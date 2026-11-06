@@ -15,7 +15,7 @@
 	<button
 		type="button"
 		onclick={copy}
-		class="absolute top-3 right-3 rounded-md bg-zinc-700/80 px-2 py-1 text-xs text-zinc-100 hover:bg-zinc-600"
+		class="absolute top-3 right-3 rounded-md bg-zinc-700 px-2 py-1 shadow-[-12px_0_12px_var(--color-zinc-900)] text-xs text-zinc-100 hover:bg-zinc-600"
 	>
 		{copied ? 'Copied' : label}
 	</button>
