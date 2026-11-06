@@ -59,13 +59,13 @@ deny:
     cargo deny check
     cargo shear
 
-# Review the branch against main with Codex (see AGENTS.md > Review).
+# Review the branch against main with Codex (see AGENTS.md > Review). Verdict also in target/review.md.
 review base="main":
-    codex exec review --base {{base}} -m gpt-6.1-sol -c model_reasoning_effort='"high"' - < scripts/review.md
+    (printf 'Review the changes of this branch: run `git diff {{base}}...HEAD` and read any file you need.\n\n'; cat scripts/review.md) | codex exec -s read-only -m gpt-6.1-sol -c model_reasoning_effort='"high"' -o target/review.md -
 
 # Answer the last review (a rebuttal or "fixed in <sha>") and get a new verdict.
 review-reply reply:
-    codex exec resume --last -m gpt-6.1-sol -c model_reasoning_effort='"high"' "{{reply}} Re-review the branch against main and end with the VERDICT line."
+    codex exec resume --last -m gpt-6.1-sol -c model_reasoning_effort='"high"' -o target/review.md "{{reply}} Re-review the branch (git diff main...HEAD) and end with the VERDICT line."
 
 # Benchmark both arms (needs OPENAI_API_KEY and Chrome), e.g. `just bench --repeat 1 --task docs-exit-code`.
 bench *args: wasm
