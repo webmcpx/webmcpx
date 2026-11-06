@@ -13,7 +13,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
-use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, webmcp_tools};
+use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, Session, webmcp_tools};
 use webmcpx_bench::cdp::Browser;
 use webmcpx_bench::model::{OpenAi, Price, list_price};
 use webmcpx_bench::report::{Results, SCHEMA_VERSION, Summary, markdown};
@@ -64,6 +64,16 @@ enum Command {
     },
     /// List tasks.
     Tasks,
+    /// Call one WebMCP tool on a live page and print what the agent would get (for writing tasks).
+    Call {
+        url: String,
+        tool: String,
+        /// Tool input as JSON.
+        #[arg(default_value = "{}")]
+        input: String,
+        #[arg(long)]
+        chrome: Option<PathBuf>,
+    },
     /// Open live pages and print, as JSON lines, the WebMCP tools each one registers.
     Probe {
         urls: Vec<String>,
@@ -107,6 +117,20 @@ async fn main() -> Result<()> {
                 };
                 writeln!(out, "{line}")?;
             }
+        }
+        Command::Call {
+            url,
+            tool,
+            input,
+            chrome,
+        } => {
+            let browser = Browser::launch(chrome.as_deref()).await?;
+            let page = browser.page(&INIT_SCRIPTS).await?;
+            page.goto(&url).await?;
+            let session = Session::new(Arm::Webmcp, &page).await?;
+            let result = session.call(&tool, &input).await;
+            page.close().await?;
+            writeln!(std::io::stdout().lock(), "{result}")?;
         }
         Command::Serve { addr } => {
             let bound = server::spawn(&root, addr).await?;
