@@ -28,7 +28,8 @@ const fn default_max_steps() -> u32 {
 #[derive(Debug, Clone, Default, PartialEq, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Check {
-    /// Each string must appear in the final answer (case-insensitive, whitespace-normalized).
+    /// Each string must appear in the final answer as a whole term: case-insensitive,
+    /// whitespace-normalized, and not inside a longer word or number (`10` does not match `100`).
     #[serde(default)]
     pub answer_contains: Vec<String>,
     /// None of these may appear in the final answer (catches hedged "X or Y" answers).
@@ -50,12 +51,23 @@ impl Check {
         let answer = normalize(answer);
         self.answer_contains
             .iter()
-            .all(|s| answer.contains(&normalize(s)))
+            .all(|s| has_term(&answer, &normalize(s)))
             && !self
                 .answer_excludes
                 .iter()
-                .any(|s| answer.contains(&normalize(s)))
+                .any(|s| has_term(&answer, &normalize(s)))
     }
+}
+
+/// Whether `term` occurs in `text` with no word character glued to its word-character edges.
+fn has_term(text: &str, term: &str) -> bool {
+    let word = |c: char| c.is_alphanumeric() || c == '_';
+    let glued_start = term.starts_with(word);
+    let glued_end = term.ends_with(word);
+    text.match_indices(term).any(|(at, _)| {
+        !(glued_start && text[..at].ends_with(word))
+            && !(glued_end && text[at + term.len()..].starts_with(word))
+    })
 }
 
 fn normalize(s: &str) -> String {
@@ -111,6 +123,16 @@ mod tests {
         let c = check(&["90 seconds", "--timeout"], &[]);
         assert!(c.answer_passes("The default is 90\nSeconds; change it with `--TIMEOUT`."));
         assert!(!c.answer_passes("90 seconds"));
+    }
+
+    #[test]
+    fn numbers_match_whole_values_only() {
+        assert!(!check(&["10"], &[]).answer_passes("It keeps 100 past releases."));
+        assert!(!check(&["90", "--timeout"], &[]).answer_passes("190 seconds; use --timeout"));
+        assert!(!check(&["106"], &[]).answer_passes("The total is $1060.00."));
+        assert!(check(&["106"], &[]).answer_passes("The total is $106.00."));
+        assert!(check(&["10"], &[]).answer_passes("10 releases (deploy.retain_releases)."));
+        assert!(!check(&["ORBIT_CONFIG"], &[]).answer_passes("ORBIT_CONFIGURE"));
     }
 
     #[test]
