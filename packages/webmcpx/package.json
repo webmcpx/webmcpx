@@ -1,0 +1,23 @@
+{
+  "name": "webmcpx",
+  "version": "0.1.0",
+  "description": "Standard WebMCP tools for any website: one script tag, zero config.",
+  "type": "module",
+  "license": "MIT OR Apache-2.0",
+  "homepage": "https://webmcp.zone",
+  "repository": { "type": "git", "url": "git+https://github.com/webmcpx/webmcpx.git", "directory": "packages/webmcpx" },
+  "keywords": ["webmcp", "mcp", "ai-agents", "model-context", "wasm"],
+  "exports": {
+    ".": { "types": "./src/index.d.ts", "default": "./src/index.js" },
+    "./auto": "./src/auto.js"
+  },
+  "types": "./src/index.d.ts",
+  "files": ["src", "wasm/webmcpx_wasm.js", "wasm/webmcpx_wasm_bg.wasm"],
+  "sideEffects": ["./src/auto.js"],
+  "scripts": {
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "linkedom": "0.18.15"
+  }
+}

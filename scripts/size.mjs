@@ -1,0 +1,22 @@
+// Size gate: fails when a shipped file exceeds its brotli budget. Run via `just size`.
+import { readFileSync } from "node:fs";
+import { brotliCompressSync, constants } from "node:zlib";
+
+const PKG = new URL("../packages/webmcpx/", import.meta.url);
+const BUDGETS = [
+  // Loaded on every page: loader + tool contracts.
+  { name: "loader (index.js + generated.js)", files: ["src/index.js", "src/generated.js"], max: 3_000 },
+  // Loaded on the first tool call only.
+  { name: "wasm module", files: ["wasm/webmcpx_wasm_bg.wasm"], max: 12_288 },
+  { name: "wasm glue", files: ["wasm/webmcpx_wasm.js"], max: 2_200 },
+];
+
+let failed = false;
+for (const { name, files, max } of BUDGETS) {
+  const bytes = Buffer.concat(files.map((f) => readFileSync(new URL(f, PKG))));
+  const size = brotliCompressSync(bytes, { params: { [constants.BROTLI_PARAM_QUALITY]: 11 } }).length;
+  const ok = size <= max;
+  failed ||= !ok;
+  console.log(`${ok ? "ok  " : "FAIL"} ${name}: ${size} B brotli (budget ${max} B)`);
+}
+process.exit(failed ? 1 : 0);
