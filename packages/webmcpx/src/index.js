@@ -7,7 +7,7 @@ const FIELD = "\x1f";
 const KINDS = {
   H1: "h1", H2: "h2", H3: "h3", H4: "h4", H5: "h5", H6: "h6",
   P: "p", LI: "li", PRE: "pre", BLOCKQUOTE: "quote",
-  DT: "p", DD: "p", TD: "p", TH: "p", FIGCAPTION: "p", SUMMARY: "p",
+  DT: "p", DD: "p", FIGCAPTION: "p", SUMMARY: "p",
 };
 const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "SVG", "NAV", "FOOTER", "ASIDE"]);
 const DEFAULT_TOOLS = ["get_page_context", "search_page", "fetch_as_markdown"];
@@ -40,8 +40,10 @@ function blocks(root) {
         continue;
       }
       if (child.id) anchor = `${base}#${child.id}`;
-      const kind = KINDS[child.tagName] ?? (child.children.length === 0 && "p");
-      if (kind) out += kind + FIELD + child.textContent + FIELD + anchor + RECORD;
+      // A table row is one block ("Monday | Closed"), so search keeps a value next to its label.
+      const row = child.tagName === "TR" && [...child.children].map((c) => text(c.textContent)).join(" | ");
+      const kind = row ? "p" : KINDS[child.tagName] ?? (child.children.length === 0 && "p");
+      if (kind) out += kind + FIELD + (row || child.textContent) + FIELD + anchor + RECORD;
       else visit(child);
     }
   };

@@ -15,6 +15,8 @@ const PAGE = `<!doctype html><html lang="en"><head><title>Pizza Roma</title>
   <h1 id="menu">Menu</h1><p>Neapolitan pizza baked in a wood oven.</p>
   <h2 id="delivery">Delivery</h2><p>Delivery takes 30 minutes and is free above 20 euros.</p>
   <ul><li>Margherita</li><li>Diavola</li></ul>
+  <h2 id="hours">Hours</h2>
+  <table><tr><th>Day</th><th>Open</th></tr><tr><td>Monday</td><td>Closed</td></tr><tr><td>Friday</td><td>12–23</td></tr></table>
   <div hidden>secret coupon</div>
 </main><footer>© Pizza Roma</footer></body></html>`;
 
@@ -82,12 +84,24 @@ test("search_page ranks main content and links to the section", async () => {
   assert.equal((await page.call("search_page", {})).error.code, "INVALID_INPUT");
 });
 
+test("search_page keeps each table row together", async () => {
+  const page = host();
+  await register({ wasm: WASM });
+  const result = await page.call("search_page", { query: "monday", limit: 1 });
+  assert.deepEqual(result.data.results, [{
+    heading: "Hours",
+    snippet: "Monday | Closed",
+    url: "https://pizza.test/menu#hours",
+  }]);
+});
+
 test("fetch_as_markdown returns main content, paged", async () => {
   const page = host();
   await register({ wasm: WASM });
   const full = await page.call("fetch_as_markdown");
   assert.equal(full.data.markdown, "# Menu\n\nNeapolitan pizza baked in a wood oven.\n\n## Delivery\n\n" +
-    "Delivery takes 30 minutes and is free above 20 euros.\n\n- Margherita\n- Diavola");
+    "Delivery takes 30 minutes and is free above 20 euros.\n\n- Margherita\n- Diavola\n\n## Hours\n\n" +
+    "Day | Open\n\nMonday | Closed\n\nFriday | 12–23");
   const first = await page.call("fetch_as_markdown", { max_chars: 100 });
   assert.equal(first.truncated, true);
   const rest = await page.call("fetch_as_markdown", { cursor: first.next_cursor, max_chars: 100 });
