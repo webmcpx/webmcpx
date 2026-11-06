@@ -41,9 +41,9 @@ enum Command {
         arms: Vec<Arm>,
         #[arg(long, default_value = "gpt-6-luna")]
         model: String,
-        /// Passed as `reasoning_effort` (e.g. none, low, medium, high).
-        #[arg(long)]
-        reasoning_effort: Option<String>,
+        /// Reasoning effort (none, low, medium, high). Medium is the project default for every run.
+        #[arg(long, default_value = "medium")]
+        reasoning_effort: String,
         /// Attempts per task and arm.
         #[arg(long, default_value_t = 3)]
         repeat: u32,
@@ -111,7 +111,7 @@ async fn main() -> Result<()> {
                 arms
             };
             let price = price.or_else(|| list_price(&model));
-            let client = OpenAi::from_env(model.clone(), reasoning_effort.clone())?;
+            let client = OpenAi::from_env(model.clone(), Some(reasoning_effort.clone()))?;
             let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into()).await?;
             let browser = Browser::launch(chrome.as_deref()).await?;
 
@@ -147,7 +147,7 @@ async fn main() -> Result<()> {
             let results = Results {
                 schema_version: SCHEMA_VERSION,
                 model: model.clone(),
-                reasoning_effort,
+                reasoning_effort: Some(reasoning_effort),
                 price_per_mtok: price,
                 started_at,
                 summary: Summary::of(&runs),
