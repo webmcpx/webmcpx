@@ -2,10 +2,10 @@
 	import Code from './Code.svelte';
 	import Section from './Section.svelte';
 	import {
+		compare,
 		headline,
 		percent,
 		perThousand,
-		ratio,
 		seconds,
 		tokens,
 		type Arm,
@@ -31,7 +31,7 @@
 <Section id="benchmark" eyebrow="Benchmark" title="Same agent, same pages. Only the tools differ.">
 	{#if h}
 		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-			{#each [{ value: ratio(h.tokensRatio), label: 'fewer tokens' }, { value: ratio(h.speedRatio), label: 'faster' }, { value: percent(h.webmcp.success_rate), label: `tasks solved (baseline ${percent(h.baseline.success_rate)})` }, { value: perThousand(h.webmcp.cost_usd), label: `per 1,000 tasks (baseline ${perThousand(h.baseline.cost_usd)})` }] as tile (tile.label)}
+			{#each [compare(h.baseline.tokens, h.webmcp.tokens, 'fewer tokens', 'more tokens'), compare(h.baseline.duration_ms, h.webmcp.duration_ms, 'faster', 'slower'), { value: percent(h.webmcp.success_rate), label: `tasks solved (baseline ${percent(h.baseline.success_rate)})` }, { value: perThousand(h.webmcp.cost_usd), label: `per 1,000 tasks (baseline ${perThousand(h.baseline.cost_usd)})` }] as tile (tile.label)}
 				<div class="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
 					<p class="text-3xl font-bold tracking-tight tabular-nums">{tile.value}</p>
 					<p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{tile.label}</p>

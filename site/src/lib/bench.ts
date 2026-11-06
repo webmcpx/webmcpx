@@ -29,25 +29,14 @@ export interface Results {
 }
 
 export interface Headline {
-	tokensRatio: number;
-	speedRatio: number;
-	costRatio: number | null;
 	baseline: ArmSummary;
 	webmcp: ArmSummary;
 }
 
-/** Ratios baseline / webmcp, or null when either arm is missing. */
+/** Both arms' totals, or null until both arms ran. */
 export function headline(r: Results): Headline | null {
 	const { baseline, webmcp } = r.summary.arms;
-	if (!baseline || !webmcp || webmcp.tokens === 0) return null;
-	return {
-		tokensRatio: baseline.tokens / webmcp.tokens,
-		speedRatio: baseline.duration_ms / Math.max(webmcp.duration_ms, 1),
-		costRatio:
-			baseline.cost_usd != null && webmcp.cost_usd ? baseline.cost_usd / webmcp.cost_usd : null,
-		baseline,
-		webmcp
-	};
+	return baseline && webmcp ? { baseline, webmcp } : null;
 }
 
 export const percent = (x: number) => `${Math.round(x * 100)}%`;
@@ -55,6 +44,13 @@ export const tokens = (x: number) =>
 	x >= 10_000 ? `${(x / 1000).toFixed(0)}k` : x >= 1000 ? `${(x / 1000).toFixed(1)}k` : `${Math.round(x)}`;
 export const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
 export const ratio = (x: number) => `${x >= 10 ? x.toFixed(0) : x.toFixed(1)}×`;
+/** A tile for webmcp vs baseline that names the direction: "2.5× fewer tokens" or "1.4× slower". */
+export function compare(baseline: number, webmcp: number, better: string, worse: string) {
+	return webmcp <= baseline
+		? { value: ratio(baseline / Math.max(webmcp, Number.MIN_VALUE)), label: better }
+		: { value: ratio(webmcp / Math.max(baseline, Number.MIN_VALUE)), label: worse };
+}
+
 /** Cost per 1,000 tasks, easier to read than fractions of a cent. */
 export const perThousand = (usd: number | null) => (usd == null ? 'n/a' : `$${(usd * 1000).toFixed(2)}`);
 

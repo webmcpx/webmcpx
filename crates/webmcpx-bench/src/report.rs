@@ -150,12 +150,21 @@ pub fn markdown(results: &Results) -> String {
     {
         let _ = writeln!(
             out,
-            "\nWebMCP used {:.1}x fewer tokens and was {:.1}x faster than the baseline.",
-            b.tokens / w.tokens,
-            b.duration_ms / w.duration_ms.max(1.0),
+            "\nWebMCP vs baseline: {}, {}.",
+            compare(b.tokens, w.tokens, "fewer tokens", "more tokens"),
+            compare(b.duration_ms, w.duration_ms, "faster", "slower"),
         );
     }
     out
+}
+
+/// "2.5x fewer tokens" when `webmcp` is lower, "1.4x more tokens" when it is higher.
+fn compare(baseline: f64, webmcp: f64, better: &str, worse: &str) -> String {
+    if webmcp <= baseline {
+        format!("{:.1}x {better}", baseline / webmcp.max(f64::MIN_POSITIVE))
+    } else {
+        format!("{:.1}x {worse}", webmcp / baseline.max(f64::MIN_POSITIVE))
+    }
 }
 
 #[cfg(test)]
@@ -194,6 +203,12 @@ mod tests {
     }
 
     #[test]
+    fn comparisons_name_the_direction() {
+        assert_eq!(compare(15.0, 1.5, "fewer tokens", "more tokens"), "10.0x fewer tokens");
+        assert_eq!(compare(3.6, 4.9, "faster", "slower"), "1.4x slower");
+    }
+
+    #[test]
     fn summarizes_per_task_and_arm() {
         let runs = [
             run("docs", Arm::Baseline, true, 9_900, 4_000),
@@ -221,7 +236,7 @@ mod tests {
         | **all** | baseline | 50% | 15000 | 2.0 | 5.0s | $0.00154 |
         | **all** | webmcp | 100% | 1500 | 2.0 | 2.0s | $0.00019 |
 
-        WebMCP used 10.0x fewer tokens and was 2.5x faster than the baseline.
+        WebMCP vs baseline: 10.0x fewer tokens, 2.5x faster.
         ");
     }
 }
