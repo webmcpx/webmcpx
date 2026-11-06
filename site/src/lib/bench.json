@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "model": "gpt-6-luna",
+  "reasoning_effort": null,
+  "price_per_mtok": [0.1, 0.5],
+  "started_at": 0,
+  "runs": [],
+  "summary": { "arms": {}, "tasks": {} }
+}
