@@ -204,3 +204,25 @@ async fn store_registers_its_own_tools_next_to_the_standard_ones() {
     );
     assert!(last_tool_result(&seen[1].0).contains("Back in stock on 3 January"));
 }
+
+#[tokio::test]
+async fn store_tools_answer_malformed_input_with_an_envelope() {
+    let Some((_, model)) = run_one("store-restock-date", Arm::Webmcp, |step, _| match step {
+        0 => call("add_to_cart", "null"),
+        1 => call("search_products", r#"{"query":null}"#),
+        2 => call("add_to_cart", r#"{"sku":"NOPE"}"#),
+        _ => answer("done"),
+    })
+    .await
+    else {
+        return;
+    };
+    let seen = model.seen.lock().unwrap();
+    for (step, code) in [(1, "INVALID_INPUT"), (2, "INVALID_INPUT"), (3, "NOT_FOUND")] {
+        let result = last_tool_result(&seen[step].0);
+        assert!(
+            result.starts_with(r#"{"ok":false"#) && result.contains(code),
+            "step {step}: {result}"
+        );
+    }
+}

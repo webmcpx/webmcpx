@@ -100,6 +100,18 @@ render();
 // ---- WebMCP: the webmcpx standard tools plus store tools, same envelope contract ----
 const ok = (data) => JSON.stringify({ ok: true, data });
 const fail = (code, message, hint) => JSON.stringify({ ok: false, error: { code, message, retryable: false }, ...(hint && { hint }) });
+// Like the webmcpx loader's guard(): tools resolve with an envelope and never reject (webmcp#282).
+const guard = (run) => async (input) => {
+  try {
+    const args = typeof input === "string" ? JSON.parse(input || "{}") : input ?? {};
+    if (typeof args !== "object" || Array.isArray(args)) return fail("INVALID_INPUT", "input must be an object");
+    return await run(args);
+  } catch (e) {
+    return fail("UNAVAILABLE", String(e?.message ?? e));
+  }
+};
+// Strict like the inputSchema: an optional key is absent or has its type; null is invalid.
+const optional = (args, key, type) => args[key] === undefined || typeof args[key] === type;
 const view = (p) => ({ sku: p.sku, name: p.name, category: p.category, color: p.color, price: p.price, stock: p.stock, ...(p.note && { note: p.note }) });
 const cartView = () => ({
   items: store.cart.map((l) => ({ ...view(PRODUCTS.find((p) => p.sku === l.sku)), quantity: l.qty })),
@@ -122,11 +134,14 @@ const TOOLS = [
       additionalProperties: false,
     },
     annotations: { readOnlyHint: true },
-    execute: async (input) => {
+    execute: guard(async (input) => {
+      const bad = [["query", "string"], ["category", "string"], ["color", "string"], ["max_price", "number"], ["sort", "string"]]
+        .find(([key, type]) => !optional(input, key, type));
+      if (bad) return fail("INVALID_INPUT", `\`${bad[0]}\` must be a ${bad[1]}`);
       const found = store.find(input);
       return found.length ? ok({ products: found.map(view) })
         : fail("NOT_FOUND", "no product matches", "Drop a filter or try other words.");
-    },
+    }),
   },
   {
     name: "add_to_cart",
@@ -141,17 +156,19 @@ const TOOLS = [
       additionalProperties: false,
     },
     annotations: { consequentialHint: false },
-    execute: async ({ sku, quantity = 1 }) => {
+    execute: guard(async ({ sku, quantity = 1 }) => {
+      if (typeof sku !== "string") return fail("INVALID_INPUT", "`sku` must be a string");
+      if (!Number.isInteger(quantity) || quantity < 1) return fail("INVALID_INPUT", "`quantity` must be an integer >= 1");
       const r = store.add(sku, quantity);
       return r.error ? fail(r.error, r.message) : ok(cartView());
-    },
+    }),
   },
   {
     name: "get_cart",
     description: "Return the cart: items with quantity and the total in USD.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
     annotations: { readOnlyHint: true },
-    execute: async () => ok(cartView()),
+    execute: guard(async () => ok(cartView())),
   },
 ];
 
