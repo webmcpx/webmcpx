@@ -9,8 +9,8 @@ pub const GET_PAGE_CONTEXT: ToolDef = ToolDef {
     name: "get_page_context",
     title: "Get page context",
     description: "Describe the page the user is on: title, URL, language, meta description, \
-        heading outline and the text the user has selected. Call it first to ground answers \
-        in the current page.",
+        heading outline and the text the user has selected. Use it for the page's structure or \
+        the user's selection; to find a fact on the page, call search_page instead.",
     input_schema: r#"{"type":"object","properties":{},"additionalProperties":false}"#,
     annotations: PAGE_CONTENT,
 };
