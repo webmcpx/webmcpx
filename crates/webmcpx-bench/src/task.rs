@@ -96,13 +96,13 @@ fn numbers(text: &str) -> impl Iterator<Item = f64> + '_ {
             return None;
         }
         let mut value = String::new();
-        while digit_at(i) || (bytes[i] == b',' && digit_at(i + 1)) {
+        while digit_at(i) || (bytes.get(i) == Some(&b',') && digit_at(i + 1)) {
             if bytes[i] != b',' {
                 value.push(char::from(bytes[i]));
             }
             i += 1;
         }
-        if i < bytes.len() && bytes[i] == b'.' && digit_at(i + 1) {
+        if bytes.get(i) == Some(&b'.') && digit_at(i + 1) {
             value.push('.');
             i += 1;
             while digit_at(i) {
@@ -171,8 +171,22 @@ mod tests {
         assert!(!check(&["106"], &[]).answer_passes("The total is $106.99."));
         assert!(!check(&["106"], &[]).answer_passes("The total is $1,060."));
         assert!(check(&["1060"], &[]).answer_passes("The total is $1,060."));
+        // Answers that end in a number, with nothing after it.
+        assert!(check(&["10"], &[]).answer_passes("10"));
+        assert!(check(&["106"], &[]).answer_passes("The cart total is $106"));
+        assert!(check(&["1060"], &[]).answer_passes("Total: 1,060"));
+        assert!(check(&["106"], &[]).answer_passes("Total: 106, shipping included"));
         assert!(check(&["10"], &[]).answer_passes("10 releases (deploy.retain_releases)."));
         assert!(!check(&["ORBIT_CONFIG"], &[]).answer_passes("ORBIT_CONFIGURE"));
+    }
+
+    #[test]
+    fn number_scan_never_panics_on_any_prefix() {
+        let text = "a1,2.3,4.,5 x9 $106.00, 1,060.5. 7";
+        for end in (0..=text.len()).filter(|&e| text.is_char_boundary(e)) {
+            let _ = numbers(&text[..end]).count();
+        }
+        assert_eq!(numbers("$1,060.5 and 7").collect::<Vec<_>>(), [1060.5, 7.0]);
     }
 
     #[test]
