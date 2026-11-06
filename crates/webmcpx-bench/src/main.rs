@@ -53,9 +53,6 @@ enum Command {
         /// USD per million tokens as `INPUT,OUTPUT` (default: built-in list price for the model).
         #[arg(long, value_parser = parse_price)]
         price: Option<(f64, f64)>,
-        /// Results file (default: bench/results/latest.json, plus a timestamped copy).
-        #[arg(long)]
-        out: Option<PathBuf>,
         /// Chrome or Chromium executable (default: `CHROME_PATH`, then the usual locations).
         #[arg(long)]
         chrome: Option<PathBuf>,
@@ -98,7 +95,6 @@ async fn main() -> Result<()> {
             repeat,
             jobs,
             price,
-            out,
             chrome,
         } => {
             let all = task::load_dir(&root.join("bench/tasks"))?;
@@ -158,7 +154,8 @@ async fn main() -> Result<()> {
                 runs,
             };
             let json = serde_json::to_string_pretty(&results)?;
-            let latest = out.unwrap_or_else(|| root.join("bench/results/latest.json"));
+            // Always bench/results/latest.json: `just bench` publishes exactly this file.
+            let latest = root.join("bench/results/latest.json");
             if let Some(dir) = latest.parent() {
                 std::fs::create_dir_all(dir)?;
             }
