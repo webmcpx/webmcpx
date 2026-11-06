@@ -1,0 +1,289 @@
+//! A minimal Chrome DevTools Protocol client: launch headless Chrome, open isolated pages, evaluate
+//! JavaScript. Only what the benchmark needs; events are ignored (we poll).
+
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::process::Stdio;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
+
+use anyhow::{Context as _, Result, anyhow, bail};
+use futures_util::{SinkExt as _, StreamExt as _};
+use serde_json::{Value, json};
+use tokio::io::{AsyncBufReadExt as _, BufReader};
+use tokio::process::{Child, Command};
+use tokio::sync::{mpsc, oneshot};
+use tokio_tungstenite::tungstenite::Message as Ws;
+
+type Pending = Arc<Mutex<HashMap<u64, oneshot::Sender<Result<Value, String>>>>>;
+
+#[derive(Clone)]
+struct Conn {
+    tx: mpsc::UnboundedSender<Ws>,
+    pending: Pending,
+    next_id: Arc<AtomicU64>,
+}
+
+impl Conn {
+    async fn connect(url: &str) -> Result<Self> {
+        let (socket, _) = tokio_tungstenite::connect_async(url)
+            .await
+            .with_context(|| format!("connecting to {url}"))?;
+        let (mut sink, mut stream) = socket.split();
+        let (tx, mut rx) = mpsc::unbounded_channel::<Ws>();
+        tokio::spawn(async move {
+            while let Some(msg) = rx.recv().await {
+                if sink.send(msg).await.is_err() {
+                    break;
+                }
+            }
+        });
+        let pending: Pending = Arc::default();
+        let routes = Arc::clone(&pending);
+        tokio::spawn(async move {
+            while let Some(Ok(msg)) = stream.next().await {
+                let Ws::Text(text) = msg else { continue };
+                let Ok(v) = serde_json::from_str::<Value>(&text) else {
+                    continue;
+                };
+                let Some(id) = v["id"].as_u64() else { continue };
+                let Some(reply) = lock(&routes).remove(&id) else {
+                    continue;
+                };
+                let result = match v.get("error") {
+                    Some(e) => Err(e.to_string()),
+                    None => Ok(v["result"].clone()),
+                };
+                // The caller may have timed out and dropped its receiver.
+                let _ = reply.send(result);
+            }
+            // Connection closed: dropping the senders fails every waiting call.
+            lock(&routes).clear();
+        });
+        Ok(Self {
+            tx,
+            pending,
+            next_id: Arc::new(AtomicU64::new(1)),
+        })
+    }
+
+    async fn call(&self, session: Option<&str>, method: &str, params: Value) -> Result<Value> {
+        let id = self.next_id.fetch_add(1, Ordering::Relaxed);
+        let mut msg = json!({ "id": id, "method": method, "params": params });
+        if let Some(s) = session {
+            msg["sessionId"] = s.into();
+        }
+        let (reply, response) = oneshot::channel();
+        lock(&self.pending).insert(id, reply);
+        self.tx
+            .send(Ws::text(msg.to_string()))
+            .map_err(|_| anyhow!("browser connection closed"))?;
+        match tokio::time::timeout(Duration::from_secs(60), response).await {
+            Ok(Ok(Ok(v))) => Ok(v),
+            Ok(Ok(Err(e))) => bail!("{method}: {e}"),
+            Ok(Err(_)) => bail!("{method}: browser connection closed"),
+            Err(_) => {
+                lock(&self.pending).remove(&id);
+                bail!("{method}: timed out")
+            }
+        }
+    }
+}
+
+fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    // A panic while holding the lock cannot leave the map inconsistent.
+    m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+/// A headless Chrome process. Killed on drop.
+pub struct Browser {
+    conn: Conn,
+    _child: Child,
+    _profile: tempfile::TempDir,
+}
+
+impl Browser {
+    pub async fn launch(executable: Option<&Path>) -> Result<Self> {
+        let executable = match executable {
+            Some(p) => p.to_path_buf(),
+            None => find_chrome().context(
+                "Chrome not found: install Google Chrome or Chromium, or pass --chrome <path>",
+            )?,
+        };
+        let profile = tempfile::tempdir()?;
+        let mut cmd = Command::new(&executable);
+        cmd.args([
+            "--headless",
+            "--remote-debugging-port=0",
+            "--no-first-run",
+            "--no-default-browser-check",
+            "--disable-background-networking",
+            "--disable-component-update",
+            "--disable-extensions",
+            "--window-size=1280,900",
+        ])
+        .arg(format!("--user-data-dir={}", profile.path().display()));
+        if std::env::var_os("CI").is_some() {
+            // CI containers often lack the user namespaces Chrome's sandbox needs.
+            cmd.arg("--no-sandbox");
+        }
+        let mut child = cmd
+            .arg("about:blank")
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::piped())
+            .kill_on_drop(true)
+            .spawn()
+            .with_context(|| format!("starting {}", executable.display()))?;
+        let stderr = child.stderr.take().context("no stderr")?;
+        let mut lines = BufReader::new(stderr).lines();
+        let url = tokio::time::timeout(Duration::from_secs(30), async {
+            while let Some(line) = lines.next_line().await? {
+                if let Some(url) = line.strip_prefix("DevTools listening on ") {
+                    return Ok(url.trim().to_owned());
+                }
+            }
+            bail!("Chrome exited before opening the DevTools port")
+        })
+        .await
+        .context("timed out waiting for Chrome")??;
+        // Keep draining stderr so Chrome never blocks on a full pipe.
+        tokio::spawn(async move { while let Ok(Some(_)) = lines.next_line().await {} });
+        Ok(Self {
+            conn: Conn::connect(&url).await?,
+            _child: child,
+            _profile: profile,
+        })
+    }
+
+    /// Opens a page in its own browser context (no shared cookies or storage), with `init_scripts`
+    /// evaluated before any page script on every navigation.
+    pub async fn page(&self, init_scripts: &[&str]) -> Result<Page> {
+        let context = self
+            .conn
+            .call(None, "Target.createBrowserContext", json!({}))
+            .await?["browserContextId"]
+            .as_str()
+            .context("no browserContextId")?
+            .to_owned();
+        let target = self
+            .conn
+            .call(
+                None,
+                "Target.createTarget",
+                json!({ "url": "about:blank", "browserContextId": context }),
+            )
+            .await?["targetId"]
+            .as_str()
+            .context("no targetId")?
+            .to_owned();
+        let session = self
+            .conn
+            .call(
+                None,
+                "Target.attachToTarget",
+                json!({ "targetId": target, "flatten": true }),
+            )
+            .await?["sessionId"]
+            .as_str()
+            .context("no sessionId")?
+            .to_owned();
+        let page = Page {
+            conn: self.conn.clone(),
+            session,
+            context,
+        };
+        page.send("Page.enable", json!({})).await?;
+        for source in init_scripts {
+            page.send(
+                "Page.addScriptToEvaluateOnNewDocument",
+                json!({ "source": source }),
+            )
+            .await?;
+        }
+        Ok(page)
+    }
+}
+
+pub struct Page {
+    conn: Conn,
+    session: String,
+    context: String,
+}
+
+impl Page {
+    async fn send(&self, method: &str, params: Value) -> Result<Value> {
+        self.conn.call(Some(&self.session), method, params).await
+    }
+
+    /// Navigates and waits for the `load` event (polled).
+    pub async fn goto(&self, url: &str) -> Result<()> {
+        let nav = self.send("Page.navigate", json!({ "url": url })).await?;
+        if let Some(e) = nav["errorText"].as_str() {
+            bail!("navigating to {url}: {e}");
+        }
+        for _ in 0..200 {
+            if self.eval("document.readyState").await? == "complete" {
+                return Ok(());
+            }
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
+        bail!("{url} did not finish loading")
+    }
+
+    /// Evaluates `expression` (awaiting promises) and returns its JSON value.
+    pub async fn eval(&self, expression: &str) -> Result<Value> {
+        let r = self
+            .send(
+                "Runtime.evaluate",
+                json!({ "expression": expression, "awaitPromise": true, "returnByValue": true }),
+            )
+            .await?;
+        if let Some(e) = r.get("exceptionDetails") {
+            let text = e["exception"]["description"]
+                .as_str()
+                .or_else(|| e["text"].as_str())
+                .unwrap_or("exception");
+            bail!("{text}");
+        }
+        Ok(r["result"]["value"].clone())
+    }
+
+    /// Closes the page and its browser context.
+    pub async fn close(self) -> Result<()> {
+        self.conn
+            .call(
+                None,
+                "Target.disposeBrowserContext",
+                json!({ "browserContextId": self.context }),
+            )
+            .await
+            .map(drop)
+    }
+}
+
+/// `CHROME_PATH`, then the usual install locations and `PATH`.
+pub fn find_chrome() -> Option<PathBuf> {
+    if let Some(p) = std::env::var_os("CHROME_PATH") {
+        return Some(p.into());
+    }
+    let apps = [
+        "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "/Applications/Chromium.app/Contents/MacOS/Chromium",
+    ];
+    if let Some(p) = apps.iter().map(PathBuf::from).find(|p| p.is_file()) {
+        return Some(p);
+    }
+    let names = [
+        "google-chrome",
+        "google-chrome-stable",
+        "chromium",
+        "chromium-browser",
+        "chrome",
+    ];
+    let path = std::env::var_os("PATH")?;
+    std::env::split_paths(&path)
+        .flat_map(|dir| names.iter().map(move |n| dir.join(n)))
+        .find(|p| p.is_file())
+}

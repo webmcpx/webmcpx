@@ -1,2 +1,2 @@
 allow-unwrap-in-tests = true
-doc-valid-idents = ["WebMCP", "WebAssembly", "JavaScript", "TypeScript", "GitHub", ".."]
+doc-valid-idents = ["WebMCP", "WebAssembly", "JavaScript", "TypeScript", "GitHub", "DevTools", "OpenAI", ".."]

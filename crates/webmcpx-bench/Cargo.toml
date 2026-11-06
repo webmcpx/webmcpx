@@ -1,0 +1,30 @@
+[package]
+name = "webmcpx-bench"
+description = "Benchmark: the same agent on the same pages, with and without WebMCP tools."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow.workspace = true
+axum.workspace = true
+clap.workspace = true
+futures-util.workspace = true
+reqwest.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tempfile.workspace = true
+tokio.workspace = true
+tokio-tungstenite.workspace = true
+toml.workspace = true
+tower-http.workspace = true
+
+[dev-dependencies]
+insta.workspace = true

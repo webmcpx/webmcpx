@@ -15,6 +15,16 @@ webmcpx-core = { path = "crates/webmcpx-core", version = "0.1.0" }
 webmcpx-std = { path = "crates/webmcpx-std", version = "0.1.0" }
 webmcpx-lint = { path = "crates/webmcpx-lint", version = "0.1.0" }
 
+anyhow = "1.0.104"
+axum = { version = "0.8.9", default-features = false, features = ["http1", "tokio"] }
+futures-util = { version = "0.3.34", default-features = false, features = ["sink"] }
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "rustls", "http2"] }
+serde = { version = "1.0.229", features = ["derive"] }
+tempfile = "3.27.0"
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread", "process", "time", "sync", "io-util", "net", "signal"] }
+tokio-tungstenite = "0.30.0"
+toml = "0.9"
+tower-http = { version = "0.7.1", features = ["fs"] }
 clap = { version = "4.6.7", features = ["derive", "wrap_help"] }
 insta = { version = "1.49.0", features = ["json"] }
 insta-cmd = "0.7.0"
