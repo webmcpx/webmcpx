@@ -65,8 +65,9 @@ fn has_term(text: &str, term: &str) -> bool {
     let glued_start = term.starts_with(word);
     let glued_end = term.ends_with(word);
     text.match_indices(term).any(|(at, _)| {
-        !(glued_start && text[..at].ends_with(word))
-            && !(glued_end && text[at + term.len()..].starts_with(word))
+        let joined_before = glued_start && text[..at].ends_with(word);
+        let joined_after = glued_end && text[at + term.len()..].starts_with(word);
+        !joined_before && !joined_after
     })
 }
 
