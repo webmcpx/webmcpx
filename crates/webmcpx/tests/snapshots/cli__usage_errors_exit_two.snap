@@ -1,0 +1,27 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - lint
+    - "--format"
+    - json
+    - missing.js
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 2
+----- stdout -----
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "missing.js does not exist",
+    "retryable": false
+  },
+  "hint": "Pass existing files or directories.",
+  "ok": false,
+  "schema_version": 1
+}
+
+----- stderr -----

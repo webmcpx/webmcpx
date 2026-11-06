@@ -1,0 +1,22 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - rule
+    - invisible-unicode
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+invisible-unicode (error)
+
+No invisible characters (zero-width, bidi controls, tags) in tool text.
+
+Reviewers cannot see them but models read them, so they can smuggle instructions (webmcp#360, Trojan Source). `--fix` deletes the ones written literally in the source.
+
+https://webmcp.zone/rules/invisible-unicode
+
+----- stderr -----

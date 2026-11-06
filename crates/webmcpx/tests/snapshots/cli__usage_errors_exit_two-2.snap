@@ -1,0 +1,17 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - rule
+    - nope
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 2
+----- stdout -----
+
+----- stderr -----
+error: unknown rule `nope` (INVALID_INPUT)
+hint: Run `webmcpx rules` to list rule names.

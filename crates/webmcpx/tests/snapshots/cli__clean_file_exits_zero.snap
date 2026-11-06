@@ -1,0 +1,16 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - lint
+    - tests/fixtures/clean.ts
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+✓ 1 tool(s) in 1 file(s), no problems.
+
+----- stderr -----

@@ -1,0 +1,28 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - rules
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+invalid-name               error                   Tool names must match `[A-Za-z0-9_.-]{1,128}`.
+long-name                  warning                 Tool names should be at most 30 characters.
+duplicate-name             error                   Each tool name may be registered once per document.
+missing-description        error                   Tools need a non-empty `description`.
+long-description           warning                 Descriptions: warn above 500 characters, error above 750.
+invisible-unicode          error, fix              No invisible characters (zero-width, bidi controls, tags) in tool text.
+invalid-input-schema       error                   `inputSchema` must be a JSON Schema object with `"type": "object"`.
+missing-param-description  warning                 Every input parameter should have a `description`.
+long-param-description     warning                 Parameter descriptions: warn above 150 characters, error above 500.
+missing-annotations        warning                 Declare the tool's effect with `annotations`.
+unknown-annotation         warning                 Only WebMCP annotations have an effect.
+tool-budget                warning                 A file should register at most 20 tools (error above 100).
+legacy-api                 warning                 Use `document.modelContext.registerTool()`, not removed origin-trial APIs.
+sensitive-param            warning, preview        Tools should not ask the agent for secrets or payment data.
+
+----- stderr -----

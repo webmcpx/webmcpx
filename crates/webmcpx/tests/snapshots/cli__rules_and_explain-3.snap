@@ -1,0 +1,26 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - explain
+    - RESULT_TOO_LARGE
+    - "--format"
+    - json
+  env:
+    NO_COLOR: "1"
+---
+success: true
+exit_code: 0
+----- stdout -----
+{
+  "data": {
+    "code": "RESULT_TOO_LARGE",
+    "explanation": "The result exceeds the output budget. Narrow the request or page with `cursor`.",
+    "retryable": false
+  },
+  "ok": true,
+  "schema_version": 1
+}
+
+----- stderr -----

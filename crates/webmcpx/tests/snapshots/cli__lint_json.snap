@@ -1,0 +1,102 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - lint
+    - "--format"
+    - json
+    - tests/fixtures/shop.js
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+{
+  "data": {
+    "diagnostics": [
+      {
+        "column": 1,
+        "end_column": 23,
+        "end_line": 1,
+        "file": "tests/fixtures/shop.js",
+        "fix": null,
+        "line": 1,
+        "message": "`navigator.modelContext` is deprecated; use `document.modelContext`",
+        "rule": "legacy-api",
+        "severity": "warning",
+        "url": "https://webmcp.zone/rules/legacy-api"
+      },
+      {
+        "column": 9,
+        "end_column": 26,
+        "end_line": 2,
+        "file": "tests/fixtures/shop.js",
+        "fix": null,
+        "line": 2,
+        "message": "tool name contains ' '; only A-Z, a-z, 0-9, '_', '.' and '-' are allowed",
+        "rule": "invalid-name",
+        "severity": "error",
+        "url": "https://webmcp.zone/rules/invalid-name"
+      },
+      {
+        "column": 16,
+        "end_column": 48,
+        "end_line": 3,
+        "file": "tests/fixtures/shop.js",
+        "fix": {
+          "edits": [
+            {
+              "end": 97,
+              "replacement": "",
+              "start": 94
+            }
+          ],
+          "message": "remove invisible characters"
+        },
+        "line": 3,
+        "message": "1 invisible character(s), first U+200B",
+        "rule": "invisible-unicode",
+        "severity": "error",
+        "url": "https://webmcp.zone/rules/invisible-unicode"
+      },
+      {
+        "column": 48,
+        "end_column": 49,
+        "end_line": 4,
+        "file": "tests/fixtures/shop.js",
+        "fix": null,
+        "line": 4,
+        "message": "parameter `q` of `search products` has no description",
+        "rule": "missing-param-description",
+        "severity": "warning",
+        "url": "https://webmcp.zone/rules/missing-param-description"
+      },
+      {
+        "column": 18,
+        "end_column": 33,
+        "end_line": 5,
+        "file": "tests/fixtures/shop.js",
+        "fix": null,
+        "line": 5,
+        "message": "`destructiveHint` is an MCP annotation; WebMCP ignores it (use consequentialHint or readOnlyHint)",
+        "rule": "unknown-annotation",
+        "severity": "warning",
+        "url": "https://webmcp.zone/rules/unknown-annotation"
+      }
+    ],
+    "summary": {
+      "errors": 2,
+      "files": 1,
+      "fixed": 0,
+      "tools": 1,
+      "unresolved": 0,
+      "warnings": 3
+    }
+  },
+  "ok": false,
+  "schema_version": 1
+}
+
+----- stderr -----

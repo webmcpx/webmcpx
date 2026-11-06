@@ -1,0 +1,22 @@
+---
+source: crates/webmcpx/tests/cli.rs
+info:
+  program: webmcpx
+  args:
+    - lint
+    - "--format"
+    - concise
+    - tests/fixtures
+  env:
+    NO_COLOR: "1"
+---
+success: false
+exit_code: 1
+----- stdout -----
+tests/fixtures/shop.js:1:1: warning [legacy-api] `navigator.modelContext` is deprecated; use `document.modelContext`
+tests/fixtures/shop.js:2:9: error [invalid-name] tool name contains ' '; only A-Z, a-z, 0-9, '_', '.' and '-' are allowed
+tests/fixtures/shop.js:3:16: error [invisible-unicode] 1 invisible character(s), first U+200B
+tests/fixtures/shop.js:4:48: warning [missing-param-description] parameter `q` of `search products` has no description
+tests/fixtures/shop.js:5:18: warning [unknown-annotation] `destructiveHint` is an MCP annotation; WebMCP ignores it (use consequentialHint or readOnlyHint)
+
+----- stderr -----
