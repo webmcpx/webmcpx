@@ -1,5 +1,5 @@
 // Types and view helpers for the benchmark results file written by `crates/webmcpx-bench`
-// (`report.rs`, schema_version 1). The summary is computed in Rust; this module only formats it.
+// (`report.rs`, schema_version 2). The summary is computed in Rust; this module only formats it.
 
 export type Arm = 'baseline' | 'webmcp';
 
@@ -16,10 +16,10 @@ export interface ArmSummary {
 }
 
 export interface Results {
-	schema_version: 1;
+	schema_version: 2;
 	model: string;
 	reasoning_effort: string | null;
-	price_per_mtok: [number, number] | null;
+	price_per_mtok: { input: number; cached_input: number; output: number } | null;
 	started_at: number;
 	runs: unknown[];
 	summary: {
@@ -57,6 +57,6 @@ export const perThousand = (usd: number | null) => (usd == null ? 'n/a' : `$${(u
 /** Accepts the JSON written by the harness; fails the build on an unknown schema. */
 export function parse(data: unknown): Results {
 	const version = (data as { schema_version?: unknown } | null)?.schema_version;
-	if (version !== 1) throw new Error(`bench.json: unsupported schema_version ${String(version)}`);
+	if (version !== 2) throw new Error(`bench.json: unsupported schema_version ${String(version)}`);
 	return data as Results;
 }

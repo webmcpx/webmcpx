@@ -15,7 +15,7 @@ use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
 use webmcpx_bench::arm::Arm;
 use webmcpx_bench::cdp::Browser;
-use webmcpx_bench::model::{OpenAi, list_price};
+use webmcpx_bench::model::{OpenAi, Price, list_price};
 use webmcpx_bench::report::{Results, SCHEMA_VERSION, Summary, markdown};
 use webmcpx_bench::{Job, repo_root, run_jobs, server, task};
 
@@ -50,9 +50,9 @@ enum Command {
         /// Runs in flight at once.
         #[arg(long, default_value_t = 4)]
         jobs: usize,
-        /// USD per million tokens as `INPUT,OUTPUT` (default: built-in list price for the model).
+        /// USD per million tokens as `INPUT,CACHED_INPUT,OUTPUT` (default: the official list price).
         #[arg(long, value_parser = parse_price)]
-        price: Option<(f64, f64)>,
+        price: Option<Price>,
         /// Chrome or Chromium executable (default: `CHROME_PATH`, then the usual locations).
         #[arg(long)]
         chrome: Option<PathBuf>,
@@ -66,10 +66,19 @@ enum Command {
     Tasks,
 }
 
-fn parse_price(s: &str) -> Result<(f64, f64), String> {
-    let (i, o) = s.split_once(',').ok_or("expected INPUT,OUTPUT")?;
-    let num = |v: &str| v.trim().parse::<f64>().map_err(|e| e.to_string());
-    Ok((num(i)?, num(o)?))
+fn parse_price(s: &str) -> Result<Price, String> {
+    let n: Vec<f64> = s
+        .split(',')
+        .map(|v| v.trim().parse::<f64>().map_err(|e| e.to_string()))
+        .collect::<Result<_, _>>()?;
+    let [input, cached_input, output] = n[..] else {
+        return Err("expected INPUT,CACHED_INPUT,OUTPUT".into());
+    };
+    Ok(Price {
+        input,
+        cached_input,
+        output,
+    })
 }
 
 #[tokio::main]

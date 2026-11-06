@@ -18,7 +18,7 @@ use tokio::task::JoinSet;
 
 use crate::arm::{Arm, INIT_SCRIPTS, Session};
 use crate::cdp::Browser;
-use crate::model::Model;
+use crate::model::{Model, Price};
 use crate::report::Run;
 use crate::task::Task;
 
@@ -41,7 +41,7 @@ pub async fn run_jobs<M: Model + Send + 'static>(
     browser: Arc<Browser>,
     model: Arc<M>,
     base_url: Arc<str>,
-    price: Option<(f64, f64)>,
+    price: Option<Price>,
     jobs: Vec<Job>,
     parallel: usize,
     on_done: impl Fn(&Run),
@@ -74,7 +74,7 @@ async fn run_job(
     browser: &Browser,
     model: &impl Model,
     base_url: &str,
-    price: Option<(f64, f64)>,
+    price: Option<Price>,
     job: Job,
 ) -> Run {
     let mut run = Run {

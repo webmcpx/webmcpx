@@ -104,7 +104,7 @@ async fn run_one<F: Fn(usize, &[Message]) -> Reply + Send + Sync + 'static>(
         browser,
         Arc::clone(&model),
         format!("http://{addr}").into(),
-        Some((0.10, 0.50)),
+        webmcpx_bench::model::list_price("gpt-6-luna"),
         vec![Job {
             task,
             arm,

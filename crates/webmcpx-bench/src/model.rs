@@ -66,11 +66,14 @@ pub struct ToolSpec {
     pub parameters: Value,
 }
 
-/// Token usage of one or more model calls.
+/// Token usage of one or more model calls. `input` includes `cached` (cache reads) and
+/// `cache_write` tokens; `output` includes `reasoning`.
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Usage {
     pub input: u64,
     pub cached: u64,
+    #[serde(default)]
+    pub cache_write: u64,
     pub output: u64,
     pub reasoning: u64,
 }
@@ -79,6 +82,7 @@ impl std::ops::AddAssign for Usage {
     fn add_assign(&mut self, o: Self) {
         self.input += o.input;
         self.cached += o.cached;
+        self.cache_write += o.cache_write;
         self.output += o.output;
         self.reasoning += o.reasoning;
     }
@@ -189,8 +193,8 @@ pub fn request_body(
             .collect();
     }
     if let Some(effort) = reasoning_effort {
+        // Stateless responses carry `encrypted_content` on reasoning items by default.
         body["reasoning"] = json!({ "effort": effort });
-        body["include"] = json!(["reasoning.encrypted_content"]);
     }
     body
 }
@@ -230,6 +234,9 @@ pub fn parse_reply(response: &Value) -> Result<Reply> {
         usage: Usage {
             input: u["input_tokens"].as_u64().unwrap_or(0),
             cached: u["input_tokens_details"]["cached_tokens"]
+                .as_u64()
+                .unwrap_or(0),
+            cache_write: u["input_tokens_details"]["cache_write_tokens"]
                 .as_u64()
                 .unwrap_or(0),
             output: u["output_tokens"].as_u64().unwrap_or(0),
@@ -284,15 +291,45 @@ impl Model for OpenAi {
     }
 }
 
-/// List prices in USD per million tokens: (input, output). Cached input is billed as input, so
-/// costs are an upper bound. Unknown models have no cost; pass `--price` instead.
-pub fn list_price(model: &str) -> Option<(f64, f64)> {
-    match model {
-        // Third-party listings as of 2026-11; verify on https://openai.com/api/pricing.
-        "gpt-6-luna" => Some((0.10, 0.50)),
-        "gpt-5.6-luna" => Some((0.20, 1.20)),
-        _ => None,
+/// USD per million tokens (Standard tier, prompts up to 272K tokens).
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+pub struct Price {
+    pub input: f64,
+    pub cached_input: f64,
+    pub output: f64,
+}
+
+/// Cache writes (default 30-minute TTL) cost this multiple of the uncached input rate.
+pub const CACHE_WRITE_MULTIPLIER: f64 = 1.25;
+
+impl Price {
+    #[expect(
+        clippy::cast_precision_loss,
+        reason = "token counts are far below 2^52"
+    )]
+    pub fn cost(self, u: Usage) -> f64 {
+        let fresh = u.input.saturating_sub(u.cached + u.cache_write);
+        (fresh as f64 * self.input
+            + u.cached as f64 * self.cached_input
+            + u.cache_write as f64 * self.input * CACHE_WRITE_MULTIPLIER
+            + u.output as f64 * self.output)
+            / 1e6
     }
+}
+
+/// Official list prices, read from <https://developers.openai.com/api/docs/pricing> on 2026-11-06.
+/// Unknown models have no cost; pass `--price` instead.
+pub fn list_price(model: &str) -> Option<Price> {
+    let (input, cached_input, output) = match model {
+        "gpt-6-luna" => (0.10, 0.01, 0.50),
+        "gpt-6.1-sol" => (2.00, 0.10, 10.00),
+        _ => return None,
+    };
+    Some(Price {
+        input,
+        cached_input,
+        output,
+    })
 }
 
 #[cfg(test)]
@@ -327,9 +364,6 @@ mod tests {
         ];
         insta::assert_json_snapshot!(request_body("gpt-6-luna", Some("medium"), &messages, &tools), @r#"
         {
-          "include": [
-            "reasoning.encrypted_content"
-          ],
           "input": [
             {
               "content": "sys",
@@ -381,7 +415,7 @@ mod tests {
                 {"type": "message", "content": [{"type": "output_text", "text": "Done."}]}
             ],
             "usage": {"input_tokens": 120, "output_tokens": 9,
-                      "input_tokens_details": {"cached_tokens": 64},
+                      "input_tokens_details": {"cached_tokens": 64, "cache_write_tokens": 16},
                       "output_tokens_details": {"reasoning_tokens": 4}}
         });
         let reply = parse_reply(&response).unwrap();
@@ -395,11 +429,31 @@ mod tests {
             Usage {
                 input: 120,
                 cached: 64,
+                cache_write: 16,
                 output: 9,
                 reasoning: 4
             }
         );
         assert_eq!(reply.raw.len(), 3);
+    }
+
+    #[test]
+    fn cost_bills_cache_reads_and_writes_at_their_rates() {
+        let price = list_price("gpt-6-luna").unwrap();
+        let usage = Usage {
+            input: 1_000_000,
+            cached: 600_000,
+            cache_write: 100_000,
+            output: 100_000,
+            reasoning: 0,
+        };
+        // 300K fresh x $0.10 + 600K cached x $0.01 + 100K writes x $0.125 + 100K out x $0.50
+        let expected = 0.03 + 0.006 + 0.0125 + 0.05;
+        assert!(
+            (price.cost(usage) - expected).abs() < 1e-12,
+            "{}",
+            price.cost(usage)
+        );
     }
 
     #[test]

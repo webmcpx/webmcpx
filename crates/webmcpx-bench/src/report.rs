@@ -8,17 +8,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::agent::Outcome;
 use crate::arm::Arm;
-use crate::model::Usage;
+use crate::model::{Price, Usage};
 
-pub const SCHEMA_VERSION: u32 = 1;
+/// 2: `price_per_mtok` became `{input, cached_input, output}`; usage gained `cache_write`.
+pub const SCHEMA_VERSION: u32 = 2;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Results {
     pub schema_version: u32,
     pub model: String,
     pub reasoning_effort: Option<String>,
-    /// USD per million (input, output) tokens used for `cost_usd`, if known.
-    pub price_per_mtok: Option<(f64, f64)>,
+    /// Prices used for `cost_usd`, if known.
+    pub price_per_mtok: Option<Price>,
     /// Unix seconds.
     pub started_at: u64,
     pub runs: Vec<Run>,
@@ -58,12 +59,8 @@ pub struct ArmSummary {
     pub cost_usd: Option<f64>,
 }
 
-pub fn cost(usage: Usage, price: Option<(f64, f64)>) -> Option<f64> {
-    #[expect(
-        clippy::cast_precision_loss,
-        reason = "token counts are far below 2^52"
-    )]
-    price.map(|(i, o)| (usage.input as f64 * i + usage.output as f64 * o) / 1e6)
+pub fn cost(usage: Usage, price: Option<Price>) -> Option<f64> {
+    price.map(|p| p.cost(usage))
 }
 
 fn summarize<'a>(runs: impl Iterator<Item = &'a Run>) -> ArmSummary {
@@ -185,7 +182,7 @@ mod tests {
                     output: 100,
                     ..Usage::default()
                 },
-                Some((0.10, 0.50)),
+                crate::model::list_price("gpt-6-luna"),
             ),
             outcome: Outcome {
                 answer: Some("x".into()),
@@ -223,7 +220,7 @@ mod tests {
             schema_version: SCHEMA_VERSION,
             model: "gpt-6-luna".into(),
             reasoning_effort: None,
-            price_per_mtok: Some((0.10, 0.50)),
+            price_per_mtok: crate::model::list_price("gpt-6-luna"),
             started_at: 0,
             summary: Summary::of(&runs),
             runs: runs.into(),

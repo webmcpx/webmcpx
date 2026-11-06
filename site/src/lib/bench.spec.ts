@@ -14,10 +14,10 @@ const arm = (tokens: number, duration_ms: number, cost_usd: number | null): ArmS
 });
 
 const results = (arms: Results['summary']['arms']): Results => ({
-	schema_version: 1,
+	schema_version: 2,
 	model: 'gpt-6-luna',
 	reasoning_effort: null,
-	price_per_mtok: [0.1, 0.5],
+	price_per_mtok: { input: 0.1, cached_input: 0.01, output: 0.5 },
 	started_at: 0,
 	runs: [],
 	summary: { arms, tasks: {} }
@@ -50,7 +50,7 @@ describe('formatting', () => {
 
 describe('parse', () => {
 	it('rejects unknown schema versions', () => {
-		expect(() => parse({ schema_version: 2 })).toThrow('unsupported schema_version 2');
+		expect(() => parse({ schema_version: 1 })).toThrow('unsupported schema_version 1');
 		expect(() => parse(null)).toThrow();
 		expect(parse(results({})).model).toBe('gpt-6-luna');
 	});
