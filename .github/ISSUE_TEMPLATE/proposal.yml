@@ -1,0 +1,15 @@
+name: Tool or rule proposal
+description: A standard tool, contract change or lint rule (including ideas closed as out of scope by the WebMCP spec repo).
+labels: [proposal]
+body:
+  - type: input
+    attributes: { label: Origin, description: "Link to the webmachinelearning/webmcp issue or real-world case, if any." }
+  - type: textarea
+    attributes: { label: Use case, description: "Who needs it and what fails today, with evidence (sites, agents, data)." }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Proposed contract, description: "Tool name, inputSchema, envelope data and annotations — or the rule name, what it flags and why." }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Acceptance criteria, description: "Checkable outcomes, e.g. 'fixture X produces diagnostic Y'." }
+    validations: { required: true }

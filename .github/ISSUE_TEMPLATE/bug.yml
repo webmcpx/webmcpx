@@ -1,0 +1,13 @@
+name: Bug
+description: Something does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    attributes: { label: Minimal reproduction, description: "Smallest input (HTML, JS or manifest) and the exact command or call." }
+    validations: { required: true }
+  - type: textarea
+    attributes: { label: Expected vs. actual, description: "Paste output (prefer `--format json`)." }
+    validations: { required: true }
+  - type: input
+    attributes: { label: Version, description: "`webmcpx --version` or npm version; browser/agent if relevant." }
+    validations: { required: true }
