@@ -64,8 +64,10 @@ review base="main":
     (printf 'Review the changes of this branch: run `git diff {{base}}...HEAD` and read any file you need.\n\n'; cat scripts/review.md) | codex exec -s read-only -m gpt-6.1-sol -c model_reasoning_effort='"high"' -o target/review.md -
 
 # Answer the last review (a rebuttal or "fixed in <sha>") and get a new verdict.
+# The reply is passed as "$1", never spliced into the shell line, so backticks and $() stay text.
+[positional-arguments]
 review-reply reply:
-    codex exec resume --last -m gpt-6.1-sol -c model_reasoning_effort='"high"' -o target/review.md "{{reply}} Re-review the branch (git diff main...HEAD) and end with the VERDICT line."
+    codex exec resume --last -m gpt-6.1-sol -c model_reasoning_effort='"high"' -o target/review.md "$1 Re-review the branch (git diff main...HEAD) and end with the VERDICT line."
 
 # Benchmark both arms (needs OPENAI_API_KEY and Chrome), e.g. `just bench --repeat 1 --task docs-exit-code`.
 bench *args: wasm
