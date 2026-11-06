@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-06: developers.cloudflare.com/kv/platform/limits/ lists "Value size 25 MiB".
+url = "https://developers.cloudflare.com/"
+prompt = "What is the maximum size of a single value stored in Cloudflare Workers KV?"
+
+[check]
+answer_contains = ["25"]
+answer_any = ["MiB", "MB"]

@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-06: specification.website/spec/accessibility/color-contrast/ requires
+# 4.5:1 for normal text (3:1 for large text, 7:1 for AAA).
+url = "https://specification.website/"
+prompt = "What minimum contrast ratio does this site's spec require for normal-size body text?"
+
+[check]
+answer_contains = ["4.5"]

@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-06: developers.notion.com/reference/request-limits, "All other plans:
+# 180 requests per minute (an average of 3 per second)".
+url = "https://developers.notion.com/guides/get-started/overview"
+prompt = "How many requests per minute does the Notion API allow per connection on plans other than Business and Enterprise?"
+
+[check]
+answer_contains = ["180"]

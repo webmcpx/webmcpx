@@ -1,0 +1,7 @@
+# Live WooCommerce demo store. Verified 2026-11-06 (Store API): 7 products; Open Web Poster ($22)
+# is out of stock; the cheapest in stock is Workflow Cards at $16.00.
+url = "https://demo.openforagents.com/"
+prompt = "What is the cheapest product in this store that is in stock, and what does it cost?"
+
+[check]
+answer_contains = ["Workflow Cards", "16"]

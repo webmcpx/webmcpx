@@ -1,0 +1,6 @@
+# Live WooCommerce demo store. Verified 2026-11-06 (Store API): only Open Web Poster is out of stock.
+url = "https://demo.openforagents.com/"
+prompt = "Which product in this store is out of stock?"
+
+[check]
+answer_contains = ["Open Web Poster"]
