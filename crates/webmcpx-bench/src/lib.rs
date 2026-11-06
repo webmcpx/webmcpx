@@ -107,7 +107,7 @@ async fn attempt(
         let session = Session::new(job.arm, &page).await?;
         run.outcome = agent::run(model, &session, &job.task.prompt, job.task.max_steps).await;
         let check = &job.task.check;
-        let answer_ok = (check.answer_contains.is_empty() && check.answer_excludes.is_empty())
+        let answer_ok = !check.has_answer_check()
             || run
                 .outcome
                 .answer

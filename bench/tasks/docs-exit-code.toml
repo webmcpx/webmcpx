@@ -2,4 +2,6 @@ site = "docs"
 prompt = "My CI step failed with orbit exit code 4. What does that mean?"
 
 [check]
-answer_contains = ["quota"]
+# The page says "Quota exceeded: your plan's build minutes or instance limit is used up";
+# a correct answer may use either wording.
+answer_any = ["quota", "build minutes", "build-minute", "instance limit"]

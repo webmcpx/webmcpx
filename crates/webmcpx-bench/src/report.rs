@@ -204,7 +204,10 @@ mod tests {
 
     #[test]
     fn comparisons_name_the_direction() {
-        assert_eq!(compare(15.0, 1.5, "fewer tokens", "more tokens"), "10.0x fewer tokens");
+        assert_eq!(
+            compare(15.0, 1.5, "fewer tokens", "more tokens"),
+            "10.0x fewer tokens"
+        );
         assert_eq!(compare(3.6, 4.9, "faster", "slower"), "1.4x slower");
     }
 

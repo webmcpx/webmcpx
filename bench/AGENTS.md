@@ -6,7 +6,7 @@ The harness is `crates/webmcpx-bench`; this directory holds what it runs.
   `/webmcpx/src/index.js` (the code under test). Custom tools follow the webmcpx envelope contract and
   call the same functions as the UI.
 - `tasks/<id>.toml` — one task: `site`, `prompt`, optional `max_steps`, and a `[check]` with
-  `answer_contains`, `answer_excludes` and/or `state` (a JS expression that must be truthy after the run).
+  `answer_contains` (all), `answer_any` (at least one), `answer_excludes` (none) and/or `state` (a JS expression that must be truthy after the run).
 - `results/` — run outputs (git-ignored). `latest.json` follows `schema_version` 1 (`report.rs`).
 
 Rules:

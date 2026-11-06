@@ -32,6 +32,9 @@ pub struct Check {
     /// whitespace-normalized, and not inside a longer word or number (`10` does not match `100`).
     #[serde(default)]
     pub answer_contains: Vec<String>,
+    /// At least one of these must appear (same matching), for facts with several correct wordings.
+    #[serde(default)]
+    pub answer_any: Vec<String>,
     /// None of these may appear in the final answer (catches hedged "X or Y" answers).
     #[serde(default)]
     pub answer_excludes: Vec<String>,
@@ -46,12 +49,23 @@ impl Task {
 }
 
 impl Check {
+    pub fn has_answer_check(&self) -> bool {
+        !self.answer_contains.is_empty()
+            || !self.answer_any.is_empty()
+            || !self.answer_excludes.is_empty()
+    }
+
     /// Grades the answer part of the check; the `state` part needs the page.
     pub fn answer_passes(&self, answer: &str) -> bool {
         let answer = normalize(answer);
         self.answer_contains
             .iter()
             .all(|s| has_term(&answer, &normalize(s)))
+            && (self.answer_any.is_empty()
+                || self
+                    .answer_any
+                    .iter()
+                    .any(|s| has_term(&answer, &normalize(s))))
             && !self
                 .answer_excludes
                 .iter()
@@ -136,8 +150,8 @@ fn load(path: &Path) -> Result<Task> {
         .clone_into(&mut task.id);
     let c = &task.check;
     ensure!(
-        !c.answer_contains.is_empty() || c.state.is_some(),
-        "{}: [check] needs answer_contains or state",
+        c.has_answer_check() || c.state.is_some(),
+        "{}: [check] needs answer_contains, answer_any or state",
         path.display()
     );
     Ok(task)
@@ -151,7 +165,7 @@ mod tests {
         Check {
             answer_contains: contains.iter().map(|s| (*s).into()).collect(),
             answer_excludes: excludes.iter().map(|s| (*s).into()).collect(),
-            state: None,
+            ..Check::default()
         }
     }
 
@@ -190,6 +204,17 @@ mod tests {
     }
 
     #[test]
+    fn any_accepts_each_correct_wording() {
+        let c = Check {
+            answer_any: vec!["quota".into(), "build minutes".into()],
+            ..Check::default()
+        };
+        assert!(c.answer_passes("Your quota is exceeded."));
+        assert!(c.answer_passes("Your build minutes are used up."));
+        assert!(!c.answer_passes("The deploy timed out."));
+    }
+
+    #[test]
     fn excludes_reject_hedged_answers() {
         let c = check(&["ORBIT_CONFIG"], &["ORBIT_HOME"]);
         assert!(c.answer_passes("Set ORBIT_CONFIG."));
@@ -221,6 +246,9 @@ mod tests {
         )
         .unwrap();
         let err = load_dir(dir.path()).unwrap_err().to_string();
-        assert!(err.contains("needs answer_contains or state"), "{err}");
+        assert!(
+            err.contains("needs answer_contains, answer_any or state"),
+            "{err}"
+        );
     }
 }
