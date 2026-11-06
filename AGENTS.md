@@ -13,6 +13,8 @@
 - `crates/webmcpx-wasm` — `#[wasm_bindgen]` exports of webmcpx-std. See its AGENTS.md.
 - `crates/webmcpx-lint` — rules, one file each in `src/rules/`. `crates/webmcpx` — the CLI.
 - `packages/webmcpx` — npm loader: the public browser API. Owns the DOM and `registerTool()`.
+- `crates/webmcpx-bench` + `bench/` — benchmark: same agent and pages, with vs without WebMCP. See `bench/AGENTS.md`.
+  Run: `OPENAI_API_KEY=... just bench`.
 
 ## Rules the tooling does not catch
 1. A contract changes in one place (`webmcpx-std/src/tools.rs` or `webmcpx-core`). Then run `just gen`;

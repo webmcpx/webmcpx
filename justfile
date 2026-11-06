@@ -17,7 +17,7 @@ setup:
     cd packages/webmcpx && npm ci
 
 # Everything CI checks.
-check: fmt-check lint test wasm js-test size deny
+check: fmt-check lint wasm test js-test size deny
 
 fmt:
     cargo fmt --all
@@ -65,3 +65,12 @@ review base="main":
 # Answer the last review (a rebuttal or "fixed in <sha>") and get a new verdict.
 review-reply reply:
     codex exec resume --last -m gpt-6.1-sol -c model_reasoning_effort='"high"' "{{reply}} Re-review the branch against main and end with the VERDICT line."
+
+# Benchmark both arms (needs OPENAI_API_KEY and Chrome), e.g. `just bench --repeat 1 --task docs-exit-code`.
+bench *args: wasm
+    cargo run -q --release -p webmcpx-bench -- run {{args}}
+    cp bench/results/latest.json site/src/lib/bench.json
+
+# Serve the benchmark sites and the built landing on http://127.0.0.1:4173.
+serve: wasm
+    cargo run -q -p webmcpx-bench -- serve
