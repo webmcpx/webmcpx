@@ -1,0 +1,6 @@
+site = "store"
+prompt = "Add one Stoneware Teapot and one Speckled Bowl to my cart, then tell me the cart total."
+
+[check]
+answer_contains = ["106"]
+state = "store.cart.length === 2 && store.cart.every((l) => l.qty === 1) && store.cart.some((l) => l.sku === 'TPT-01') && store.cart.some((l) => l.sku === 'BWL-01')"

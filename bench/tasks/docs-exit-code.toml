@@ -1,0 +1,5 @@
+site = "docs"
+prompt = "My CI step failed with orbit exit code 4. What does that mean?"
+
+[check]
+answer_contains = ["quota"]

@@ -1,0 +1,5 @@
+site = "docs"
+prompt = "What is the default timeout of `orbit deploy`, and which flag changes it?"
+
+[check]
+answer_contains = ["90", "--timeout"]

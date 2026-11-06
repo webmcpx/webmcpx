@@ -1,0 +1,5 @@
+site = "store"
+prompt = "When will the Ash Glaze Vase be back in stock? Give the date as the store writes it."
+
+[check]
+answer_contains = ["3 January"]

@@ -1,0 +1,6 @@
+site = "docs"
+prompt = "Which environment variable makes Orbit read its config file from a different path?"
+
+[check]
+answer_contains = ["ORBIT_CONFIG"]
+answer_excludes = ["ORBIT_HOME"]

@@ -1,0 +1,6 @@
+site = "docs"
+prompt = "By default, how many past releases does Orbit keep for rollback?"
+
+[check]
+answer_contains = ["10"]
+answer_excludes = ["25"]

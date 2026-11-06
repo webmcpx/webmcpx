@@ -1,0 +1,130 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orbit CLI reference</title><meta name="description" content="Reference for the Orbit command-line tool: commands, flags, configuration, environment variables and exit codes.">
+<style>body{font:16px/1.6 system-ui,sans-serif;margin:0;color:#1d2330}header,footer,nav{background:#f3f5f9;padding:12px 24px}main{max-width:820px;margin:0 auto;padding:24px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #d9dee8;padding:6px 8px;text-align:left;vertical-align:top}code,pre{background:#f3f5f9;border-radius:4px}pre{padding:12px;overflow:auto}</style>
+<script type="module">import { register } from "/webmcpx/src/index.js"; register();</script></head><body>
+<header><strong>Orbit</strong> · Docs</header>
+<nav aria-label="Sections"><a href="#cmd-init">orbit init</a> · <a href="#cmd-build">orbit build</a> · <a href="#cmd-deploy">orbit deploy</a> · <a href="#cmd-rollback">orbit rollback</a> · <a href="#cmd-releases">orbit releases</a> · <a href="#cmd-logs">orbit logs</a> · <a href="#cmd-test">orbit test</a> · <a href="#cmd-env">orbit env</a> · <a href="#cmd-secrets">orbit secrets</a> · <a href="#cmd-domains">orbit domains</a> · <a href="#cmd-scale">orbit scale</a> · <a href="#cmd-login">orbit login</a> · <a href="#config">Config</a> · <a href="#env">Environment</a> · <a href="#exit-codes">Exit codes</a></nav>
+<main><h1 id="top">Orbit CLI reference</h1>
+<p>Orbit builds, deploys and runs web applications. This page documents every command of the <code>orbit</code> CLI, version 3.8. Install it with <code>curl -fsSL https://get.orbit.example | sh</code> or <code>brew install orbit</code>.</p>
+<h2 id="commands">Commands</h2><p>Every command accepts <code>--help</code>, <code>--json</code> for machine-readable output and <code>--quiet</code> to print only errors.</p>
+<h3 id="cmd-init">orbit init</h3><p>Create an <code>orbit.toml</code> in the current directory and link it to a project.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--name</code></td><td>directory name</td><td>Project name shown in the dashboard.</td></tr>
+<tr><td><code>--region</code></td><td>eu-west</td><td>Default region for new environments.</td></tr>
+<tr><td><code>--template</code></td><td>none</td><td>Start from a template: <code>static</code>, <code>node</code> or <code>rust</code>.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit init --name shop --region us-east</code></pre>
+<h3 id="cmd-build">orbit build</h3><p>Build the project into an immutable artifact. Builds run in a clean container and are cached by the hash of your lockfiles.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--timeout</code></td><td>300 seconds</td><td>Abort the build after this long.</td></tr>
+<tr><td><code>--no-cache</code></td><td>off</td><td>Ignore cached layers.</td></tr>
+<tr><td><code>--target</code></td><td>release</td><td>Build profile: <code>release</code> or <code>debug</code>.</td></tr>
+<tr><td><code>--arg KEY=VALUE</code></td><td>none</td><td>Pass a build argument. Repeatable.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit build --target debug --arg API_URL=https://api.example.com</code></pre>
+<h3 id="cmd-deploy">orbit deploy</h3><p>Upload the latest artifact and roll it out to an environment. Traffic shifts to the new release once every instance passes its health check.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--env</code></td><td>staging</td><td>Environment to deploy to.</td></tr>
+<tr><td><code>--timeout</code></td><td>90 seconds</td><td>How long to wait for health checks before the deploy fails and traffic stays on the previous release.</td></tr>
+<tr><td><code>--strategy</code></td><td>rolling</td><td><code>rolling</code>, <code>blue-green</code> or <code>canary</code>.</td></tr>
+<tr><td><code>--canary-percent</code></td><td>10</td><td>Share of traffic for a canary release.</td></tr>
+<tr><td><code>--message</code></td><td>none</td><td>A note stored with the release.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit deploy --env production --timeout 180 --strategy blue-green</code></pre>
+<h3 id="cmd-rollback">orbit rollback</h3><p>Move traffic back to an earlier release of the same environment. No rebuild happens: the old artifact is reused.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--env</code></td><td>staging</td><td>Environment to roll back.</td></tr>
+<tr><td><code>--to</code></td><td>previous release</td><td>Release id to return to, as shown by <code>orbit releases</code>.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit rollback --env production --to r-2041</code></pre>
+<h3 id="cmd-releases">orbit releases</h3><p>List the releases of an environment, newest first, with their id, author, message and status.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--env</code></td><td>staging</td><td>Environment to list.</td></tr>
+<tr><td><code>--limit</code></td><td>20</td><td>How many releases to show.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit releases --env production --limit 5</code></pre>
+<h3 id="cmd-logs">orbit logs</h3><p>Stream logs from every instance of an environment.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--env</code></td><td>staging</td><td>Environment to read.</td></tr>
+<tr><td><code>--since</code></td><td>15m</td><td>Start this far back, e.g. <code>2h</code>.</td></tr>
+<tr><td><code>--follow</code></td><td>off</td><td>Keep streaming new lines.</td></tr>
+<tr><td><code>--grep</code></td><td>none</td><td>Only lines matching a regular expression.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit logs --env production --since 1h --grep timeout</code></pre>
+<h3 id="cmd-test">orbit test</h3><p>Run the project's test command in the same container image as the build.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--timeout</code></td><td>120 seconds</td><td>Abort the test run after this long.</td></tr>
+<tr><td><code>--shard</code></td><td>1/1</td><td>Run one shard of the suite, e.g. <code>2/4</code>.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit test --shard 1/3</code></pre>
+<h3 id="cmd-env">orbit env</h3><p>Create, list and delete environments.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>create NAME</code></td><td>—</td><td>Create an environment.</td></tr>
+<tr><td><code>list</code></td><td>—</td><td>List environments and their current release.</td></tr>
+<tr><td><code>delete NAME</code></td><td>—</td><td>Delete an environment and its releases. Asks for confirmation.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit env create preview-42</code></pre>
+<h3 id="cmd-secrets">orbit secrets</h3><p>Manage encrypted secrets. Secrets are injected as environment variables at runtime and never appear in build logs.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>set KEY VALUE</code></td><td>—</td><td>Create or replace a secret.</td></tr>
+<tr><td><code>unset KEY</code></td><td>—</td><td>Remove a secret.</td></tr>
+<tr><td><code>list</code></td><td>—</td><td>List secret names (never values).</td></tr>
+<tr><td><code>--env</code></td><td>all environments</td><td>Limit to one environment.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit secrets set STRIPE_KEY sk_live_... --env production</code></pre>
+<h3 id="cmd-domains">orbit domains</h3><p>Attach custom domains. Orbit provisions TLS certificates automatically once DNS points to your environment.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>add DOMAIN</code></td><td>—</td><td>Attach a domain.</td></tr>
+<tr><td><code>remove DOMAIN</code></td><td>—</td><td>Detach a domain.</td></tr>
+<tr><td><code>verify DOMAIN</code></td><td>—</td><td>Check DNS and certificate status.</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit domains add shop.example.com --env production</code></pre>
+<h3 id="cmd-scale">orbit scale</h3><p>Change the number and size of instances.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--env</code></td><td>staging</td><td>Environment to scale.</td></tr>
+<tr><td><code>--instances</code></td><td>2</td><td>Instance count, 1 to 50.</td></tr>
+<tr><td><code>--size</code></td><td>small</td><td><code>small</code> (0.5 vCPU, 512 MB), <code>medium</code> (1 vCPU, 2 GB) or <code>large</code> (4 vCPU, 8 GB).</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit scale --env production --instances 6 --size medium</code></pre>
+<h3 id="cmd-login">orbit login</h3><p>Authenticate this machine. Opens a browser window; on headless machines, prints a one-time code instead.</p>
+<table><thead><tr><th>Flag or subcommand</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>--token</code></td><td>none</td><td>Use an access token instead of the browser flow (for CI).</td></tr>
+</tbody></table><p>Example:</p><pre><code>orbit login --token $ORBIT_TOKEN</code></pre>
+<h2 id="config">Configuration file</h2><p>Orbit reads <code>orbit.toml</code> from the current directory or the nearest parent directory. Keys use dotted names below; in the file they live under <code>[build]</code>, <code>[deploy]</code> and <code>[runtime]</code> tables.</p>
+<table><thead><tr><th>Key</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>project</code></td><td>string</td><td><code>required</code></td><td>Project name.</td></tr>
+<tr><td><code>region</code></td><td>string</td><td><code>&quot;eu-west&quot;</code></td><td>Default region.</td></tr>
+<tr><td><code>build.command</code></td><td>string</td><td><code>auto-detected</code></td><td>Command that produces the artifact.</td></tr>
+<tr><td><code>build.output</code></td><td>path</td><td><code>&quot;dist&quot;</code></td><td>Directory packaged as the artifact.</td></tr>
+<tr><td><code>deploy.health_check</code></td><td>path</td><td><code>&quot;/healthz&quot;</code></td><td>Path that must return 2xx before traffic shifts.</td></tr>
+<tr><td><code>deploy.retain_releases</code></td><td>integer</td><td><code>10</code></td><td>How many past releases are kept for rollback. Older releases are deleted and can no longer be rolled back to.</td></tr>
+<tr><td><code>deploy.strategy</code></td><td>string</td><td><code>&quot;rolling&quot;</code></td><td>Default rollout strategy.</td></tr>
+<tr><td><code>runtime.port</code></td><td>integer</td><td><code>8080</code></td><td>Port your server listens on.</td></tr>
+<tr><td><code>runtime.max_body</code></td><td>size</td><td><code>&quot;10 MB&quot;</code></td><td>Largest accepted request body.</td></tr>
+</tbody></table><pre><code>project = "shop"
+region = "us-east"
+
+[deploy]
+health_check = "/ready"
+retain_releases = 25</code></pre>
+<h2 id="env">Environment variables</h2><table><thead><tr><th>Variable</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>ORBIT_TOKEN</code></td><td>Access token for non-interactive use. Overrides the credentials saved by <code>orbit login</code>.</td></tr>
+<tr><td><code>ORBIT_HOME</code></td><td>Directory for Orbit's cache and credentials. Default: <code>~/.orbit</code>.</td></tr>
+<tr><td><code>ORBIT_CONFIG</code></td><td>Path to the project config file, instead of looking for <code>orbit.toml</code> in the current directory and its parents.</td></tr>
+<tr><td><code>ORBIT_REGION</code></td><td>Region used when neither a flag nor the config sets one.</td></tr>
+<tr><td><code>ORBIT_NO_COLOR</code></td><td>Disable colored output. <code>NO_COLOR</code> is honored too.</td></tr>
+<tr><td><code>ORBIT_LOG</code></td><td>CLI log level: <code>error</code>, <code>warn</code>, <code>info</code> or <code>debug</code>.</td></tr>
+</tbody></table><p>Flags win over environment variables, which win over <code>orbit.toml</code>.</p>
+<h2 id="exit-codes">Exit codes</h2><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>0</td><td>Success.</td></tr>
+<tr><td>1</td><td>Generic failure; see the message.</td></tr>
+<tr><td>2</td><td>Invalid usage: unknown command, flag or value.</td></tr>
+<tr><td>3</td><td>Not authenticated. Run <code>orbit login</code> or set <code>ORBIT_TOKEN</code>.</td></tr>
+<tr><td>4</td><td>Quota exceeded: your plan's build minutes or instance limit is used up. Upgrade the plan or wait for the monthly reset.</td></tr>
+<tr><td>5</td><td>Health checks did not pass within the deploy timeout; traffic stayed on the previous release.</td></tr>
+<tr><td>6</td><td>Network error talking to the Orbit API. Safe to retry.</td></tr>
+<tr><td>7</td><td>The release or environment was not found.</td></tr>
+</tbody></table>
+<h2 id="faq">Frequently asked questions</h2>
+<h3>Why is my build slower than locally?</h3><p>Builds start from a clean container. The first build of a branch fills the cache; later builds reuse layers unless your lockfiles change. Use <code>--no-cache</code> only when debugging cache problems.</p>
+<h3>Can I deploy without building?</h3><p>No. Every deploy points at an artifact produced by <code>orbit build</code>, which keeps releases reproducible. Rollbacks are the exception: they reuse an old artifact.</p>
+<h3>How do preview environments work?</h3><p>Create one per pull request with <code>orbit env create preview-&lt;n&gt;</code> and delete it when the pull request closes. Preview environments count toward your instance quota.</p>
+<h3>Where are secrets stored?</h3><p>Secrets are encrypted at rest with a per-project key and decrypted only inside your instances. Orbit staff cannot read secret values.</p>
+<h3>How do I see who deployed?</h3><p>Run <code>orbit releases</code>; every release records its author and message.</p>
+<h3>Does Orbit support WebSockets?</h3><p>Yes, on all strategies. During a rolling deploy, existing connections stay on old instances until they close or 10 minutes pass.</p>
+<h2 id="changelog">Changelog</h2><ul>
+<li><strong>3.8</strong>: Canary deploys gain <code>--canary-percent</code>.</li>
+<li><strong>3.7</strong>: <code>orbit logs --grep</code>.</li>
+<li><strong>3.6</strong>: Default deploy timeout raised from 60 to 90 seconds.</li>
+<li><strong>3.5</strong>: <code>deploy.retain_releases</code> default raised from 5 to 10.</li>
+<li><strong>3.4</strong>: Blue-green deploys.</li>
+</ul></main><footer>© Orbit Platform · <a href="#top">Back to top</a></footer></body></html>

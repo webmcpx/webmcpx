@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kiln &amp; Co · Handmade ceramics</title>
+  <meta name="description" content="Handmade mugs, bowls, plates, teapots and vases from a small studio.">
+  <link rel="stylesheet" href="store.css">
+  <script type="module" src="store.js"></script>
+</head>
+<body>
+  <header>
+    <strong>Kiln &amp; Co</strong>
+    <nav aria-label="Main"><a href="#shop">Shop</a> · <a href="#about">About</a> · <a href="#shipping">Shipping</a></nav>
+  </header>
+  <main>
+    <section id="shop" aria-labelledby="shop-title">
+      <h1 id="shop-title">Shop</h1>
+      <form id="filters" aria-label="Filter products">
+        <label>Search <input name="q" type="search" placeholder="Search products"></label>
+        <label>Category
+          <select name="category">
+            <option value="">All</option><option>mug</option><option>bowl</option>
+            <option>plate</option><option>teapot</option><option>vase</option>
+          </select>
+        </label>
+        <label>Color
+          <select name="color">
+            <option value="">All</option><option>blue</option><option>white</option>
+            <option>green</option><option>black</option><option>terracotta</option>
+          </select>
+        </label>
+        <label>Sort
+          <select name="sort">
+            <option value="featured">Featured</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+          </select>
+        </label>
+      </form>
+      <ul id="products" class="grid"></ul>
+    </section>
+    <aside id="cart" aria-labelledby="cart-title">
+      <h2 id="cart-title">Your cart</h2>
+      <ul id="cart-items"></ul>
+      <p>Total: <strong id="cart-total">$0.00</strong></p>
+    </aside>
+    <section id="about">
+      <h2>About the studio</h2>
+      <p>Every piece is thrown by hand in our studio in Porto and fired twice. Glazes are lead-free and every
+        piece is dishwasher safe unless the listing says otherwise. Because each piece is handmade, sizes and
+        colors vary slightly.</p>
+    </section>
+    <section id="shipping">
+      <h2>Shipping and returns</h2>
+      <p>Orders ship within 3 business days. Shipping is free on orders over $80; below that it costs $9.
+        Returns are accepted within 30 days in the original packaging.</p>
+    </section>
+  </main>
+  <footer>© Kiln &amp; Co</footer>
+</body>
+</html>

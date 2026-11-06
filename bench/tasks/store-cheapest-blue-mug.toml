@@ -1,0 +1,5 @@
+site = "store"
+prompt = "Add two of the cheapest blue mug to my cart."
+
+[check]
+state = "store.cart.length === 1 && store.cart[0].sku === 'MUG-03' && store.cart[0].qty === 2"
