@@ -59,8 +59,12 @@ impl Check {
     }
 }
 
-/// Whether `term` occurs in `text` with no word character glued to its word-character edges.
+/// Whether `term` occurs in `text`. A numeric term must equal a number in the text by value
+/// (`106` matches `$106.00`, not `$106.99` or `1,060`); any other term must not be glued to a word.
 fn has_term(text: &str, term: &str) -> bool {
+    if let Ok(expected) = term.parse::<f64>() {
+        return numbers(text).any(|n| (n - expected).abs() < 1e-9);
+    }
     let word = |c: char| c.is_alphanumeric() || c == '_';
     let glued_start = term.starts_with(word);
     let glued_end = term.ends_with(word);
@@ -76,6 +80,38 @@ fn normalize(s: &str) -> String {
         .collect::<Vec<_>>()
         .join(" ")
         .to_lowercase()
+}
+
+/// Numbers in `text`: digits with `,` thousands separators and an optional decimal part.
+fn numbers(text: &str) -> impl Iterator<Item = f64> + '_ {
+    let bytes = text.as_bytes();
+    let digit_at = |i: usize| bytes.get(i).is_some_and(u8::is_ascii_digit);
+    let mut i = 0;
+    std::iter::from_fn(move || {
+        while i < bytes.len() && !(digit_at(i) && (i == 0 || !bytes[i - 1].is_ascii_alphanumeric()))
+        {
+            i += 1;
+        }
+        if i == bytes.len() {
+            return None;
+        }
+        let mut value = String::new();
+        while digit_at(i) || (bytes[i] == b',' && digit_at(i + 1)) {
+            if bytes[i] != b',' {
+                value.push(char::from(bytes[i]));
+            }
+            i += 1;
+        }
+        if i < bytes.len() && bytes[i] == b'.' && digit_at(i + 1) {
+            value.push('.');
+            i += 1;
+            while digit_at(i) {
+                value.push(char::from(bytes[i]));
+                i += 1;
+            }
+        }
+        value.parse().ok()
+    })
 }
 
 /// Loads every `*.toml` in `dir`, sorted by id.
@@ -132,6 +168,9 @@ mod tests {
         assert!(!check(&["90", "--timeout"], &[]).answer_passes("190 seconds; use --timeout"));
         assert!(!check(&["106"], &[]).answer_passes("The total is $1060.00."));
         assert!(check(&["106"], &[]).answer_passes("The total is $106.00."));
+        assert!(!check(&["106"], &[]).answer_passes("The total is $106.99."));
+        assert!(!check(&["106"], &[]).answer_passes("The total is $1,060."));
+        assert!(check(&["1060"], &[]).answer_passes("The total is $1,060."));
         assert!(check(&["10"], &[]).answer_passes("10 releases (deploy.retain_releases)."));
         assert!(!check(&["ORBIT_CONFIG"], &[]).answer_passes("ORBIT_CONFIGURE"));
     }
