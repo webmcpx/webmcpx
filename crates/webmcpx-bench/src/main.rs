@@ -13,7 +13,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
-use webmcpx_bench::arm::Arm;
+use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, webmcp_tools};
 use webmcpx_bench::cdp::Browser;
 use webmcpx_bench::model::{OpenAi, Price, list_price};
 use webmcpx_bench::report::{Results, SCHEMA_VERSION, Summary, markdown};
@@ -64,6 +64,12 @@ enum Command {
     },
     /// List tasks.
     Tasks,
+    /// Open live pages and print, as JSON lines, the WebMCP tools each one registers.
+    Probe {
+        urls: Vec<String>,
+        #[arg(long)]
+        chrome: Option<PathBuf>,
+    },
 }
 
 fn parse_price(s: &str) -> Result<Price, String> {
@@ -88,7 +94,18 @@ async fn main() -> Result<()> {
         Command::Tasks => {
             let mut out = std::io::stdout().lock();
             for t in task::load_dir(&root.join("bench/tasks"))? {
-                writeln!(out, "{}\t{}\t{}", t.id, t.site, t.prompt)?;
+                writeln!(out, "{}\t{}\t{}", t.id, t.place(), t.prompt)?;
+            }
+        }
+        Command::Probe { urls, chrome } => {
+            let browser = Browser::launch(chrome.as_deref()).await?;
+            let mut out = std::io::stdout().lock();
+            for url in urls {
+                let line = match probe(&browser, &url).await {
+                    Ok(tools) => serde_json::json!({ "url": url, "tools": tools }),
+                    Err(e) => serde_json::json!({ "url": url, "error": format!("{e:#}") }),
+                };
+                writeln!(out, "{line}")?;
             }
         }
         Command::Serve { addr } => {
@@ -176,6 +193,28 @@ async fn main() -> Result<()> {
         }
     }
     Ok(())
+}
+
+/// The tools `url` registers: name, description and parameter names.
+async fn probe(browser: &Browser, url: &str) -> Result<Vec<serde_json::Value>> {
+    let page = browser.page(&INIT_SCRIPTS).await?;
+    let result = async {
+        page.goto(url).await?;
+        let tools = webmcp_tools(&page).await?;
+        Ok(tools
+            .into_iter()
+            .map(|t| {
+                let params: Vec<&String> = t.parameters["properties"]
+                    .as_object()
+                    .map(|p| p.keys().collect())
+                    .unwrap_or_default();
+                serde_json::json!({ "name": t.name, "description": t.description, "params": params })
+            })
+            .collect())
+    }
+    .await;
+    page.close().await?;
+    result
 }
 
 fn progress(run: &webmcpx_bench::report::Run) {

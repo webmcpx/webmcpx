@@ -137,11 +137,12 @@ fn baseline_tools() -> Vec<ToolSpec> {
     ]
 }
 
-/// Waits briefly for the page to register its tools, then lists them.
-async fn webmcp_tools(page: &Page) -> Result<Vec<ToolSpec>> {
+/// Waits for the page to register its tools (up to 10 s; live sites register after hydration),
+/// then lists them.
+pub async fn webmcp_tools(page: &Page) -> Result<Vec<ToolSpec>> {
     let mut listed = Value::Null;
     let mut stable = 0;
-    for _ in 0..100 {
+    for _ in 0..400 {
         let now = page.eval("__webmcpHost.list()").await?;
         // Registration is async; take the list once it is non-empty and unchanged for 100 ms.
         stable = if now == listed && now.as_array().is_some_and(|a| !a.is_empty()) {

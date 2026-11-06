@@ -11,8 +11,10 @@ pub struct Task {
     /// File stem; set by `load_dir`.
     #[serde(skip)]
     pub id: String,
-    /// Directory under `bench/sites/`.
-    pub site: String,
+    /// A fixture: directory under `bench/sites/`. Exactly one of `site` and `url` is set.
+    pub site: Option<String>,
+    /// A live page on the public web that registers WebMCP tools itself.
+    pub url: Option<String>,
     /// What the user asks the agent.
     pub prompt: String,
     #[serde(default = "default_max_steps")]
@@ -43,8 +45,20 @@ pub struct Check {
 }
 
 impl Task {
-    pub fn url(&self, base: &str) -> String {
-        format!("{base}/sites/{}/", self.site)
+    /// The page to open: the live `url`, or the fixture served from `base`.
+    pub fn page_url(&self, base: &str) -> String {
+        match (&self.url, &self.site) {
+            (Some(url), _) => url.clone(),
+            (None, site) => format!("{base}/sites/{}/", site.as_deref().unwrap_or_default()),
+        }
+    }
+
+    /// Where the task runs, for listings: the fixture name or the live URL.
+    pub fn place(&self) -> &str {
+        self.url
+            .as_deref()
+            .or(self.site.as_deref())
+            .unwrap_or_default()
     }
 }
 
@@ -148,6 +162,11 @@ fn load(path: &Path) -> Result<Task> {
         .and_then(|s| s.to_str())
         .context("task file name is not UTF-8")?
         .clone_into(&mut task.id);
+    ensure!(
+        task.site.is_some() != task.url.is_some(),
+        "{}: set exactly one of `site` and `url`",
+        path.display()
+    );
     let c = &task.check;
     ensure!(
         c.has_answer_check() || c.state.is_some(),
@@ -228,12 +247,10 @@ mod tests {
         assert!(tasks.len() >= 4, "found {}", tasks.len());
         let sites = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../bench/sites");
         for t in &tasks {
-            assert!(
-                sites.join(&t.site).join("index.html").is_file(),
-                "{}: unknown site {}",
-                t.id,
-                t.site
-            );
+            if let Some(site) = &t.site {
+                let page = sites.join(site).join("index.html");
+                assert!(page.is_file(), "{}: unknown site {site}", t.id);
+            }
         }
     }
 

@@ -103,7 +103,7 @@ async fn attempt(
 ) -> Result<()> {
     let page = browser.page(&INIT_SCRIPTS).await?;
     let result = async {
-        page.goto(&job.task.url(base_url)).await?;
+        page.goto(&job.task.page_url(base_url)).await?;
         let session = Session::new(job.arm, &page).await?;
         run.outcome = agent::run(model, &session, &job.task.prompt, job.task.max_steps).await;
         let check = &job.task.check;
