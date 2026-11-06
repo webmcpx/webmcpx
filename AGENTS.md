@@ -1,7 +1,8 @@
 # AGENTS.md — webmcpx
 
 ## Verify (run before every commit; it is exactly what CI runs)
-- `just check` — fmt, clippy (native + wasm32, `-D warnings`), tests, wasm build, JS e2e, size budgets, cargo deny + shear.
+- `just check` — fmt, clippy (native + wasm32, `-D warnings`), wasm build, tests (incl. Chrome e2e), JS e2e, size budgets,
+  landing check/test/build, cargo deny + shear.
 - Fast loop: `just test -p <crate>` (e.g. `just test -p webmcpx-lint`).
 - Snapshots: `cargo insta test`, then `cargo insta review`. Never edit `.snap` files by hand.
 - After a wasm or loader change: `just wasm js-test size` (the size gate fails the build).
@@ -15,6 +16,7 @@
 - `packages/webmcpx` — npm loader: the public browser API. Owns the DOM and `registerTool()`.
 - `crates/webmcpx-bench` + `bench/` — benchmark: same agent and pages, with vs without WebMCP. See `bench/AGENTS.md`.
   Run: `OPENAI_API_KEY=... just bench`.
+- `site/` — landing (SvelteKit 3, Svelte 5 runes, Tailwind 4, static). Shows `site/src/lib/bench.json`. See `site/AGENTS.md`.
 
 ## Rules the tooling does not catch
 1. A contract changes in one place (`webmcpx-std/src/tools.rs` or `webmcpx-core`). Then run `just gen`;

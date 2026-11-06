@@ -31,6 +31,7 @@ jobs:
           node-version: 24
       - run: sudo apt-get install -y binaryen
       - run: cd packages/webmcpx && npm ci
+      - run: cd site && npm ci
       - run: just check
       - name: Generated files are up to date
         run: just gen && git diff --exit-code

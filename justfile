@@ -15,9 +15,10 @@ setup:
     cargo install --locked cargo-nextest cargo-insta cargo-deny cargo-shear
     @command -v wasm-opt >/dev/null || echo "Install binaryen (wasm-opt): brew install binaryen / apt install binaryen"
     cd packages/webmcpx && npm ci
+    cd site && npm ci
 
 # Everything CI checks.
-check: fmt-check lint wasm test js-test size deny
+check: fmt-check lint wasm test js-test size site deny
 
 fmt:
     cargo fmt --all
@@ -70,6 +71,14 @@ review-reply reply:
 bench *args: wasm
     cargo run -q --release -p webmcpx-bench -- run {{args}}
     cp bench/results/latest.json site/src/lib/bench.json
+
+# Landing: type check, unit tests, static build into site/build (needs `just wasm`).
+site:
+    cd site && npm run check && npm test && npm run build
+
+# Landing dev server with hot reload on http://localhost:5173.
+site-dev: wasm
+    cd site && npm run dev
 
 # Serve the benchmark sites and the built landing on http://127.0.0.1:4173.
 serve: wasm
