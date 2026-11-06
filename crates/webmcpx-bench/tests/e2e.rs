@@ -46,6 +46,7 @@ fn call(name: &str, args: &str) -> Reply {
             output: 10,
             ..Usage::default()
         },
+        raw: Vec::new(),
     }
 }
 
@@ -54,6 +55,7 @@ fn answer(text: &str) -> Reply {
         content: Some(text.into()),
         tool_calls: Vec::new(),
         usage: Usage::default(),
+        raw: Vec::new(),
     }
 }
 

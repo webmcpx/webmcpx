@@ -1,5 +1,9 @@
-//! The model boundary: an OpenAI-compatible Chat Completions client, and the `Model` trait the agent
-//! loop depends on (tests swap in a scripted model).
+//! The model boundary: an OpenAI Responses API client, and the `Model` trait the agent loop
+//! depends on (tests swap in a scripted model).
+//!
+//! Responses API, not Chat Completions: reasoning models such as `gpt-6-luna` only accept function
+//! tools together with `reasoning.effort` there. Calls are stateless (`store: false`); reasoning items
+//! come back encrypted and are sent back verbatim on the next turn.
 
 use std::future::Future;
 use std::time::Duration;
@@ -8,8 +12,8 @@ use anyhow::{Context as _, Result, bail};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(tag = "role", rename_all = "lowercase")]
+/// The conversation as the agent loop sees it.
+#[derive(Debug, Clone, PartialEq)]
 pub enum Message {
     System {
         content: String,
@@ -18,10 +22,11 @@ pub enum Message {
         content: String,
     },
     Assistant {
-        #[serde(default, skip_serializing_if = "Option::is_none")]
         content: Option<String>,
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
         tool_calls: Vec<ToolCall>,
+        /// The provider's output items for this turn, echoed back verbatim (they carry reasoning).
+        /// Empty for scripted models; the request is then rebuilt from `content` and `tool_calls`.
+        raw: Vec<Value>,
     },
     Tool {
         tool_call_id: String,
@@ -29,23 +34,16 @@ pub enum Message {
     },
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ToolCall {
     pub id: String,
-    #[serde(rename = "type", default = "function_kind")]
-    pub kind: String,
     pub function: FunctionCall,
-}
-
-fn function_kind() -> String {
-    "function".into()
 }
 
 impl ToolCall {
     pub fn new(id: &str, name: &str, arguments: &str) -> Self {
         Self {
             id: id.into(),
-            kind: function_kind(),
             function: FunctionCall {
                 name: name.into(),
                 arguments: arguments.into(),
@@ -54,7 +52,7 @@ impl ToolCall {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct FunctionCall {
     pub name: String,
     pub arguments: String,
@@ -87,17 +85,20 @@ impl std::ops::AddAssign for Usage {
 }
 
 impl Usage {
+    /// Input plus output tokens (reasoning tokens are part of output).
     pub const fn total(self) -> u64 {
         self.input + self.output
     }
 }
 
 /// One assistant turn: either a final answer or tool calls.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub struct Reply {
     pub content: Option<String>,
     pub tool_calls: Vec<ToolCall>,
     pub usage: Usage,
+    /// Output items to echo back (see `Message::Assistant::raw`).
+    pub raw: Vec<Value>,
 }
 
 pub trait Model: Sync {
@@ -108,7 +109,7 @@ pub trait Model: Sync {
     ) -> impl Future<Output = Result<Reply>> + Send;
 }
 
-/// OpenAI Chat Completions (`/v1/chat/completions`), or any compatible endpoint via `base_url`.
+/// OpenAI Responses API (`/v1/responses`), or a compatible endpoint via `OPENAI_BASE_URL`.
 pub struct OpenAi {
     http: reqwest::Client,
     base_url: String,
@@ -125,7 +126,7 @@ impl OpenAi {
         let base_url =
             std::env::var("OPENAI_BASE_URL").unwrap_or_else(|_| "https://api.openai.com/v1".into());
         let http = reqwest::Client::builder()
-            .timeout(Duration::from_secs(180))
+            .timeout(Duration::from_secs(300))
             .build()?;
         Ok(Self {
             http,
@@ -134,15 +135,6 @@ impl OpenAi {
             model,
             reasoning_effort,
         })
-    }
-
-    fn body(&self, messages: &[Message], tools: &[ToolSpec]) -> Value {
-        request_body(
-            &self.model,
-            self.reasoning_effort.as_deref(),
-            messages,
-            tools,
-        )
     }
 }
 
@@ -153,57 +145,111 @@ pub fn request_body(
     messages: &[Message],
     tools: &[ToolSpec],
 ) -> Value {
-    let mut body = json!({ "model": model, "messages": messages });
+    let mut input = Vec::new();
+    for m in messages {
+        match m {
+            Message::System { content } => {
+                input.push(json!({ "role": "system", "content": content }));
+            }
+            Message::User { content } => input.push(json!({ "role": "user", "content": content })),
+            Message::Assistant { raw, .. } if !raw.is_empty() => input.extend(raw.iter().cloned()),
+            Message::Assistant {
+                content,
+                tool_calls,
+                ..
+            } => {
+                if let Some(text) = content {
+                    input.push(json!({ "role": "assistant", "content": text }));
+                }
+                input.extend(tool_calls.iter().map(|c| {
+                    json!({
+                        "type": "function_call", "call_id": c.id,
+                        "name": c.function.name, "arguments": c.function.arguments
+                    })
+                }));
+            }
+            Message::Tool {
+                tool_call_id,
+                content,
+            } => input.push(json!({
+                "type": "function_call_output", "call_id": tool_call_id, "output": content
+            })),
+        }
+    }
+    let mut body = json!({ "model": model, "input": input, "store": false });
     if !tools.is_empty() {
         body["tools"] = tools
             .iter()
-            .map(|t| json!({ "type": "function", "function": t }))
+            .map(|t| {
+                json!({
+                    "type": "function", "name": t.name, "description": t.description,
+                    "parameters": t.parameters, "strict": false
+                })
+            })
             .collect();
     }
     if let Some(effort) = reasoning_effort {
-        body["reasoning_effort"] = effort.into();
+        body["reasoning"] = json!({ "effort": effort });
+        body["include"] = json!(["reasoning.encrypted_content"]);
     }
     body
 }
 
-/// Parses a Chat Completions response.
+/// Parses a Responses API response.
 pub fn parse_reply(response: &Value) -> Result<Reply> {
-    let message = &response["choices"][0]["message"];
-    if message.is_null() {
-        bail!("response has no choices[0].message: {response}");
-    }
-    let tool_calls = match message.get("tool_calls") {
-        Some(Value::Array(calls)) => calls
-            .iter()
-            .map(|c| serde_json::from_value(c.clone()))
-            .collect::<Result<_, _>>()
-            .context("malformed tool_calls")?,
-        _ => Vec::new(),
+    let Some(output) = response["output"].as_array() else {
+        bail!("response has no output: {response}");
     };
+    let mut text = String::new();
+    let mut tool_calls = Vec::new();
+    for item in output {
+        match item["type"].as_str() {
+            Some("function_call") => tool_calls.push(ToolCall::new(
+                item["call_id"]
+                    .as_str()
+                    .context("function_call without call_id")?,
+                item["name"]
+                    .as_str()
+                    .context("function_call without name")?,
+                item["arguments"].as_str().unwrap_or("{}"),
+            )),
+            Some("message") => {
+                for part in item["content"].as_array().into_iter().flatten() {
+                    if let Some(t) = part["text"].as_str() {
+                        text.push_str(t);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
     let u = &response["usage"];
     Ok(Reply {
-        content: message["content"]
-            .as_str()
-            .filter(|s| !s.is_empty())
-            .map(Into::into),
+        content: (!text.is_empty()).then_some(text),
         tool_calls,
         usage: Usage {
-            input: u["prompt_tokens"].as_u64().unwrap_or(0),
-            cached: u["prompt_tokens_details"]["cached_tokens"]
+            input: u["input_tokens"].as_u64().unwrap_or(0),
+            cached: u["input_tokens_details"]["cached_tokens"]
                 .as_u64()
                 .unwrap_or(0),
-            output: u["completion_tokens"].as_u64().unwrap_or(0),
-            reasoning: u["completion_tokens_details"]["reasoning_tokens"]
+            output: u["output_tokens"].as_u64().unwrap_or(0),
+            reasoning: u["output_tokens_details"]["reasoning_tokens"]
                 .as_u64()
                 .unwrap_or(0),
         },
+        raw: output.clone(),
     })
 }
 
 impl Model for OpenAi {
     async fn complete(&self, messages: &[Message], tools: &[ToolSpec]) -> Result<Reply> {
-        let body = self.body(messages, tools);
-        let url = format!("{}/chat/completions", self.base_url);
+        let body = request_body(
+            &self.model,
+            self.reasoning_effort.as_deref(),
+            messages,
+            tools,
+        );
+        let url = format!("{}/responses", self.base_url);
         let mut delay = Duration::from_secs(2);
         for attempt in 1..=4 {
             let response = self
@@ -254,7 +300,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn body_is_chat_completions_shape() {
+    fn body_is_responses_shape() {
         let tools = [ToolSpec {
             name: "search_page".into(),
             description: "Find passages.".into(),
@@ -267,50 +313,58 @@ mod tests {
             Message::Assistant {
                 content: None,
                 tool_calls: vec![ToolCall::new("c1", "search_page", "{}")],
+                raw: Vec::new(),
             },
             Message::Tool {
                 tool_call_id: "c1".into(),
                 content: "{\"ok\":true}".into(),
             },
+            Message::Assistant {
+                content: None,
+                tool_calls: Vec::new(),
+                raw: vec![json!({"type": "reasoning", "encrypted_content": "x"})],
+            },
         ];
-        insta::assert_json_snapshot!(request_body("gpt-6-luna", Some("low"), &messages, &tools), @r#"
+        insta::assert_json_snapshot!(request_body("gpt-6-luna", Some("medium"), &messages, &tools), @r#"
         {
-          "messages": [
+          "include": [
+            "reasoning.encrypted_content"
+          ],
+          "input": [
             {
               "content": "sys",
               "role": "system"
             },
             {
-              "role": "assistant",
-              "tool_calls": [
-                {
-                  "function": {
-                    "arguments": "{}",
-                    "name": "search_page"
-                  },
-                  "id": "c1",
-                  "type": "function"
-                }
-              ]
+              "arguments": "{}",
+              "call_id": "c1",
+              "name": "search_page",
+              "type": "function_call"
             },
             {
-              "content": "{\"ok\":true}",
-              "role": "tool",
-              "tool_call_id": "c1"
+              "call_id": "c1",
+              "output": "{\"ok\":true}",
+              "type": "function_call_output"
+            },
+            {
+              "encrypted_content": "x",
+              "type": "reasoning"
             }
           ],
           "model": "gpt-6-luna",
-          "reasoning_effort": "low",
+          "reasoning": {
+            "effort": "medium"
+          },
+          "store": false,
           "tools": [
             {
-              "function": {
-                "description": "Find passages.",
-                "name": "search_page",
-                "parameters": {
-                  "properties": {},
-                  "type": "object"
-                }
+              "description": "Find passages.",
+              "name": "search_page",
+              "parameters": {
+                "properties": {},
+                "type": "object"
               },
+              "strict": false,
               "type": "function"
             }
           ]
@@ -319,17 +373,19 @@ mod tests {
     }
 
     #[test]
-    fn parses_tool_calls_and_usage() {
+    fn parses_tool_calls_text_and_usage() {
         let response = json!({
-            "choices": [{"message": {"role": "assistant", "content": null, "tool_calls": [
-                {"id": "c1", "type": "function", "function": {"name": "click", "arguments": "{\"ref\":3}"}}
-            ]}}],
-            "usage": {"prompt_tokens": 120, "completion_tokens": 9,
-                      "prompt_tokens_details": {"cached_tokens": 64},
-                      "completion_tokens_details": {"reasoning_tokens": 4}}
+            "output": [
+                {"type": "reasoning", "id": "rs_1", "encrypted_content": "x"},
+                {"type": "function_call", "call_id": "c1", "name": "click", "arguments": "{\"ref\":3}"},
+                {"type": "message", "content": [{"type": "output_text", "text": "Done."}]}
+            ],
+            "usage": {"input_tokens": 120, "output_tokens": 9,
+                      "input_tokens_details": {"cached_tokens": 64},
+                      "output_tokens_details": {"reasoning_tokens": 4}}
         });
         let reply = parse_reply(&response).unwrap();
-        assert_eq!(reply.content, None);
+        assert_eq!(reply.content.as_deref(), Some("Done."));
         assert_eq!(
             reply.tool_calls,
             [ToolCall::new("c1", "click", "{\"ref\":3}")]
@@ -343,10 +399,11 @@ mod tests {
                 reasoning: 4
             }
         );
+        assert_eq!(reply.raw.len(), 3);
     }
 
     #[test]
-    fn rejects_responses_without_a_message() {
+    fn rejects_responses_without_output() {
         assert!(parse_reply(&json!({"error": {"message": "bad model"}})).is_err());
     }
 }

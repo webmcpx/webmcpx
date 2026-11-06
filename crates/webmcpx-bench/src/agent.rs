@@ -77,6 +77,7 @@ pub async fn run(
         messages.push(Message::Assistant {
             content: reply.content,
             tool_calls: reply.tool_calls.clone(),
+            raw: reply.raw,
         });
         for call in reply.tool_calls {
             let result = session
