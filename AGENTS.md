@@ -34,6 +34,12 @@
 - Don't use `#[allow]`; use `#[expect(lint, reason = "...")]`.
 - Don't add options or abstractions "for later": a safe default beats a setting; generalize on the third use.
 
+## Review (required before every merge)
+- Work on a branch. Before merging, run `just review` (Codex, `gpt-6.1-sol`, high reasoning; prompt in
+  `scripts/review.md`). Fix each finding, or rebut it with evidence via `just review-reply "<reply>"`.
+- Repeat until Codex ends with `VERDICT: NO SUBSTANTIAL FINDINGS`. Only substantial findings count;
+  ignore style nits. Summarize the rounds (finding → fix or rebuttal) in the PR description.
+
 ## PRs
 - Conventional Commits title: `feat(std): ...`, `fix(lint): ...`, `docs: ...`.
 - Disclose AI help with an `Assisted-by: <tool>` trailer. You must understand every line you submit.

@@ -57,3 +57,11 @@ size:
 deny:
     cargo deny check
     cargo shear
+
+# Review the branch against main with Codex (see AGENTS.md > Review).
+review base="main":
+    codex exec review --base {{base}} -m gpt-6.1-sol -c model_reasoning_effort='"high"' - < scripts/review.md
+
+# Answer the last review (a rebuttal or "fixed in <sha>") and get a new verdict.
+review-reply reply:
+    codex exec resume --last -m gpt-6.1-sol -c model_reasoning_effort='"high"' "{{reply}} Re-review the branch against main and end with the VERDICT line."
