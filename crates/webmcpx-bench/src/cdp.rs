@@ -223,7 +223,8 @@ impl Page {
         if let Some(e) = nav["errorText"].as_str() {
             bail!("navigating to {url}: {e}");
         }
-        for _ in 0..200 {
+        // Up to 30 s: live sites load slower than the local fixtures.
+        for _ in 0..1200 {
             if self.eval("document.readyState").await? == "complete" {
                 return Ok(());
             }
