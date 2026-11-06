@@ -2,8 +2,3000 @@
   "schema_version": 2,
   "model": "gpt-6-luna",
   "reasoning_effort": "medium",
-  "price_per_mtok": { "input": 0.1, "cached_input": 0.01, "output": 0.5 },
-  "started_at": 0,
-  "runs": [],
-  "summary": { "arms": {}, "tasks": {} }
+  "price_per_mtok": {
+    "input": 0.1,
+    "cached_input": 0.01,
+    "output": 0.5
+  },
+  "started_at": 1794002978,
+  "runs": [
+    {
+      "task": "docs-config-path",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00032105,
+      "answer": "`ORBIT_CONFIG` sets the path to Orbit’s project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2481,
+        "cached": 0,
+        "cache_write": 2258,
+        "output": 33,
+        "reasoning": 0
+      },
+      "duration_ms": 2582
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000327425,
+      "answer": "`ORBIT_CONFIG` sets the path to Orbit’s config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2492,
+        "cached": 0,
+        "cache_write": 2269,
+        "output": 43,
+        "reasoning": 9
+      },
+      "duration_ms": 2662
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00006138,
+      "answer": "`ORBIT_CONFIG` specifies the path to Orbit’s project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2481,
+        "cached": 2258,
+        "cache_write": 0,
+        "output": 33,
+        "reasoning": 0
+      },
+      "duration_ms": 2395
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001168,
+      "answer": "`ORBIT_CONFIG` — set it to the path of the project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"environment variable config file different path Orbit\"}",
+          "result_chars": 883
+        }
+      ],
+      "usage": {
+        "input": 943,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 45,
+        "reasoning": 0
+      },
+      "duration_ms": 1957
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001162,
+      "answer": "`ORBIT_CONFIG` — set it to the path of the project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"environment variable config file different path\"}",
+          "result_chars": 883
+        }
+      ],
+      "usage": {
+        "input": 942,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 44,
+        "reasoning": 0
+      },
+      "duration_ms": 2013
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001168,
+      "answer": "`ORBIT_CONFIG` — set it to the path of the project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"environment variable config file different path Orbit\"}",
+          "result_chars": 883
+        }
+      ],
+      "usage": {
+        "input": 943,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 45,
+        "reasoning": 0
+      },
+      "duration_ms": 1835
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0003315,
+      "answer": "The default timeout for `orbit deploy` is **90 seconds**. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 0,
+        "cache_write": 2260,
+        "output": 53,
+        "reasoning": 0
+      },
+      "duration_ms": 3434
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00007159999999999999,
+      "answer": "The default timeout for `orbit deploy` is **90 seconds**. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 2260,
+        "cache_write": 0,
+        "output": 53,
+        "reasoning": 0
+      },
+      "duration_ms": 2418
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0000711,
+      "answer": "The default `orbit deploy` timeout is **90 seconds**. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 2260,
+        "cache_write": 0,
+        "output": 52,
+        "reasoning": 0
+      },
+      "duration_ms": 5020
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002205,
+      "answer": "The default `orbit deploy` timeout is **90 seconds**. Use the `--timeout` flag to change it (for example, `--timeout 180`).",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit deploy default timeout flag change timeout\"}",
+          "result_chars": 740
+        },
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"--timeout seconds deploy default 90\"}",
+          "result_chars": 859
+        }
+      ],
+      "usage": {
+        "input": 1780,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 85,
+        "reasoning": 0
+      },
+      "duration_ms": 3640
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00021420000000000003,
+      "answer": "The default `orbit deploy` timeout is **90 seconds**. The `--timeout` flag changes it.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit deploy default timeout flag\"}",
+          "result_chars": 740
+        },
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"--timeout deploy 90 seconds timeout default\"}",
+          "result_chars": 859
+        }
+      ],
+      "usage": {
+        "input": 1777,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 73,
+        "reasoning": 0
+      },
+      "duration_ms": 3307
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000214,
+      "answer": "`orbit deploy` defaults to a **90-second** timeout. Use the `--timeout` flag to change it.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit deploy default timeout flag\"}",
+          "result_chars": 740
+        },
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"--timeout deploy 90 seconds\"}",
+          "result_chars": 859
+        }
+      ],
+      "usage": {
+        "input": 1775,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 73,
+        "reasoning": 0
+      },
+      "duration_ms": 3071
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000337375,
+      "answer": "Orbit exit code **4** means your plan’s quota has been exceeded—either build minutes or the instance limit. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2496,
+        "cached": 0,
+        "cache_write": 2271,
+        "output": 62,
+        "reasoning": 9
+      },
+      "duration_ms": 2541
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0003285,
+      "answer": "Orbit exit code 4 means your plan’s build-minute or instance quota has been exceeded. Upgrade your plan or wait for the monthly quota reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 0,
+        "cache_write": 2260,
+        "output": 47,
+        "reasoning": 0
+      },
+      "duration_ms": 2237
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0000686,
+      "answer": "Orbit exit code 4 means your plan’s build minutes or instance limit has been used up. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 2260,
+        "cache_write": 0,
+        "output": 47,
+        "reasoning": 0
+      },
+      "duration_ms": 2570
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001225,
+      "answer": "Orbit exit code **4** means your plan’s quota has been exceeded—either build minutes or instance limit. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit exit code 4\"}",
+          "result_chars": 767
+        }
+      ],
+      "usage": {
+        "input": 935,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 58,
+        "reasoning": 0
+      },
+      "duration_ms": 2579
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001235,
+      "answer": "Orbit exit code **4** means **quota exceeded**: your plan has used up its build minutes or instance limit. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit exit code 4\"}",
+          "result_chars": 767
+        }
+      ],
+      "usage": {
+        "input": 935,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 60,
+        "reasoning": 0
+      },
+      "duration_ms": 1976
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000124,
+      "answer": "Orbit exit code **4** means **quota exceeded**: your plan’s build minutes or instance limit has been used up. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit exit code 4\"}",
+          "result_chars": 767
+        }
+      ],
+      "usage": {
+        "input": 935,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 61,
+        "reasoning": 0
+      },
+      "duration_ms": 2481
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000319825,
+      "answer": "By default, Orbit keeps **10 past releases** for rollback.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2479,
+        "cached": 0,
+        "cache_write": 2257,
+        "output": 31,
+        "reasoning": 0
+      },
+      "duration_ms": 3080
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000059770000000000005,
+      "answer": "Orbit keeps **10 past releases** for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2479,
+        "cached": 2257,
+        "cache_write": 0,
+        "output": 30,
+        "reasoning": 0
+      },
+      "duration_ms": 3009
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00005927,
+      "answer": "Orbit keeps 10 past releases for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2479,
+        "cached": 2257,
+        "cache_write": 0,
+        "output": 29,
+        "reasoning": 0
+      },
+      "duration_ms": 3594
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00011830000000000002,
+      "answer": "Orbit keeps **10 past releases** for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"By default, how many past releases does Orbit keep for rollback?\"}",
+          "result_chars": 864
+        }
+      ],
+      "usage": {
+        "input": 953,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 46,
+        "reasoning": 0
+      },
+      "duration_ms": 2163
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001168,
+      "answer": "Orbit keeps **10 past releases** for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"default how many past releases Orbit keep rollback\",\"limit\":5}",
+          "result_chars": 828
+        }
+      ],
+      "usage": {
+        "input": 943,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 45,
+        "reasoning": 0
+      },
+      "duration_ms": 2078
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001149,
+      "answer": "By default, Orbit keeps **10 past releases** for rollback.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"past releases rollback default Orbit keep how many\"}",
+          "result_chars": 828
+        }
+      ],
+      "usage": {
+        "input": 939,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 42,
+        "reasoning": 0
+      },
+      "duration_ms": 2552
+    },
+    {
+      "task": "live-allbirds-return-window",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000233555,
+      "answer": "You have 30 days to return a pair of Allbirds shoes.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4492
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":74}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 2618
+        }
+      ],
+      "usage": {
+        "input": 5778,
+        "cached": 4743,
+        "cache_write": 805,
+        "output": 125,
+        "reasoning": 58
+      },
+      "duration_ms": 5180
+    },
+    {
+      "task": "live-allbirds-return-window",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00023457,
+      "answer": "You have 30 days to return a pair of Allbirds shoes.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4492
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":74}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 2618
+        }
+      ],
+      "usage": {
+        "input": 5815,
+        "cached": 4757,
+        "cache_write": 828,
+        "output": 121,
+        "reasoning": 52
+      },
+      "duration_ms": 4766
+    },
+    {
+      "task": "live-allbirds-return-window",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00041194,
+      "answer": "You have **30 days from the delivery date** to return or exchange unworn, unwashed shoes with the original tags attached.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4492
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":74}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 2618
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":44}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3823
+        }
+      ],
+      "usage": {
+        "input": 11560,
+        "cached": 9484,
+        "cache_write": 1840,
+        "output": 127,
+        "reasoning": 19
+      },
+      "duration_ms": 6723
+    },
+    {
+      "task": "live-allbirds-return-window",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000111025,
+      "answer": "You have 30 days from delivery to return Allbirds shoes. They must be unworn and unwashed, with their original tags attached.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "ask_business",
+          "arguments": "{\"ask\":{\"query\":\"How many days do I have to return a pair of Allbirds shoes?\",\"context\":{\"intent\":\"returns\"}}}",
+          "result_chars": 391
+        }
+      ],
+      "usage": {
+        "input": 5823,
+        "cached": 5680,
+        "cache_write": 137,
+        "output": 73,
+        "reasoning": 0
+      },
+      "duration_ms": 6088
+    },
+    {
+      "task": "live-allbirds-return-window",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0000959,
+      "answer": "You have 30 days from delivery to return Allbirds shoes. They must be unworn and unwashed, with the original tags attached; Final Sale items aren’t returnable.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "ask_business",
+          "arguments": "{\"ask\":{\"query\":\"How many days do I have to return a pair of Allbirds shoes?\"}}",
+          "result_chars": 483
+        }
+      ],
+      "usage": {
+        "input": 5836,
+        "cached": 5830,
+        "cache_write": 0,
+        "output": 74,
+        "reasoning": 0
+      },
+      "duration_ms": 3715
+    },
+    {
+      "task": "live-allbirds-return-window",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0000959,
+      "answer": "You have 30 days from delivery to return Allbirds shoes. They must be unworn and unwashed, with the original tags attached; Final Sale items can’t be returned.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "ask_business",
+          "arguments": "{\"ask\":{\"query\":\"How many days do I have to return a pair of Allbirds shoes?\"}}",
+          "result_chars": 483
+        }
+      ],
+      "usage": {
+        "input": 5836,
+        "cached": 5830,
+        "cache_write": 0,
+        "output": 74,
+        "reasoning": 0
+      },
+      "duration_ms": 3001
+    },
+    {
+      "task": "live-cloudflare-kv-value-size",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00070041,
+      "answer": "The maximum size of a single value in Cloudflare Workers KV is **25 MiB**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8335
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":60}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6644
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":37}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 5456
+        }
+      ],
+      "usage": {
+        "input": 20619,
+        "cached": 16796,
+        "cache_write": 3586,
+        "output": 121,
+        "reasoning": 18
+      },
+      "duration_ms": 7447
+    },
+    {
+      "task": "live-cloudflare-kv-value-size",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000692135,
+      "answer": "A single value in Cloudflare Workers KV can be up to **25 MiB**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8335
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":60}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6644
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":37}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 5456
+        }
+      ],
+      "usage": {
+        "input": 20616,
+        "cached": 16856,
+        "cache_write": 3523,
+        "output": 119,
+        "reasoning": 17
+      },
+      "duration_ms": 7572
+    },
+    {
+      "task": "live-cloudflare-kv-value-size",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0006989100000000001,
+      "answer": "A single value in Workers KV can be up to **25 MiB**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8335
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":60}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6644
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":37}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 5456
+        }
+      ],
+      "usage": {
+        "input": 20619,
+        "cached": 16796,
+        "cache_write": 3586,
+        "output": 118,
+        "reasoning": 18
+      },
+      "duration_ms": 8381
+    },
+    {
+      "task": "live-cloudflare-kv-value-size",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001075,
+      "answer": "The maximum size of a single value in Cloudflare Workers KV is **25 MiB**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search",
+          "arguments": "{\"query\":\"Cloudflare Workers KV maximum size single value stored value limit\"}",
+          "result_chars": 1362
+        }
+      ],
+      "usage": {
+        "input": 825,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 50,
+        "reasoning": 0
+      },
+      "duration_ms": 5320
+    },
+    {
+      "task": "live-cloudflare-kv-value-size",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00010760000000000001,
+      "answer": "The maximum size of a single value in Cloudflare Workers KV is **25 MiB**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search",
+          "arguments": "{\"query\":\"Workers KV maximum size single value stored max value size\"}",
+          "result_chars": 1377
+        }
+      ],
+      "usage": {
+        "input": 831,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 49,
+        "reasoning": 0
+      },
+      "duration_ms": 4055
+    },
+    {
+      "task": "live-cloudflare-kv-value-size",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001168,
+      "answer": "A single value in Cloudflare Workers KV can be up to **25 MiB**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search",
+          "arguments": "{\"query\":\"Workers KV maximum size single value stored\"}",
+          "result_chars": 1949
+        }
+      ],
+      "usage": {
+        "input": 943,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 45,
+        "reasoning": 0
+      },
+      "duration_ms": 3749
+    },
+    {
+      "task": "live-notion-request-limit",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": false,
+      "harness_error": null,
+      "cost_usd": 0.00163009,
+      "answer": null,
+      "stop": "max_steps",
+      "steps": 12,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6431
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":9}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6649
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":87,\"value\":\"rate limits requests per minute plans Business Enterprise\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6706
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":88}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6237
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":79,\"value\":\"How many requests per minute does the Notion API allow per connection on plans other than Business and Enterprise?\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":76}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6350
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":15}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3602
+        }
+      ],
+      "usage": {
+        "input": 57379,
+        "cached": 50459,
+        "cache_write": 6660,
+        "output": 534,
+        "reasoning": 303
+      },
+      "duration_ms": 16618
+    },
+    {
+      "task": "live-notion-request-limit",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": false,
+      "harness_error": null,
+      "cost_usd": 0.0015964,
+      "answer": null,
+      "stop": "max_steps",
+      "steps": 12,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6431
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":9}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6649
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":87,\"value\":\"rate limits API per connection Business Enterprise\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6699
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":5,\"value\":\"How many requests per minute does the Notion API allow per connection on plans other than Business and Enterprise?\"}",
+          "result_chars": 11
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":7}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6813
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":88}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6237
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":1}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 40033
+        }
+      ],
+      "usage": {
+        "input": 56789,
+        "cached": 49815,
+        "cache_write": 6714,
+        "output": 466,
+        "reasoning": 238
+      },
+      "duration_ms": 19266
+    },
+    {
+      "task": "live-notion-request-limit",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": false,
+      "harness_error": null,
+      "cost_usd": 0.001610345,
+      "answer": null,
+      "stop": "max_steps",
+      "steps": 12,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6431
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":9}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6649
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":87,\"value\":\"rate limits API requests per minute Business Enterprise\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6704
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":88}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6455
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":82,\"value\":\"According to Notion API documentation, how many requests per minute are allowed per connection on plans other than Business and Enterprise?\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":76}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6593
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":9}",
+          "result_chars": 12
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":87,\"value\":\"request limits\"}",
+          "result_chars": 55
+        }
+      ],
+      "usage": {
+        "input": 58133,
+        "cached": 51172,
+        "cache_write": 6701,
+        "output": 470,
+        "reasoning": 228
+      },
+      "duration_ms": 20527
+    },
+    {
+      "task": "live-notion-request-limit",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00013510000000000003,
+      "answer": "The Notion API allows **180 requests per minute per connection** on plans other than Business and Enterprise.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_docs",
+          "arguments": "{\"query\":\"Notion API requests per minute per connection plans other than Business Enterprise rate limit\"}",
+          "result_chars": 1551
+        }
+      ],
+      "usage": {
+        "input": 1011,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 68,
+        "reasoning": 9
+      },
+      "duration_ms": 3117
+    },
+    {
+      "task": "live-notion-request-limit",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001275,
+      "answer": "Notion allows **180 requests per minute per connection** on plans other than Business and Enterprise.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_docs",
+          "arguments": "{\"query\":\"requests per minute per connection plans other than Business Enterprise Notion API rate limit\"}",
+          "result_chars": 1551
+        }
+      ],
+      "usage": {
+        "input": 1000,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 55,
+        "reasoning": 0
+      },
+      "duration_ms": 3014
+    },
+    {
+      "task": "live-notion-request-limit",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001285,
+      "answer": "The Notion API allows **180 requests per minute per connection** on plans other than Business and Enterprise.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_docs",
+          "arguments": "{\"query\":\"requests per minute per connection plans other than Business Enterprise Notion API rate limit\"}",
+          "result_chars": 1551
+        }
+      ],
+      "usage": {
+        "input": 1000,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 57,
+        "reasoning": 0
+      },
+      "duration_ms": 2650
+    },
+    {
+      "task": "live-spec-contrast",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000533035,
+      "answer": "The spec requires a minimum contrast ratio of **4.5:1** for normal-size body text (WCAG AA).",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4389
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":27}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4621
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":23}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 5383
+        }
+      ],
+      "usage": {
+        "input": 13070,
+        "cached": 10081,
+        "cache_write": 2753,
+        "output": 129,
+        "reasoning": 20
+      },
+      "duration_ms": 6346
+    },
+    {
+      "task": "live-spec-contrast",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00053543,
+      "answer": "The spec requires a minimum contrast ratio of **4.5:1** for normal-size body text.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4389
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":15}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4621
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":23}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 5383
+        }
+      ],
+      "usage": {
+        "input": 13118,
+        "cached": 10108,
+        "cache_write": 2774,
+        "output": 128,
+        "reasoning": 23
+      },
+      "duration_ms": 6679
+    },
+    {
+      "task": "live-spec-contrast",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000536055,
+      "answer": "The spec requires a minimum contrast ratio of **4.5:1** for normal-size body text.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4389
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":15}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 4621
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":23}",
+          "result_chars": 89
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 5383
+        }
+      ],
+      "usage": {
+        "input": 13119,
+        "cached": 10108,
+        "cache_write": 2775,
+        "output": 129,
+        "reasoning": 24
+      },
+      "duration_ms": 6621
+    },
+    {
+      "task": "live-spec-contrast",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00013606,
+      "answer": "The spec requires a minimum contrast ratio of **4.5:1** for normal-size body text.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_spec",
+          "arguments": "{\"query\":\"minimum contrast ratio normal-size body text\"}",
+          "result_chars": 1541
+        },
+        {
+          "name": "get_topic",
+          "arguments": "{\"slug\":\"color-contrast\"}",
+          "result_chars": 3910
+        }
+      ],
+      "usage": {
+        "input": 3811,
+        "cached": 3106,
+        "cache_write": 0,
+        "output": 69,
+        "reasoning": 0
+      },
+      "duration_ms": 4796
+    },
+    {
+      "task": "live-spec-contrast",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000378075,
+      "answer": "The spec requires a minimum **4.5:1 contrast ratio** for normal-size body text.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_spec",
+          "arguments": "{\"query\":\"minimum contrast ratio normal-size body text\",\"limit\":5}",
+          "result_chars": 1541
+        },
+        {
+          "name": "get_topic",
+          "arguments": "{\"slug\":\"color-contrast\",\"limit\":200}",
+          "result_chars": 3910
+        }
+      ],
+      "usage": {
+        "input": 3823,
+        "cached": 1045,
+        "cache_write": 2073,
+        "output": 76,
+        "reasoning": 0
+      },
+      "duration_ms": 4310
+    },
+    {
+      "task": "live-spec-contrast",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00013606,
+      "answer": "The spec requires a minimum contrast ratio of **4.5:1** for normal-size body text.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_spec",
+          "arguments": "{\"query\":\"minimum contrast ratio normal-size body text\"}",
+          "result_chars": 1541
+        },
+        {
+          "name": "get_topic",
+          "arguments": "{\"slug\":\"color-contrast\"}",
+          "result_chars": 3910
+        }
+      ],
+      "usage": {
+        "input": 3811,
+        "cached": 3106,
+        "cache_write": 0,
+        "output": 69,
+        "reasoning": 0
+      },
+      "duration_ms": 3816
+    },
+    {
+      "task": "live-woo-cheapest-in-stock",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000374625,
+      "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00**.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 1427
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":3}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3144
+        }
+      ],
+      "usage": {
+        "input": 2977,
+        "cached": 0,
+        "cache_write": 1497,
+        "output": 79,
+        "reasoning": 9
+      },
+      "duration_ms": 4686
+    },
+    {
+      "task": "live-woo-cheapest-in-stock",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000390625,
+      "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00**.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 1427
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":3}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3144
+        }
+      ],
+      "usage": {
+        "input": 2977,
+        "cached": 0,
+        "cache_write": 1497,
+        "output": 111,
+        "reasoning": 39
+      },
+      "duration_ms": 5126
+    },
+    {
+      "task": "live-woo-cheapest-in-stock",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0003739,
+      "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00**.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 1427
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":3}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3144
+        }
+      ],
+      "usage": {
+        "input": 2975,
+        "cached": 0,
+        "cache_write": 1496,
+        "output": 78,
+        "reasoning": 8
+      },
+      "duration_ms": 4126
+    },
+    {
+      "task": "live-woo-cheapest-in-stock",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00006175,
+      "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00 USD**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "woo_search_products_api",
+          "arguments": "{\"availability\":\"available\",\"orderby\":\"price\",\"order\":\"ASC\",\"per_page\":1}",
+          "result_chars": 1244
+        }
+      ],
+      "usage": {
+        "input": 3221,
+        "cached": 3215,
+        "cache_write": 0,
+        "output": 58,
+        "reasoning": 0
+      },
+      "duration_ms": 3068
+    },
+    {
+      "task": "live-woo-cheapest-in-stock",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00006175,
+      "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00 USD**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "woo_search_products_api",
+          "arguments": "{\"availability\":\"available\",\"orderby\":\"price\",\"order\":\"ASC\",\"per_page\":1}",
+          "result_chars": 1244
+        }
+      ],
+      "usage": {
+        "input": 3221,
+        "cached": 3215,
+        "cache_write": 0,
+        "output": 58,
+        "reasoning": 0
+      },
+      "duration_ms": 5332
+    },
+    {
+      "task": "live-woo-cheapest-in-stock",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00006175,
+      "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00 USD**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "woo_search_products_api",
+          "arguments": "{\"availability\":\"available\",\"orderby\":\"price\",\"order\":\"ASC\",\"per_page\":1}",
+          "result_chars": 1244
+        }
+      ],
+      "usage": {
+        "input": 3221,
+        "cached": 3215,
+        "cache_write": 0,
+        "output": 58,
+        "reasoning": 0
+      },
+      "duration_ms": 5199
+    },
+    {
+      "task": "live-woo-out-of-stock",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00037125,
+      "answer": "The **Open Web Poster** is out of stock. It’s listed as unavailable.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 1427
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":3}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3144
+        }
+      ],
+      "usage": {
+        "input": 2945,
+        "cached": 0,
+        "cache_write": 1490,
+        "output": 79,
+        "reasoning": 11
+      },
+      "duration_ms": 4226
+    },
+    {
+      "task": "live-woo-out-of-stock",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000370875,
+      "answer": "The Open Web Poster is out of stock.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 1427
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":3}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3144
+        }
+      ],
+      "usage": {
+        "input": 2955,
+        "cached": 0,
+        "cache_write": 1495,
+        "output": 76,
+        "reasoning": 16
+      },
+      "duration_ms": 4709
+    },
+    {
+      "task": "live-woo-out-of-stock",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00037995000000000005,
+      "answer": "The Open Web Poster is out of stock.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 1427
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":3}",
+          "result_chars": 12
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3144
+        }
+      ],
+      "usage": {
+        "input": 2988,
+        "cached": 0,
+        "cache_write": 1506,
+        "output": 87,
+        "reasoning": 25
+      },
+      "duration_ms": 4636
+    },
+    {
+      "task": "live-woo-out-of-stock",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00017251499999999998,
+      "answer": "The **Open Web Poster** is out of stock.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "browse_products_api",
+          "arguments": "{}",
+          "result_chars": 1453
+        },
+        {
+          "name": "woo_search_products_api",
+          "arguments": "{\"availability\":\"unavailable\",\"per_page\":50}",
+          "result_chars": 1200
+        }
+      ],
+      "usage": {
+        "input": 5363,
+        "cached": 4649,
+        "cache_write": 705,
+        "output": 74,
+        "reasoning": 14
+      },
+      "duration_ms": 8673
+    },
+    {
+      "task": "live-woo-out-of-stock",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00012769500000000002,
+      "answer": "The **Open Web Poster** is out of stock.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "browse_products_api",
+          "arguments": "{}",
+          "result_chars": 1453
+        },
+        {
+          "name": "woo_search_products_api",
+          "arguments": "{\"availability\":\"unavailable\",\"per_page\":50}",
+          "result_chars": 1200
+        }
+      ],
+      "usage": {
+        "input": 5359,
+        "cached": 5017,
+        "cache_write": 333,
+        "output": 70,
+        "reasoning": 10
+      },
+      "duration_ms": 9473
+    },
+    {
+      "task": "live-woo-out-of-stock",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00009839,
+      "answer": "The **Open Web Poster** is out of stock.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "woo_search_products_api",
+          "arguments": "{\"availability\":\"unavailable\",\"per_page\":20}",
+          "result_chars": 1200
+        }
+      ],
+      "usage": {
+        "input": 3194,
+        "cached": 2854,
+        "cache_write": 334,
+        "output": 55,
+        "reasoning": 11
+      },
+      "duration_ms": 5820
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00065273,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106.00**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":21}",
+          "result_chars": 13
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 55
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3720
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3789
+        }
+      ],
+      "usage": {
+        "input": 12198,
+        "cached": 8108,
+        "cache_write": 3846,
+        "output": 133,
+        "reasoning": 0
+      },
+      "duration_ms": 7834
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00021044,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. The cart total is **$106.00**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":21}",
+          "result_chars": 13
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 55
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3720
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3789
+        }
+      ],
+      "usage": {
+        "input": 12198,
+        "cached": 11954,
+        "cache_write": 0,
+        "output": 133,
+        "reasoning": 0
+      },
+      "duration_ms": 8142
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0004975450000000001,
+      "answer": "Added one Speckled Bowl and one Stoneware Teapot. The cart total is **$106.00**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":21}",
+          "result_chars": 13
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 55
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3720
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3789
+        }
+      ],
+      "usage": {
+        "input": 12255,
+        "cached": 9602,
+        "cache_write": 2409,
+        "output": 152,
+        "reasoning": 17
+      },
+      "duration_ms": 7597
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000237,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Stoneware Teapot\"}",
+          "result_chars": 133
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Speckled Bowl\"}",
+          "result_chars": 128
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"TPT-01\",\"quantity\":1}",
+          "result_chars": 154
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"BWL-01\",\"quantity\":1}",
+          "result_chars": 263
+        }
+      ],
+      "usage": {
+        "input": 1650,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 144,
+        "reasoning": 0
+      },
+      "duration_ms": 4549
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000237,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Stoneware Teapot\"}",
+          "result_chars": 133
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Speckled Bowl\"}",
+          "result_chars": 128
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"TPT-01\",\"quantity\":1}",
+          "result_chars": 154
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"BWL-01\",\"quantity\":1}",
+          "result_chars": 263
+        }
+      ],
+      "usage": {
+        "input": 1650,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 144,
+        "reasoning": 0
+      },
+      "duration_ms": 4255
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000237,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Stoneware Teapot\"}",
+          "result_chars": 133
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Speckled Bowl\"}",
+          "result_chars": 128
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"TPT-01\",\"quantity\":1}",
+          "result_chars": 154
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"BWL-01\",\"quantity\":1}",
+          "result_chars": 263
+        }
+      ],
+      "usage": {
+        "input": 1650,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 144,
+        "reasoning": 0
+      },
+      "duration_ms": 3845
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00044924,
+      "answer": "Added 2 Harbor Mugs—the cheapest blue mug—to your cart for $38.00.",
+      "stop": "answered",
+      "steps": 5,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":12,\"value\":\"2\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":13}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3714
+        }
+      ],
+      "usage": {
+        "input": 7079,
+        "cached": 4234,
+        "cache_write": 2616,
+        "output": 114,
+        "reasoning": 23
+      },
+      "duration_ms": 5866
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000297885,
+      "answer": "Added 2 Harbor Mugs—the cheapest blue mug—to your cart for $38.00.",
+      "stop": "answered",
+      "steps": 5,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":12,\"value\":\"2\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":13}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3714
+        }
+      ],
+      "usage": {
+        "input": 7103,
+        "cached": 5611,
+        "cache_write": 1263,
+        "output": 122,
+        "reasoning": 31
+      },
+      "duration_ms": 6485
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00045451000000000004,
+      "answer": "Added 2 Harbor Mugs—the cheapest blue mug—to your cart for $38.00.",
+      "stop": "answered",
+      "steps": 5,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":12,\"value\":\"2\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":13}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3714
+        }
+      ],
+      "usage": {
+        "input": 7114,
+        "cached": 4261,
+        "cache_write": 2624,
+        "output": 122,
+        "reasoning": 29
+      },
+      "duration_ms": 7543
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001841,
+      "answer": "Added two Harbor Mugs (the cheapest blue mug) to your cart. Total: $38.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"category\":\"mug\",\"color\":\"blue\",\"sort\":\"price_asc\"}",
+          "result_chars": 301
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"MUG-03\",\"quantity\":2}",
+          "result_chars": 144
+        }
+      ],
+      "usage": {
+        "input": 1446,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 79,
+        "reasoning": 0
+      },
+      "duration_ms": 3878
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001846,
+      "answer": "Added two Harbor Mugs (the cheapest blue mug) to your cart. The total is $38.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"category\":\"mug\",\"color\":\"blue\",\"sort\":\"price_asc\"}",
+          "result_chars": 301
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"MUG-03\",\"quantity\":2}",
+          "result_chars": 144
+        }
+      ],
+      "usage": {
+        "input": 1446,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 80,
+        "reasoning": 0
+      },
+      "duration_ms": 3632
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001846,
+      "answer": "Added 2 Harbor Mugs (the cheapest blue mug) to your cart. Total: $38.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"category\":\"mug\",\"color\":\"blue\",\"sort\":\"price_asc\"}",
+          "result_chars": 301
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"MUG-03\",\"quantity\":2}",
+          "result_chars": 144
+        }
+      ],
+      "usage": {
+        "input": 1446,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 80,
+        "reasoning": 0
+      },
+      "duration_ms": 3552
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000204375,
+      "answer": "3 January",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        }
+      ],
+      "usage": {
+        "input": 1601,
+        "cached": 0,
+        "cache_write": 1371,
+        "output": 20,
+        "reasoning": 0
+      },
+      "duration_ms": 2544
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00004671,
+      "answer": "3 January",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        }
+      ],
+      "usage": {
+        "input": 1601,
+        "cached": 1371,
+        "cache_write": 0,
+        "output": 20,
+        "reasoning": 0
+      },
+      "duration_ms": 1904
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00005371,
+      "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        }
+      ],
+      "usage": {
+        "input": 1601,
+        "cached": 1371,
+        "cache_write": 0,
+        "output": 34,
+        "reasoning": 0
+      },
+      "duration_ms": 2696
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002509,
+      "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "get_page_context",
+          "arguments": "{}",
+          "result_chars": 1160
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Ash Glaze Vase\"}",
+          "result_chars": 165
+        }
+      ],
+      "usage": {
+        "input": 1994,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 103,
+        "reasoning": 45
+      },
+      "duration_ms": 4149
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00022510000000000002,
+      "answer": "The Ash Glaze Vase is expected back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "get_page_context",
+          "arguments": "{}",
+          "result_chars": 1160
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"category\":\"vase\",\"query\":\"Ash Glaze\"}",
+          "result_chars": 165
+        }
+      ],
+      "usage": {
+        "input": 1951,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 60,
+        "reasoning": 0
+      },
+      "duration_ms": 3784
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002389,
+      "answer": "The Ash Glaze Vase is expected back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "get_page_context",
+          "arguments": "{}",
+          "result_chars": 1160
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Ash Glaze Vase\"}",
+          "result_chars": 165
+        }
+      ],
+      "usage": {
+        "input": 1974,
+        "cached": 0,
+        "cache_write": 0,
+        "output": 83,
+        "reasoning": 25
+      },
+      "duration_ms": 4334
+    }
+  ],
+  "summary": {
+    "arms": {
+      "baseline": {
+        "runs": 39,
+        "success_rate": 0.9230769230769231,
+        "tokens": 10550.102564102564,
+        "input_tokens": 10435.74358974359,
+        "output_tokens": 114.35897435897436,
+        "steps": 4.435897435897436,
+        "tool_calls": 3.58974358974359,
+        "duration_ms": 5892.0,
+        "cost_usd": 0.0004332984615384615
+      },
+      "webmcp": {
+        "runs": 39,
+        "success_rate": 1.0,
+        "tokens": 2304.153846153846,
+        "input_tokens": 2234.25641025641,
+        "output_tokens": 69.8974358974359,
+        "steps": 2.4358974358974357,
+        "tool_calls": 1.5897435897435896,
+        "duration_ms": 3867.3333333333335,
+        "cost_usd": 0.00015275820512820516
+      }
+    },
+    "tasks": {
+      "docs-config-path": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2521.0,
+          "input_tokens": 2484.6666666666665,
+          "output_tokens": 36.333333333333336,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2546.3333333333335,
+          "cost_usd": 0.00023661833333333334
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 987.3333333333334,
+          "input_tokens": 942.6666666666666,
+          "output_tokens": 44.666666666666664,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 1935.0,
+          "cost_usd": 0.00011660000000000002
+        }
+      },
+      "docs-deploy-timeout": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2537.6666666666665,
+          "input_tokens": 2485.0,
+          "output_tokens": 52.666666666666664,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 3624.0,
+          "cost_usd": 0.00015806666666666667
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1854.3333333333333,
+          "input_tokens": 1777.3333333333333,
+          "output_tokens": 77.0,
+          "steps": 3.0,
+          "tool_calls": 2.0,
+          "duration_ms": 3339.3333333333335,
+          "cost_usd": 0.00021623333333333332
+        }
+      },
+      "docs-exit-code": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2540.6666666666665,
+          "input_tokens": 2488.6666666666665,
+          "output_tokens": 52.0,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2449.3333333333335,
+          "cost_usd": 0.000244825
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 994.6666666666666,
+          "input_tokens": 935.0,
+          "output_tokens": 59.666666666666664,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2345.3333333333335,
+          "cost_usd": 0.00012333333333333334
+        }
+      },
+      "docs-retained-releases": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2509.0,
+          "input_tokens": 2479.0,
+          "output_tokens": 30.0,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 3227.6666666666665,
+          "cost_usd": 0.00014628833333333333
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 989.3333333333334,
+          "input_tokens": 945.0,
+          "output_tokens": 44.333333333333336,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2264.3333333333335,
+          "cost_usd": 0.00011666666666666668
+        }
+      },
+      "live-allbirds-return-window": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 7842.0,
+          "input_tokens": 7717.666666666667,
+          "output_tokens": 124.33333333333333,
+          "steps": 4.666666666666667,
+          "tool_calls": 3.6666666666666665,
+          "duration_ms": 5556.333333333333,
+          "cost_usd": 0.00029335499999999997
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 5905.333333333333,
+          "input_tokens": 5831.666666666667,
+          "output_tokens": 73.66666666666667,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 4268.0,
+          "cost_usd": 0.00010094166666666666
+        }
+      },
+      "live-cloudflare-kv-value-size": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 20737.333333333332,
+          "input_tokens": 20618.0,
+          "output_tokens": 119.33333333333333,
+          "steps": 6.0,
+          "tool_calls": 5.0,
+          "duration_ms": 7800.0,
+          "cost_usd": 0.0006971516666666667
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 914.3333333333334,
+          "input_tokens": 866.3333333333334,
+          "output_tokens": 48.0,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 4374.666666666667,
+          "cost_usd": 0.00011063333333333334
+        }
+      },
+      "live-notion-request-limit": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 0.0,
+          "tokens": 57923.666666666664,
+          "input_tokens": 57433.666666666664,
+          "output_tokens": 490.0,
+          "steps": 12.0,
+          "tool_calls": 12.0,
+          "duration_ms": 18803.666666666668,
+          "cost_usd": 0.0016122783333333333
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1063.6666666666667,
+          "input_tokens": 1003.6666666666666,
+          "output_tokens": 60.0,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2927.0,
+          "cost_usd": 0.00013036666666666667
+        }
+      },
+      "live-spec-contrast": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 13231.0,
+          "input_tokens": 13102.333333333334,
+          "output_tokens": 128.66666666666666,
+          "steps": 6.0,
+          "tool_calls": 5.0,
+          "duration_ms": 6548.666666666667,
+          "cost_usd": 0.00053484
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 3886.3333333333335,
+          "input_tokens": 3815.0,
+          "output_tokens": 71.33333333333333,
+          "steps": 3.0,
+          "tool_calls": 2.0,
+          "duration_ms": 4307.333333333333,
+          "cost_usd": 0.00021673166666666668
+        }
+      },
+      "live-woo-cheapest-in-stock": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 3065.6666666666665,
+          "input_tokens": 2976.3333333333335,
+          "output_tokens": 89.33333333333333,
+          "steps": 4.0,
+          "tool_calls": 3.0,
+          "duration_ms": 4646.0,
+          "cost_usd": 0.0003797166666666667
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 3279.0,
+          "input_tokens": 3221.0,
+          "output_tokens": 58.0,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 4533.0,
+          "cost_usd": 0.00006175
+        }
+      },
+      "live-woo-out-of-stock": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 3043.3333333333335,
+          "input_tokens": 2962.6666666666665,
+          "output_tokens": 80.66666666666667,
+          "steps": 4.0,
+          "tool_calls": 3.0,
+          "duration_ms": 4523.666666666667,
+          "cost_usd": 0.000374025
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 4705.0,
+          "input_tokens": 4638.666666666667,
+          "output_tokens": 66.33333333333333,
+          "steps": 2.6666666666666665,
+          "tool_calls": 1.6666666666666667,
+          "duration_ms": 7988.666666666667,
+          "cost_usd": 0.00013286666666666665
+        }
+      },
+      "store-cart-total": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 12356.333333333334,
+          "input_tokens": 12217.0,
+          "output_tokens": 139.33333333333334,
+          "steps": 6.0,
+          "tool_calls": 6.0,
+          "duration_ms": 7857.666666666667,
+          "cost_usd": 0.00045357166666666675
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1794.0,
+          "input_tokens": 1650.0,
+          "output_tokens": 144.0,
+          "steps": 3.0,
+          "tool_calls": 4.0,
+          "duration_ms": 4216.333333333333,
+          "cost_usd": 0.000237
+        }
+      },
+      "store-cheapest-blue-mug": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 7218.0,
+          "input_tokens": 7098.666666666667,
+          "output_tokens": 119.33333333333333,
+          "steps": 5.0,
+          "tool_calls": 4.0,
+          "duration_ms": 6631.333333333333,
+          "cost_usd": 0.000400545
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1525.6666666666667,
+          "input_tokens": 1446.0,
+          "output_tokens": 79.66666666666667,
+          "steps": 3.0,
+          "tool_calls": 2.0,
+          "duration_ms": 3687.3333333333335,
+          "cost_usd": 0.00018443333333333336
+        }
+      },
+      "store-restock-date": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1625.6666666666667,
+          "input_tokens": 1601.0,
+          "output_tokens": 24.666666666666668,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2381.3333333333335,
+          "cost_usd": 0.00010159833333333333
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2055.0,
+          "input_tokens": 1973.0,
+          "output_tokens": 82.0,
+          "steps": 3.0,
+          "tool_calls": 2.0,
+          "duration_ms": 4089.0,
+          "cost_usd": 0.00023830000000000002
+        }
+      }
+    }
+  }
 }

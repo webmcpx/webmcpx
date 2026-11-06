@@ -52,7 +52,12 @@
 				<tbody>
 					{#each rows as [task, arms] (task)}
 						<tr class="border-t border-zinc-200 align-top dark:border-zinc-800">
-							<td class="py-3 pr-4 font-mono text-xs">{task}</td>
+							<td class="py-3 pr-4 font-mono text-xs">
+								{task.replace(/^live-/, '')}
+								{#if task.startsWith('live-')}
+									<span class="ml-1 rounded bg-accent/15 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-accent-ink uppercase dark:text-accent">live</span>
+								{/if}
+							</td>
 							<td class="w-1/2 py-3 pr-4">
 								{#each ARMS as { arm, bar } (arm)}
 									{@const s = arms[arm]}
@@ -103,6 +108,11 @@
 				Model <code class="font-mono">{results.model}</code>{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
 				headless Chrome{#if ran}, run on {ran}{/if}. Every task runs in both arms with the same prompt,
 				system prompt and step limit.
+			</p>
+			<p>
+				Tasks marked <strong>live</strong> run on public sites that already ship WebMCP: Cloudflare and
+				Notion docs, a Shopify store, a WooCommerce store and specification.website. The others run on
+				local fixture sites that use webmcpx.
 			</p>
 			<p>
 				<strong>Without WebMCP</strong>, the agent reads a text snapshot of the page and clicks or fills
