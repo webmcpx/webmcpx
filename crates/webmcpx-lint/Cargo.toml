@@ -1,0 +1,24 @@
+[package]
+name = "webmcpx-lint"
+description = "Fast linter for WebMCP tool definitions in JS/TS sources and JSON manifests."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+webmcpx-core.workspace = true
+oxc_allocator.workspace = true
+oxc_ast.workspace = true
+oxc_ast_visit.workspace = true
+oxc_parser.workspace = true
+oxc_span.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+webmcpx-std.workspace = true
