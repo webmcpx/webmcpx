@@ -60,6 +60,20 @@ It finds `registerTool()` calls in JS/TS (and `*webmcp*.json` manifests), then c
 
 Exit codes: `0` no errors, `1` errors, `2` usage or I/O error.
 
+## Benchmark
+
+The same agent runs the same tasks on the same pages twice: once as a DOM-snapshot browser agent, once
+with only the WebMCP tools the page registers. Grading is deterministic. Reproduce it:
+
+```sh
+just setup
+OPENAI_API_KEY=sk-... just bench            # default model gpt-6-luna, 3 runs per task and arm
+just bench --model <id> --repeat 1           # any OpenAI-compatible model (OPENAI_BASE_URL)
+```
+
+Tasks live in [`bench/tasks`](bench/tasks), sites in [`bench/sites`](bench/sites). Results go to
+`bench/results/latest.json`, which the landing page (`site/`, `just site-dev`) displays.
+
 ## Using an AI coding agent?
 
 `npx skills add webmcpx/webmcpx` installs [the webmcpx skill](skills/webmcpx/SKILL.md), so your agent can
