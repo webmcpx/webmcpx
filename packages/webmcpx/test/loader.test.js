@@ -16,7 +16,7 @@ const PAGE = `<!doctype html><html lang="en"><head><title>Pizza Roma</title>
   <h2 id="delivery">Delivery</h2><p>Delivery takes 30 minutes and is free above 20 euros.</p>
   <ul><li>Margherita</li><li>Diavola</li></ul>
   <h2 id="hours">Hours</h2>
-  <table><tr><th>Day</th><th>Open</th></tr><tr><td>Monday</td><td>Closed</td></tr><tr><td>Friday</td><td>12–23</td></tr></table>
+  <table><tr><th>Day</th><th>Open</th></tr><tr><td>Monday</td><td>Closed</td></tr><tr><td>Friday</td><td>12–23</td><td hidden>secret coupon</td><td aria-hidden="true">secret coupon</td></tr></table>
   <div hidden>secret coupon</div>
 </main><footer>© Pizza Roma</footer></body></html>`;
 
@@ -81,6 +81,7 @@ test("search_page ranks main content and links to the section", async () => {
     url: "https://pizza.test/menu#delivery",
   }]);
   assert.equal((await page.call("search_page", { query: "coupon" })).error.code, "NOT_FOUND", "hidden and nav/footer text is excluded");
+  assert.ok(!(await page.call("fetch_as_markdown")).data.markdown.includes("coupon"), "hidden table cells are excluded");
   assert.equal((await page.call("search_page", {})).error.code, "INVALID_INPUT");
 });
 

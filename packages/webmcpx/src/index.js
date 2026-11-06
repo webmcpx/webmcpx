@@ -29,6 +29,8 @@ const engine = (source) =>
 const pageUrl = () => location.href.split("#")[0];
 const text = (s) => (s ?? "").replace(/\s+/g, " ").trim();
 
+const skipped = (el) => SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true";
+
 /** Serializes readable content of `root` as a block stream (see webmcpx-std `blocks`). */
 function blocks(root) {
   let out = "";
@@ -36,12 +38,10 @@ function blocks(root) {
   const base = pageUrl();
   const visit = (el) => {
     for (const child of el.children) {
-      if (SKIP.has(child.tagName) || child.hasAttribute("hidden") || child.getAttribute("aria-hidden") === "true") {
-        continue;
-      }
+      if (skipped(child)) continue;
       if (child.id) anchor = `${base}#${child.id}`;
       // A table row is one block ("Monday | Closed"), so search keeps a value next to its label.
-      const row = child.tagName === "TR" && [...child.children].map((c) => text(c.textContent)).join(" | ");
+      const row = child.tagName === "TR" && [...child.children].filter((c) => !skipped(c)).map((c) => text(c.textContent)).join(" | ");
       const kind = row ? "p" : KINDS[child.tagName] ?? (child.children.length === 0 && "p");
       if (kind) out += kind + FIELD + (row || child.textContent) + FIELD + anchor + RECORD;
       else visit(child);
