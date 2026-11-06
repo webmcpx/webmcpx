@@ -1,9 +1,1468 @@
 {
   "schema_version": 1,
   "model": "gpt-6-luna",
-  "reasoning_effort": null,
-  "price_per_mtok": [0.1, 0.5],
-  "started_at": 0,
-  "runs": [],
-  "summary": { "arms": {}, "tasks": {} }
+  "reasoning_effort": "medium",
+  "price_per_mtok": [
+    0.1,
+    0.5
+  ],
+  "started_at": 1794001259,
+  "runs": [
+    {
+      "task": "docs-config-path",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00026460000000000003,
+      "answer": "`ORBIT_CONFIG` sets the path to Orbit’s project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2481,
+        "cached": 0,
+        "output": 33,
+        "reasoning": 0
+      },
+      "duration_ms": 2270
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00027120000000000003,
+      "answer": "`ORBIT_CONFIG` specifies the path to Orbit’s project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2492,
+        "cached": 0,
+        "output": 44,
+        "reasoning": 9
+      },
+      "duration_ms": 2619
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00026510000000000005,
+      "answer": "`ORBIT_CONFIG` specifies a different path for Orbit’s project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2481,
+        "cached": 0,
+        "output": 34,
+        "reasoning": 0
+      },
+      "duration_ms": 2519
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00011860000000000001,
+      "answer": "`ORBIT_CONFIG` — set it to the path of the project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"environment variable config file different path\",\"limit\":5}",
+          "result_chars": 883
+        }
+      ],
+      "usage": {
+        "input": 946,
+        "cached": 0,
+        "output": 48,
+        "reasoning": 0
+      },
+      "duration_ms": 2530
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001168,
+      "answer": "`ORBIT_CONFIG` — set it to the path of the project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"environment variable config file different path Orbit\"}",
+          "result_chars": 883
+        }
+      ],
+      "usage": {
+        "input": 943,
+        "cached": 0,
+        "output": 45,
+        "reasoning": 0
+      },
+      "duration_ms": 2396
+    },
+    {
+      "task": "docs-config-path",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00011860000000000001,
+      "answer": "`ORBIT_CONFIG` — set it to the path of the project config file.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"environment variable config file path Orbit\",\"limit\":5}",
+          "result_chars": 883
+        }
+      ],
+      "usage": {
+        "input": 946,
+        "cached": 0,
+        "output": 48,
+        "reasoning": 0
+      },
+      "duration_ms": 2010
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000274,
+      "answer": "`orbit deploy` defaults to a 90-second timeout. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 2260,
+        "output": 51,
+        "reasoning": 0
+      },
+      "duration_ms": 2148
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002745,
+      "answer": "The default `orbit deploy` timeout is **90 seconds**. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 0,
+        "output": 52,
+        "reasoning": 0
+      },
+      "duration_ms": 2625
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002745,
+      "answer": "The default `orbit deploy` timeout is **90 seconds**. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 2260,
+        "output": 52,
+        "reasoning": 0
+      },
+      "duration_ms": 2069
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00022030000000000002,
+      "answer": "`orbit deploy` defaults to a **90-second** timeout. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit deploy default timeout flag timeout\"}",
+          "result_chars": 740
+        },
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"--timeout deploy seconds default 90\"}",
+          "result_chars": 859
+        }
+      ],
+      "usage": {
+        "input": 1778,
+        "cached": 0,
+        "output": 85,
+        "reasoning": 0
+      },
+      "duration_ms": 3977
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002434,
+      "answer": "The default timeout is **90 seconds**. Use the `--timeout` flag to change it (for example, `orbit deploy --timeout 180`).",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit deploy default timeout flag timeout\",\"limit\":5}",
+          "result_chars": 740
+        },
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"timeout default deploy --timeout\",\"limit\":10}",
+          "result_chars": 1621
+        }
+      ],
+      "usage": {
+        "input": 1994,
+        "cached": 0,
+        "output": 88,
+        "reasoning": 0
+      },
+      "duration_ms": 3346
+    },
+    {
+      "task": "docs-deploy-timeout",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000118,
+      "answer": "The default timeout for `orbit deploy` is **90 seconds**. Use the `--timeout` flag to change it.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit deploy default timeout flag\"}",
+          "result_chars": 740
+        }
+      ],
+      "usage": {
+        "input": 925,
+        "cached": 0,
+        "output": 51,
+        "reasoning": 0
+      },
+      "duration_ms": 2518
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002735,
+      "answer": "Orbit exit code **4** means your plan’s **build-minute or instance quota has been exceeded**. Upgrade your plan or wait for the monthly quota reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 0,
+        "output": 50,
+        "reasoning": 0
+      },
+      "duration_ms": 2402
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002775,
+      "answer": "Orbit exit code **4** means your plan’s quota is exhausted: you’ve used up your build minutes or reached your instance limit. Upgrade your plan or wait for the monthly reset, then retry.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2485,
+        "cached": 2260,
+        "output": 58,
+        "reasoning": 0
+      },
+      "duration_ms": 2558
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002786,
+      "answer": "Orbit exit code 4 means your plan’s build-minute or instance quota has been used up. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2496,
+        "cached": 0,
+        "output": 58,
+        "reasoning": 9
+      },
+      "duration_ms": 2782
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000121,
+      "answer": "Orbit exit code 4 means your plan’s build-minute quota or instance limit has been reached. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit exit code 4\"}",
+          "result_chars": 767
+        }
+      ],
+      "usage": {
+        "input": 935,
+        "cached": 0,
+        "output": 55,
+        "reasoning": 0
+      },
+      "duration_ms": 2696
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0003191,
+      "answer": "Orbit exit code **4** means you’ve exceeded your plan’s quota—either build minutes or the instance limit. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "get_page_context",
+          "arguments": "{}",
+          "result_chars": 2218
+        },
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"Exit code 4\",\"limit\":5}",
+          "result_chars": 767
+        }
+      ],
+      "usage": {
+        "input": 2751,
+        "cached": 1075,
+        "output": 88,
+        "reasoning": 9
+      },
+      "duration_ms": 3365
+    },
+    {
+      "task": "docs-exit-code",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000122,
+      "answer": "Orbit exit code **4** means your plan’s build-minute quota or instance limit has been used up. Upgrade your plan or wait for the monthly reset.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"orbit exit code 4\"}",
+          "result_chars": 767
+        }
+      ],
+      "usage": {
+        "input": 935,
+        "cached": 0,
+        "output": 57,
+        "reasoning": 0
+      },
+      "duration_ms": 1846
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002629,
+      "answer": "Orbit keeps **10 past releases** for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2479,
+        "cached": 0,
+        "output": 30,
+        "reasoning": 0
+      },
+      "duration_ms": 1763
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002629,
+      "answer": "Orbit keeps **10 past releases** for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2479,
+        "cached": 2257,
+        "output": 30,
+        "reasoning": 0
+      },
+      "duration_ms": 1751
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002624,
+      "answer": "Orbit keeps 10 past releases for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 8411
+        }
+      ],
+      "usage": {
+        "input": 2479,
+        "cached": 2257,
+        "output": 29,
+        "reasoning": 0
+      },
+      "duration_ms": 2039
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001168,
+      "answer": "Orbit keeps **10 past releases** for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"default how many past releases keep for rollback\",\"limit\":5}",
+          "result_chars": 828
+        }
+      ],
+      "usage": {
+        "input": 943,
+        "cached": 0,
+        "output": 45,
+        "reasoning": 0
+      },
+      "duration_ms": 2630
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001177,
+      "answer": "Orbit keeps **10 past releases** for rollback by default.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"By default how many past releases does Orbit keep for rollback?\"}",
+          "result_chars": 864
+        }
+      ],
+      "usage": {
+        "input": 952,
+        "cached": 0,
+        "output": 45,
+        "reasoning": 0
+      },
+      "duration_ms": 3583
+    },
+    {
+      "task": "docs-retained-releases",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001132,
+      "answer": "Orbit keeps **10 past releases** by default for rollback.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "search_page",
+          "arguments": "{\"query\":\"default past releases keep rollback\"}",
+          "result_chars": 865
+        }
+      ],
+      "usage": {
+        "input": 942,
+        "cached": 0,
+        "output": 38,
+        "reasoning": 0
+      },
+      "duration_ms": 2831
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0012863,
+      "answer": "Added one Speckled Bowl and one Stoneware Teapot. The cart total is **$106.00**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":21}",
+          "result_chars": 13
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 55
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3720
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3789
+        }
+      ],
+      "usage": {
+        "input": 12198,
+        "cached": 8108,
+        "output": 133,
+        "reasoning": 0
+      },
+      "duration_ms": 7129
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0012863,
+      "answer": "Added one Speckled Bowl and one Stoneware Teapot. Your cart total is **$106.00**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":21}",
+          "result_chars": 13
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 55
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3720
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3789
+        }
+      ],
+      "usage": {
+        "input": 12198,
+        "cached": 11954,
+        "output": 133,
+        "reasoning": 0
+      },
+      "duration_ms": 6733
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0012863,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106.00**.",
+      "stop": "answered",
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":21}",
+          "result_chars": 13
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 55
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3720
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":35}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3789
+        }
+      ],
+      "usage": {
+        "input": 12198,
+        "cached": 11954,
+        "output": 133,
+        "reasoning": 0
+      },
+      "duration_ms": 7034
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002735,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106**.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Stoneware Teapot\"}",
+          "result_chars": 133
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Speckled Bowl\"}",
+          "result_chars": 128
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"TPT-01\",\"quantity\":1}",
+          "result_chars": 154
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"BWL-01\",\"quantity\":1}",
+          "result_chars": 263
+        }
+      ],
+      "usage": {
+        "input": 2075,
+        "cached": 0,
+        "output": 132,
+        "reasoning": 0
+      },
+      "duration_ms": 6048
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002735,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106**.",
+      "stop": "answered",
+      "steps": 4,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Stoneware Teapot\"}",
+          "result_chars": 133
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Speckled Bowl\"}",
+          "result_chars": 128
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"TPT-01\",\"quantity\":1}",
+          "result_chars": 154
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"BWL-01\",\"quantity\":1}",
+          "result_chars": 263
+        }
+      ],
+      "usage": {
+        "input": 2075,
+        "cached": 0,
+        "output": 132,
+        "reasoning": 0
+      },
+      "duration_ms": 5653
+    },
+    {
+      "task": "store-cart-total",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000237,
+      "answer": "Added one Stoneware Teapot and one Speckled Bowl. Your cart total is **$106**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Stoneware Teapot\"}",
+          "result_chars": 133
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Speckled Bowl\"}",
+          "result_chars": 128
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"TPT-01\",\"quantity\":1}",
+          "result_chars": 154
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"BWL-01\",\"quantity\":1}",
+          "result_chars": 263
+        }
+      ],
+      "usage": {
+        "input": 1650,
+        "cached": 0,
+        "output": 144,
+        "reasoning": 0
+      },
+      "duration_ms": 3747
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0007657,
+      "answer": "Added 2 Harbor Mugs—the cheapest blue mugs—to your cart for $38.00.",
+      "stop": "answered",
+      "steps": 5,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":12,\"value\":\"2\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":13}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3714
+        }
+      ],
+      "usage": {
+        "input": 7082,
+        "cached": 4236,
+        "output": 115,
+        "reasoning": 24
+      },
+      "duration_ms": 5580
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0007723000000000001,
+      "answer": "Added 2 Harbor Mugs—the cheapest blue mug—to your cart for $38.00.",
+      "stop": "answered",
+      "steps": 5,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":12,\"value\":\"2\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":13}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3714
+        }
+      ],
+      "usage": {
+        "input": 7113,
+        "cached": 4260,
+        "output": 122,
+        "reasoning": 29
+      },
+      "duration_ms": 7425
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0007619000000000001,
+      "answer": "Added 2 Harbor Mugs, the cheapest blue mug, to your cart for $38.00.",
+      "stop": "answered",
+      "steps": 5,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        },
+        {
+          "name": "fill",
+          "arguments": "{\"ref\":12,\"value\":\"2\"}",
+          "result_chars": 12
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":13}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3714
+        }
+      ],
+      "usage": {
+        "input": 7064,
+        "cached": 5585,
+        "output": 111,
+        "reasoning": 18
+      },
+      "duration_ms": 7134
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00018209999999999998,
+      "answer": "Added two Harbor Mugs (blue) to your cart for $38 total.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"category\":\"mug\",\"color\":\"blue\",\"sort\":\"price_asc\"}",
+          "result_chars": 301
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"MUG-03\",\"quantity\":2}",
+          "result_chars": 144
+        }
+      ],
+      "usage": {
+        "input": 1446,
+        "cached": 0,
+        "output": 75,
+        "reasoning": 0
+      },
+      "duration_ms": 5104
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001846,
+      "answer": "Added two Harbor Mugs (the cheapest blue mug) to your cart. The total is $38.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"category\":\"mug\",\"color\":\"blue\",\"sort\":\"price_asc\"}",
+          "result_chars": 301
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"MUG-03\",\"quantity\":2}",
+          "result_chars": 144
+        }
+      ],
+      "usage": {
+        "input": 1446,
+        "cached": 0,
+        "output": 80,
+        "reasoning": 0
+      },
+      "duration_ms": 3329
+    },
+    {
+      "task": "store-cheapest-blue-mug",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0001816,
+      "answer": "Added two Harbor Mugs to your cart. The total is $38.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "search_products",
+          "arguments": "{\"category\":\"mug\",\"color\":\"blue\",\"sort\":\"price_asc\"}",
+          "result_chars": 301
+        },
+        {
+          "name": "add_to_cart",
+          "arguments": "{\"sku\":\"MUG-03\",\"quantity\":2}",
+          "result_chars": 144
+        }
+      ],
+      "usage": {
+        "input": 1446,
+        "cached": 0,
+        "output": 74,
+        "reasoning": 0
+      },
+      "duration_ms": 3959
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "baseline",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00017710000000000002,
+      "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        }
+      ],
+      "usage": {
+        "input": 1601,
+        "cached": 0,
+        "output": 34,
+        "reasoning": 0
+      },
+      "duration_ms": 1932
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "baseline",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00017010000000000001,
+      "answer": "3 January",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        }
+      ],
+      "usage": {
+        "input": 1601,
+        "cached": 1371,
+        "output": 20,
+        "reasoning": 0
+      },
+      "duration_ms": 1735
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "baseline",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00017710000000000002,
+      "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 2,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3663
+        }
+      ],
+      "usage": {
+        "input": 1601,
+        "cached": 1371,
+        "output": 34,
+        "reasoning": 0
+      },
+      "duration_ms": 2360
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "webmcp",
+      "attempt": 1,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0002575,
+      "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "get_page_context",
+          "arguments": "{}",
+          "result_chars": 1160
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Ash Glaze Vase\"}",
+          "result_chars": 165
+        }
+      ],
+      "usage": {
+        "input": 2005,
+        "cached": 0,
+        "output": 114,
+        "reasoning": 56
+      },
+      "duration_ms": 3906
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "webmcp",
+      "attempt": 2,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.00024430000000000003,
+      "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "get_page_context",
+          "arguments": "{}",
+          "result_chars": 1160
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Ash Glaze Vase\"}",
+          "result_chars": 165
+        }
+      ],
+      "usage": {
+        "input": 1983,
+        "cached": 0,
+        "output": 92,
+        "reasoning": 34
+      },
+      "duration_ms": 3368
+    },
+    {
+      "task": "store-restock-date",
+      "arm": "webmcp",
+      "attempt": 3,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.000257,
+      "answer": "The Ash Glaze Vase will be back in stock on 3 January.",
+      "stop": "answered",
+      "steps": 3,
+      "tool_calls": [
+        {
+          "name": "get_page_context",
+          "arguments": "{}",
+          "result_chars": 1160
+        },
+        {
+          "name": "search_products",
+          "arguments": "{\"query\":\"Ash Glaze Vase\"}",
+          "result_chars": 165
+        }
+      ],
+      "usage": {
+        "input": 2005,
+        "cached": 0,
+        "output": 113,
+        "reasoning": 56
+      },
+      "duration_ms": 3707
+    }
+  ],
+  "summary": {
+    "arms": {
+      "baseline": {
+        "runs": 21,
+        "success_rate": 1.0,
+        "tokens": 4467.809523809524,
+        "input_tokens": 4403.238095238095,
+        "output_tokens": 64.57142857142857,
+        "steps": 3.0,
+        "tool_calls": 2.142857142857143,
+        "duration_ms": 3552.714285714286,
+        "cost_usd": 0.00047260952380952367
+      },
+      "webmcp": {
+        "runs": 21,
+        "success_rate": 1.0,
+        "tokens": 1560.4761904761904,
+        "input_tokens": 1481.952380952381,
+        "output_tokens": 78.52380952380952,
+        "steps": 2.6666666666666665,
+        "tool_calls": 1.8571428571428572,
+        "duration_ms": 3454.714285714286,
+        "cost_usd": 0.00018745714285714287
+      }
+    },
+    "tasks": {
+      "docs-config-path": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2521.6666666666665,
+          "input_tokens": 2484.6666666666665,
+          "output_tokens": 37.0,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2469.3333333333335,
+          "cost_usd": 0.00026696666666666674
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 992.0,
+          "input_tokens": 945.0,
+          "output_tokens": 47.0,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2312.0,
+          "cost_usd": 0.00011800000000000001
+        }
+      },
+      "docs-deploy-timeout": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2536.6666666666665,
+          "input_tokens": 2485.0,
+          "output_tokens": 51.666666666666664,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2280.6666666666665,
+          "cost_usd": 0.0002743333333333333
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1640.3333333333333,
+          "input_tokens": 1565.6666666666667,
+          "output_tokens": 74.66666666666667,
+          "steps": 2.6666666666666665,
+          "tool_calls": 1.6666666666666667,
+          "duration_ms": 3280.3333333333335,
+          "cost_usd": 0.00019390000000000002
+        }
+      },
+      "docs-exit-code": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2544.0,
+          "input_tokens": 2488.6666666666665,
+          "output_tokens": 55.333333333333336,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2580.6666666666665,
+          "cost_usd": 0.00027653333333333335
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1607.0,
+          "input_tokens": 1540.3333333333333,
+          "output_tokens": 66.66666666666667,
+          "steps": 2.3333333333333335,
+          "tool_calls": 1.3333333333333333,
+          "duration_ms": 2635.6666666666665,
+          "cost_usd": 0.00018736666666666668
+        }
+      },
+      "docs-retained-releases": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2508.6666666666665,
+          "input_tokens": 2479.0,
+          "output_tokens": 29.666666666666668,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 1851.0,
+          "cost_usd": 0.00026273333333333334
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 988.3333333333334,
+          "input_tokens": 945.6666666666666,
+          "output_tokens": 42.666666666666664,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 3014.6666666666665,
+          "cost_usd": 0.0001159
+        }
+      },
+      "store-cart-total": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 12331.0,
+          "input_tokens": 12198.0,
+          "output_tokens": 133.0,
+          "steps": 6.0,
+          "tool_calls": 6.0,
+          "duration_ms": 6965.333333333333,
+          "cost_usd": 0.0012863
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2069.3333333333335,
+          "input_tokens": 1933.3333333333333,
+          "output_tokens": 136.0,
+          "steps": 3.6666666666666665,
+          "tool_calls": 4.0,
+          "duration_ms": 5149.333333333333,
+          "cost_usd": 0.0002613333333333333
+        }
+      },
+      "store-cheapest-blue-mug": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 7202.333333333333,
+          "input_tokens": 7086.333333333333,
+          "output_tokens": 116.0,
+          "steps": 5.0,
+          "tool_calls": 4.0,
+          "duration_ms": 6713.0,
+          "cost_usd": 0.0007666333333333333
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1522.3333333333333,
+          "input_tokens": 1446.0,
+          "output_tokens": 76.33333333333333,
+          "steps": 3.0,
+          "tool_calls": 2.0,
+          "duration_ms": 4130.666666666667,
+          "cost_usd": 0.00018276666666666665
+        }
+      },
+      "store-restock-date": {
+        "baseline": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 1630.3333333333333,
+          "input_tokens": 1601.0,
+          "output_tokens": 29.333333333333332,
+          "steps": 2.0,
+          "tool_calls": 1.0,
+          "duration_ms": 2009.0,
+          "cost_usd": 0.0001747666666666667
+        },
+        "webmcp": {
+          "runs": 3,
+          "success_rate": 1.0,
+          "tokens": 2104.0,
+          "input_tokens": 1997.6666666666667,
+          "output_tokens": 106.33333333333333,
+          "steps": 3.0,
+          "tool_calls": 2.0,
+          "duration_ms": 3660.3333333333335,
+          "cost_usd": 0.0002529333333333333
+        }
+      }
+    }
+  }
 }
