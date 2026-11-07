@@ -541,14 +541,22 @@ test('install and agent setup are tabs with logos, the most used open, each with
 	await expect(fix.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
 
 	const agents = fix.getByRole('tablist', { name: 'In your agent' }).getByRole('tab');
-	await expect(agents).toHaveText(['VS Code', 'Cursor', 'Claude Code', 'Codex CLI', 'Windsurf']);
-	await expect(agents.locator('svg')).toHaveCount(5);
+	await expect(agents).toHaveText([
+		'VS Code',
+		'Cursor',
+		'Claude Code',
+		'Codex CLI',
+		'Windsurf',
+		'Your coding agent'
+	]);
+	await expect(agents.locator('svg')).toHaveCount(6);
 	await agents.nth(2).click();
 	const panel = fix.locator('[role=tabpanel]:not([data-inactive])').nth(1);
 	await expect(panel).toContainText('claude mcp add webmcpx -- npx -y webmcpx mcp');
 	await expect(panel.getByRole('button', { name: /Copy/ })).toBeVisible();
-	const check = fix.getByRole('figure').filter({ hasText: 'npx webmcpx tools localhost:3000' });
-	await expect(check.getByRole('button', { name: /Copy/ })).toBeVisible();
+	// Or the agent sets itself up.
+	await agents.last().click();
+	await expect(fix.locator('[role=tabpanel]:not([data-inactive])').nth(1)).toContainText('npx');
 });
 
 test('the verdicts page explains each stamp and is linked from every scan result and the footer', async ({

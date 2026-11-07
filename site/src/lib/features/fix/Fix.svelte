@@ -1,14 +1,11 @@
 <!--
-	The fix, in two steps: 1. on your site (tabs: script tag, npm, coding agent; then see your tools),
-	2. in your agent (skipped by agents with WebMCP built in; tabs, one per client). Then what it gives
-	agents. Tabs list the most used first; the first one opens.
+	The fix, in two steps: 1. on your site (tabs: script tag, npm, coding agent), 2. in your agent
+	(skipped by agents with WebMCP built in; tabs, one per client, then your coding agent).  Tabs list the most used first; the first one opens.
 -->
 <script lang="ts">
-	import Check from '@lucide/svelte/icons/check';
 	import SquareTerminal from '@lucide/svelte/icons/square-terminal';
 	import Bot from '@lucide/svelte/icons/bot';
 	import { siClaude, siCursor, siGithubcopilot, siHtml5, siNpm, siWindsurf } from 'simple-icons';
-	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import CodeTabs, { type CodeTab } from '#lib/components/ui/CodeTabs.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
 	import type { Highlighted, SnippetId } from '#lib/content/snippets.ts';
@@ -21,8 +18,6 @@
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.fix);
-	/** The standard tools the script registers (what each does: `fix.gives.<tool>`). */
-	const GIVES = ['search_page', 'fetch_as_markdown', 'get_page_context'] as const;
 	const capital = (s: string) => s.charAt(0).toLocaleUpperCase(i18n.code) + s.slice(1);
 
 	const install: CodeTab[] = $derived([
@@ -48,6 +43,13 @@
 			icon: siWindsurf,
 			snippet: code.mcpWindsurf,
 			title: '~/.codeium/windsurf/mcp_config.json'
+		},
+		{
+			id: 'agent',
+			label: capital(m.alternatives.agent),
+			icon: Bot,
+			snippet: code.mcpPrompt,
+			title: 'prompt'
 		}
 	]);
 </script>
@@ -69,8 +71,6 @@
 							{fmt(m.steps.site.lead, { tag: '</body>' })}
 						</p>
 						<CodeTabs label={step.title} tabs={install} />
-						<p class="mt-5 text-sm font-medium text-ink-2">{m.check}</p>
-						<CodeBlock snippet={code.checkTools} title="terminal" class="mt-2" />
 					{:else}
 						<p class="mt-2 text-sm text-pretty text-ink-2">{m.steps.agent.lead}</p>
 						<p class="mt-3 mb-4 rounded-xl bg-paper-2 px-3.5 py-2.5 text-sm text-pretty text-ink">
@@ -87,21 +87,5 @@
 			</li>
 		{/each}
 	</ol>
-	<ul class="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
-		{#each GIVES as tool, i (tool)}
-			<li>
-				<Reveal
-					delay={i * 90}
-					class="flex h-full flex-col items-center gap-2 rounded-card border-2 border-ink bg-card p-5 text-center"
-				>
-					<span class="grid size-9 place-items-center rounded-full border-2 border-ink bg-good-soft">
-						<Check size={18} strokeWidth={3} aria-hidden="true" />
-					</span>
-					<code class="font-mono text-sm font-semibold">{tool}</code>
-					<span class="text-sm text-ink-2">{m.gives[tool]}</span>
-				</Reveal>
-			</li>
-		{/each}
-	</ul>
 	<p class="mt-8 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">{m.facts}</p>
 </Section>

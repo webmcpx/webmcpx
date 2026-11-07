@@ -422,12 +422,6 @@ const en = {
 		title: 'Two steps. Agent-ready.',
 		lead: 'Step 1 puts tools on your site. Step 2 lets your agent call them.',
 		alternatives: { npm: 'npm', agent: 'your coding agent' },
-		// What each standard tool does, under its name: max 24, verb first.
-		gives: {
-			search_page: 'finds the passage',
-			fetch_as_markdown: 'reads the page, paged',
-			get_page_context: 'knows where it is'
-		},
 		// Small capitals, max 50.
 		facts: '~3.2 KB on load · Rust + WebAssembly · MIT license',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
@@ -442,7 +436,6 @@ const en = {
 				skip: 'Using the ChatGPT desktop app or the Codex app? Skip this step: they call WebMCP tools natively ({docs}).'
 			}
 		},
-		check: 'See your site’s tools, localhost included:',
 		docs: 'OpenAI docs'
 	},
 

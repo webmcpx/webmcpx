@@ -324,11 +324,6 @@ const hi: Messages = {
 		title: 'दो कदम। एजेंट-रेडी।',
 		lead: 'कदम 1 आपकी साइट पर टूल लाता है। कदम 2 आपके एजेंट को उन्हें कॉल करने देता है।',
 		alternatives: { npm: 'npm', agent: 'आपके कोडिंग एजेंट' },
-		gives: {
-			search_page: 'सही हिस्सा खोजता है',
-			fetch_as_markdown: 'पेज हिस्सों में पढ़ता है',
-			get_page_context: 'जानता है कि कहाँ है'
-		},
 		facts: 'लोड पर ~3.2 KB · Rust + WebAssembly · MIT लाइसेंस',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
@@ -342,7 +337,6 @@ const hi: Messages = {
 				skip: 'ChatGPT डेस्कटॉप ऐप या Codex ऐप इस्तेमाल करते हैं? यह कदम छोड़ दें: वे WebMCP टूल नेटिव रूप से कॉल करते हैं ({docs})।'
 			}
 		},
-		check: 'अपनी साइट के टूल देखें, localhost पर भी:',
 		docs: 'OpenAI डॉक्स'
 	},
 

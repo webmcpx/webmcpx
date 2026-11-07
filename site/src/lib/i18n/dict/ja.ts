@@ -316,11 +316,6 @@ const ja: Messages = {
 		title: '2 ステップで、エージェント対応。',
 		lead: 'ステップ 1 でサイトにツールを置き、ステップ 2 でエージェントがそれを呼べるようにします。',
 		alternatives: { npm: 'npm を使う場合', agent: 'コーディングエージェントの場合' },
-		gives: {
-			search_page: '該当箇所を見つける',
-			fetch_as_markdown: 'ページを分割して読む',
-			get_page_context: '現在地を把握する'
-		},
 		facts: '読込時 ~3.2 KB · Rust + WebAssembly · MIT License',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
@@ -331,7 +326,6 @@ const ja: Messages = {
 				skip: 'ChatGPT デスクトップアプリや Codex アプリなら、このステップは不要です。WebMCP ツールをネイティブに呼び出します（{docs}）。'
 			}
 		},
-		check: 'サイトのツールを確認（localhost も可）：',
 		docs: 'OpenAI のドキュメント'
 	},
 

@@ -45,6 +45,11 @@ register(); // the standard tools; tool() adds your own`
 }`
 	},
 	agentMcp: { lang: 'sh', code: 'claude mcp add webmcpx -- npx -y webmcpx mcp' },
+	// Step 2 for any coding agent: it adds the MCP server to its own config.
+	mcpPrompt: {
+		lang: 'text',
+		code: 'Add the webmcpx MCP server to your MCP config (command: `npx`, args: `["-y", "webmcpx", "mcp"]`), so you can call the WebMCP tools of any page you open.'
+	},
 	mcpCodex: { lang: 'sh', code: 'codex mcp add webmcpx -- npx -y webmcpx mcp' },
 	mcpWindsurf: {
 		lang: 'json',

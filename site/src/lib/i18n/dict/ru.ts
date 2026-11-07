@@ -343,11 +343,6 @@ const ru: Messages = {
 		title: 'Два шага. Сайт готов для агентов.',
 		lead: 'Шаг 1 добавляет инструменты на ваш сайт. Шаг 2 позволяет агенту их вызывать.',
 		alternatives: { npm: 'npm', agent: 'вашего кодинг-агента' },
-		gives: {
-			search_page: 'находит нужный фрагмент',
-			fetch_as_markdown: 'читает страницу частями',
-			get_page_context: 'знает, где находится'
-		},
 		facts: '~3,2 КБ на загрузку · Rust + WebAssembly · MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
@@ -358,7 +353,6 @@ const ru: Messages = {
 				skip: 'Пользуетесь десктопным ChatGPT или приложением Codex? Пропустите этот шаг: они вызывают WebMCP-инструменты нативно ({docs}).'
 			}
 		},
-		check: 'Посмотрите инструменты своего сайта, в том числе на localhost:',
 		docs: 'документация OpenAI'
 	},
 

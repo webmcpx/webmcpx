@@ -317,11 +317,6 @@ const id: Messages = {
 		title: 'Dua langkah. Siap agent.',
 		lead: 'Langkah 1 memasang tool di situs Anda. Langkah 2 membuat agen Anda bisa memanggilnya.',
 		alternatives: { npm: 'npm', agent: 'coding agent Anda' },
-		gives: {
-			search_page: 'menemukan bagian teks',
-			fetch_as_markdown: 'membaca halaman bertahap',
-			get_page_context: 'mengenali posisinya'
-		},
 		facts: '~3,2 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
@@ -335,7 +330,6 @@ const id: Messages = {
 				skip: 'Pakai aplikasi desktop ChatGPT atau aplikasi Codex? Lewati langkah ini: keduanya memanggil tool WebMCP secara native ({docs}).'
 			}
 		},
-		check: 'Lihat tool situs Anda, termasuk di localhost:',
 		docs: 'dokumentasi OpenAI'
 	},
 

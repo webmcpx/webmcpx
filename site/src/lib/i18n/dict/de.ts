@@ -327,11 +327,6 @@ const de: Messages = {
 		title: 'Zwei Schritte. Agentenfähig.',
 		lead: 'Schritt 1 bringt Tools auf deine Website. Schritt 2 lässt deinen Agenten sie aufrufen.',
 		alternatives: { npm: 'npm', agent: 'Ihren Coding-Agenten' },
-		gives: {
-			search_page: 'findet die Textstelle',
-			fetch_as_markdown: 'liest Seiten paginiert',
-			get_page_context: 'weiß, wo es ist'
-		},
 		facts: '~3,2 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
@@ -342,7 +337,6 @@ const de: Messages = {
 				skip: 'Du nutzt die ChatGPT-Desktop-App oder die Codex-App? Überspring diesen Schritt: Sie rufen WebMCP-Tools nativ auf ({docs}).'
 			}
 		},
-		check: 'Sieh dir die Tools deiner Website an, auch auf localhost:',
 		docs: 'OpenAI-Doku'
 	},
 

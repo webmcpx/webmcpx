@@ -325,11 +325,6 @@ const bn: Messages = {
 		title: 'দুই ধাপ। এজেন্ট-রেডি।',
 		lead: 'ধাপ ১ আপনার সাইটে টুল যোগ করে। ধাপ ২ আপনার এজেন্টকে সেগুলো কল করতে দেয়।',
 		alternatives: { npm: 'npm', agent: 'আপনার কোডিং এজেন্ট' },
-		gives: {
-			search_page: 'ঠিক অংশটি খুঁজে দেয়',
-			fetch_as_markdown: 'পেজ পড়ে, ভাগে ভাগে',
-			get_page_context: 'জানে সে কোথায় আছে'
-		},
 		facts: 'লোডে ~3.2 KB · Rust + WebAssembly · MIT লাইসেন্স',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
@@ -343,7 +338,6 @@ const bn: Messages = {
 				skip: 'ChatGPT ডেস্কটপ অ্যাপ বা Codex অ্যাপ ব্যবহার করেন? এই ধাপ বাদ দিন: তারা নেটিভভাবে WebMCP টুল কল করে ({docs})।'
 			}
 		},
-		check: 'আপনার সাইটের টুল দেখুন, localhost-এও:',
 		docs: 'OpenAI ডকস'
 	},
 
