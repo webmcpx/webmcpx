@@ -3,18 +3,18 @@
 	let { class: className }: { class?: string } = $props();
 </script>
 
-<span class={['inline-flex items-center gap-2.5 font-semibold tracking-tight', className]}>
-	<svg viewBox="0 0 32 32" class="size-7" aria-hidden="true">
-		<rect width="32" height="32" rx="9" class="fill-accent" />
+<span class={['inline-flex items-center gap-2', className]}>
+	<svg viewBox="0 0 32 32" class="size-8" aria-hidden="true">
+		<rect x="1.5" y="1.5" width="29" height="29" rx="9" class="fill-marker stroke-ink" stroke-width="3" />
 		<path
-			d="M11 9.5 7.5 16l3.5 6.5M21 9.5l3.5 6.5-3.5 6.5"
+			d="M11.5 10 8 16l3.5 6M20.5 10 24 16l-3.5 6"
 			fill="none"
-			stroke-width="2.4"
+			stroke-width="3"
 			stroke-linecap="round"
 			stroke-linejoin="round"
-			class="stroke-on-accent"
+			class="stroke-ink"
 		/>
-		<circle cx="16" cy="16" r="2.6" class="fill-on-accent" />
+		<circle cx="16" cy="16" r="2.4" class="fill-ink" />
 	</svg>
-	<span class="font-mono text-[15px]">webmcpx</span>
+	<span class="font-display text-xl font-bold tracking-tight">webmcpx</span>
 </span>

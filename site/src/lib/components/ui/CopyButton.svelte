@@ -1,3 +1,4 @@
+<!-- Copies text; announces it to screen readers. Styled for the dark code background. -->
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
 	import Copy from '@lucide/svelte/icons/copy';
@@ -30,15 +31,14 @@
 	onclick={copy}
 	aria-label={label}
 	class={[
-		'inline-grid size-8 place-items-center rounded-lg border border-border bg-surface text-muted transition',
-		'hover:border-border-strong hover:text-fg',
+		'inline-flex h-8 items-center gap-1.5 rounded-full border-2 border-on-code/40 px-3 text-xs font-medium text-on-code transition',
+		'hover:border-on-code hover:bg-on-code hover:text-code',
 		className
 	]}
 >
-	{#if copied}
-		<Check size={15} class="text-accent-ink" aria-hidden="true" />
-	{:else}
-		<Copy size={15} aria-hidden="true" />
-	{/if}
+	{#if copied}<Check size={14} aria-hidden="true" />Copied{:else}<Copy
+			size={14}
+			aria-hidden="true"
+		/>Copy{/if}
 </button>
 <span class="sr-only" aria-live="polite">{copied ? 'Copied' : ''}</span>

@@ -1,5 +1,5 @@
 // Guards the design system: every documented token exists, and text colors pass WCAG 2.2 AA (4.5:1)
-// against the surfaces they sit on, in both themes. Edit a color in tokens.css and this tells you if
+// against the surfaces they sit on. Edit a color in tokens.css and this tells you if
 // it still reads.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
@@ -40,26 +40,28 @@ function contrast(x: [number, number, number], y: [number, number, number]): num
 
 /** [text, background] pairs the components actually use. */
 const PAIRS: [string, string][] = [
-	['fg', 'bg'],
-	['fg', 'surface'],
-	['fg', 'surface-2'],
-	['fg', 'code'],
-	['muted', 'bg'],
-	['muted', 'surface'],
-	['subtle', 'bg'],
-	['subtle', 'surface'],
-	['subtle', 'code'],
-	['accent-ink', 'bg'],
-	['accent-ink', 'surface'],
-	['on-accent', 'accent'],
-	['danger', 'code'],
-	['warn', 'code']
+	['ink', 'paper'],
+	['ink', 'paper-2'],
+	['ink', 'card'],
+	['ink', 'marker'],
+	['ink', 'good-soft'],
+	['ink', 'bad-soft'],
+	['paper', 'ink'],
+	['ink-2', 'paper'],
+	['ink-2', 'card'],
+	['ink-3', 'paper'],
+	['ink-3', 'paper-2'],
+	['ink-3', 'card'],
+	['good', 'paper'],
+	['good', 'card'],
+	['bad', 'paper'],
+	['bad', 'card'],
+	['on-code', 'code']
 ];
 
-describe.each([
-	['dark', theme(":root,\n[data-theme='dark']")],
-	['light', theme("[data-theme='light']")]
-])('%s theme', (_, vars) => {
+describe('tokens', () => {
+	const vars = theme(':root');
+
 	it('defines every documented color', () => {
 		for (const { name } of COLORS) expect(vars, name).toHaveProperty(name);
 	});

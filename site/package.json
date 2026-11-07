@@ -21,6 +21,7 @@
 	"devDependencies": {
 		"@axe-core/playwright": "4.14.0",
 		"@eslint/js": "10.0.1",
+		"@fontsource-variable/bricolage-grotesque": "5.3.0",
 		"@fontsource-variable/geist": "5.3.0",
 		"@fontsource-variable/geist-mono": "5.3.0",
 		"@lucide/svelte": "1.70.0",

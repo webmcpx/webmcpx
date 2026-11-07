@@ -1,27 +1,31 @@
-<!-- A link styled as a button when `href` is set, otherwise a <button>. -->
+<!--
+	Chunky pill button with a hard offset shadow that "presses" on click. A link when `href` is set,
+	otherwise a <button>.
+-->
 <script lang="ts" module>
 	import { tv, type VariantProps } from 'tailwind-variants';
 
 	export const button = tv({
 		base: [
-			'inline-flex items-center justify-center gap-2 rounded-xl font-medium whitespace-nowrap select-none',
-			'transition duration-200 ease-out-expo active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50',
-			'[&_svg]:size-4 [&_svg]:shrink-0'
+			'inline-flex items-center justify-center gap-2 rounded-full border-2 border-ink font-semibold whitespace-nowrap select-none',
+			'shadow-hard transition-[translate,box-shadow] duration-150 ease-out-expo',
+			'hover:-translate-x-px hover:-translate-y-px hover:shadow-hard-lg',
+			'active:translate-x-0.5 active:translate-y-0.5 active:shadow-none',
+			'disabled:pointer-events-none disabled:opacity-60',
+			'[&_svg]:size-[1.1em] [&_svg]:shrink-0'
 		],
 		variants: {
 			variant: {
-				primary: 'bg-accent text-on-accent shadow-glow hover:brightness-110',
-				secondary: 'border border-border-strong bg-surface text-fg hover:border-subtle hover:bg-surface-2',
-				ghost: 'text-muted hover:bg-surface-2 hover:text-fg'
+				solid: 'bg-ink text-paper',
+				outline: 'bg-card text-ink'
 			},
 			size: {
-				sm: 'h-8 px-3 text-sm',
-				md: 'h-10 px-4 text-sm',
-				lg: 'h-12 px-6 text-base',
-				icon: 'size-9'
+				sm: 'h-9 px-4 text-sm',
+				md: 'h-11 px-5 text-sm',
+				lg: 'h-13 px-7 text-base'
 			}
 		},
-		defaultVariants: { variant: 'secondary', size: 'md' }
+		defaultVariants: { variant: 'solid', size: 'md' }
 	});
 
 	export type ButtonVariants = VariantProps<typeof button>;

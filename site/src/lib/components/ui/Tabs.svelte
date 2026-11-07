@@ -68,10 +68,10 @@
 				onclick={() => (value = item.id)}
 				onkeydown={(e) => onkeydown(e, i)}
 				class={[
-					'inline-flex h-8 shrink-0 items-center gap-2 rounded-lg px-3 text-sm font-medium transition [&_svg]:size-4',
+					'inline-flex h-9 shrink-0 items-center gap-2 rounded-full border-2 px-4 text-sm font-medium transition [&_svg]:size-4',
 					selected
-						? 'bg-surface-2 text-fg shadow-[inset_0_0_0_1px_var(--border-strong)]'
-						: 'text-muted hover:text-fg'
+						? 'border-ink bg-ink text-paper'
+						: 'border-transparent text-ink-2 hover:border-ink hover:text-ink'
 				]}
 			>
 				{#if tab}{@render tab(item)}{:else}{item.label}{/if}

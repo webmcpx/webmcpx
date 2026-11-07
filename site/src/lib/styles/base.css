@@ -5,21 +5,29 @@
 	}
 
 	body {
-		background: var(--bg);
-		color: var(--fg);
+		background: var(--paper);
+		color: var(--ink);
 		font-family: var(--font-sans);
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 	}
 
 	::selection {
-		background: var(--accent-soft);
+		background: var(--marker);
+		color: var(--ink);
 	}
 
 	:focus-visible {
-		outline: 2px solid var(--accent);
-		outline-offset: 2px;
+		outline: 3px solid var(--ink);
+		outline-offset: 3px;
 	}
+}
+
+/* A highlighter stroke behind a word: <mark class="marker">. */
+@utility marker {
+	background: linear-gradient(transparent 55%, var(--marker) 55%, var(--marker) 92%, transparent 92%);
+	color: inherit;
+	padding-inline: 0.08em;
 }
 
 /*
@@ -30,37 +38,13 @@
 	opacity: 0;
 	translate: 0 1.25rem;
 	transition:
-		opacity 0.8s var(--ease-out-expo) var(--reveal-delay, 0ms),
-		translate 0.8s var(--ease-out-expo) var(--reveal-delay, 0ms);
+		opacity 0.7s var(--ease-out-expo) var(--reveal-delay, 0ms),
+		translate 0.7s var(--ease-out-expo) var(--reveal-delay, 0ms);
 }
 
 [data-js] .reveal[data-visible] {
 	opacity: 1;
 	translate: 0 0;
-}
-
-/* One switch for everyone who asks for less motion. */
-@media (prefers-reduced-motion: reduce) {
-	html {
-		scroll-behavior: auto;
-	}
-
-	*,
-	::before,
-	::after,
-	::view-transition-group(*),
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation-duration: 0.01ms !important;
-		animation-iteration-count: 1 !important;
-		transition-duration: 0.01ms !important;
-		transition-delay: 0ms !important;
-	}
-
-	[data-js] .reveal {
-		opacity: 1;
-		translate: none;
-	}
 }
 
 /* If the app never hydrates (the layout sets `data-hydrated`), show the content anyway after a moment. */
@@ -72,5 +56,26 @@
 	to {
 		opacity: 1;
 		translate: 0 0;
+	}
+}
+
+/* One switch for everyone who asks for less motion. */
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	*,
+	::before,
+	::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		transition-delay: 0ms !important;
+	}
+
+	[data-js] .reveal {
+		opacity: 1;
+		translate: none;
 	}
 }

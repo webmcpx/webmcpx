@@ -3,10 +3,9 @@ import { SNIPPETS } from '#lib/content/snippets.ts';
 import { highlight, highlightAll } from './highlight.ts';
 
 describe('highlight', () => {
-	it('emits both themes as CSS variables and escapes the code', async () => {
+	it('colors tokens inline and escapes the code', async () => {
 		const h = await highlight({ lang: 'html', code: '<b>"x"</b>' });
-		expect(h.html).toContain('--shiki-dark');
-		expect(h.html).toContain('--shiki-light');
+		expect(h.html).toContain('style="color:');
 		expect(h.html).not.toContain('<b>');
 		expect(h.code).toBe('<b>"x"</b>');
 	});

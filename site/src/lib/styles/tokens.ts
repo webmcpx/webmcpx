@@ -1,5 +1,5 @@
-// The semantic color roles defined in `tokens.css`, for the /design page and its test.
-// Each one is a CSS variable (`--surface`) and a Tailwind color (`bg-surface`, `text-surface`, ...).
+// The color roles defined in `tokens.css`, for the /design page and its test.
+// Each one is a CSS variable (`--ink-2`) and a Tailwind color (`text-ink-2`, `bg-ink-2`, ...).
 
 export interface ColorToken {
 	name: string;
@@ -7,20 +7,18 @@ export interface ColorToken {
 }
 
 export const COLORS: ColorToken[] = [
-	{ name: 'bg', use: 'Page background' },
-	{ name: 'surface', use: 'Cards, code blocks, inputs' },
-	{ name: 'surface-2', use: 'Hover and selected surfaces' },
-	{ name: 'fg', use: 'Body text and headings' },
-	{ name: 'muted', use: 'Secondary text' },
-	{ name: 'subtle', use: 'Captions, labels, axis text' },
-	{ name: 'border', use: 'Dividers and card borders' },
-	{ name: 'border-strong', use: 'Input borders, hovered cards' },
-	{ name: 'accent', use: 'Primary buttons, the webmcpx series in charts' },
-	{ name: 'on-accent', use: 'Text on accent fills' },
-	{ name: 'accent-ink', use: 'Accent-colored text and links' },
-	{ name: 'accent-soft', use: 'Tinted backgrounds, glow' },
-	{ name: 'baseline', use: 'The baseline series in charts' },
-	{ name: 'danger', use: 'Errors' },
-	{ name: 'warn', use: 'Warnings' },
-	{ name: 'code', use: 'Code block background' }
+	{ name: 'paper', use: 'Page background' },
+	{ name: 'paper-2', use: 'Sunken panels, tracks' },
+	{ name: 'card', use: 'Cards and inputs on paper' },
+	{ name: 'ink', use: 'Text, outlines, shadows, primary buttons' },
+	{ name: 'ink-2', use: 'Secondary text' },
+	{ name: 'ink-3', use: 'Captions and labels' },
+	{ name: 'hairline', use: 'Thin dividers' },
+	{ name: 'marker', use: 'Highlighter: the one accent' },
+	{ name: 'good', use: 'Ready, passed (text)' },
+	{ name: 'good-soft', use: 'Ready, passed (fill)' },
+	{ name: 'bad', use: 'Missing, failed (text)' },
+	{ name: 'bad-soft', use: 'Missing, failed (fill)' },
+	{ name: 'code', use: 'Code block background' },
+	{ name: 'on-code', use: 'Text on code blocks' }
 ];

@@ -1,26 +1,13 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
-		<meta name="theme-color" content="#0b0d12" />
+		<meta name="theme-color" content="#f2f1ec" />
 		<script>
-			// Before first paint: mark JS as available (enables reveal animations) and apply the saved or
-			// system theme, so the page never flashes the wrong colors. Keep in sync with `theme.svelte.ts`.
-			(() => {
-				const root = document.documentElement;
-				root.dataset.js = '';
-				try {
-					const saved = localStorage.getItem('theme');
-					root.dataset.theme =
-						saved === 'light' || saved === 'dark'
-							? saved
-							: matchMedia('(prefers-color-scheme: light)').matches
-								? 'light'
-								: 'dark';
-				} catch {}
-			})();
+			// Before first paint: mark JS as available, which enables the reveal animations (see base.css).
+			document.documentElement.dataset.js = '';
 		</script>
 		%sveltekit.head%
 	</head>

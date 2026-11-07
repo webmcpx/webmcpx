@@ -1,13 +1,6 @@
-/* Shiki output (highlighted at build time, see `server/highlight.ts`): pick the token colors of the theme. */
-.shiki,
-.shiki span {
-	color: var(--shiki-dark);
+/* Shiki output (highlighted at build time, see `server/highlight.ts`) on the ink code background. */
+.shiki {
 	background: transparent !important;
-}
-
-[data-theme='light'] .shiki,
-[data-theme='light'] .shiki span {
-	color: var(--shiki-light);
 }
 
 .shiki code {
