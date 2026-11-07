@@ -581,8 +581,8 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
         markdown.headers()["content-type"],
         "text/markdown; charset=utf-8"
     );
-    assert_eq!(markdown.text().await.unwrap(), "# landing");
     assert_eq!(markdown.headers()["vary"], "Accept");
+    assert_eq!(markdown.text().await.unwrap(), "# landing");
     let html = reqwest::get(format!("http://{addr}/")).await.unwrap();
     // Browsers get HTML at the same URL, so caches must key on Accept.
     assert_eq!(html.headers()["vary"], "Accept");
