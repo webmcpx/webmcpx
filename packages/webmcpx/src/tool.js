@@ -24,7 +24,7 @@ export function schema(input = {}) {
 }
 
 // Assertions not checked here (if they appear, the input is refused): see check().
-const UNCHECKED = ["if", "patternProperties", "propertyNames", "dependentRequired", "dependentSchemas", "contains", "prefixItems", "unevaluatedProperties", "unevaluatedItems", "$dynamicRef"];
+const UNCHECKED = ["if", "patternProperties", "propertyNames", "dependentRequired", "dependentSchemas", "contains", "prefixItems", "unevaluatedProperties", "unevaluatedItems", "$dynamicRef", "$recursiveRef", "dependencies", "additionalItems"];
 
 const TYPES = {
   string: (v) => typeof v === "string",
@@ -100,7 +100,7 @@ function check(s, value, at = "input") {
   if (s.anyOf && s.anyOf.every((b) => check(b, value, at))) return `${at} matches none of the allowed shapes`;
   if (s.oneOf && s.oneOf.filter((b) => !check(b, value, at)).length !== 1) return `${at} must match exactly one allowed shape`;
   // Fail closed: an assertion this checker doesn't run refuses the input instead of letting it through.
-  const unknown = UNCHECKED.find((k) => k in s);
+  const unknown = UNCHECKED.find((k) => k in s) ?? (Array.isArray(s.items) && "tuple items");
   if (unknown) return (fatal = `${at}: can't check ${unknown}`);
   if (s.not && !check(s.not, value, at)) return `${at} matches a shape that is not allowed`;
   if (typeof value === "number") {
@@ -111,8 +111,10 @@ function check(s, value, at = "input") {
     if (s.multipleOf && !multiple(value, s.multipleOf)) return `${at} must be a multiple of ${s.multipleOf}`;
   }
   if (typeof value === "string") {
-    if (value.length < s.minLength) return `${at} must have at least ${s.minLength} chars`;
-    if (value.length > s.maxLength) return `${at} must have at most ${s.maxLength} chars`;
+    // JSON Schema counts characters (code points), not UTF-16 units: "😀" is 1.
+    const chars = [...value].length;
+    if (chars < s.minLength) return `${at} must have at least ${s.minLength} chars`;
+    if (chars > s.maxLength) return `${at} must have at most ${s.maxLength} chars`;
     if (s.pattern && !new RegExp(s.pattern, "u").test(value)) return `${at} must match ${s.pattern}`;
   }
   if (Array.isArray(value)) {

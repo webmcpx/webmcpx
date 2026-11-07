@@ -197,6 +197,17 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   tool({ name: "tiny", description: "Tiny step.", input: { v: { type: "number", multipleOf: 2e-15 } }, run: () => "ok" });
   assert.equal((await page.call("tiny", { v: 4.500000000000005 })).ok, false);
   assert.equal((await page.call("tiny", { v: 4.500000000000004 })).ok, true);
+  // Characters are code points: two emoji are 2 long.
+  tool({ name: "emoji", description: "Emoji.", input: { e: { type: "string", minLength: 2, maxLength: 2 } }, run: () => "ok" });
+  assert.equal((await page.call("emoji", { e: "😀😀" })).ok, true);
+  assert.equal((await page.call("emoji", { e: "😀" })).ok, false);
+  // Draft-07 tuples and dependencies are not checked here: refused, never waved through.
+  let legacy = 0;
+  tool({ name: "tuple", description: "Tuple.", inputSchema: { type: "object", properties: { t: { type: "array", items: [{ type: "integer", minimum: 1 }], additionalItems: false } } }, run: () => ++legacy });
+  tool({ name: "deps", description: "Deps.", inputSchema: { type: "object", properties: { card: { type: "string" } }, dependencies: { card: ["billing_address"] } }, run: () => ++legacy });
+  assert.equal((await page.call("tuple", { t: [-5, "unexpected"] })).ok, false);
+  assert.equal((await page.call("deps", { card: "4111" })).ok, false);
+  assert.equal(legacy, 0);
   // ...even under not or oneOf, where a plain mismatch would flip into acceptance.
   let notRuns = 0;
   tool({ name: "notmul", description: "Not a multiple.", input: { value: { not: { multipleOf: 1 } } }, run: () => ++notRuns });

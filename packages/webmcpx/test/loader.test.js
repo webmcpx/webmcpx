@@ -172,3 +172,12 @@ test("readPage skips CSS-hidden content but keeps display: contents children", a
     delete globalThis.getComputedStyle;
   }
 });
+
+test("the default content root is the first visible one", async () => {
+  const page = host();
+  document.body.innerHTML = '<main hidden><p>Hidden price is $1.</p></main><article><p>Visible price is $20.</p></article>';
+  await register({ wasm: WASM });
+  const md = (await page.call("fetch_as_markdown", {})).data.markdown;
+  assert.doesNotMatch(md, /\$1\./);
+  assert.match(md, /Visible price is \$20/);
+});

@@ -68,7 +68,9 @@ export function readPage(what, root) {
       else visit(child);
     }
   };
-  visit(root ?? document.querySelector("main, [role=main], article") ?? document.body);
+  const shown = (el) => !el || !skipped(el) && shown(el.parentElement);
+  root ??= [...document.querySelectorAll("main, [role=main], article")].find(shown) ?? document.body;
+  if (shown(root)) visit(root);
   return out;
 }
 
