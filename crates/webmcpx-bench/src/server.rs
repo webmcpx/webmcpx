@@ -106,7 +106,7 @@ async fn page(
     let wants_markdown = headers
         .get(axum::http::header::ACCEPT)
         .and_then(|h| h.to_str().ok())
-        .is_some_and(|a| a.contains("text/markdown"));
+        .is_some_and(prefers_markdown);
     if wants_markdown
         && path.ends_with('/')
         && !path.contains("..")
@@ -147,6 +147,30 @@ async fn page(
 }
 
 /// `https://host`, from our proxy's headers (plain `http://` locally).
+/// Whether an `Accept` header names `text/markdown` with a quality above zero and at least that of HTML
+/// (`text/html`, else `text/*`, else `*/*`). Browsers never name Markdown, so they always get HTML.
+fn prefers_markdown(accept: &str) -> bool {
+    let mut markdown = None;
+    let (mut html, mut text, mut any) = (None, None, None);
+    for range in accept.split(',') {
+        let mut parts = range.split(';');
+        let media = parts.next().unwrap_or("").trim().to_ascii_lowercase();
+        let q = parts
+            .filter_map(|p| p.trim().strip_prefix("q="))
+            .find_map(|q| q.trim().parse::<f32>().ok())
+            .unwrap_or(1.0);
+        let slot = match media.as_str() {
+            "text/markdown" => &mut markdown,
+            "text/html" => &mut html,
+            "text/*" => &mut text,
+            "*/*" => &mut any,
+            _ => continue,
+        };
+        *slot = Some(q);
+    }
+    markdown.is_some_and(|md| md > 0.0 && md >= html.or(text).or(any).unwrap_or(0.0))
+}
+
 fn origin(headers: &HeaderMap) -> String {
     let host = headers
         .get(axum::http::header::HOST)
@@ -378,6 +402,19 @@ pub async fn spawn_with(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn markdown_only_when_preferred() {
+        use super::prefers_markdown as md;
+        assert!(md("text/markdown"));
+        assert!(md("text/markdown, text/html;q=0.9"));
+        assert!(md("text/html, text/markdown"));
+        assert!(!md("text/html, text/markdown;q=0"));
+        assert!(!md("text/html;q=1, text/markdown;q=0.1"));
+        assert!(!md("text/html,application/xhtml+xml,*/*;q=0.8"));
+        assert!(md("text/markdown;q=0.9, */*;q=0.8"));
+        assert!(!md(""));
+    }
+
     use super::*;
 
     #[test]
