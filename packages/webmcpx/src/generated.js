@@ -17,3 +17,11 @@ export const CODES = {
   REQUIRES_USER: false,
   UNAVAILABLE: true,
 };
+
+/** Authoring limits, in chars (webmcpx-core `limits`). */
+export const LIMITS = {
+  NAME_WARN: 30,
+  DESCRIPTION_WARN: 500,
+  TOOLS_WARN: 20,
+  OUTPUT_MAX: 20000,
+};

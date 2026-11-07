@@ -1,0 +1,109 @@
+// tool(): your own tools get the standard contract (shorthand schema, checked input, one result shape).
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { parseHTML } from "linkedom";
+
+const setNavigator = (value) => Object.defineProperty(globalThis, "navigator", { value, configurable: true, writable: true });
+
+/** A host that records registrations, like a browser exposing document.modelContext. */
+function host({ webmcp = true } = {}) {
+  const { document } = parseHTML("<!doctype html><html><body></body></html>");
+  const tools = new Map();
+  if (webmcp) {
+    document.modelContext = Object.freeze({
+      async registerTool(tool, { signal } = {}) {
+        if (tools.has(tool.name)) throw new DOMException("duplicate tool", "InvalidStateError");
+        tools.set(tool.name, tool);
+        signal?.addEventListener("abort", () => tools.delete(tool.name));
+      },
+    });
+  }
+  globalThis.document = document;
+  setNavigator({});
+  return { tools, call: async (name, input) => JSON.parse(await tools.get(name).execute(input, {})) };
+}
+
+const { schema, tool } = await import("../src/index.js");
+
+test("input shorthand becomes a JSON Schema; a full schema passes through", () => {
+  assert.deepEqual(schema({ sku: "string", qty: "number?", "note?": { type: "string", description: "Gift note." }, size: ["S", "M"] }), {
+    type: "object",
+    properties: {
+      sku: { type: "string" },
+      qty: { type: "number" },
+      note: { type: "string", description: "Gift note." },
+      size: { enum: ["S", "M"] },
+    },
+    required: ["sku", "size"],
+  });
+  assert.deepEqual(schema(), { type: "object", properties: {} });
+  const full = { type: "object", properties: { q: { type: "string" } } };
+  assert.equal(schema(full), full);
+});
+
+test("a tool answers with the standard envelope and checks its input", async () => {
+  const page = host();
+  const cart = [];
+  const { ready } = tool({
+    name: "add_to_cart",
+    description: "Add a product to the cart.",
+    input: { sku: "string", qty: "integer?", size: ["S", "M"] },
+    acts: true,
+    run: ({ sku, qty = 1 }) => (cart.push([sku, qty]), { items: cart.length }),
+  });
+  assert.equal(await ready, true);
+  const registered = page.tools.get("add_to_cart");
+  assert.deepEqual(registered.annotations, { consequentialHint: true });
+  assert.deepEqual(registered.inputSchema.required, ["sku", "size"]);
+
+  assert.deepEqual(await page.call("add_to_cart", { sku: "MUG", size: "S" }), { ok: true, data: { items: 1 } });
+  // Hosts may pass the input as a JSON string.
+  assert.equal((await page.call("add_to_cart", '{"sku":"CUP","size":"M","qty":2}')).ok, true);
+  assert.deepEqual(cart, [["MUG", 1], ["CUP", 2]]);
+
+  const missing = await page.call("add_to_cart", { size: "S" });
+  assert.deepEqual(missing.error, { code: "INVALID_INPUT", message: "`sku` is required", retryable: false });
+  assert.match((await page.call("add_to_cart", { sku: "MUG", size: "XL" })).error.message, /one of S, M/);
+  assert.match((await page.call("add_to_cart", { sku: "MUG", size: "S", qty: 1.5 })).error.message, /must be of type integer/);
+  assert.equal((await page.call("add_to_cart", "{nope")).error.code, "INVALID_INPUT");
+  assert.equal(cart.length, 2, "invalid input never reaches run()");
+});
+
+test("errors resolve as envelopes; a webmcpx code is kept", async () => {
+  const page = host();
+  tool({ name: "boom", description: "Fails.", run: () => { throw new Error("database down"); } });
+  tool({
+    name: "login_first",
+    description: "Needs a signed-in user.",
+    run: () => { throw Object.assign(new Error("sign in first"), { code: "REQUIRES_USER" }); },
+  });
+  tool({ name: "huge", description: "Too much.", run: () => "x".repeat(30_000) });
+  assert.deepEqual((await page.call("boom", {})).error, { code: "UNAVAILABLE", message: "database down", retryable: true });
+  assert.equal((await page.call("login_first", {})).error.code, "REQUIRES_USER");
+  const huge = await page.call("huge", {});
+  assert.equal(huge.error.code, "RESULT_TOO_LARGE");
+  assert.match(huge.hint, /page it/);
+});
+
+test("dispose and an aborted signal unregister; no WebMCP means a quiet no-op", async () => {
+  const page = host();
+  const handle = tool({ name: "a", description: "A.", run: () => 1 });
+  const controller = new AbortController();
+  tool({ name: "b", description: "B.", run: () => 2, signal: controller.signal });
+  assert.deepEqual([...page.tools.keys()], ["a", "b"]);
+  handle.dispose();
+  controller.abort();
+  assert.equal(page.tools.size, 0);
+
+  host({ webmcp: false });
+  assert.equal(await tool({ name: "c", description: "C.", run: () => 3 }).ready, false);
+});
+
+test("authoring mistakes are flagged in the console, with the linter's limits", async (t) => {
+  host();
+  const warn = t.mock.method(console, "warn", () => {});
+  tool({ name: "a_tool_name_that_goes_on_and_on_forever", description: "", run: () => 1 });
+  const messages = warn.mock.calls.map((c) => c.arguments[0]).join("\n");
+  assert.match(messages, /keep names under 30 chars/);
+  assert.match(messages, /say what it does/);
+});

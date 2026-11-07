@@ -48,7 +48,7 @@ wasm:
 
 # Loader end-to-end tests (needs `just wasm`).
 js-test:
-    cd packages/webmcpx && node --test
+    cd packages/webmcpx && npm test
 
 # Brotli size budgets (needs `just wasm`).
 size:

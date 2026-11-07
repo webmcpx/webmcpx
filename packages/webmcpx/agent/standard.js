@@ -3,7 +3,7 @@
 // engine runs here in Node. Nothing is injected into the page besides the W3C polyfill.
 import { readFileSync } from "node:fs";
 import { CODES, TOOLS } from "../src/generated.js";
-import { readPage } from "../src/index.js";
+import { readPage } from "../src/loader.js";
 
 export const STANDARD = ["get_page_context", "search_page", "fetch_as_markdown"];
 

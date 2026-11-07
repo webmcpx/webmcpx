@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use webmcpx_core::Code;
+use webmcpx_core::{Code, limits};
 use webmcpx_std::tools::ALL;
 
 fn render() -> String {
@@ -22,6 +22,15 @@ fn render() -> String {
             if code.retryable() { "true" } else { "false" },
             ",\n",
         ]);
+    }
+    out.push_str("};\n\n/** Authoring limits, in chars (webmcpx-core `limits`). */\nexport const LIMITS = {\n");
+    for (key, value) in [
+        ("NAME_WARN", limits::NAME_WARN),
+        ("DESCRIPTION_WARN", limits::DESCRIPTION_WARN),
+        ("TOOLS_WARN", limits::TOOLS_WARN),
+        ("OUTPUT_MAX", limits::OUTPUT_MAX),
+    ] {
+        out.extend(["  ", key, ": ", &value.to_string(), ",\n"]);
     }
     out.push_str("};\n");
     out

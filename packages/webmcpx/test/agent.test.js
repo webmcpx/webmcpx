@@ -2,6 +2,7 @@
 // flag). Needs `just wasm` and Chrome, Chromium, Edge or Brave (or WEBMCPX_CHROME).
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { createInterface } from "node:readline";
 import { after, before, test } from "node:test";
@@ -57,12 +58,41 @@ const NAMES = `<!doctype html><html><head><title>Names</title></head><body><main
 const FRAME = `<!doctype html><html><body><script>
   document.modelContext.registerTool({ name: "checkout", description: "Frame checkout.", execute: () => "frame" });
 </script></body></html>`;
-const PAGES = { "/shop": SHOP, "/plain": PLAIN, "/names": NAMES, "/frame": FRAME };
+// Declarative tools: forms with toolname, through the webmcpx script tag (served from this package).
+const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
+<script type="module" src="/pkg/src/auto.js"></script></head><body><main>
+<form toolname="search_mugs" tooldescription="Search the mug catalog." action="/search" method="get">
+  <label>Glaze <input name="glaze" required></label>
+  <input name="limit" type="number" min="1" max="20" toolparamdescription="How many results.">
+</form>
+<form toolname="Book a class" tooldescription="Book a pottery class." method="post" toolautosubmit>
+  <input name="name" required toolparamdescription="Who comes.">
+  <select name="day"><option>monday</option><option>friday</option></select>
+  <label><input type="checkbox" name="wheel"> Wheel</label>
+  <button>Book</button>
+</form>
+<script>
+  document.querySelector('form[method=post]').addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (event.agentInvoked) {
+      const data = Object.fromEntries(new FormData(event.target));
+      event.respondWith(Promise.resolve({ booked: data.name, day: data.day, wheel: data.wheel === "on" }));
+    }
+  });
+</script></main></body></html>`;
+const PAGES = { "/shop": SHOP, "/plain": PLAIN, "/names": NAMES, "/frame": FRAME, "/forms": FORMS };
+const PKG = new URL("../", import.meta.url);
 
 let server;
 let origin;
 before(async () => {
   server = createServer((req, res) => {
+    if (req.url.startsWith("/pkg/")) {
+      const file = new URL(`.${req.url.slice(4)}`, PKG);
+      if (!file.href.startsWith(PKG.href) || !existsSync(file)) return res.writeHead(404).end();
+      const type = file.pathname.endsWith(".wasm") ? "application/wasm" : "text/javascript";
+      return res.writeHead(200, { "Content-Type": type }).end(readFileSync(file));
+    }
     const strict = req.url === "/plain";
     if (!(req.url in PAGES)) return res.writeHead(404).end();
     res.writeHead(200, {
@@ -178,6 +208,39 @@ test("a tool listed earlier never runs another owner's tool", { skip, timeout: 9
     assert.equal(await session.call(drop, {}), "dropped");
     await session.tools(); // a refresh: the frame's checkout is now the only one
     await assert.rejects(session.call(top, {}), (e) => !/frame/.test(String(e?.message)));
+  } finally {
+    session.close();
+  }
+});
+
+test("<form toolname> becomes a tool an agent fills and submits", { skip, timeout: 90_000 }, async () => {
+  const session = new Session();
+  try {
+    const { tools } = await session.goto(`${origin}/forms`);
+    const search = tools.find((t) => t.name === "search_mugs");
+    const book = tools.find((t) => t.name === "Book_a_class");
+    assert.ok(search && book, tools.map((t) => t.name).join(", "));
+    assert.deepEqual(search.inputSchema, {
+      type: "object",
+      properties: {
+        glaze: { type: "string", description: "Glaze" },
+        limit: { type: "number", minimum: 1, maximum: 20, description: "How many results." },
+      },
+      required: ["glaze"],
+    });
+    // The polyfill fills in every annotation; GET forms read, others act.
+    assert.equal(search.annotations.readOnlyHint, true);
+    assert.equal(book.annotations.consequentialHint, true);
+    assert.deepEqual(book.inputSchema.properties.day, { type: "string", enum: ["monday", "friday"] });
+
+    // Without toolautosubmit the agent fills the form and leaves the submit to the user.
+    const filled = JSON.parse(await session.call(search, { glaze: "celadon", limit: 3 }));
+    assert.deepEqual(filled, { ok: true, data: { submitted: false, next: "Ask the user to review the form and submit it." } });
+    // With it, the page's submit handler sees agentInvoked and answers through respondWith().
+    const booked = JSON.parse(await session.call(book, { name: "Ana", day: "friday", wheel: true }));
+    assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true } });
+    const invalid = JSON.parse(await session.call(book, { day: "friday" }));
+    assert.equal(invalid.error.code, "INVALID_INPUT");
   } finally {
     session.close();
   }

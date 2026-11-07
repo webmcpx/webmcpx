@@ -11,21 +11,36 @@
     "directory": "packages/webmcpx"
   },
   "keywords": [
-    "webmcp",
-    "mcp",
-    "ai-agents",
-    "model-context",
-    "wasm",
-    "mcp-server",
     "agent",
-    "polyfill"
+    "ai-agents",
+    "mcp",
+    "mcp-server",
+    "model-context",
+    "polyfill",
+    "react",
+    "svelte",
+    "vue",
+    "wasm",
+    "webmcp"
   ],
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
       "default": "./src/index.js"
     },
-    "./auto": "./src/auto.js"
+    "./auto": "./src/auto.js",
+    "./react": {
+      "types": "./src/react.d.ts",
+      "default": "./src/react.js"
+    },
+    "./vue": {
+      "types": "./src/vue.d.ts",
+      "default": "./src/vue.js"
+    },
+    "./svelte": {
+      "types": "./src/svelte.d.ts",
+      "default": "./src/svelte.js"
+    }
   },
   "types": "./src/index.d.ts",
   "bin": {
@@ -44,7 +59,7 @@
     "./src/auto.js"
   ],
   "scripts": {
-    "test": "node --test"
+    "test": "node --test --experimental-test-module-mocks"
   },
   "engines": {
     "node": ">=22"
@@ -53,9 +68,28 @@
     "@w3c/webmcp-polyfill": "0.1.0"
   },
   "devDependencies": {
-    "linkedom": "0.18.15"
+    "linkedom": "0.18.15",
+    "react": "19.3.1",
+    "svelte": "5.57.3",
+    "vue": "3.5.45"
   },
   "bugs": {
     "url": "https://github.com/webmcpx/webmcpx/issues"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "svelte": ">=4",
+    "vue": ">=3.3"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    }
   }
 }

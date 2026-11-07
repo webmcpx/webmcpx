@@ -40,3 +40,41 @@ export const TOOLS: Record<ToolName, {
 export type Envelope<T = unknown> =
   | { ok: true; data: T; truncated?: true; next_cursor?: string; hint?: string }
   | { ok: false; error: { code: string; message: string; retryable: boolean }; hint?: string };
+
+/** An input field: a JSON type ("string", "number?" for optional), a list of choices, or a property schema. */
+export type InputField = string | readonly (string | number)[] | Record<string, unknown>;
+
+export interface ToolDefinition<I = any, O = unknown> {
+  /** 1–128 of A-Z a-z 0-9 _ . - (keep it under 30). */
+  name: string;
+  /** What it does and when to use it (under 500 chars). */
+  description: string;
+  /** Shorthand (`{ sku: "string", "qty?": "number", size: ["S", "M"] }`) or a JSON Schema with `type`. */
+  input?: Record<string, InputField> | { type: "object"; [key: string]: unknown };
+  /** Returns the data for `{ ok: true, data }`. Throw for errors; an error with a webmcpx `code` keeps it. */
+  run(input: I, client?: unknown): O | Promise<O>;
+  /** Only reads (readOnlyHint). */
+  readOnly?: boolean;
+  /** Changes something for the user: cart, booking, message (consequentialHint). */
+  acts?: boolean;
+  /** Returns third-party content, like reviews or comments (untrustedContentHint). */
+  untrusted?: boolean;
+  /** Abort to unregister. */
+  signal?: AbortSignal;
+}
+
+export interface ToolHandle {
+  /** Resolves true once registered, false where WebMCP is missing or the host refused it. */
+  ready: Promise<boolean>;
+  /** Unregisters the tool. */
+  dispose(): void;
+}
+
+/** Registers one of your own tools with the webmcpx contract. A no-op where WebMCP is missing. */
+export function tool<I = any, O = unknown>(definition: ToolDefinition<I, O>): ToolHandle;
+
+/** Exposes every `<form toolname>` as a tool (WebMCP declarative API), following DOM changes. */
+export function forms(): { dispose(): void };
+
+/** The JSON Schema an input shorthand stands for. */
+export function schema(input?: ToolDefinition["input"]): object;
