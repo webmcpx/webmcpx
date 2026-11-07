@@ -4,8 +4,8 @@ import { brotliCompressSync, constants } from "node:zlib";
 
 const PKG = new URL("../packages/webmcpx/", import.meta.url);
 const BUDGETS = [
-  // Loaded on every page: loader + tool contracts (3,400: reading only what a visitor sees costs ~60 B).
-  { name: "on load (auto.js + loader.js + generated.js)", files: ["src/auto.js", "src/loader.js", "src/generated.js"], max: 3_400 },
+  // Loaded on every page: loader + tool contracts (3,500: reading only what a visitor sees costs ~120 B).
+  { name: "on load (auto.js + loader.js + generated.js)", files: ["src/auto.js", "src/loader.js", "src/generated.js"], max: 3_500 },
   // Loaded only by pages with a <form toolname> and by sites that import tool(); most of it is the
   // input checker that keeps invalid input away from the site's own code (JSON Schema keywords and
   // combinators tool inputs use), so it is budgeted for correctness, not squeezed.

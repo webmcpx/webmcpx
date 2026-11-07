@@ -69,8 +69,9 @@ export function readPage(what, root) {
     }
   };
   const shown = (el) => !el || !skipped(el) && shown(el.parentElement);
-  root ??= [...document.querySelectorAll("main, [role=main], article")].find(shown) ?? document.body;
-  if (shown(root)) visit(root);
+  for (const el of root ? [root] : [...document.querySelectorAll("main, [role=main], article"), document.body]) {
+    if (shown(el) && (visit(el), out)) break;
+  }
   return out;
 }
 

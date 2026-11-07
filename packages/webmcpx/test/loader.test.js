@@ -181,3 +181,17 @@ test("the default content root is the first visible one", async () => {
   assert.doesNotMatch(md, /\$1\./);
   assert.match(md, /Visible price is \$20/);
 });
+
+test("a content root without visible text falls through to the next", async () => {
+  const page = host();
+  document.body.innerHTML = '<main class="invisible"><p>Hidden</p></main><article><p>Visible price</p></article>';
+  globalThis.getComputedStyle = (el) => ({ visibility: el.closest(".invisible") ? "hidden" : "visible" });
+  try {
+    await register({ wasm: WASM });
+    const md = (await page.call("fetch_as_markdown", {})).data.markdown;
+    assert.match(md, /Visible price/);
+    assert.doesNotMatch(md, /Hidden/);
+  } finally {
+    delete globalThis.getComputedStyle;
+  }
+});
