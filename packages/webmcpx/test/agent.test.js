@@ -70,7 +70,8 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <input name="total" value="40" readonly>
   <fieldset disabled><input name="coupon"></fieldset>
   <input name="name" required toolparamdescription="Who comes.">
-  <select name="day"><option>monday</option><option>friday</option></select>
+  <select name="day"><option>monday</option><option>friday</option><option disabled>sunday</option>
+    <optgroup label="Holidays" disabled><option>christmas</option></optgroup></select>
   <label><input type="checkbox" name="wheel"> Wheel</label>
   <label><input type="checkbox" name="glazes" value="celadon"> Celadon</label>
   <label><input type="checkbox" name="glazes" value="tenmoku"> Tenmoku</label>
@@ -277,6 +278,7 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     // The polyfill fills in every annotation; GET forms read, others act.
     assert.equal(search.annotations.readOnlyHint, true);
     assert.equal(book.annotations.consequentialHint, true);
+    // Disabled choices (and those in a disabled optgroup) are not offered.
     assert.deepEqual(book.inputSchema.properties.day, { type: "string", enum: ["monday", "friday"] });
 
     // Without toolautosubmit the agent fills the form and leaves the submit to the user.

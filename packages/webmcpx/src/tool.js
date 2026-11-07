@@ -195,7 +195,8 @@ export function formSchema(form) {
     } else if (type === "checkbox") p = { type: "boolean" };
     else if (type === "radio") (p = properties[name] ?? { type: "string", enum: [] }).enum.push(el.value);
     else if (el.tagName === "SELECT") {
-      p = { type: "string", enum: [...el.options].map((o) => o.value) };
+      // Disabled choices (or in a disabled optgroup) are not offered: a form would not send them.
+      p = { type: "string", enum: [...el.options].filter((o) => !o.matches(":disabled")).map((o) => o.value) };
       if (el.multiple) p = { type: "array", items: p };
     } else if (type === "number" || type === "range") {
       p = { type: "number", ...(el.min && { minimum: +el.min }), ...(el.max && { maximum: +el.max }) };
@@ -224,7 +225,7 @@ function fill(form, args) {
         if (el.checked !== on) el.click();
         continue;
       }
-      if (el.multiple) for (const o of el.options) o.selected = [].concat(value).includes(o.value);
+      if (el.multiple) for (const o of el.options) o.selected = !o.matches(":disabled") && [].concat(value).includes(o.value);
       else Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
       // Frameworks listen for these, not for property writes.
       el.dispatchEvent(new Event("input", { bubbles: true }));
