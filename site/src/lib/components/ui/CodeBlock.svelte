@@ -1,22 +1,27 @@
+<!-- A highlighted code block (HTML from `server/highlight.ts`) with an optional title bar and copy button. -->
 <script lang="ts">
-	let { code, label = 'Copy' }: { code: string; label?: string } = $props();
-	let copied = $state(false);
+	import type { Highlighted } from '#lib/content/snippets.ts';
+	import CopyButton from './CopyButton.svelte';
 
-	async function copy() {
-		await navigator.clipboard.writeText(code);
-		copied = true;
-		setTimeout(() => (copied = false), 1500);
+	interface Props {
+		snippet: Highlighted;
+		/** Shown in the title bar, e.g. a file name. Defaults to the language. */
+		title?: string;
+		copy?: boolean;
+		class?: string;
 	}
+
+	let { snippet, title, copy = true, class: className }: Props = $props();
 </script>
 
-<div class="group relative">
-	<pre
-		class="overflow-x-auto rounded-xl bg-zinc-900 p-4 pr-20 font-mono text-sm leading-relaxed text-zinc-100 dark:bg-zinc-900/80 dark:ring-1 dark:ring-zinc-800"><code>{code}</code></pre>
-	<button
-		type="button"
-		onclick={copy}
-		class="absolute top-3 right-3 rounded-md bg-zinc-700 px-2 py-1 shadow-[-12px_0_12px_var(--color-zinc-900)] text-xs text-zinc-100 hover:bg-zinc-600"
-	>
-		{copied ? 'Copied' : label}
-	</button>
-</div>
+<figure class={['min-w-0 overflow-hidden rounded-2xl border border-border bg-code', className]}>
+	<figcaption class="flex h-11 items-center justify-between gap-3 border-b border-border pr-1.5 pl-4">
+		<span class="truncate font-mono text-xs text-subtle">{title ?? snippet.lang}</span>
+		{#if copy}
+			<CopyButton text={snippet.code} label="Copy {title ?? snippet.lang} code" class="size-8" />
+		{/if}
+	</figcaption>
+	<!-- Shiki escapes the code; the HTML is generated at build time from our own snippets. -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	<div class="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed">{@html snippet.html}</div>
+</figure>
