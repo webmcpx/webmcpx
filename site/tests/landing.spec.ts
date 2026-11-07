@@ -157,6 +157,22 @@ test('an agent-ready site can pick one of three badge styles, each embedded inli
 	await expect(embed).not.toContainText('<img');
 });
 
+test('the menu marks the section in view and opens on phones', async ({ page }) => {
+	await page.goto('/');
+	const menu = page.getByRole('navigation', { name: 'Main' });
+	await menu.getByRole('link', { name: 'Benchmark' }).first().click();
+	await expect(menu.getByRole('link', { name: 'Benchmark' }).first()).toHaveAttribute('aria-current', 'true');
+	await menu.getByRole('link', { name: 'vs MCP' }).first().click();
+	await expect(menu.getByRole('link', { name: 'vs MCP' }).first()).toHaveAttribute('aria-current', 'true');
+	await expect(menu.locator('[aria-current]')).toHaveCount(1);
+
+	await page.setViewportSize({ width: 390, height: 844 });
+	await menu.locator('summary').click();
+	await menu.getByRole('link', { name: 'Install' }).last().click();
+	await expect(page).toHaveURL(/#fix$/);
+	await expect(menu.getByRole('link', { name: 'Install' }).last()).toBeHidden();
+});
+
 test('scanning a site shows the verdict and its tools', async ({ page }) => {
 	const seen = await mockScan(page);
 	await page.goto('/');
