@@ -125,6 +125,19 @@ test('hovering or focusing a tool shows its description', async ({ page }) => {
 	await expect(tip).toHaveCount(0);
 });
 
+test('a long tool description wraps inside the tooltip on a phone', async ({ page }) => {
+	await page.setViewportSize({ width: 390, height: 844 });
+	const long = 'x'.repeat(100);
+	await mockScan(page, { ...REPORT, tools: [{ ...REPORT.tools[0], description: long }] });
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await page.getByRole('list', { name: 'Tools found' }).getByRole('button').first().focus();
+	await expect(page.locator('body > div.absolute')).toHaveText(long);
+	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
+	expect(overflow).toBeLessThanOrEqual(0);
+});
+
 test('an agent-ready site can pick one of three badge styles, each embedded inline', async ({ page }) => {
 	await mockScan(page);
 	await page.goto('/');

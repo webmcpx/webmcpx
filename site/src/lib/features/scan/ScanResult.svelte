@@ -246,7 +246,7 @@
 	<div
 		{@attach portal}
 		aria-hidden="true"
-		class="pointer-events-none absolute z-50 w-max max-w-[min(20rem,calc(100vw-2rem))] rounded-xl border-2 border-ink bg-ink px-3 py-2 text-sm text-paper shadow-hard-sm"
+		class="pointer-events-none absolute z-50 w-max max-w-[min(20rem,calc(100vw-2rem))] rounded-xl border-2 border-ink bg-ink px-3 py-2 text-sm wrap-anywhere text-paper shadow-hard-sm"
 		style:left="{tip.left}px"
 		style:top="{tip.top}px"
 		style:translate={tip.above ? '0 -100%' : undefined}
