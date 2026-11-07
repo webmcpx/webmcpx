@@ -1,6 +1,5 @@
-// Your own tools with the standard tools' contract (one result shape, validated input, never a
-// rejection), and the WebMCP declarative API (<form toolname>, webmcp's declarative-api-explainer.md)
-// in browsers that expose WebMCP without it.
+// Your own tools, with the standard tools' contract, and <form toolname> (webmcp's
+// declarative-api-explainer.md) where the browser lacks it.
 import { CODES, LIMITS } from "./generated.js";
 
 const context = () => globalThis.document?.modelContext ?? globalThis.navigator?.modelContext;
@@ -146,7 +145,7 @@ export function formSchema(form) {
     const { name, type } = el;
     if (!fillable(el)) continue;
     let p;
-    // One checkbox is a yes/no; several with one name are a set of choices.
+    // Several checkboxes with one name: a set of choices.
     if (type === "checkbox" && [...form.elements].filter((e) => e.name === name && fillable(e)).length > 1) {
       (p = properties[name] ?? { type: "array", items: { enum: [] } }).items.enum.push(el.value);
     } else if (type === "checkbox") p = { type: "boolean" };
@@ -157,14 +156,13 @@ export function formSchema(form) {
     } else if (type === "number" || type === "range") {
       p = { type: "number", ...(el.min && { minimum: +el.min }), ...(el.max && { maximum: +el.max }) };
     } else p = { type: "string", ...(FORMATS[type] && { format: FORMATS[type] }) };
-    // A choice's label names that choice, not the field.
     const description =
       el.getAttribute("toolparamdescription") || (!p.items && (el.labels?.[0]?.textContent.trim() || el.getAttribute("placeholder")));
     if (description) p.description = description;
     properties[name] = p;
     if (el.required && !required.includes(name)) required.push(name);
   }
-  // Only the fields it shows: hidden, password and disabled controls are never set by an agent.
+  // Only fields it shows: never hidden, password or disabled ones.
   return { type: "object", properties, ...(required.length && { required }), additionalProperties: false };
 }
 
@@ -176,8 +174,7 @@ function fill(form, args) {
   for (const [name, value] of Object.entries(args)) {
     const field = form.elements.namedItem(name);
     for (const el of (field instanceof Element ? [field] : [...(field ?? [])]).filter(fillable)) {
-      // A click and the native setter, as a user would: React and others track the value themselves and
-      // ignore a plain property write.
+      // Click / native setter: frameworks (React) ignore plain property writes.
       const on = el.type === "checkbox" ? ([].concat(value).includes(el.value) || value === true) : el.value === String(value);
       if (el.type === "checkbox" || el.type === "radio") {
         if (el.checked !== on) el.click();
