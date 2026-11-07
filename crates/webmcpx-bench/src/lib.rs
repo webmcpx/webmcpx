@@ -2,8 +2,10 @@
 //! success, tokens, time and cost. See `bench/AGENTS.md`.
 
 pub mod agent;
+pub mod anthropic;
 pub mod arm;
 pub mod cdp;
+pub mod gemini;
 pub mod model;
 pub mod proxy;
 pub mod report;

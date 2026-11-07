@@ -1,7 +1,8 @@
-//! The model boundary: an OpenAI Responses API client, and the `Model` trait the agent loop
-//! depends on (tests swap in a scripted model).
+//! The model boundary: the `Model` trait the agent loop depends on (tests swap in a scripted
+//! model), `Client` (picks the provider from the model name), and the OpenAI client. The Anthropic
+//! and Gemini clients live in `anthropic.rs` and `gemini.rs`.
 //!
-//! Responses API, not Chat Completions: reasoning models such as `gpt-6-luna` only accept function
+//! OpenAI: the Responses API, not Chat Completions: reasoning models such as `gpt-6-luna` only accept function
 //! tools together with `reasoning.effort` there. Calls are stateless (`store: false`); reasoning items
 //! come back encrypted and are sent back verbatim on the next turn.
 
@@ -257,41 +258,99 @@ impl Model for OpenAi {
             tools,
         );
         let url = format!("{}/responses", self.base_url);
-        let mut delay = Duration::from_secs(2);
-        for attempt in 1..=4 {
-            let response = self
-                .http
-                .post(&url)
-                .bearer_auth(&self.api_key)
-                .json(&body)
-                .send()
-                .await;
-            let retry = match response {
-                Ok(r) if r.status().is_success() => return parse_reply(&r.json().await?),
-                Ok(r) if r.status() == 429 || r.status().is_server_error() => {
-                    format!("HTTP {}", r.status())
-                }
-                Ok(r) => {
-                    let status = r.status();
-                    bail!(
-                        "{url}: HTTP {status}: {}",
-                        r.text().await.unwrap_or_default()
-                    );
-                }
-                Err(e) if e.is_timeout() || e.is_connect() => e.to_string(),
-                Err(e) => return Err(e.into()),
-            };
-            if attempt == 4 {
-                bail!("{url}: giving up after {attempt} attempts: {retry}");
-            }
-            tokio::time::sleep(delay).await;
-            delay *= 2;
-        }
-        unreachable!("the loop returns or bails")
+        let response = post_json(&url, &body, || {
+            self.http.post(&url).bearer_auth(&self.api_key)
+        })
+        .await?;
+        parse_reply(&response)
     }
 }
 
-/// USD per million tokens (Standard tier, prompts up to 272K tokens).
+/// Posts `body` and returns the JSON response, retrying rate limits, overload (5xx, Anthropic's
+/// 529), timeouts and refused connections with backoff. `request` builds a fresh request per attempt.
+pub(crate) async fn post_json(
+    url: &str,
+    body: &Value,
+    request: impl Fn() -> reqwest::RequestBuilder,
+) -> Result<Value> {
+    let mut delay = Duration::from_secs(2);
+    for attempt in 1..=5 {
+        let retry = match request().json(body).send().await {
+            Ok(r) if r.status().is_success() => return Ok(r.json().await?),
+            Ok(r) if r.status() == 429 || r.status().is_server_error() => {
+                format!("HTTP {}", r.status())
+            }
+            Ok(r) => {
+                let status = r.status();
+                bail!(
+                    "{url}: HTTP {status}: {}",
+                    r.text().await.unwrap_or_default()
+                );
+            }
+            Err(e) if e.is_timeout() || e.is_connect() => e.to_string(),
+            Err(e) => return Err(e.into()),
+        };
+        if attempt == 5 {
+            bail!("{url}: giving up after {attempt} attempts: {retry}");
+        }
+        tokio::time::sleep(delay).await;
+        delay *= 2;
+    }
+    unreachable!("the loop returns or bails")
+}
+
+/// Which API serves a model, from its name.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Provider {
+    OpenAi,
+    Anthropic,
+    Gemini,
+}
+
+impl Provider {
+    pub fn of(model: &str) -> Self {
+        if model.starts_with("claude-") {
+            Self::Anthropic
+        } else if model.starts_with("gemini-") {
+            Self::Gemini
+        } else {
+            Self::OpenAi
+        }
+    }
+}
+
+/// A client for any supported provider. `effort` is the same scale everywhere (low, medium, high):
+/// OpenAI `reasoning.effort`, Anthropic `output_config.effort`, Gemini `thinking_level`.
+pub enum Client {
+    OpenAi(OpenAi),
+    Anthropic(crate::anthropic::Anthropic),
+    Gemini(crate::gemini::Gemini),
+}
+
+impl Client {
+    /// Reads the provider's API key from the environment.
+    pub fn from_env(model: String, effort: Option<String>) -> Result<Self> {
+        Ok(match Provider::of(&model) {
+            Provider::OpenAi => Self::OpenAi(OpenAi::from_env(model, effort)?),
+            Provider::Anthropic => {
+                Self::Anthropic(crate::anthropic::Anthropic::from_env(model, effort)?)
+            }
+            Provider::Gemini => Self::Gemini(crate::gemini::Gemini::from_env(model, effort)?),
+        })
+    }
+}
+
+impl Model for Client {
+    async fn complete(&self, messages: &[Message], tools: &[ToolSpec]) -> Result<Reply> {
+        match self {
+            Self::OpenAi(m) => m.complete(messages, tools).await,
+            Self::Anthropic(m) => m.complete(messages, tools).await,
+            Self::Gemini(m) => m.complete(messages, tools).await,
+        }
+    }
+}
+
+/// USD per million tokens (standard tier, at the shortest prompt-length tier).
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Price {
     pub input: f64,
@@ -299,7 +358,8 @@ pub struct Price {
     pub output: f64,
 }
 
-/// Cache writes (default 30-minute TTL) cost this multiple of the uncached input rate.
+/// Cache writes cost this multiple of the uncached input rate (OpenAI's default TTL, Anthropic's
+/// 5-minute TTL; Gemini's implicit cache has no write charge and reports no writes).
 pub const CACHE_WRITE_MULTIPLIER: f64 = 1.25;
 
 impl Price {
@@ -317,12 +377,20 @@ impl Price {
     }
 }
 
-/// Official list prices, read from <https://developers.openai.com/api/docs/pricing> on 2026-11-06.
-/// Unknown models have no cost; pass `--price` instead.
+/// Official list prices. Unknown models have no cost; pass `--price` instead. Read on:
+/// - OpenAI, 2026-11-06: <https://developers.openai.com/api/docs/pricing>
+/// - Anthropic, 2026-11-07: <https://platform.claude.com/docs/en/about-claude/pricing> (Haiku: prompts
+///   up to 100K tokens)
+/// - Google, 2026-11-07: <https://aistudio.google.com/docs/pricing> (Gemini 4 Argon until 2026-11-30;
+///   Gemini 3.8 Flash until 2026-12-31). A run stores the price it used.
 pub fn list_price(model: &str) -> Option<Price> {
     let (input, cached_input, output) = match model {
         "gpt-6-luna" => (0.10, 0.01, 0.50),
         "gpt-6.1-sol" => (2.00, 0.10, 10.00),
+        "claude-haiku-5-5" => (0.10, 0.01, 0.50),
+        "claude-opus-5-5" => (4.00, 0.20, 20.00),
+        "gemini-3.8-flash" => (0.75, 0.075, 3.75),
+        "gemini-4-argon" => (2.00, 0.10, 10.00),
         _ => return None,
     };
     Some(Price {
@@ -454,6 +522,13 @@ mod tests {
             "{}",
             price.cost(usage)
         );
+    }
+
+    #[test]
+    fn provider_from_model_name() {
+        assert_eq!(Provider::of("gpt-6-luna"), Provider::OpenAi);
+        assert_eq!(Provider::of("claude-haiku-5-5"), Provider::Anthropic);
+        assert_eq!(Provider::of("gemini-4-argon"), Provider::Gemini);
     }
 
     #[test]
