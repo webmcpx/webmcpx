@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import bench from '#lib/content/bench.json';
+import bench from '#lib/content/bench/gpt-6-luna.json';
 import snapshot from '#lib/content/tools.json';
 import { parse, type Results, type RunInfo } from './bench.ts';
 import { siteTools, toolsFor } from './tools.ts';

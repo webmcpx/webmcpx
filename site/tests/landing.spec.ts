@@ -158,6 +158,31 @@ test('the site filter shows each site and each question on its own, never averag
 	await expect(proof.getByText(/average/i)).toHaveCount(0);
 });
 
+test('the model switcher shows each model on its own run', async ({ page }) => {
+	await page.goto('/#proof');
+	const proof = page.locator('#proof');
+	const models = proof.getByRole('tablist', { name: 'Model' }).getByRole('tab');
+	await expect(models.first()).toHaveAttribute('aria-selected', 'true');
+	await expect(models.first()).toContainText('GPT-6 Luna');
+	const ids = await proof
+		.locator('a[href*="/content/bench/"]')
+		.evaluateAll((links) => links.map((a) => a.getAttribute('href')?.match(/bench\/(.+)\.json$/)?.[1]));
+	expect(ids.length).toBe(await models.count());
+	for (const [i, id] of ids.entries()) {
+		await models.nth(i).click();
+		await expect(models.nth(i)).toHaveAttribute('aria-selected', 'true');
+		// Only the selected model's run is shown: its results link and its method.
+		await expect(proof.getByRole('link', { name: 'All results' })).toHaveAttribute(
+			'href',
+			new RegExp(`bench/${id}\\.json$`)
+		);
+		await proof.getByRole('tab', { name: 'Method' }).click();
+		await expect(
+			proof.getByText(new RegExp(`^${id}, reasoning medium`)).filter({ visible: true })
+		).toHaveCount(1);
+	}
+});
+
 test('a site with several questions rotates them, and the rotation can be paused', async ({ page }) => {
 	await page.clock.install();
 	await page.goto('/#proof');
@@ -231,7 +256,10 @@ test('the page says its benchmark shows selected cases and links to all results'
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
 	await expect(proof.getByText(/Selected cases: \d+ of \d+ questions/)).toBeVisible();
-	await expect(proof.getByRole('link', { name: 'All results' })).toHaveAttribute('href', /bench\.json$/);
+	await expect(proof.getByRole('link', { name: 'All results' })).toHaveAttribute(
+		'href',
+		/bench\/[^/]+\.json$/
+	);
 	// Sites without an impressive case are not shown.
 	await expect(proof.getByRole('tab', { name: /WooCommerce/ })).toHaveCount(0);
 });

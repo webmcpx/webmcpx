@@ -25,12 +25,6 @@
 <Hero scriptTag={page.code.scriptTag} />
 <LogoWall />
 {#if page.best}<Why bestSaving={page.best.saving} bestSite={page.best.site} />{/if}
-<Proof
-	results={page.results}
-	sites={page.sites}
-	tools={page.tools}
-	totalQuestions={page.totalQuestions}
-	reproduce={page.code.reproduce}
-/>
+<Proof runs={page.runs} reproduce={page.code.reproduce} />
 <Fix scriptTag={page.code.scriptTag} />
 <Issues />

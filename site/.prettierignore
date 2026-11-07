@@ -2,7 +2,7 @@ build/
 .svelte-kit/
 node_modules/
 package-lock.json
-src/lib/content/bench.json
+src/lib/content/bench/
 test-results/
 playwright-report/
 src/lib/content/tools.json

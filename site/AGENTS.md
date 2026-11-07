@@ -28,10 +28,10 @@ src/
   lib/components/layout/     Header, Footer, Logo
   lib/features/<section>/    one folder per page section; logic in .ts with a *.spec.ts next to it
                              (scan/ holds the API client and the shared scanner state)
-  lib/content/               copy, links, code samples, issues, verified sites, bench.json (data only)
+  lib/content/               copy, links, code samples, issues, verified sites, bench/<model>.json (data only)
   lib/motion/                Reveal (scroll-in) and its attachment
   lib/server/                build-time only (shiki); never imported by components
-  routes/                    +page.server.ts highlights code and trims bench.json at build time;
+  routes/                    +page.server.ts highlights code and trims each bench/<model>.json at build time;
                              brand/ is the brand manual and design system
 tests/                       Playwright e2e against the prerendered build
 ```
@@ -74,7 +74,9 @@ tests/                       Playwright e2e against the prerendered build
 
 ## Data and copy
 
-- `lib/content/bench.json` is copied from `bench/results/latest.json` by `just bench`; never edit it by hand
+- `lib/content/bench/<model>.json` (one per model) is copied from `bench/results/latest.json` by `just bench`;
+  a model switcher picks the run (`lib/content/models.ts`: cheap and frontier per provider, provider logos
+  in `logos.ts`), and the site and detail tabs stay put across models. Never edit a results file by hand
   and never publish numbers that did not come from a run. Each run records where every task ran and what it
   asked (`tasks`, schema 3); the page groups results per site from that (`features/benchmark/sites.ts`),
   never from today's `bench/tasks`. Display names live in `lib/content/benchSites.ts`. The summary is

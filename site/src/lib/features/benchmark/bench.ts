@@ -74,6 +74,16 @@ export function compare(baseline: number, webmcp: number, better: string, worse:
 /** Cost per 1,000 tasks, easier to read than fractions of a cent. */
 export const perThousand = (usd: number | null) => (usd == null ? 'n/a' : `$${(usd * 1000).toFixed(2)}`);
 
+/** One model's published run as the landing gets it: runs stripped, sites selected (see sites.ts). */
+export interface ModelRun {
+	results: Results;
+	sites: import('./sites.ts').BenchSite[];
+	/** Per question: the site's WebMCP tools and the calls the agent made. */
+	tools: Record<string, import('./tools.ts').QuestionTools>;
+	/** Questions in the whole run, of which `sites` shows a selection. */
+	totalQuestions: number;
+}
+
 /** Accepts the JSON written by the harness; fails the build on an unknown schema. */
 export function parse(data: unknown): Results {
 	const version = (data as { schema_version?: unknown } | null)?.schema_version;
