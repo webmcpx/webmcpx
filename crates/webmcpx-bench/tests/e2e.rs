@@ -480,6 +480,8 @@ async fn the_snapshot_reads_through_display_contents_wrappers() {
     let page = format!(
         r#"<title>t</title><div style="display: contents"><main><h1>Care</h1><p>{words}</p>
         <details><summary>Returns</summary><div style="display: contents">SECRET-UNTIL-OPENED<p>NESTED-SECRET</p></div></details>
+        <div id="cv" style="content-visibility: hidden"><div style="display: contents">CV-SECRET</div></div>
+        <div style="visibility: hidden"><div style="display: contents">VIS-SECRET</div></div>
         </main></div>"#
     );
     let site = serve_html(axum::Router::new().route(
@@ -507,16 +509,24 @@ async fn the_snapshot_reads_through_display_contents_wrappers() {
     let snapshot = page.eval("__bench.snapshot()").await.unwrap();
     let snapshot = snapshot.as_str().unwrap();
     assert!(snapshot.contains("Kettles carry"), "{snapshot}");
-    assert!(
-        !snapshot.contains("SECRET-UNTIL-OPENED") && !snapshot.contains("NESTED-SECRET"),
-        "{snapshot}"
-    );
-    page.eval("document.querySelector('details').open = true")
-        .await
-        .unwrap();
+    for hidden in [
+        "SECRET-UNTIL-OPENED",
+        "NESTED-SECRET",
+        "CV-SECRET",
+        "VIS-SECRET",
+    ] {
+        assert!(!snapshot.contains(hidden), "{hidden} leaked:\n{snapshot}");
+    }
+    page.eval(
+        "document.querySelector('details').open = true; \
+         document.getElementById('cv').style.contentVisibility = 'visible'",
+    )
+    .await
+    .unwrap();
     let opened = page.eval("__bench.snapshot()").await.unwrap();
+    let opened = opened.as_str().unwrap();
     assert!(
-        opened.as_str().unwrap().contains("SECRET-UNTIL-OPENED"),
+        opened.contains("SECRET-UNTIL-OPENED") && opened.contains("CV-SECRET"),
         "{opened}"
     );
 }

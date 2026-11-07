@@ -28,13 +28,18 @@
       line = "";
     };
     // Text directly inside a `display: contents` element has no element of its own to ask
-    // checkVisibility(), and a closed <details> still lays it out (content-visibility: hidden). It is
-    // hidden when an ancestor hides it: a closed <details> (outside its <summary>) or [hidden].
+    // checkVisibility(), and hidden content can still be laid out (content-visibility: hidden, a closed
+    // <details>). So check what checkVisibility() would: every ancestor up to the first one with a box
+    // (whose own checkVisibility() the walk already passed, covering everything above it).
     const textShown = (text) => {
-      const el = text.parentElement;
-      if (el?.closest("[hidden]")) return false;
-      const closed = el?.closest("details:not([open])");
-      return !closed || Boolean(el.closest("summary")?.parentElement === closed);
+      if (getComputedStyle(text.parentElement).visibility !== "visible") return false;
+      for (let el = text.parentElement; el; el = el.parentElement) {
+        const style = getComputedStyle(el);
+        if (style.contentVisibility === "hidden" || el.hidden) return false;
+        if (el.tagName === "DETAILS" && !el.open && !text.parentElement.closest("summary")) return false;
+        if (style.display !== "contents") return true;
+      }
+      return true;
     };
     const walk = (node, throughContents = false) => {
       for (const child of node.childNodes) {
