@@ -1,9 +1,16 @@
-# The public entry: automatic HTTPS for WEBMCPX_DOMAIN, then the site and scan API (the `web` service).
+# Behind the Cloudflare tunnel (which terminates TLS): headers, cache rules and compression for the site
+# and scan API (the `web` service). Plain HTTP on the internal network only.
 {
 	admin off
+	auto_https off
+	servers {
+		# Only cloudflared reaches Caddy; the visitor's address comes in CF-Connecting-IP.
+		trusted_proxies static private_ranges
+		client_ip_headers CF-Connecting-IP
+	}
 }
 
-{$WEBMCPX_DOMAIN} {
+:8080 {
 	encode zstd gzip
 
 	header {

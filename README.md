@@ -122,11 +122,13 @@ Everything is checked by one command, the same one CI runs: `just check`.
 
 ## Self-hosting the site and scanner
 
-[`deploy/`](deploy) runs webmcpx.dev: distroless, nonroot images behind Caddy, with the scan browser
-isolated on a network that can only reach public addresses through an egress filter.
+[`deploy/`](deploy) runs webmcpx.dev: distroless, nonroot images behind a Cloudflare Tunnel (no open
+ports), with the scan browser isolated on a network that can only reach public addresses through an
+egress filter.
 
 ```sh
-WEBMCPX_DOMAIN=example.com docker compose -f deploy/compose.yaml up -d --build
+echo "TUNNEL_TOKEN=<token>" > deploy/.env
+docker compose -f deploy/compose.yaml --env-file deploy/.env up -d --build
 ```
 
 See [deploy/README.md](deploy/README.md) for the security model and a rootless setup.

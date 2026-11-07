@@ -1,13 +1,16 @@
 # webmcpx in production: three containers, least privilege each.
 #
-#   internet ──443──▶ caddy ──edge──▶ web ──scan (internal, no internet)──▶ chrome
-#                                      ▲                                       │
-#                                      └──── egress proxy (public IPs only) ◀──┘
+#   visitors ─▶ Cloudflare ◀─outbound tunnel─ cloudflared ──edge──▶ caddy ──▶ web ──scan──▶ chrome
+#                                                                             ▲            │
+#                                                     egress proxy (public IPs only) ◀─────┘
+#
+# No port is published: cloudflared dials out to Cloudflare, which terminates TLS. The `scan` network is
+# internal (no internet).
 #
 # Chrome has no route to the network of its own: every request it makes goes through the egress proxy in
 # `web`, which resolves hosts itself and refuses private, loopback and reserved addresses (see
-# crates/webmcpx-bench/src/proxy.rs). Run: `docker compose -f deploy/compose.yaml up -d --build`,
-# with WEBMCPX_DOMAIN set (see deploy/README.md).
+# crates/webmcpx-bench/src/proxy.rs). Run: `docker compose -f deploy/compose.yaml --env-file deploy/.env
+# up -d --build`, with TUNNEL_TOKEN set (see deploy/README.md).
 
 name: webmcpx
 
@@ -20,13 +23,21 @@ x-hardening: &hardening
     options: { max-size: 10m, max-file: "3" }
 
 services:
+  tunnel:
+    <<: *hardening
+    image: cloudflare/cloudflared:2026.10.7
+    # A remotely managed tunnel: its public hostname (-> http://caddy:8080) is set in Cloudflare.
+    command: [tunnel, --no-autoupdate, run]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN in deploy/.env}
+    read_only: true
+    networks: [edge]
+    depends_on: [caddy]
+
   caddy:
     <<: *hardening
     build: { context: .., dockerfile: deploy/caddy.Dockerfile }
     read_only: true
-    environment:
-      WEBMCPX_DOMAIN: ${WEBMCPX_DOMAIN:?set WEBMCPX_DOMAIN, e.g. webmcpx.dev}
-    ports: ["80:80", "443:443", "443:443/udp"]
     volumes: [caddy-data:/data, caddy-config:/config]
     networks: [edge]
     depends_on: [web]
