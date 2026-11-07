@@ -325,7 +325,7 @@ const es: Messages = {
 			fetch_as_markdown: 'lee la página por partes',
 			get_page_context: 'sabe dónde está'
 		},
-		facts: '~2,8 KB al cargar · Rust + WebAssembly · MIT',
+		facts: '~3,2 KB al cargar · Rust + WebAssembly · MIT',
 		see: {
 			title: 'Míralo funcionar en cualquier agente, ya',
 			lead: 'Dale a tu agente de código las herramientas WebMCP de cada página que abra. Sin flags en el navegador: recibe el polyfill del W3C antes de que cargue la página, así que las herramientas de tu sitio también funcionan.',
@@ -336,6 +336,17 @@ const es: Messages = {
 			docs: 'docs de OpenAI'
 		},
 		agent: 'O pídeselo a tu agente de código:'
+	},
+
+	own: {
+		title: 'Tus propias herramientas, en cinco líneas',
+		lead: 'Las herramientas estándar leen la página. Las tuyas actúan: añaden al carrito, reservan mesa, filtran resultados. Mismo contrato: entrada validada, un único formato de resultado, nada de fallos silenciosos.',
+		notes: {
+			form: 'Sin JavaScript: la API declarativa de WebMCP. La etiqueta de script la añade donde el navegador aún no la tiene.',
+			js: 'Desde npm, o importada desde el mismo CDN que la etiqueta de script.',
+			hook: 'Registrada mientras el componente está montado; desaparece al desmontarlo.'
+		},
+		check: 'Luego compruébalo, sin flags en el navegador: {cmd}'
 	},
 
 	issues: {

@@ -5,7 +5,16 @@ import { createHighlighterCore, type HighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { CodeSample, Highlighted } from '#lib/content/snippets.ts';
 
-const LANGS = { html: 'html', js: 'javascript', sh: 'shellscript', json: 'json', text: 'text' } as const;
+const LANGS = {
+	html: 'html',
+	js: 'javascript',
+	jsx: 'jsx',
+	vue: 'vue',
+	svelte: 'svelte',
+	sh: 'shellscript',
+	json: 'json',
+	text: 'text'
+} as const;
 
 let highlighter: Promise<HighlighterCore> | undefined;
 
@@ -15,6 +24,9 @@ function load() {
 		langs: [
 			import('shiki/langs/html.mjs'),
 			import('shiki/langs/javascript.mjs'),
+			import('shiki/langs/jsx.mjs'),
+			import('shiki/langs/vue.mjs'),
+			import('shiki/langs/svelte.mjs'),
 			import('shiki/langs/shellscript.mjs'),
 			import('shiki/langs/json.mjs')
 		],

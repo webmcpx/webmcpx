@@ -226,7 +226,7 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await expect(page.getByText('Not yet')).toBeVisible();
 	// The fix is right there, ready to copy.
 	const fix = page.locator('#scan').getByRole('figure').filter({ hasText: 'index.html' });
-	await expect(fix).toContainText('cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js');
+	await expect(fix).toContainText('cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js');
 	await expect(fix.getByRole('button', { name: /Copy/ })).toBeVisible();
 });
 
@@ -500,4 +500,26 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	// The badge SVG is inlined: the embed loads nothing from our server.
 	await expect(embed).toContainText('<svg');
 	await expect(embed).not.toContainText('<img');
+});
+
+test('your own tools: one tool, written five ways, as keyboard-friendly tabs', async ({ page }) => {
+	await page.goto('/#own');
+	const own = page.locator('#own');
+	const tabs = own.getByRole('tab');
+	await expect(tabs).toHaveText(['HTML', 'JavaScript', 'React', 'Vue', 'Svelte']);
+	await expect(own.getByRole('tabpanel')).toHaveCount(1);
+	await expect(own.getByRole('tabpanel')).toContainText('toolname="search_flights"');
+	await tabs.first().focus();
+	await page.keyboard.press('ArrowRight');
+	await page.keyboard.press('ArrowRight');
+	await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'true');
+	await expect(own.getByRole('tabpanel')).toContainText('from "webmcpx/react"');
+	await expect(own.getByText('npx webmcpx tools localhost:3000')).toBeVisible();
+});
+
+test('without JavaScript every way to write a tool still shows', async ({ browser }) => {
+	const page = await browser.newPage({ javaScriptEnabled: false });
+	await page.goto('/');
+	await expect(page.locator('#own [role=tabpanel]')).toHaveCount(5);
+	await page.close();
 });

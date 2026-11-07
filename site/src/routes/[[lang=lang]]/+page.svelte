@@ -7,6 +7,7 @@
 	import Meta from '#lib/components/layout/Meta.svelte';
 	import Divider from '#lib/components/ui/Divider.svelte';
 	import Fix from '#lib/features/fix/Fix.svelte';
+	import Own from '#lib/features/own/Own.svelte';
 	import Hero from '#lib/features/hero/Hero.svelte';
 	import Issues from '#lib/features/issues/Issues.svelte';
 	import LogoWall from '#lib/features/logos/LogoWall.svelte';
@@ -26,6 +27,8 @@
 <LogoWall />
 <Divider />
 <Fix scriptTag={page.code.scriptTag} agentPrompt={page.code.agentPrompt} agentMcp={page.code.agentMcp} />
+<Divider />
+<Own samples={page.own} />
 {#if page.best}
 	<Divider />
 	<Why bestSaving={page.best.saving} bestSite={page.best.site} />

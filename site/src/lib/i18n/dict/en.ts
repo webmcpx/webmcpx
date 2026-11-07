@@ -427,7 +427,7 @@ const en = {
 			get_page_context: 'knows where it is'
 		},
 		// Small capitals, max 50.
-		facts: '~2.8 KB on load · Rust + WebAssembly · MIT license',
+		facts: '~3.2 KB on load · Rust + WebAssembly · MIT license',
 		// "See it work": where to watch the tools being called. {docs}, {flag} and {meta} are links or code;
 		// ChatGPT, Codex, Chrome, DevTools, Application and WebMCP are product and panel names: keep them.
 		see: {
@@ -440,6 +440,17 @@ const en = {
 		},
 		// Above the prompt people paste into their coding agent (the prompt itself stays in English).
 		agent: 'Or ask your coding agent:'
+	},
+
+	own: {
+		title: 'Your own tools, in five lines',
+		lead: 'The standard tools read the page. Yours act: add to cart, book a table, filter results. Same contract: checked input, one result shape, no silent failures.',
+		notes: {
+			form: 'No JavaScript: the WebMCP declarative API. The script tag adds it where the browser doesn’t have it yet.',
+			js: 'From npm, or imported from the same CDN as the script tag.',
+			hook: 'Registered while the component is mounted, gone when it unmounts.'
+		},
+		check: 'Then see it, no browser flag: {cmd}'
 	},
 
 	issues: {

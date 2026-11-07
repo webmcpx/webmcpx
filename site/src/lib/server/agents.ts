@@ -46,6 +46,13 @@ const SEE_IT_WORK = `- Any agent, today: \`claude mcp add webmcpx -- npx -y webm
 - Check a site's tools, localhost included: \`npx webmcpx tools localhost:3000\`; call one: \`npx webmcpx call <url> <tool> '<json>'\`.
 - Native: the ChatGPT desktop app's browser and Codex call a site's WebMCP tools (https://learn.chatgpt.com/docs/webmcp). Chrome: chrome://flags/#enable-webmcp-testing, or an origin-trial token in a <meta http-equiv="origin-trial"> tag.`;
 
+const OWN_TOOLS = `A site's own tools (add to cart, book, filter) get the same contract with tool():
+\`\`\`js
+import { tool } from "webmcpx"; // or useTool from "webmcpx/react" (16.8+), "webmcpx/vue" (2.7+), "webmcpx/svelte" (3+)
+tool({ name: "add_to_cart", description: "Add a product to the cart by SKU.", input: { sku: "string", "qty?": "integer" }, acts: true, run: ({ sku, qty = 1 }) => cart.add(sku, qty) });
+\`\`\`
+Input shorthand: "type", "type?" (optional), [choices] or a JSON Schema. run() returns data; a thrown error becomes {ok:false, error}. No JavaScript: <form toolname="..." tooldescription="..."> with toolparamdescription on fields (and toolautosubmit) is a tool (WebMCP declarative API), added by the script tag where the browser lacks it.`;
+
 const SCAN_API = `GET ${ORIGIN}/api/scan?url=<site> returns JSON: { url, final_url, title, verdict: "ready" | "issues" | "missing", tools: [{ name, description, ... }], diagnostics: [{ rule, severity, message }], page_tokens, elapsed_ms }. One scan per minute per visitor; results from the last minutes are free. Share a result: ${ORIGIN}/?scan=<site>. README badge: ${ORIGIN}/badge/<host>.svg.`;
 
 export function llmsTxt(): string {
@@ -66,6 +73,10 @@ WebMCP (${SPEC}) is a W3C Community Group draft, not a W3C standard: a page regi
 ## See it work
 
 ${SEE_IT_WORK}
+
+## Your own tools
+
+${OWN_TOOLS}
 
 ## Docs
 
@@ -113,6 +124,10 @@ Or \`npm i webmcpx\`. Or ask your coding agent: "${SNIPPETS.agentPrompt.code}"
 ### See it work
 
 ${SEE_IT_WORK}
+
+### Your own tools
+
+${OWN_TOOLS}
 
 ## Scan any site
 

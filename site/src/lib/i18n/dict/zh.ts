@@ -316,7 +316,7 @@ const zh: Messages = {
 			fetch_as_markdown: '分页读取页面',
 			get_page_context: '知道自己在哪'
 		},
-		facts: '加载约 2.8 KB · Rust + WebAssembly · MIT 许可证',
+		facts: '加载约 3.2 KB · Rust + WebAssembly · MIT 许可证',
 		see: {
 			title: '在任何智能体里都能用，就在今天',
 			lead: '让你的编程智能体拿到它打开的每个页面的 WebMCP 工具。无需开启浏览器 flag：页面加载前，它的浏览器就会注入 W3C polyfill，所以你网站自己的工具也能用。',
@@ -326,6 +326,17 @@ const zh: Messages = {
 			docs: 'OpenAI 文档'
 		},
 		agent: '或者直接交给你的 AI 编程智能体：'
+	},
+
+	own: {
+		title: '你自己的工具，五行搞定',
+		lead: '标准工具负责读页面，你的工具负责动手：加入购物车、预订座位、筛选结果。契约不变：输入经过校验，结果只有一种格式，绝不悄悄失败。',
+		notes: {
+			form: '无需 JavaScript：WebMCP 的声明式 API。浏览器还不支持时，脚本标签会补上。',
+			js: '通过 npm，或从与脚本标签相同的 CDN 导入。',
+			hook: '组件挂载期间注册，卸载时自动移除。'
+		},
+		check: '然后查看效果，无需浏览器 flag：{cmd}'
 	},
 
 	issues: {

@@ -324,7 +324,7 @@ const ptBr: Messages = {
 			fetch_as_markdown: 'lê a página, paginada',
 			get_page_context: 'sabe onde está'
 		},
-		facts: '~2,8 KB ao carregar · Rust + WebAssembly · MIT',
+		facts: '~3,2 KB ao carregar · Rust + WebAssembly · MIT',
 		see: {
 			title: 'Veja funcionando em qualquer agente, hoje',
 			lead: 'Dê ao seu agente de código as ferramentas WebMCP de cada página que ele abrir. Sem flag no navegador: ele recebe o polyfill do W3C antes de a página carregar, então as ferramentas do seu site também funcionam.',
@@ -335,6 +335,17 @@ const ptBr: Messages = {
 			docs: 'docs da OpenAI'
 		},
 		agent: 'Ou peça ao seu agente de código:'
+	},
+
+	own: {
+		title: 'Suas próprias ferramentas, em cinco linhas',
+		lead: 'As ferramentas padrão leem a página. As suas agem: põem no carrinho, reservam uma mesa, filtram resultados. Mesmo contrato: entrada validada, um formato de resultado, nada de falha silenciosa.',
+		notes: {
+			form: 'Sem JavaScript: a API declarativa do WebMCP. A tag de script adiciona onde o navegador ainda não tem.',
+			js: 'Pelo npm, ou importando da mesma CDN da tag de script.',
+			hook: 'Registrada enquanto o componente está montado, removida quando ele sai.'
+		},
+		check: 'Depois confira, sem flag no navegador: {cmd}'
 	},
 
 	issues: {

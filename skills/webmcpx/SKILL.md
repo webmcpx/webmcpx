@@ -12,7 +12,7 @@ WebMCP lets a page expose tools to AI agents via `document.modelContext.register
 If the site has none yet, add the drop-in. It registers `get_page_context`, `search_page` and `fetch_as_markdown`:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
 ```
 
 In a bundled app use `npm install webmcpx`, then call `register()` once on startup:
@@ -25,20 +25,23 @@ const { dispose } = await register({ searchSite }); // searchSite optional: (que
 - In SPAs, call `dispose()` when the app unmounts. Don't re-register on every route.
 - If the page has a strict CSP, add `'wasm-unsafe-eval'` to `script-src`. Without it, tools return `UNAVAILABLE`.
 
-## 2. Custom tools: follow the same contract
+## 2. The site's own tools: use `tool()` or a form
 
 ```js
-await document.modelContext.registerTool({
-  name: "add_to_cart",                       // [A-Za-z0-9_.-], ≤ 30 chars recommended
-  description: "Add a product to the cart.", // what it does and when to use it, ≤ 500 chars
-  inputSchema: { type: "object", properties: { sku: { type: "string", description: "Product SKU." } }, required: ["sku"] },
-  annotations: { consequentialHint: true },  // readOnlyHint: true for read-only tools
-  async execute({ sku }) {
-    // Resolve with an envelope; don't throw for expected failures.
-    return JSON.stringify({ ok: true, data: await cart.add(sku) });
-  },
-}, { signal });                              // abort the signal to unregister
+import { tool } from "webmcpx"; // or useTool from "webmcpx/react" | "webmcpx/vue" | "webmcpx/svelte"
+
+tool({
+  name: "add_to_cart",                          // [A-Za-z0-9_.-], under 30 chars
+  description: "Add a product to the cart by SKU.", // what it does and when to use it, under 500 chars
+  input: { sku: "string", "qty?": "integer" },  // shorthand ("?" = optional, [..] = choices) or a JSON Schema
+  acts: true,                                   // changes something for the user; readOnly: true for reads
+  run: ({ sku, qty = 1 }) => cart.add(sku, qty), // return data; throw on failure (error.code = a webmcpx code)
+});
 ```
+
+A server-rendered form needs no JavaScript: add `toolname`, `tooldescription` and, per field,
+`toolparamdescription` (plus `toolautosubmit` if the agent may submit; then `event.agentInvoked` and
+`event.respondWith(promise)` in the submit handler). The script tag makes it a tool.
 
 - Reuse the functions the UI already calls; don't drive the DOM.
 - Keep each page to 20 tools or fewer.

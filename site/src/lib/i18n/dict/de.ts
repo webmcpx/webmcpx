@@ -327,7 +327,7 @@ const de: Messages = {
 			fetch_as_markdown: 'liest Seiten paginiert',
 			get_page_context: 'weiß, wo es ist'
 		},
-		facts: '~2,8 KB geladen · Rust + WebAssembly · MIT-Lizenz',
+		facts: '~3,2 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		see: {
 			title: 'In jedem Agenten sehen, schon heute',
 			lead: 'Gib deinem Coding-Agenten die WebMCP-Tools jeder Seite, die er öffnet. Kein Browser-Flag nötig: Sein Browser bekommt das W3C-Polyfill, bevor die Seite lädt, also laufen auch die Tools deiner Website.',
@@ -337,6 +337,17 @@ const de: Messages = {
 			docs: 'OpenAI-Doku'
 		},
 		agent: 'Oder fragen Sie Ihren Coding-Agenten:'
+	},
+
+	own: {
+		title: 'Eigene Tools, in fünf Zeilen',
+		lead: 'Die Standard-Tools lesen die Seite. Deine handeln: in den Warenkorb legen, einen Tisch buchen, Ergebnisse filtern. Gleicher Vertrag: geprüfte Eingaben, ein Ergebnisformat, keine stillen Fehler.',
+		notes: {
+			form: 'Ohne JavaScript: die deklarative WebMCP-API. Das Script-Tag ergänzt sie, wo der Browser sie noch nicht hat.',
+			js: 'Über npm, oder aus demselben CDN importiert wie das Script-Tag.',
+			hook: 'Registriert, solange die Komponente gemountet ist, und wieder weg, wenn sie verschwindet.'
+		},
+		check: 'Dann prüfen, ohne Browser-Flag: {cmd}'
 	},
 
 	issues: {

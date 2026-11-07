@@ -18,7 +18,7 @@ instead of making them read and click their way through.
 </div>
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
 ```
 
 That's it. Your page now registers `search_page`, `fetch_as_markdown` and `get_page_context` with
@@ -38,11 +38,44 @@ tools work (try a Shopify store), and every page gets the standard ones. Check y
 `npx webmcpx tools localhost:3000`. The ChatGPT desktop app's browser and Codex also
 [call WebMCP tools](https://learn.chatgpt.com/docs/webmcp) natively.
 
+## Your own tools
+
+The standard tools read the page. Your own tools act: add to cart, book a table, filter results. Same
+contract (checked input, one result shape, no silent failures), in five lines:
+
+```js
+import { tool } from "webmcpx";
+
+tool({
+  name: "add_to_cart",
+  description: "Add a product to the cart by SKU.",
+  input: { sku: "string", "qty?": "integer" },
+  acts: true,
+  run: ({ sku, qty = 1 }) => cart.add(sku, qty),
+});
+```
+
+No JavaScript? A form with `toolname` is a tool: the WebMCP
+[declarative API](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md), which
+the script tag adds where the browser doesn't have it yet. With `toolautosubmit`, your submit handler gets
+`event.agentInvoked` and can answer with `event.respondWith(...)`.
+
+```html
+<form toolname="search_flights" tooldescription="Search flights by route and date." action="/search">
+  <input name="from" required toolparamdescription="Departure airport, e.g. GRU">
+  <input name="to" required toolparamdescription="Arrival airport, e.g. LIS">
+  <input name="date" type="date" required>
+</form>
+```
+
+In a component, `useTool(...)` from `webmcpx/react` (16.8+), `webmcpx/vue` (2.7+) or `webmcpx/svelte` (3+)
+registers it while the component is mounted. Then see it, no browser flag: `npx webmcpx tools localhost:3000`.
+
 ## What's inside
 
 | | |
 |---|---|
-| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped. About 2.8 KB on load. |
+| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped. About 3.2 KB on load. |
 | **[Agent bridge](packages/webmcpx/agent)** · `npx webmcpx mcp` | An MCP server for Claude Code, Codex, Cursor and others: it opens pages in a local Chromium and hands the agent their WebMCP tools as typed tools. Also `npx webmcpx tools <url>` to check yours. |
 | **[Linter](crates/webmcpx)** · [crates.io](https://crates.io/crates/webmcpx) | `webmcpx lint` checks your own `registerTool()` calls. It catches the silent failures: too many tools, the removed `provideContext`, the legacy `navigator.modelContext`, hidden characters. |
 | **[Scanner](https://webmcpx.dev)** | Paste a URL: which tools a site registers, what the linter thinks, what an agent would read instead. Shareable result, README badge. |

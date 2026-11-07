@@ -317,7 +317,7 @@ const id: Messages = {
 			fetch_as_markdown: 'membaca halaman bertahap',
 			get_page_context: 'mengenali posisinya'
 		},
-		facts: '~2,8 KB dimuat · Rust + WebAssembly · lisensi MIT',
+		facts: '~3,2 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		see: {
 			title: 'Lihat hasilnya di agen mana pun, sekarang',
 			lead: 'Beri agen coding Anda tool WebMCP dari setiap halaman yang dibukanya. Tanpa flag browser: browsernya mendapat polyfill W3C sebelum halaman dimuat, jadi tool milik situs Anda juga jalan.',
@@ -327,6 +327,17 @@ const id: Messages = {
 			docs: 'dokumentasi OpenAI'
 		},
 		agent: 'Atau minta coding agent Anda:'
+	},
+
+	own: {
+		title: 'Tool Anda sendiri, dalam lima baris',
+		lead: 'Tool standar membaca halaman. Tool Anda bertindak: menambah ke keranjang, memesan meja, menyaring hasil. Kontrak yang sama: input divalidasi, satu bentuk hasil, tanpa gagal diam-diam.',
+		notes: {
+			form: 'Tanpa JavaScript: API deklaratif WebMCP. Tag script menambahkannya di browser yang belum punya.',
+			js: 'Lewat npm, atau diimpor dari CDN yang sama dengan tag script.',
+			hook: 'Terdaftar selama komponen terpasang, hilang saat dilepas.'
+		},
+		check: 'Lalu cek, tanpa flag browser: {cmd}'
 	},
 
 	issues: {

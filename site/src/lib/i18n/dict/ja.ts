@@ -317,7 +317,7 @@ const ja: Messages = {
 			fetch_as_markdown: 'ページを分割して読む',
 			get_page_context: '現在地を把握する'
 		},
-		facts: '読込時 ~2.8 KB · Rust + WebAssembly · MIT License',
+		facts: '読込時 ~3.2 KB · Rust + WebAssembly · MIT License',
 		see: {
 			title: 'どんなエージェントでも、今日から動く',
 			lead: 'コーディングエージェントに、開いたページすべての WebMCP ツールを渡せます。ブラウザーのフラグは不要。ページの読み込み前に W3C のポリフィルが入るので、サイト独自のツールもそのまま動きます。',
@@ -328,6 +328,17 @@ const ja: Messages = {
 			docs: 'OpenAI のドキュメント'
 		},
 		agent: 'コーディングエージェントに任せる場合：'
+	},
+
+	own: {
+		title: '独自ツールも、5 行で',
+		lead: '標準ツールはページを読みます。独自ツールは動きます。カートに入れる、席を予約する、結果を絞り込む。契約は同じ：入力を検証し、結果の形は一つ、黙って失敗しません。',
+		notes: {
+			form: 'JavaScript 不要：WebMCP の宣言的 API です。ブラウザーが未対応なら、スクリプトタグが補います。',
+			js: 'npm から、またはスクリプトタグと同じ CDN からインポート。',
+			hook: 'コンポーネントがマウントされている間だけ登録され、外れると消えます。'
+		},
+		check: 'あとは確認するだけ（ブラウザーのフラグ不要）：{cmd}'
 	},
 
 	issues: {
