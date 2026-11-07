@@ -1,6 +1,6 @@
 {
   "name": "webmcpx",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Standard WebMCP tools for any website, and an MCP server that gives any agent the WebMCP tools of the pages it opens.",
   "type": "module",
   "license": "MIT",
@@ -77,9 +77,9 @@
     "url": "https://github.com/webmcpx/webmcpx/issues"
   },
   "peerDependencies": {
-    "react": ">=18",
-    "svelte": ">=4",
-    "vue": ">=3.3"
+    "react": ">=16.8",
+    "vue": ">=2.7",
+    "svelte": ">=3"
   },
   "peerDependenciesMeta": {
     "react": {

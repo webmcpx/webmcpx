@@ -5,7 +5,7 @@
 call a function instead of reading and clicking through the page.
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
 ```
 
 **See it work in any agent, today.** Give your coding agent the WebMCP tools of every page it opens:
@@ -25,6 +25,39 @@ npx webmcpx call localhost:3000 search_page '{"query": "pricing"}'
 
 The ChatGPT desktop app's browser and Codex also [call WebMCP tools](https://learn.chatgpt.com/docs/webmcp)
 natively; in Chrome, turn on `chrome://flags/#enable-webmcp-testing` and open DevTools › Application › WebMCP.
+
+## Your own tools
+
+The standard tools read the page. Your own tools act: add to cart, book a table, filter results. Same
+contract (checked input, one result shape, no silent failures), in five lines:
+
+```js
+import { tool } from "webmcpx";
+
+tool({
+  name: "add_to_cart",
+  description: "Add a product to the cart by SKU.",
+  input: { sku: "string", "qty?": "integer" },
+  acts: true,
+  run: ({ sku, qty = 1 }) => cart.add(sku, qty),
+});
+```
+
+No JavaScript? A form with `toolname` is a tool: the WebMCP
+[declarative API](https://github.com/webmachinelearning/webmcp/blob/main/declarative-api-explainer.md), which
+the script tag adds where the browser doesn't have it yet. With `toolautosubmit`, your submit handler gets
+`event.agentInvoked` and can answer with `event.respondWith(...)`.
+
+```html
+<form toolname="search_flights" tooldescription="Search flights by route and date." action="/search">
+  <input name="from" required toolparamdescription="Departure airport, e.g. GRU">
+  <input name="to" required toolparamdescription="Arrival airport, e.g. LIS">
+  <input name="date" type="date" required>
+</form>
+```
+
+In a component, `useTool(...)` from `webmcpx/react` (16.8+), `webmcpx/vue` (2.7+) or `webmcpx/svelte` (3+)
+registers it while the component is mounted. Then see it, no browser flag: `npx webmcpx tools localhost:3000`.
 
 Or from npm (`npm i webmcpx`):
 
@@ -51,7 +84,7 @@ const { registered, dispose } = await register({
 - **Invisible characters stripped** from page text.
 - **A no-op where WebMCP is missing.** Uses `document.modelContext`, with a `navigator.modelContext`
   fallback.
-- **About 2.8 KB brotli on page load.** The WebAssembly engine loads on the first tool call.
+- **About 3.2 KB brotli on page load.** The WebAssembly engine loads on the first tool call.
 
 `npx webmcpx --help` shows the setup for Cursor, VS Code and Windsurf, `--headed` to watch the browser and
 `--cdp <url>` to use your own. Needs Node 22+ and Chrome, Chromium, Edge or Brave.

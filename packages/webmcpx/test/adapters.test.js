@@ -23,7 +23,7 @@ mock.module("react", {
 });
 mock.module("vue", {
   namedExports: {
-    toValue: (v) => (typeof v === "function" ? v() : v && "value" in v ? v.value : v),
+    unref: (v) => (v && typeof v === "object" && "value" in v ? v.value : v),
     watchEffect: (effect) => effects.push({ effect: () => { let undo; effect((fn) => (undo = fn)); return undo; } }),
   },
 });

@@ -1,4 +1,4 @@
-// React: `useTool({ name, description, input, run })` registers the tool while the component is
+// React 16.8+ (and Preact via preact/compat): `useTool({ name, description, input, run })` registers the tool while the component is
 // mounted. `run` always sees the latest props and state; the tool re-registers only when its name,
 // description or input change.
 import { useEffect, useRef } from "react";
