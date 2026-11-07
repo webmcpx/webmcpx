@@ -87,14 +87,14 @@ const timeout = (ms, what) =>
 
 /** Whether an error means the page navigated or the tool list was replaced since it was read. */
 export const stale = (e) =>
-  /stale tool list|Could not find object|Cannot find context|context was destroyed|Inspected target navigated/i.test(e?.message);
+  /Could not find object|Cannot find context|context was destroyed|Inspected target navigated/i.test(e?.message);
 
 export class Page {
   #cdp;
   #session;
   #onChange;
   #loads = new Set();
-  #handle;
+  #handles = [];
   #debounce;
 
   /** Opens a new tab. `onChange()` fires when the page's tools may have changed on their own. */
@@ -154,6 +154,9 @@ export class Page {
    * (outside a secure context).
    */
   async open(url) {
+    // The old document's tool lists die with it.
+    await this.#send("Runtime.releaseObjectGroup", { objectGroup: GROUP }).catch(() => {});
+    this.#handles = [];
     const loaded = new Promise((resolve) => this.#loads.add(resolve));
     const nav = await this.#send("Page.navigate", { url });
     if (nav.errorText) throw new Error(`could not open ${url}: ${nav.errorText}`);
@@ -193,25 +196,25 @@ export class Page {
       functionDeclaration: summarize.toString(),
       returnByValue: true,
     });
-    const previous = this.#handle;
-    this.#handle = result.objectId;
-    if (previous) this.#send("Runtime.releaseObject", { objectId: previous }).catch(() => {});
-    // Each tool names the list it came from (a call never runs an index against a newer list) and its
-    // rank among same-named tools of its origin (frames), to find it again in a newer list.
-    const seen = new Map();
-    return list.value.map((tool) => {
-      const key = `${tool.origin} ${tool.name}`;
-      const nth = seen.get(key) ?? 0;
-      seen.set(key, nth + 1);
-      return { ...tool, nth, list: result.objectId };
-    });
+    // Each tool keeps the very list it came from: a call runs on that descriptor, so it reaches the
+    // owning frame or fails if that owner unregistered it; it never shifts to another tool.
+    this.#handles.push(result.objectId);
+    if (this.#handles.length > 50) {
+      this.#send("Runtime.releaseObject", { objectId: this.#handles.shift() }).catch(() => {});
+    }
+    const count = new Map();
+    for (const t of list.value) count.set(`${t.origin} ${t.name}`, (count.get(`${t.origin} ${t.name}`) ?? 0) + 1);
+    return list.value.map((tool) => ({
+      ...tool,
+      list: result.objectId,
+      unique: count.get(`${tool.origin} ${tool.name}`) === 1,
+    }));
   }
 
-  /** Runs a tool from the latest list `tools()` returned; resolves with its result text. */
+  /** Runs a tool on the list it came from; resolves with its result text. */
   async call(tool, input) {
-    if (!this.#handle || tool.list !== this.#handle) throw new Error("stale tool list");
     const run = this.#send("Runtime.callFunctionOn", {
-      objectId: this.#handle,
+      objectId: tool.list,
       functionDeclaration: execute.toString(),
       arguments: [{ value: tool.index }, { value: input ?? {} }],
       awaitPromise: true,
@@ -231,4 +234,4 @@ export class Page {
 
 const describeException = (d) => d.exception?.description?.split("\n")[0] ?? d.text;
 
-/** @typedef {{index: number, nth: number, list: string, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string}} PageTool */
+/** @typedef {{index: number, list: string, unique: boolean, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string}} PageTool */

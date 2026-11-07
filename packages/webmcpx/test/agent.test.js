@@ -7,7 +7,7 @@ import { createInterface } from "node:readline";
 import { after, before, test } from "node:test";
 import { promisify } from "node:util";
 import { findBrowser } from "../agent/browser.js";
-import { normalize } from "../agent/session.js";
+import { Session, normalize } from "../agent/session.js";
 import { runStandard } from "../agent/standard.js";
 
 const BIN = new URL("../bin/webmcpx.js", import.meta.url).pathname;
@@ -50,7 +50,9 @@ const NAMES = `<!doctype html><html><head><title>Names</title></head><body><main
     inputSchema: { properties: { q: { type: "string" } }, required: ["q"] },
     execute: ({ q }) => "found " + q,
   });
-  mc.registerTool({ name: "checkout", description: "Top checkout.", execute: () => "top" });
+  const topCheckout = new AbortController();
+  mc.registerTool({ name: "checkout", description: "Top checkout.", execute: () => "top" }, { signal: topCheckout.signal });
+  mc.registerTool({ name: "drop_top", description: "Unregisters the top checkout.", execute: () => (topCheckout.abort(), "dropped") });
 </script></body></html>`;
 const FRAME = `<!doctype html><html><body><script>
   document.modelContext.registerTool({ name: "checkout", description: "Frame checkout.", execute: () => "frame" });
@@ -164,6 +166,20 @@ test("every tool stays reachable: clashing names, frames, schemas without a type
     assert.equal((await mcp.rpc("tools/call", { name: "find", arguments: { q: "mugs" } })).result.content[0].text, "found mugs");
   } finally {
     mcp.close();
+  }
+});
+
+test("a tool listed earlier never runs another owner's tool", { skip, timeout: 90_000 }, async () => {
+  const session = new Session();
+  try {
+    const { tools } = await session.goto(`${origin}/names`);
+    const top = tools.find((t) => t.name === "checkout" && t.description === "Top checkout.");
+    const drop = tools.find((t) => t.name === "drop_top");
+    assert.equal(await session.call(drop, {}), "dropped");
+    await session.tools(); // a refresh: the frame's checkout is now the only one
+    await assert.rejects(session.call(top, {}), (e) => !/frame/.test(String(e?.message)));
+  } finally {
+    session.close();
   }
 });
 

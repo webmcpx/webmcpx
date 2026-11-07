@@ -59,10 +59,10 @@ export class Session {
         return await page.call(tool, input);
       } catch (e) {
         if (!stale(e)) throw e;
-        // The list changed since the tool was listed: run the same tool (name, origin, rank) or nothing.
-        const again = ((await page.tools()) ?? []).find(
-          (t) => t.name === tool.name && t.origin === tool.origin && t.nth === tool.nth,
-        );
+        // The document the tool was listed in is gone: run the same tool in the new one only when no
+        // other tool shares its name and origin there or then; otherwise refuse rather than guess.
+        const now = ((await page.tools()) ?? []).filter((t) => t.name === tool.name && t.origin === tool.origin);
+        const again = tool.unique && now.length === 1 ? now[0] : undefined;
         if (!again) throw new Error(`the page changed and no longer has the tool "${tool.name}": call open_page again`);
         return page.call(again, input);
       }
