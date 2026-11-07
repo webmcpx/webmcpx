@@ -43,6 +43,8 @@ tests/                       Playwright e2e against the prerendered build
   type, components, misuse and trademark wording. Data lives in `lib/content/brand.ts`; the policy is the
   repo's `TRADEMARK.md`. Research and brief: `reports/Marca e logo do webmcpx.md` (outside the repo).
 - The primary mark is the Junction; the lockup is "webmcp" with the Junction as the final x (`Logo`).
+  Where the site fonts can't load (README, slides), use the outlined lockup in `static/brand-assets/lockup/`
+  (`lockup-ink`, `lockup-paper`, `lockup` in currentColor), made by `scripts/lockup.py` from the font itself.
   Real brands' logos are never redrawn; new marks of our own go through a brief, Codex and the four checks
   (16px, one color, inverse, circle crop).
 - The agent-ready badge comes in three styles (`lib/content/badges/`: Card for light pages, Flat for READMEs

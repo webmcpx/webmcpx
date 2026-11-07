@@ -1,8 +1,9 @@
 <div align="center">
 
-<img src="site/static/brand-assets/junction/app-icon-512.svg" width="88" height="88" alt="webmcpx">
-
-# webmcpx
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="site/static/brand-assets/lockup/lockup-paper.svg">
+  <img src="site/static/brand-assets/lockup/lockup-ink.svg" width="360" alt="webmcpx">
+</picture>
 
 **Make your site agent-ready.** Standard WebMCP tools in one script tag, a linter for your own tools,
 and a public benchmark that shows what changes.
