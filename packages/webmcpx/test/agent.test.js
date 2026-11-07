@@ -32,20 +32,41 @@ const SHOP = `<!doctype html><html lang="en"><head><title>Kiln Shop</title></hea
     name: "late.tool", description: "Registered after load.", execute: () => "late",
   }), 1500);
 </script></body></html>`;
-// No tools of its own, behind a strict CSP that would block an injected script and WebAssembly.
+// No tools of its own, behind a strict CSP. The inline script must stay blocked: the bridge never turns
+// a page's CSP off.
 const PLAIN = `<!doctype html><html><head><title>Plain</title></head><body>
-<main><h1>Opening hours</h1><p>The workshop is closed on Mondays.</p></main></body></html>`;
+<main><h1>Opening hours</h1><p>The workshop is closed on Mondays.</p></main>
+<script>document.title = "CSP was bypassed";</script></body></html>`;
+// Names that clash once made MCP-safe, a schema without a root type, and the same name in a frame.
+const NAMES = `<!doctype html><html><head><title>Names</title></head><body><main><p>Names.</p></main>
+<iframe src="/frame"></iframe>
+<script>
+  const mc = document.modelContext;
+  mc.registerTool({ name: "cart.add", description: "Dotted.", execute: () => "dotted" });
+  mc.registerTool({ name: "cart_add", description: "Underscored.", execute: () => "underscored" });
+  mc.registerTool({
+    name: "find", description: "No root type.",
+    inputSchema: { properties: { q: { type: "string" } }, required: ["q"] },
+    execute: ({ q }) => "found " + q,
+  });
+  mc.registerTool({ name: "checkout", description: "Top checkout.", execute: () => "top" });
+</script></body></html>`;
+const FRAME = `<!doctype html><html><body><script>
+  document.modelContext.registerTool({ name: "checkout", description: "Frame checkout.", execute: () => "frame" });
+</script></body></html>`;
+const PAGES = { "/shop": SHOP, "/plain": PLAIN, "/names": NAMES, "/frame": FRAME };
 
 let server;
 let origin;
 before(async () => {
   server = createServer((req, res) => {
     const strict = req.url === "/plain";
+    if (!(req.url in PAGES)) return res.writeHead(404).end();
     res.writeHead(200, {
       "Content-Type": "text/html; charset=utf-8",
       ...(strict && { "Content-Security-Policy": "default-src 'none'; script-src 'none'" }),
     });
-    res.end(strict ? PLAIN : SHOP);
+    res.end(PAGES[req.url] ?? SHOP);
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   origin = `http://127.0.0.1:${server.address().port}`;
@@ -90,7 +111,7 @@ test("an MCP client gets the page's own tools, typed, plus the standard ones", {
     const opened = await mcp.rpc("tools/call", { name: "open_page", arguments: { url: `${origin}/shop` } });
     const summary = opened.result.content[0].text;
     assert.match(summary, /The site's own WebMCP tools \(1\):\n- add_to_cart: Add a mug to the cart by SKU\. \[has side effects\]/);
-    assert.match(summary, /Standard tools on every page: fetch_as_markdown, get_page_context, search_page\./);
+    assert.match(summary, /Standard tools on every page: get_page_context, search_page, fetch_as_markdown\./);
     assert.ok(mcp.notes.includes("notifications/tools/list_changed"));
 
     const { tools } = (await mcp.rpc("tools/list")).result;
@@ -117,8 +138,58 @@ test("an MCP client gets the page's own tools, typed, plus the standard ones", {
   }
 });
 
+test("every tool stays reachable: clashing names, frames, schemas without a type", { skip, timeout: 90_000 }, async () => {
+  const mcp = client();
+  try {
+    await mcp.rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {} });
+    await mcp.rpc("tools/call", { name: "open_page", arguments: { url: `${origin}/names` } });
+    const { tools } = (await mcp.rpc("tools/list")).result;
+    const by = (title) => tools.filter((t) => t.title === title).map((t) => t.name);
+    assert.deepEqual([...by("cart.add"), ...by("cart_add")].sort(), ["cart_add", "cart_add_2"]);
+    const results = await Promise.all(
+      ["cart_add", "cart_add_2"].map((name) => mcp.rpc("tools/call", { name, arguments: {} })),
+    );
+    assert.deepEqual(results.map((r) => r.result.content[0].text).sort(), ["dotted", "underscored"]);
+
+    // The same name in the page and in a same-origin frame: two tools, each running in its own frame.
+    const checkouts = by("checkout");
+    assert.equal(checkouts.length, 2, tools.map((t) => t.name).join(", "));
+    const ran = [];
+    for (const name of checkouts) ran.push((await mcp.rpc("tools/call", { name, arguments: {} })).result.content[0].text);
+    assert.deepEqual(ran.sort(), ["frame", "top"]);
+
+    const find = tools.find((t) => t.name === "find");
+    assert.deepEqual(find.inputSchema, { type: "object", properties: { q: { type: "string" } }, required: ["q"] });
+    assert.equal((await mcp.rpc("tools/call", { name: "find", arguments: { q: "mugs" } })).result.content[0].text, "found mugs");
+  } finally {
+    mcp.close();
+  }
+});
+
+test("overlapping requests each get their own page", { skip, timeout: 90_000 }, async () => {
+  const mcp = client();
+  try {
+    await mcp.rpc("initialize", { protocolVersion: "2025-06-18", capabilities: {} });
+    const [shop, plain] = await Promise.all([
+      mcp.rpc("tools/call", { name: "open_page", arguments: { url: `${origin}/shop` } }),
+      mcp.rpc("tools/call", { name: "open_page", arguments: { url: `${origin}/plain` } }),
+    ]);
+    assert.match(shop.result.content[0].text, /Opened "Kiln Shop"/);
+    assert.match(plain.result.content[0].text, /Opened "Plain"/);
+    // ping answers while a page is loading
+    const [pong] = await Promise.all([
+      mcp.rpc("ping"),
+      mcp.rpc("tools/call", { name: "open_page", arguments: { url: `${origin}/shop` } }),
+    ]);
+    assert.deepEqual(pong.result, {});
+  } finally {
+    mcp.close();
+  }
+});
+
 test("a site with no tools and a strict CSP still gets the standard tools", { skip, timeout: 90_000 }, async () => {
   const listed = await cli("tools", `${origin}/plain`);
+  assert.match(listed.stdout, /^Plain /, "the page's CSP must stay on");
   assert.match(listed.stdout, /The site registers no WebMCP tools of its own/);
   assert.match(listed.stdout, /search_page/);
 

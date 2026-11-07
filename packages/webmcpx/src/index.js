@@ -2,14 +2,6 @@
 // all text processing runs in a WebAssembly module loaded on the first tool call.
 import { CODES, TOOLS } from "./generated.js";
 
-const RECORD = "\x1e";
-const FIELD = "\x1f";
-const KINDS = {
-  H1: "h1", H2: "h2", H3: "h3", H4: "h4", H5: "h5", H6: "h6",
-  P: "p", LI: "li", PRE: "pre", BLOCKQUOTE: "quote",
-  DT: "p", DD: "p", FIGCAPTION: "p", SUMMARY: "p",
-};
-const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "SVG", "NAV", "FOOTER", "ASIDE"]);
 const DEFAULT_TOOLS = ["get_page_context", "search_page", "fetch_as_markdown"];
 
 const envelope = (body) => JSON.stringify(body);
@@ -26,16 +18,36 @@ const engine = (source) =>
       throw e;
     }));
 
-const pageUrl = () => location.href.split("#")[0];
-const text = (s) => (s ?? "").replace(/\s+/g, " ").trim();
-
-const skipped = (el) => SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true";
-
-/** Serializes readable content of `root` as a block stream (see webmcpx-std `blocks`). */
-function blocks(root) {
+// "blocks": main content as a webmcpx-std block stream; "context": the page. Self-contained:
+// agent/ runs its source in pages. Internal, not public API.
+export function readPage(what, root) {
+  const RECORD = "\x1e";
+  const FIELD = "\x1f";
+  const KINDS = {
+    H1: "h1", H2: "h2", H3: "h3", H4: "h4", H5: "h5", H6: "h6",
+    P: "p", LI: "li", PRE: "pre", BLOCKQUOTE: "quote",
+    DT: "p", DD: "p", FIGCAPTION: "p", SUMMARY: "p",
+  };
+  const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "SVG", "NAV", "FOOTER", "ASIDE"]);
+  const base = location.href.split("#")[0];
+  const text = (s) => (s ?? "").replace(/\s+/g, " ").trim();
+  if (what === "context") {
+    return {
+      title: document.title,
+      url: location.href,
+      lang: document.documentElement.lang || undefined,
+      description: document.querySelector('meta[name="description"]')?.getAttribute("content") || undefined,
+      headings: [...document.querySelectorAll("h1, h2, h3")].slice(0, 30).map((h) => ({
+        level: Number(h.tagName[1]),
+        text: text(h.textContent).slice(0, 120),
+        url: h.id ? `${base}#${h.id}` : undefined,
+      })),
+      selection: text(globalThis.getSelection?.()?.toString()).slice(0, 1000) || undefined,
+    };
+  }
+  const skipped = (el) => SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true";
   let out = "";
   let anchor = "";
-  const base = pageUrl();
   const visit = (el) => {
     for (const child of el.children) {
       if (skipped(child)) continue;
@@ -47,30 +59,11 @@ function blocks(root) {
       else visit(child);
     }
   };
-  visit(root);
+  visit(root ?? document.querySelector("main, [role=main], article") ?? document.body);
   return out;
 }
 
-function contentRoot(root) {
-  if (typeof root === "string") return document.querySelector(root) ?? document.body;
-  return root ?? document.querySelector("main, [role=main], article") ?? document.body;
-}
-
-function pageContext() {
-  const base = pageUrl();
-  return ok({
-    title: document.title,
-    url: location.href,
-    lang: document.documentElement.lang || undefined,
-    description: document.querySelector('meta[name="description"]')?.getAttribute("content") || undefined,
-    headings: [...document.querySelectorAll("h1, h2, h3")].slice(0, 30).map((h) => ({
-      level: Number(h.tagName[1]),
-      text: text(h.textContent).slice(0, 120),
-      url: h.id ? `${base}#${h.id}` : undefined,
-    })),
-    selection: text(globalThis.getSelection?.()?.toString()).slice(0, 1000) || undefined,
-  });
-}
+const contentRoot = (root) => (typeof root === "string" ? document.querySelector(root) ?? document.body : root);
 
 function executors(options) {
   const withEngine = (run) => async (input) => {
@@ -81,10 +74,10 @@ function executors(options) {
       return err("UNAVAILABLE", `WebAssembly could not load: ${e?.message ?? e}`,
         "If the page sets a Content-Security-Policy, add 'wasm-unsafe-eval' to script-src.");
     }
-    return run(m, blocks(contentRoot(options.root)), input);
+    return run(m, readPage("blocks", contentRoot(options.root)), input);
   };
   return {
-    get_page_context: async () => pageContext(),
+    get_page_context: async () => ok(readPage("context")),
     search_page: withEngine((m, page, { query, limit }) =>
       typeof query === "string" ? m.search(page, query, limit ?? 0) : err("INVALID_INPUT", "`query` must be a string")),
     fetch_as_markdown: withEngine((m, page, { cursor, max_chars }) => m.markdown(page, String(cursor ?? ""), max_chars ?? 0)),

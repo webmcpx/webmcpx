@@ -4,8 +4,8 @@
 //   webmcpx tools <url>              list a page's WebMCP tools (great on localhost)
 //   webmcpx call <url> <tool> [json] call one and print the result
 import { parseArgs } from "node:util";
-import { describe, serve } from "../agent/mcp.js";
-import { Session, STANDARD_TOOLS, failed, mcpResult } from "../agent/session.js";
+import { describe, named, serve } from "../agent/mcp.js";
+import { Session, failed, mcpResult } from "../agent/session.js";
 
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
 const paint = (code) => (s) => (tty ? `\x1b[${code}m${s}\x1b[0m` : s);
@@ -69,8 +69,8 @@ const firstLine = (s, max = 72) => {
 
 function printTools(page) {
   if (page.tools === null) return console.log(describe(page));
-  const own = page.tools.filter((t) => !STANDARD_TOOLS.has(t.name));
-  const standard = page.tools.filter((t) => STANDARD_TOOLS.has(t.name));
+  const own = page.tools.filter((t) => !t.standard);
+  const standard = page.tools.filter((t) => t.standard);
   const width = Math.max(0, ...page.tools.map((t) => t.name.length)) + 2;
   const row = (t) => {
     const a = t.annotations ?? {};
@@ -79,13 +79,13 @@ function printTools(page) {
   };
   console.log(`${bold(page.title || page.url)} ${dim(page.url)}\n`);
   if (own.length) {
-    console.log(green(`✓ ${own.length} WebMCP tool${own.length === 1 ? "" : "s"} from the site`));
+    console.log(green(`✓ ${own.length} WebMCP tool${own.length === 1 ? "" : "s"} registered by the site`));
     for (const t of own) console.log(row(t));
   } else {
     console.log(yellow("○ The site registers no WebMCP tools of its own.") + dim(" Add them: https://webmcpx.dev/#fix"));
   }
   if (standard.length) {
-    console.log(`\n${dim("+ standard tools, added by webmcpx on every page")}`);
+    console.log(`\n${dim("+ standard tools webmcpx adds to every page")}`);
     for (const t of standard) console.log(row(t));
   }
   console.log(dim(`\nTry one: npx webmcpx call ${page.url} search_page '{"query": "..."}'`));
@@ -121,7 +121,14 @@ async function main() {
   try {
     const page = await session.goto(url);
     if (command === "tools") return printTools(page);
-    const out = await session.call(name, input);
+    const entries = named(page.tools ?? []);
+    const tool = (entries.find((e) => e.tool.name === name) ?? entries.find((e) => e.name === name))?.tool;
+    if (!tool) {
+      console.error(`webmcpx: ${page.url} has no tool named "${name}". Run: npx webmcpx tools ${url}`);
+      process.exitCode = 2;
+      return;
+    }
+    const out = await session.call(tool, input);
     const mcp = mcpResult(out);
     let pretty = out;
     try {

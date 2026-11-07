@@ -2,7 +2,7 @@
 // Cursor, VS Code...) the WebMCP tools of the page it opens, as typed tools of its own.
 import { readFileSync } from "node:fs";
 import { createInterface } from "node:readline";
-import { Session, STANDARD_TOOLS, failed, mcpResult } from "./session.js";
+import { Session, failed, mcpResult } from "./session.js";
 
 const PROTOCOL = "2025-06-18";
 const VERSION = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
@@ -35,7 +35,7 @@ const CALL = {
   inputSchema: {
     type: "object",
     properties: {
-      name: { type: "string", description: "The tool name, as open_page listed it." },
+      name: { type: "string", description: "The tool name, as open_page listed it (or as the page registered it)." },
       input: { type: "object", description: "The tool's input, matching its schema." },
     },
     required: ["name"],
@@ -43,13 +43,30 @@ const CALL = {
   annotations: { openWorldHint: true },
 };
 
-const FIXED = new Set([OPEN.name, CALL.name]);
+/**
+ * Gives each tool a unique MCP name, in list order: MCP allows [A-Za-z0-9_-] and 64 characters, WebMCP
+ * also "." and 128, and two frames can register the same name. Clashes get "_2", "_3"...
+ * @returns {{name: string, tool: import("./session.js").Tool}[]}
+ */
+export function named(tools) {
+  const used = new Set([OPEN.name, CALL.name]);
+  return tools.map((tool) => {
+    const base = tool.name.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64) || "tool";
+    let name = base;
+    for (let n = 2; used.has(name); n++) name = `${base.slice(0, 64 - String(n).length - 1)}_${n}`;
+    used.add(name);
+    return { name, tool };
+  });
+}
 
-/** MCP names allow [A-Za-z0-9_-] and 64 characters; WebMCP also allows "." and 128. */
-const mcpName = (name) => {
-  const safe = name.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64);
-  return FIXED.has(safe) ? `page_${safe}`.slice(0, 64) : safe;
-};
+/** MCP wants an object schema at the root; WebMCP schemas may leave `type` out. */
+export function objectSchema(schema) {
+  if (schema && typeof schema === "object" && !Array.isArray(schema)) {
+    if (schema.type === undefined) return { type: "object", ...schema };
+    if (schema.type === "object") return schema;
+  }
+  return { type: "object", properties: {} };
+}
 
 const host = (origin) => {
   try {
@@ -60,14 +77,13 @@ const host = (origin) => {
 };
 
 /** A page tool as an MCP tool. The annotations are hints the site declares, kept as hints. */
-function asMcp(tool) {
+function asMcp({ name, tool }) {
   const a = tool.annotations ?? {};
-  const schema = tool.inputSchema?.type === "object" ? tool.inputSchema : { type: "object", properties: {} };
   return {
-    name: mcpName(tool.name),
+    name,
     title: tool.name,
-    description: `${tool.description}${STANDARD_TOOLS.has(tool.name) ? "" : ` (from ${host(tool.origin)})`}`.trim(),
-    inputSchema: schema,
+    description: `${tool.description}${tool.standard ? "" : ` (from ${host(tool.origin)})`}`.trim(),
+    inputSchema: objectSchema(tool.inputSchema),
     annotations: {
       readOnlyHint: Boolean(a.readOnlyHint),
       destructiveHint: a.readOnlyHint ? false : Boolean(a.consequentialHint),
@@ -81,11 +97,14 @@ export function describe({ url, title, tools }) {
   if (tools === null) {
     return `Opened ${url}, but it is not a secure context, so it has no WebMCP. Use https:// or localhost.`;
   }
-  const own = tools.filter((t) => !STANDARD_TOOLS.has(t.name));
+  const entries = named(tools);
+  const own = entries.filter((e) => !e.tool.standard);
   const lines = [`Opened "${title}" (${url}).`, ""];
   lines.push(own.length ? `The site's own WebMCP tools (${own.length}):` : "The site registers no WebMCP tools of its own.");
-  for (const t of own) lines.push(`- ${t.name}: ${t.description}${t.annotations?.consequentialHint ? " [has side effects]" : ""}`);
-  const standard = tools.filter((t) => STANDARD_TOOLS.has(t.name)).map((t) => t.name);
+  for (const { name, tool } of own) {
+    lines.push(`- ${name}: ${tool.description}${tool.annotations?.consequentialHint ? " [has side effects]" : ""}`);
+  }
+  const standard = entries.filter((e) => e.tool.standard).map((e) => e.name);
   if (standard.length) lines.push("", `Standard tools on every page: ${standard.join(", ")}.`);
   lines.push("", "Call these tools instead of reading or clicking through the page.");
   return lines.join("\n");
@@ -93,30 +112,33 @@ export function describe({ url, title, tools }) {
 
 /** Runs the server on stdin/stdout until stdin closes. Logs go to stderr only. */
 export async function serve(options = {}, { input = process.stdin, output = process.stdout } = {}) {
-  let tools = [];
+  let entries = [];
   let initialized = false;
   const write = (msg) => output.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
-  const notify = async () => {
-    const next = await session.tools().catch(() => tools);
-    const changed = JSON.stringify(next.map(asMcp)) !== JSON.stringify(tools.map(asMcp));
-    tools = next;
-    if (changed && initialized) write({ method: "notifications/tools/list_changed" });
+  // Replaces the tool list and tells the client when what it would see changed.
+  const update = (tools) => {
+    const before = JSON.stringify(entries.map(asMcp));
+    entries = named(tools);
+    if (initialized && JSON.stringify(entries.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
   };
-  const session = new Session({ ...options, onChange: () => void notify() });
+  const session = new Session({
+    ...options,
+    onChange: () => session.tools().then(update, () => {}),
+  });
 
   const text = (t, isError = false) => ({ content: [{ type: "text", text: t }], ...(isError && { isError }) });
 
   async function call(name, args = {}) {
     if (name === OPEN.name) {
       const page = await session.goto(args.url);
-      const before = JSON.stringify(tools.map(asMcp));
-      tools = page.tools ?? [];
-      if (JSON.stringify(tools.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
+      update(page.tools ?? []);
       return text(describe(page));
     }
-    const target = name === CALL.name ? args.name : tools.find((t) => mcpName(t.name) === name)?.name;
-    if (!target) return text(`Unknown tool "${name}". Call open_page first, then use the tools it lists.`, true);
-    const out = await session.call(target, name === CALL.name ? args.input : args);
+    const wanted = name === CALL.name ? String(args.name ?? "") : name;
+    const entry =
+      entries.find((e) => e.name === wanted) ?? (name === CALL.name ? entries.find((e) => e.tool.name === wanted) : undefined);
+    if (!entry) return text(`Unknown tool "${wanted}". Call open_page first, then use the tools it lists.`, true);
+    const out = await session.call(entry.tool, name === CALL.name ? args.input : args);
     return mcpResult(out) ?? text(out, failed(out));
   }
 
@@ -135,7 +157,7 @@ export async function serve(options = {}, { input = process.stdin, output = proc
       case "ping":
         return {};
       case "tools/list":
-        return { tools: [OPEN, CALL, ...tools.map(asMcp)] };
+        return { tools: [OPEN, CALL, ...entries.map(asMcp)] };
       case "tools/call":
         try {
           return await call(params?.name, params?.arguments);
