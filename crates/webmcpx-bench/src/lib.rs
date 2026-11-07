@@ -86,6 +86,7 @@ async fn run_job(
         success: false,
         harness_error: None,
         cost_usd: None,
+        tools: Vec::new(),
         outcome: agent::Outcome::default(),
     };
     if let Err(e) = attempt(browser, model, base_url, &job, &mut run).await {
@@ -107,6 +108,16 @@ async fn attempt(
     let result = async {
         page.goto(&job.task.page_url(base_url)).await?;
         let session = Session::new(job.arm, &page).await?;
+        if job.arm == Arm::Webmcp {
+            run.tools = session
+                .tools
+                .iter()
+                .map(|t| report::ToolInfo {
+                    name: t.name.clone(),
+                    description: t.description.clone(),
+                })
+                .collect();
+        }
         run.outcome = agent::run(model, &session, &job.task.prompt, job.task.max_steps).await;
         let check = &job.task.check;
         let answer_ok = !check.has_answer_check()

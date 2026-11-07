@@ -12,7 +12,8 @@ use crate::model::{Price, Usage};
 
 /// 2: `price_per_mtok` became `{input, cached_input, output}`; usage gained `cache_write`.
 /// 3: `tasks` (where each task ran and what it asked) travels with the run.
-pub const SCHEMA_VERSION: u32 = 3;
+/// 4: each `webmcp` run records the `tools` (name, description) the agent was given.
+pub const SCHEMA_VERSION: u32 = 4;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Results {
@@ -40,8 +41,18 @@ pub struct Run {
     /// Set when the harness itself failed (not the agent); such runs count as failures.
     pub harness_error: Option<String>,
     pub cost_usd: Option<f64>,
+    /// The tools the agent was given, as the page registered them (`webmcp` arm only).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub tools: Vec<ToolInfo>,
     #[serde(flatten)]
     pub outcome: Outcome,
+}
+
+/// What an agent sees of a tool before calling it.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ToolInfo {
+    pub name: String,
+    pub description: String,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -181,6 +192,7 @@ mod tests {
             attempt: 1,
             success,
             harness_error: None,
+            tools: Vec::new(),
             cost_usd: cost(
                 Usage {
                     input,

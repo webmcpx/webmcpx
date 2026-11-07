@@ -138,6 +138,12 @@ async fn webmcp_arm_uses_the_page_tools() {
     assert!(result.starts_with(r#"{"ok":true"#), "{result}");
     assert!(result.contains("90 seconds"), "{result}");
     assert_eq!(run.cost_usd, Some(0.000_015));
+    // The run records the tools the agent was given, with the descriptions it read.
+    let search = run.tools.iter().find(|t| t.name == "search_page").unwrap();
+    assert!(
+        search.description.starts_with("Find passages"),
+        "{search:?}"
+    );
 }
 
 #[tokio::test]
