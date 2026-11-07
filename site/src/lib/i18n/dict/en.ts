@@ -74,6 +74,8 @@ const en = {
 		// max 70: the footer's big line, 3 lines at 320 px.
 		tagline: 'Standard WebMCP tools for any website, and a linter for your own.',
 		license: 'MIT license · an independent community project.',
+		// Tooltip of our own agent-ready badge, which links to a live scan of this site: max 60.
+		badge: 'This site is agent-ready: check it live',
 		// Column titles: max 12, shown in small capitals.
 		columns: { product: 'Product', project: 'Project', webmcp: 'WebMCP' },
 		// Link labels: max 24, one line in a narrow column.
@@ -193,9 +195,12 @@ const en = {
 			}
 		},
 		// Keep "W3C Community Group draft", "not a W3C standard" and "origin trial" exact in meaning: this
-		// line exists so no reason reads as more than it is.
+		// line exists so no reason reads as more than it is. ChatGPT, Codex and Chrome are product names.
 		status:
-			'WebMCP is a W3C Community Group draft (2 November 2026), not a W3C standard, in a Chrome origin trial. Annotations are hints a site declares, not guarantees.'
+			'WebMCP is a W3C Community Group draft (2 November 2026), not a W3C standard. The ChatGPT desktop app’s browser and Codex can call a site’s WebMCP tools; Chrome runs it behind a flag or an origin trial. Annotations are hints a site declares, not guarantees.',
+		// The reasons not shown as cards, in one line: {list} is their titles joined by the language's own
+		// list format ("A, B and C").
+		also: 'Also:'
 	},
 
 	proof: {
@@ -237,7 +242,7 @@ const en = {
 		// Tag on a site tab for our local test sites: max 7, small capitals.
 		local: 'local',
 		// The two arms of the benchmark: max 16 each (stamps and chart labels).
-		arms: { baseline: 'Without WebMCP', webmcp: 'With webmcpx' },
+		arms: { baseline: 'Without WebMCP', webmcp: 'With WebMCP' },
 		// Under the big token count: max 10, small capitals.
 		tokens: 'tokens',
 		// {time} (3.4s), {steps} (4.0) and {cost} ($1.20) are formatted numbers. max 45.
@@ -310,7 +315,7 @@ const en = {
 					'{model}, headless Chrome. Same prompt and step limit in both arms; {n} runs per question and arm.'
 			}),
 			baseline: 'Without WebMCP: a DOM-snapshot agent that reads, clicks and fills.',
-			webmcp: 'With webmcpx: only the tools the page registers.',
+			webmcp: 'With WebMCP: only the tools the page registers (its own, or webmcpx’s on our test sites).',
 			// "LLM judge": a model grading answers; keep the term.
 			graded: 'Graded by facts in the answer and page state. No LLM judge.',
 			live: 'A live site: it ships its own WebMCP tools.',
@@ -397,7 +402,7 @@ const en = {
 			},
 			status: {
 				label: 'Status',
-				webmcp: 'W3C Community Group draft; a Chrome origin trial.',
+				webmcp: 'W3C Community Group draft. ChatGPT desktop and Codex call it; Chrome: origin trial.',
 				mcp: 'A Linux Foundation project, 10,000+ public servers.'
 			}
 		},
@@ -422,7 +427,19 @@ const en = {
 			get_page_context: 'knows where it is'
 		},
 		// Small capitals, max 50.
-		facts: '~2.7 KB on load · Rust + WebAssembly · MIT license'
+		facts: '~2.8 KB on load · Rust + WebAssembly · MIT license',
+		// "See it work": where to watch the tools being called. {docs}, {flag} and {meta} are links or code;
+		// ChatGPT, Codex, Chrome, DevTools, Application and WebMCP are product and panel names: keep them.
+		see: {
+			title: 'See it work',
+			chatgpt:
+				'Open your page in the ChatGPT desktop app’s browser or in Codex: they call WebMCP tools ({docs}).',
+			docs: 'OpenAI docs',
+			chrome: 'Or in Chrome: turn on {flag}, relaunch, then open DevTools › Application › WebMCP.',
+			live: 'Going live in Chrome? Add your origin-trial token in a {meta} tag.'
+		},
+		// Above the prompt people paste into their coding agent (the prompt itself stays in English).
+		agent: 'Or ask your coding agent:'
 	},
 
 	issues: {
@@ -496,6 +513,11 @@ const en = {
 				one: '{n} tool agents can call directly. Nice.',
 				other: '{n} tools agents can call directly. Nice.'
 			}),
+			// Scanning webmcpx.dev itself: "We'd better be." is a wink (we make the tool); adapt it.
+			readySelf: p({
+				one: '{n} tool agents can call directly. We’d better be.',
+				other: '{n} tools agents can call directly. We’d better be.'
+			}),
 			/** Names the list of tool chips. */
 			tools: 'Tools found',
 			more: '+{n} more',
@@ -519,7 +541,9 @@ const en = {
 		// Badge styles: the name (max 8) and where it fits (max 22).
 		badges: {
 			card: { name: 'Card', fits: 'Light pages' },
-			flat: { name: 'Flat', fits: 'READMEs and footers' },
+			flat: { name: 'Flat', fits: 'Footers' },
+			// Name max 10, fits max 22: an image link for GitHub and npm READMEs (Markdown).
+			readme: { name: 'README', fits: 'GitHub and npm' },
 			dark: { name: 'Dark', fits: 'Dark pages' }
 		},
 		errors: {

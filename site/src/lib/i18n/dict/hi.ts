@@ -47,6 +47,7 @@ const hi: Messages = {
 	footer: {
 		tagline: 'हर वेबसाइट के लिए स्टैंडर्ड WebMCP टूल्स, अपने टूल्स के लिए लिंटर।',
 		license: 'MIT लाइसेंस · एक स्वतंत्र कम्युनिटी प्रोजेक्ट।',
+		badge: 'यह साइट एजेंट-रेडी है: लाइव जाँचें',
 		columns: { product: 'प्रोडक्ट', project: 'प्रोजेक्ट', webmcp: 'WebMCP' },
 		links: {
 			scan: 'अपनी साइट स्कैन करें',
@@ -145,7 +146,8 @@ const hi: Messages = {
 			}
 		},
 		status:
-			'WebMCP एक W3C Community Group ड्राफ़्ट (2 नवंबर 2026) है, W3C स्टैंडर्ड नहीं, और Chrome के ऑरिजिन ट्रायल में है। एनोटेशन वे संकेत हैं जो साइट ख़ुद घोषित करती है, गारंटी नहीं।'
+			'WebMCP एक W3C Community Group ड्राफ़्ट (2 नवंबर 2026) है, W3C स्टैंडर्ड नहीं। ChatGPT डेस्कटॉप ऐप का ब्राउज़र और Codex किसी साइट के WebMCP टूल्स कॉल कर सकते हैं; Chrome में यह फ़्लैग या ऑरिजिन ट्रायल के ज़रिए चलता है। एनोटेशन वे संकेत हैं जो साइट ख़ुद घोषित करती है, गारंटी नहीं।',
+		also: 'और भी:'
 	},
 
 	proof: {
@@ -173,7 +175,7 @@ const hi: Messages = {
 			text: 'हर सवाल और दोनों पक्षों के नतीजे ऊपर पूरे नतीजों में हैं।'
 		},
 		local: 'लोकल',
-		arms: { baseline: 'WebMCP के बिना', webmcp: 'webmcpx के साथ' },
+		arms: { baseline: 'WebMCP के बिना', webmcp: 'WebMCP के साथ' },
 		tokens: 'टोकन',
 		stats: '{time} · {steps} स्टेप · {cost} प्रति 1k',
 		na: 'उपलब्ध नहीं',
@@ -226,7 +228,8 @@ const hi: Messages = {
 					'{model}, हेडलेस Chrome। दोनों पक्षों में एक जैसा प्रॉम्प्ट और स्टेप लिमिट; हर सवाल और पक्ष के लिए {n} रन।'
 			},
 			baseline: 'WebMCP के बिना: DOM-स्नैपशॉट वाला एजेंट, जो पढ़ता, क्लिक करता और फ़ॉर्म भरता है।',
-			webmcp: 'webmcpx के साथ: सिर्फ़ वे टूल्स जो पेज रजिस्टर करता है।',
+			webmcp:
+				'WebMCP के साथ: सिर्फ़ वे टूल्स जो पेज रजिस्टर करता है (उसके अपने, या हमारी टेस्ट साइटों पर webmcpx के)।',
 			graded: 'ग्रेडिंग जवाब में मौजूद तथ्यों और पेज की स्टेट से। कोई LLM जज नहीं।',
 			live: 'लाइव साइट: इसके WebMCP टूल्स इसके अपने हैं।',
 			local: 'लोकल टेस्ट साइट: इसके टूल्स webmcpx से आते हैं।',
@@ -302,7 +305,8 @@ const hi: Messages = {
 			},
 			status: {
 				label: 'स्थिति',
-				webmcp: 'W3C Community Group ड्राफ़्ट; Chrome में ऑरिजिन ट्रायल।',
+				webmcp:
+					'W3C Community Group ड्राफ़्ट। ChatGPT डेस्कटॉप और Codex इसे कॉल करते हैं; Chrome: ऑरिजिन ट्रायल।',
 				mcp: 'Linux Foundation का प्रोजेक्ट, 10,000+ पब्लिक सर्वर।'
 			}
 		},
@@ -321,7 +325,17 @@ const hi: Messages = {
 			fetch_as_markdown: 'पेज हिस्सों में पढ़ता है',
 			get_page_context: 'जानता है कि कहाँ है'
 		},
-		facts: 'लोड पर ~2.7 KB · Rust + WebAssembly · MIT लाइसेंस'
+		facts: 'लोड पर ~2.8 KB · Rust + WebAssembly · MIT लाइसेंस',
+		see: {
+			title: 'काम करते देखें',
+			chatgpt:
+				'अपना पेज ChatGPT डेस्कटॉप ऐप के ब्राउज़र या Codex में खोलें: दोनों WebMCP टूल्स कॉल करते हैं ({docs})।',
+			docs: 'OpenAI डॉक्स',
+			chrome:
+				'या Chrome में: {flag} चालू करें, ब्राउज़र रीस्टार्ट करें, फिर DevTools › Application › WebMCP खोलें।',
+			live: 'Chrome में लाइव जा रहे हैं? अपना ऑरिजिन ट्रायल टोकन {meta} टैग में जोड़ें।'
+		},
+		agent: 'या अपने कोडिंग एजेंट से कहें:'
 	},
 
 	issues: {
@@ -385,6 +399,10 @@ const hi: Messages = {
 				one: '{n} टूल, जिसे एजेंट सीधे कॉल कर सकते हैं। बढ़िया।',
 				other: '{n} टूल्स, जिन्हें एजेंट सीधे कॉल कर सकते हैं। बढ़िया।'
 			},
+			readySelf: {
+				one: '{n} टूल, जिसे एजेंट सीधे कॉल कर सकते हैं। होना भी चाहिए, टूल हमारा जो है।',
+				other: '{n} टूल्स, जिन्हें एजेंट सीधे कॉल कर सकते हैं। होना भी चाहिए, टूल हमारा जो है।'
+			},
 			tools: 'मिले हुए टूल्स',
 			more: '+{n} और',
 			findings: 'लिंट के नतीजे',
@@ -401,7 +419,8 @@ const hi: Messages = {
 		},
 		badges: {
 			card: { name: 'कार्ड', fits: 'लाइट पेज' },
-			flat: { name: 'फ़्लैट', fits: 'README और फ़ुटर' },
+			flat: { name: 'फ़्लैट', fits: 'फ़ुटर' },
+			readme: { name: 'README', fits: 'GitHub और npm' },
 			dark: { name: 'डार्क', fits: 'डार्क पेज' }
 		},
 		errors: {

@@ -48,6 +48,7 @@ const id: Messages = {
 	footer: {
 		tagline: 'Tool WebMCP standar untuk situs apa pun, plus linter untuk tool Anda.',
 		license: 'Lisensi MIT · proyek komunitas independen.',
+		badge: 'Situs ini siap agent: cek langsung',
 		columns: { product: 'Produk', project: 'Proyek', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Scan situs Anda',
@@ -143,7 +144,8 @@ const id: Messages = {
 			}
 		},
 		status:
-			'WebMCP adalah draf W3C Community Group (2 November 2026), bukan standar W3C, dan sedang dalam origin trial Chrome. Anotasi adalah petunjuk yang dideklarasikan situs, bukan jaminan.'
+			'WebMCP adalah draf W3C Community Group (2 November 2026), bukan standar W3C. Browser di aplikasi desktop ChatGPT dan Codex bisa memanggil tool WebMCP milik sebuah situs; di Chrome, WebMCP berjalan lewat flag atau origin trial. Anotasi adalah petunjuk yang dideklarasikan situs, bukan jaminan.',
+		also: 'Selain itu:'
 	},
 
 	proof: {
@@ -170,7 +172,7 @@ const id: Messages = {
 			text: 'Semua pertanyaan dan kedua varian ada di hasil lengkap di atas.'
 		},
 		local: 'lokal',
-		arms: { baseline: 'Tanpa WebMCP', webmcp: 'Dengan webmcpx' },
+		arms: { baseline: 'Tanpa WebMCP', webmcp: 'Dengan WebMCP' },
 		tokens: 'token',
 		stats: '{time} · {steps} langkah · {cost} per 1.000',
 		na: 't/a',
@@ -221,7 +223,8 @@ const id: Messages = {
 					'{model}, Chrome headless. Prompt dan batas langkah sama di kedua varian; {n} run per pertanyaan per varian.'
 			},
 			baseline: 'Tanpa WebMCP: agent berbasis snapshot DOM yang membaca, mengeklik, dan mengisi.',
-			webmcp: 'Dengan webmcpx: hanya tool yang didaftarkan halaman.',
+			webmcp:
+				'Dengan WebMCP: hanya tool yang didaftarkan halaman (milik situs itu sendiri, atau dari webmcpx di situs uji kami).',
 			graded: 'Dinilai dari fakta dalam jawaban dan state halaman. Tanpa LLM judge.',
 			live: 'Situs live: menyediakan tool WebMCP-nya sendiri.',
 			local: 'Situs uji lokal: tool-nya berasal dari webmcpx.',
@@ -295,7 +298,7 @@ const id: Messages = {
 			},
 			status: {
 				label: 'Status',
-				webmcp: 'Draf W3C Community Group; origin trial Chrome.',
+				webmcp: 'Draf W3C Community Group. Bisa dipanggil ChatGPT desktop dan Codex; Chrome: origin trial.',
 				mcp: 'Proyek Linux Foundation, 10.000+ server publik.'
 			}
 		},
@@ -314,7 +317,16 @@ const id: Messages = {
 			fetch_as_markdown: 'membaca halaman bertahap',
 			get_page_context: 'mengenali posisinya'
 		},
-		facts: '~2,7 KB dimuat · Rust + WebAssembly · lisensi MIT'
+		facts: '~2,8 KB dimuat · Rust + WebAssembly · lisensi MIT',
+		see: {
+			title: 'Lihat langsung',
+			chatgpt:
+				'Buka halaman Anda di browser aplikasi desktop ChatGPT atau di Codex: keduanya memanggil tool WebMCP ({docs}).',
+			docs: 'dokumentasi OpenAI',
+			chrome: 'Atau di Chrome: aktifkan {flag}, jalankan ulang, lalu buka DevTools › Application › WebMCP.',
+			live: 'Mau live di Chrome? Tambahkan token origin trial Anda di tag {meta}.'
+		},
+		agent: 'Atau minta coding agent Anda:'
 	},
 
 	issues: {
@@ -376,6 +388,9 @@ const id: Messages = {
 			ready: {
 				other: '{n} tool yang bisa langsung dipanggil agent. Mantap.'
 			},
+			readySelf: {
+				other: '{n} tool yang bisa langsung dipanggil agent. Masa pembuatnya sendiri belum.'
+			},
 			tools: 'Tool yang ditemukan',
 			more: '+{n} lainnya',
 			findings: 'Temuan lint',
@@ -392,7 +407,8 @@ const id: Messages = {
 		},
 		badges: {
 			card: { name: 'Kartu', fits: 'Halaman terang' },
-			flat: { name: 'Datar', fits: 'README dan footer' },
+			flat: { name: 'Datar', fits: 'Footer' },
+			readme: { name: 'README', fits: 'GitHub dan npm' },
 			dark: { name: 'Gelap', fits: 'Halaman gelap' }
 		},
 		errors: {

@@ -1,3 +1,5 @@
-# allow crawling everything by default
+# Crawlers and agents are welcome. Agents: start at /llms.txt (or /index.md for this page as Markdown).
 User-agent: *
 Disallow:
+
+Sitemap: https://webmcpx.dev/sitemap.xml

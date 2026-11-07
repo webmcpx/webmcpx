@@ -41,11 +41,16 @@
 		small: Blocks
 	};
 	const fill = (s: string) => fmt(s, { best: ratio(bestSaving), bestSite });
+	/** The four with the strongest evidence get cards; the rest are named in one line under them. */
+	const CARDS: Reason['id'][] = ['finish', 'tokens', 'backend', 'small'];
+	const cards = $derived(REASONS.filter((r) => CARDS.includes(r.id)));
+	// Chips, not a sentence: some titles hold their own commas ("Same cart, same form").
+	const also = $derived(REASONS.filter((r) => !CARDS.includes(r.id)).map((r) => m.reasons[r.id].title));
 </script>
 
 <Section id="why" kicker={m.kicker} title={m.title} lead={m.lead}>
 	<ol class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-		{#each REASONS as r, i (r.id)}
+		{#each cards as r, i (r.id)}
 			{@const Icon = ICONS[r.id]}
 			{@const t = m.reasons[r.id]}
 			<li class="min-w-0">
@@ -80,5 +85,11 @@
 			</li>
 		{/each}
 	</ol>
-	<p class="mt-8 max-w-3xl text-sm text-pretty text-ink-3">{m.status}</p>
+	<p class="mt-6 flex max-w-4xl flex-wrap items-center gap-2 text-ink-2">
+		<span>{m.also}</span>
+		{#each also as title (title)}
+			<span class="rounded-full border-2 border-ink/15 px-3 py-0.5 text-sm font-medium">{title}</span>
+		{/each}
+	</p>
+	<p class="mt-4 max-w-3xl text-sm text-pretty text-ink-3">{m.status}</p>
 </Section>

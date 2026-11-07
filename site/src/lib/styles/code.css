@@ -8,3 +8,12 @@
 	width: max-content;
 	min-width: 100%;
 }
+
+/* Prose in a code block (the agent prompt): wrap instead of scrolling sideways. */
+.code-wrap .shiki {
+	white-space: pre-wrap;
+}
+
+.code-wrap .shiki code {
+	width: auto;
+}

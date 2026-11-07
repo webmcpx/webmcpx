@@ -47,6 +47,7 @@ const ja: Messages = {
 	footer: {
 		tagline: 'あらゆるサイトに標準の WebMCP ツールを。自作ツールにはリンターを。',
 		license: 'MIT ライセンス · 独立したコミュニティプロジェクトです。',
+		badge: 'このサイトはエージェント対応済み：ライブで確認',
 		columns: { product: 'プロダクト', project: 'プロジェクト', webmcp: 'WebMCP' },
 		links: {
 			scan: 'サイトをスキャン',
@@ -142,7 +143,8 @@ const ja: Messages = {
 			}
 		},
 		status:
-			'WebMCP は W3C Community Group のドラフト（2026 年 11 月 2 日）であり、W3C 標準ではありません。現在は Chrome のオリジントライアル中です。アノテーションはサイトが宣言するヒントであり、保証ではありません。'
+			'WebMCP は W3C Community Group のドラフト（2026 年 11 月 2 日）であり、W3C 標準ではありません。ChatGPT デスクトップアプリのブラウザーと Codex は、サイトの WebMCP ツールを呼び出せます。Chrome ではフラグかオリジントライアルで動作します。アノテーションはサイトが宣言するヒントであり、保証ではありません。',
+		also: 'ほかにも：'
 	},
 
 	proof: {
@@ -169,7 +171,7 @@ const ja: Messages = {
 			text: 'すべての質問と両条件の結果は、上の全結果に掲載しています。'
 		},
 		local: 'テスト',
-		arms: { baseline: 'WebMCP なし', webmcp: 'webmcpx あり' },
+		arms: { baseline: 'WebMCP なし', webmcp: 'WebMCP あり' },
 		tokens: 'トークン',
 		stats: '{time} · {steps} ステップ · {cost}/1,000 回',
 		na: '記録なし',
@@ -220,7 +222,8 @@ const ja: Messages = {
 					'{model}、ヘッドレス Chrome。両条件で同じプロンプトとステップ上限を使い、質問と条件ごとに {n} 回実行しています。'
 			},
 			baseline: 'WebMCP なし：DOM スナップショットを読み、クリックし、入力するエージェント。',
-			webmcp: 'webmcpx あり：ページが登録したツールだけを使用。',
+			webmcp:
+				'WebMCP あり：ページが登録したツールだけを使用（サイト独自のもの、またはテスト用サイトでは webmcpx のもの）。',
 			graded: '回答に含まれる事実とページの状態で採点します。LLM ジャッジは使いません。',
 			live: '実サイト：独自の WebMCP ツールを提供しています。',
 			local: 'ローカルのテストサイト：ツールは webmcpx が提供しています。',
@@ -294,7 +297,8 @@ const ja: Messages = {
 			},
 			status: {
 				label: 'ステータス',
-				webmcp: 'W3C Community Group のドラフト。Chrome でオリジントライアル中。',
+				webmcp:
+					'W3C Community Group のドラフト。ChatGPT デスクトップと Codex が呼び出せます。Chrome はオリジントライアル。',
 				mcp: 'Linux Foundation のプロジェクト。公開サーバーは 10,000 以上。'
 			}
 		},
@@ -313,7 +317,16 @@ const ja: Messages = {
 			fetch_as_markdown: 'ページを分割して読む',
 			get_page_context: '現在地を把握する'
 		},
-		facts: '読込時 ~2.7 KB · Rust + WebAssembly · MIT License'
+		facts: '読込時 ~2.8 KB · Rust + WebAssembly · MIT License',
+		see: {
+			title: '動作を確かめる',
+			chatgpt:
+				'ChatGPT デスクトップアプリのブラウザーか Codex でページを開いてください。どちらも WebMCP ツールを呼び出します（{docs}）。',
+			docs: 'OpenAI のドキュメント',
+			chrome: 'Chrome なら、{flag} を有効にして再起動し、DevTools › Application › WebMCP を開きます。',
+			live: 'Chrome で本番公開するなら、オリジントライアルのトークンを {meta} タグに追加します。'
+		},
+		agent: 'コーディングエージェントに任せる場合：'
 	},
 
 	issues: {
@@ -376,6 +389,9 @@ const ja: Messages = {
 			ready: {
 				other: 'エージェントが直接呼び出せるツールが {n} 個あります。いいですね。'
 			},
+			readySelf: {
+				other: 'エージェントが直接呼び出せるツールが {n} 個あります。紺屋の白袴では示しがつきません。'
+			},
 			tools: '検出されたツール',
 			more: 'ほか {n} 件',
 			findings: 'lint の指摘事項',
@@ -392,7 +408,8 @@ const ja: Messages = {
 		},
 		badges: {
 			card: { name: 'カード', fits: '明るいページ' },
-			flat: { name: 'フラット', fits: 'README やフッター' },
+			flat: { name: 'フラット', fits: 'フッター' },
+			readme: { name: 'README', fits: 'GitHub や npm' },
 			dark: { name: 'ダーク', fits: '暗いページ' }
 		},
 		errors: {

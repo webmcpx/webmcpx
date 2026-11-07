@@ -47,6 +47,7 @@ const de: Messages = {
 	footer: {
 		tagline: 'Standard-WebMCP-Tools für jede Website, ein Linter für Ihre eigenen.',
 		license: 'MIT-Lizenz · ein unabhängiges Community-Projekt.',
+		badge: 'Diese Website ist agentenfähig: live prüfen',
 		columns: { product: 'Produkt', project: 'Projekt', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Website scannen',
@@ -145,7 +146,8 @@ const de: Messages = {
 			}
 		},
 		status:
-			'WebMCP ist ein Entwurf der W3C Community Group (2. November 2026), kein W3C-Standard, und läuft in Chrome als Origin Trial. Annotationen sind Hinweise, die eine Website deklariert, keine Garantien.'
+			'WebMCP ist ein Entwurf der W3C Community Group (2. November 2026), kein W3C-Standard. Der Browser der ChatGPT-Desktop-App und Codex können die WebMCP-Tools einer Website aufrufen; Chrome bietet es hinter einem Flag oder als Origin Trial an. Annotationen sind Hinweise, die eine Website deklariert, keine Garantien.',
+		also: 'Außerdem:'
 	},
 
 	proof: {
@@ -173,7 +175,7 @@ const de: Messages = {
 			text: 'Alle Fragen und beide Varianten stehen in den vollständigen Ergebnissen oben.'
 		},
 		local: 'lokal',
-		arms: { baseline: 'Ohne WebMCP', webmcp: 'Mit webmcpx' },
+		arms: { baseline: 'Ohne WebMCP', webmcp: 'Mit WebMCP' },
 		tokens: 'Tokens',
 		stats: '{time} · {steps} Schritte · {cost} pro 1.000',
 		na: 'k. A.',
@@ -226,7 +228,8 @@ const de: Messages = {
 					'{model}, Headless Chrome. Gleicher Prompt und gleiches Schrittlimit in beiden Varianten; {n} Läufe pro Frage und Variante.'
 			},
 			baseline: 'Ohne WebMCP: ein DOM-Snapshot-Agent, der liest, klickt und Formulare ausfüllt.',
-			webmcp: 'Mit webmcpx: nur die Tools, die die Seite registriert.',
+			webmcp:
+				'Mit WebMCP: nur die Tools, die die Seite registriert (eigene oder, auf unseren Testseiten, die von webmcpx).',
 			graded: 'Bewertet anhand der Fakten in der Antwort und des Seitenzustands. Kein LLM-Judge.',
 			live: 'Eine Live-Website: Sie liefert eigene WebMCP-Tools mit.',
 			local: 'Eine lokale Test-Website: Ihre Tools stammen von webmcpx.',
@@ -304,7 +307,8 @@ const de: Messages = {
 			},
 			status: {
 				label: 'Status',
-				webmcp: 'Entwurf der W3C Community Group; Origin Trial in Chrome.',
+				webmcp:
+					'Entwurf der W3C Community Group. ChatGPT Desktop und Codex rufen es auf; Chrome: Origin Trial.',
 				mcp: 'Ein Projekt der Linux Foundation, über 10.000 öffentliche Server.'
 			}
 		},
@@ -323,7 +327,16 @@ const de: Messages = {
 			fetch_as_markdown: 'liest Seiten paginiert',
 			get_page_context: 'weiß, wo es ist'
 		},
-		facts: '~2,7 KB geladen · Rust + WebAssembly · MIT-Lizenz'
+		facts: '~2,8 KB geladen · Rust + WebAssembly · MIT-Lizenz',
+		see: {
+			title: 'In Aktion sehen',
+			chatgpt:
+				'Öffnen Sie Ihre Seite im Browser der ChatGPT-Desktop-App oder in Codex: Beide rufen WebMCP-Tools auf ({docs}).',
+			docs: 'OpenAI-Doku',
+			chrome: 'Oder in Chrome: {flag} aktivieren, neu starten, dann DevTools › Application › WebMCP öffnen.',
+			live: 'Sie gehen in Chrome live? Tragen Sie Ihr Origin-Trial-Token in ein {meta}-Tag ein.'
+		},
+		agent: 'Oder fragen Sie Ihren Coding-Agenten:'
 	},
 
 	issues: {
@@ -387,6 +400,10 @@ const de: Messages = {
 				one: '{n} Tool, das Agenten direkt aufrufen können. Gut gemacht.',
 				other: '{n} Tools, die Agenten direkt aufrufen können. Gut gemacht.'
 			},
+			readySelf: {
+				one: '{n} Tool, das Agenten direkt aufrufen können. Das wollen wir auch hoffen.',
+				other: '{n} Tools, die Agenten direkt aufrufen können. Das wollen wir auch hoffen.'
+			},
 			tools: 'Gefundene Tools',
 			more: '+{n} weitere',
 			findings: 'Lint-Befunde',
@@ -403,7 +420,8 @@ const de: Messages = {
 		},
 		badges: {
 			card: { name: 'Karte', fits: 'Helle Seiten' },
-			flat: { name: 'Flach', fits: 'READMEs und Footer' },
+			flat: { name: 'Flach', fits: 'Footer' },
+			readme: { name: 'README', fits: 'GitHub und npm' },
 			dark: { name: 'Dunkel', fits: 'Dunkle Seiten' }
 		},
 		errors: {

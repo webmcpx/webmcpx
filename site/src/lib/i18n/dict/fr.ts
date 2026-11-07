@@ -48,6 +48,7 @@ const fr: Messages = {
 	footer: {
 		tagline: 'Outils WebMCP standard pour tout site, et un linter pour les vôtres.',
 		license: 'Licence MIT · un projet communautaire indépendant.',
+		badge: 'Ce site est prêt pour les agents : vérifiez en direct',
 		columns: { product: 'Produit', project: 'Projet', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Scanner votre site',
@@ -146,7 +147,8 @@ const fr: Messages = {
 			}
 		},
 		status:
-			'WebMCP est un brouillon du Community Group du W3C (2 novembre 2026), pas un standard du W3C, en origin trial dans Chrome. Les annotations sont des indications que le site déclare, pas des garanties.'
+			'WebMCP est un brouillon du Community Group du W3C (2 novembre 2026), pas un standard du W3C. Le navigateur de l’app de bureau ChatGPT et Codex peuvent appeler les outils WebMCP d’un site ; Chrome le propose derrière un flag ou en origin trial. Les annotations sont des indications que le site déclare, pas des garanties.',
+		also: 'Et aussi :'
 	},
 
 	proof: {
@@ -174,7 +176,7 @@ const fr: Messages = {
 			text: 'Toutes les questions et les deux variantes figurent dans les résultats complets ci-dessus.'
 		},
 		local: 'local',
-		arms: { baseline: 'Sans WebMCP', webmcp: 'Avec webmcpx' },
+		arms: { baseline: 'Sans WebMCP', webmcp: 'Avec WebMCP' },
 		tokens: 'tokens',
 		stats: '{time} · {steps} étapes · {cost} pour 1 000',
 		na: 'n. d.',
@@ -228,7 +230,8 @@ const fr: Messages = {
 					'{model}, Chrome headless. Même prompt et même limite d’étapes dans les deux variantes ; {n} exécutions par question et par variante.'
 			},
 			baseline: 'Sans WebMCP : un agent qui lit, clique et remplit à partir de snapshots du DOM.',
-			webmcp: 'Avec webmcpx : uniquement les outils que la page enregistre.',
+			webmcp:
+				'Avec WebMCP : uniquement les outils que la page enregistre (les siens, ou ceux de webmcpx sur nos sites de test).',
 			graded: 'Notation sur les faits présents dans la réponse et sur l’état de la page. Pas de LLM juge.',
 			live: 'Un site en ligne : il fournit ses propres outils WebMCP.',
 			local: 'Un site de test local : ses outils viennent de webmcpx.',
@@ -305,7 +308,8 @@ const fr: Messages = {
 			},
 			status: {
 				label: 'Statut',
-				webmcp: 'Brouillon du Community Group du W3C ; en origin trial dans Chrome.',
+				webmcp:
+					'Brouillon du Community Group du W3C. ChatGPT (bureau) et Codex l’appellent ; Chrome : origin trial.',
 				mcp: 'Un projet de la Linux Foundation, plus de 10 000 serveurs publics.'
 			}
 		},
@@ -324,7 +328,16 @@ const fr: Messages = {
 			fetch_as_markdown: 'lit la page, paginée',
 			get_page_context: 'sait où il se trouve'
 		},
-		facts: '~2,7 Ko chargés · Rust + WebAssembly · licence MIT'
+		facts: '~2,8 Ko chargés · Rust + WebAssembly · licence MIT',
+		see: {
+			title: 'Le voir à l’œuvre',
+			chatgpt:
+				'Ouvrez votre page dans le navigateur de l’app de bureau ChatGPT ou dans Codex : tous deux appellent les outils WebMCP ({docs}).',
+			docs: 'documentation OpenAI',
+			chrome: 'Ou dans Chrome : activez {flag}, relancez, puis ouvrez DevTools › Application › WebMCP.',
+			live: 'Mise en production dans Chrome ? Ajoutez votre token d’origin trial dans une balise {meta}.'
+		},
+		agent: 'Ou demandez à votre agent de code :'
 	},
 
 	issues: {
@@ -388,6 +401,10 @@ const fr: Messages = {
 				one: '{n} outil que les agents peuvent appeler directement. Bien joué.',
 				other: '{n} outils que les agents peuvent appeler directement. Bien joué.'
 			},
+			readySelf: {
+				one: '{n} outil que les agents peuvent appeler directement. Encore heureux.',
+				other: '{n} outils que les agents peuvent appeler directement. Encore heureux.'
+			},
 			tools: 'Outils trouvés',
 			more: '+{n} de plus',
 			findings: 'Résultats du lint',
@@ -404,7 +421,8 @@ const fr: Messages = {
 		},
 		badges: {
 			card: { name: 'Carte', fits: 'Pages claires' },
-			flat: { name: 'Plat', fits: 'README, pieds de page' },
+			flat: { name: 'Plat', fits: 'Pieds de page' },
+			readme: { name: 'README', fits: 'GitHub et npm' },
 			dark: { name: 'Sombre', fits: 'Pages sombres' }
 		},
 		errors: {

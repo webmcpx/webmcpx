@@ -8,7 +8,8 @@
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
 
-	let { scriptTag }: { scriptTag: Highlighted } = $props();
+	let { scriptTag, agentPrompt }: { scriptTag: Highlighted; agentPrompt: Highlighted } = $props();
+	const OPENAI_DOCS = 'https://learn.chatgpt.com/docs/webmcp';
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.fix);
@@ -30,6 +31,41 @@
 				>
 			{/each}
 		</p>
+		<div
+			class="mt-8 rounded-card border-2 border-dashed border-ink/40 p-5 text-left text-sm text-ink-2 sm:p-6"
+		>
+			<p class="font-display text-base font-bold text-ink">{m.see.title}</p>
+			<ul class="mt-2 list-disc space-y-1.5 pl-5">
+				<li>
+					<Rich text={m.see.chatgpt}
+						>{#snippet docs()}<a
+								class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4"
+								href={OPENAI_DOCS}>{m.see.docs}</a
+							>{/snippet}</Rich
+					>
+				</li>
+				<li>
+					<Rich text={m.see.chrome}
+						>{#snippet flag()}<code class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-ink"
+								>chrome://flags/#enable-webmcp-testing</code
+							>{/snippet}</Rich
+					>
+				</li>
+				<li>
+					<Rich text={m.see.live}
+						>{#snippet meta()}<code class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-ink"
+								>&lt;meta http-equiv="origin-trial"&gt;</code
+							>{/snippet}</Rich
+					>
+				</li>
+			</ul>
+		</div>
+		<p class="mt-8 text-left text-sm font-medium text-ink-2">{m.agent}</p>
+		<CodeBlock
+			snippet={agentPrompt}
+			title="prompt"
+			class="code-wrap mt-2"
+		/>
 	</Reveal>
 	<ul class="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
 		{#each GIVES as tool, i (tool)}

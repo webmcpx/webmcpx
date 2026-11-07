@@ -1,8 +1,10 @@
 <!--
-	The landing, in order of importance: can agents use YOUR site (scan) → others already do (logos) → why it matters →
-	proof it matters (benchmark) → how it relates to MCP → the fix (one line) → what the community asked for .
+	The landing, in order of importance: can agents use YOUR site (scan) → others already do (logos) → the fix in
+	one line, and how to see it work → why it matters → proof it matters (benchmark) → how it relates to MCP → what
+	the community asked for.
 -->
 <script lang="ts">
+	import Meta from '#lib/components/layout/Meta.svelte';
 	import Divider from '#lib/components/ui/Divider.svelte';
 	import Fix from '#lib/features/fix/Fix.svelte';
 	import Hero from '#lib/features/hero/Hero.svelte';
@@ -18,13 +20,12 @@
 	const i18n = useI18n();
 </script>
 
-<svelte:head>
-	<title>{i18n.m.meta.home.title}</title>
-	<meta name="description" content={i18n.m.meta.home.description} />
-</svelte:head>
+<Meta title={i18n.m.meta.home.title} description={i18n.m.meta.home.description} />
 
 <Hero scriptTag={page.code.scriptTag} />
 <LogoWall />
+<Divider />
+<Fix scriptTag={page.code.scriptTag} agentPrompt={page.code.agentPrompt} />
 {#if page.best}
 	<Divider />
 	<Why bestSaving={page.best.saving} bestSite={page.best.site} />
@@ -33,7 +34,5 @@
 <Proof runs={page.runs} reproduce={page.code.reproduce} />
 <Divider />
 <Versus />
-<Divider />
-<Fix scriptTag={page.code.scriptTag} />
 <Divider />
 <Issues />

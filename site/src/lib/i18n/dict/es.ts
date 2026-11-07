@@ -46,6 +46,7 @@ const es: Messages = {
 	footer: {
 		tagline: 'Herramientas WebMCP estándar para cada web y un linter para las tuyas.',
 		license: 'Licencia MIT · un proyecto comunitario independiente.',
+		badge: 'Este sitio está listo para agentes: compruébalo en vivo',
 		columns: { product: 'Producto', project: 'Proyecto', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Escanea tu sitio',
@@ -144,7 +145,8 @@ const es: Messages = {
 			}
 		},
 		status:
-			'WebMCP es un borrador de un Community Group del W3C (2 de noviembre de 2026), no un estándar del W3C, y está en origin trial en Chrome. Las anotaciones son indicaciones que declara el sitio, no garantías.'
+			'WebMCP es un borrador de un Community Group del W3C (2 de noviembre de 2026), no un estándar del W3C. El navegador de la app de escritorio de ChatGPT y Codex pueden llamar a las herramientas WebMCP de un sitio; Chrome lo ofrece detrás de un flag o en origin trial. Las anotaciones son indicaciones que declara el sitio, no garantías.',
+		also: 'Además:'
 	},
 
 	proof: {
@@ -172,7 +174,7 @@ const es: Messages = {
 			text: 'Todas las preguntas y ambas variantes están en los resultados completos de arriba.'
 		},
 		local: 'local',
-		arms: { baseline: 'Sin WebMCP', webmcp: 'Con webmcpx' },
+		arms: { baseline: 'Sin WebMCP', webmcp: 'Con WebMCP' },
 		tokens: 'tokens',
 		stats: '{time} · {steps} pasos · {cost} por 1000',
 		na: 'n/d',
@@ -225,7 +227,8 @@ const es: Messages = {
 					'{model}, Chrome headless. Mismo prompt y mismo límite de pasos en ambas variantes; {n} ejecuciones por pregunta y variante.'
 			},
 			baseline: 'Sin WebMCP: un agente basado en snapshots del DOM que lee, hace clic y rellena.',
-			webmcp: 'Con webmcpx: solo las herramientas que registra la página.',
+			webmcp:
+				'Con WebMCP: solo las herramientas que registra la página (las suyas o, en nuestros sitios de prueba, las de webmcpx).',
 			graded: 'Evaluado según los hechos de la respuesta y el estado de la página. Sin LLM como juez.',
 			live: 'Un sitio real: publica sus propias herramientas WebMCP.',
 			local: 'Un sitio de prueba local: sus herramientas vienen de webmcpx.',
@@ -302,7 +305,8 @@ const es: Messages = {
 			},
 			status: {
 				label: 'Estado',
-				webmcp: 'Borrador de un Community Group del W3C; en origin trial en Chrome.',
+				webmcp:
+					'Borrador de un Community Group del W3C. Lo llaman ChatGPT de escritorio y Codex; Chrome: origin trial.',
 				mcp: 'Un proyecto de la Linux Foundation, más de 10 000 servidores públicos.'
 			}
 		},
@@ -321,7 +325,16 @@ const es: Messages = {
 			fetch_as_markdown: 'lee la página por partes',
 			get_page_context: 'sabe dónde está'
 		},
-		facts: '~2,7 KB al cargar · Rust + WebAssembly · MIT'
+		facts: '~2,8 KB al cargar · Rust + WebAssembly · MIT',
+		see: {
+			title: 'Míralo en acción',
+			chatgpt:
+				'Abre tu página en el navegador de la app de escritorio de ChatGPT o en Codex: ambos llaman a herramientas WebMCP ({docs}).',
+			docs: 'documentación de OpenAI',
+			chrome: 'O en Chrome: activa {flag}, reinicia y abre DevTools › Application › WebMCP.',
+			live: '¿Vas a producción en Chrome? Añade tu token de origin trial en una etiqueta {meta}.'
+		},
+		agent: 'O pídeselo a tu agente de código:'
 	},
 
 	issues: {
@@ -386,6 +399,10 @@ const es: Messages = {
 				one: '{n} herramienta que los agentes pueden llamar directamente. Bien hecho.',
 				other: '{n} herramientas que los agentes pueden llamar directamente. Bien hecho.'
 			},
+			readySelf: {
+				one: '{n} herramienta que los agentes pueden llamar directamente. Faltaría más.',
+				other: '{n} herramientas que los agentes pueden llamar directamente. Faltaría más.'
+			},
 			tools: 'Herramientas encontradas',
 			more: '+{n} más',
 			findings: 'Hallazgos del linter',
@@ -402,7 +419,8 @@ const es: Messages = {
 		},
 		badges: {
 			card: { name: 'Tarjeta', fits: 'Páginas claras' },
-			flat: { name: 'Plana', fits: 'READMEs y footers' },
+			flat: { name: 'Plana', fits: 'Footers' },
+			readme: { name: 'README', fits: 'GitHub y npm' },
 			dark: { name: 'Oscura', fits: 'Páginas oscuras' }
 		},
 		errors: {

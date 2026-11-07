@@ -48,6 +48,7 @@ const ptBr: Messages = {
 	footer: {
 		tagline: 'Ferramentas WebMCP padrão para todo site, e um linter para as suas.',
 		license: 'Licença MIT · um projeto independente da comunidade.',
+		badge: 'Este site está pronto para agentes: confira ao vivo',
 		columns: { product: 'Produto', project: 'Projeto', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Escaneie seu site',
@@ -143,7 +144,8 @@ const ptBr: Messages = {
 			}
 		},
 		status:
-			'WebMCP é um rascunho de Community Group do W3C (2 de novembro de 2026), não um padrão do W3C, em origin trial no Chrome. As anotações são dicas que o site declara, não garantias.'
+			'WebMCP é um rascunho de Community Group do W3C (2 de novembro de 2026), não um padrão do W3C. O navegador do app de desktop do ChatGPT e o Codex podem chamar as ferramentas WebMCP de um site; no Chrome, ele roda atrás de uma flag ou em origin trial. As anotações são dicas que o site declara, não garantias.',
+		also: 'E também:'
 	},
 
 	proof: {
@@ -171,7 +173,7 @@ const ptBr: Messages = {
 			text: 'Todas as perguntas, nos dois cenários, estão nos resultados completos acima.'
 		},
 		local: 'local',
-		arms: { baseline: 'Sem WebMCP', webmcp: 'Com webmcpx' },
+		arms: { baseline: 'Sem WebMCP', webmcp: 'Com WebMCP' },
 		tokens: 'tokens',
 		stats: '{time} · {steps} passos · {cost} por 1 mil',
 		na: 'n/d',
@@ -224,7 +226,8 @@ const ptBr: Messages = {
 					'{model}, Chrome headless. Mesmo prompt e mesmo limite de passos nos dois cenários; {n} execuções por pergunta e cenário.'
 			},
 			baseline: 'Sem WebMCP: um agente baseado em snapshots do DOM, que lê, clica e preenche.',
-			webmcp: 'Com webmcpx: só as ferramentas que a página registra.',
+			webmcp:
+				'Com WebMCP: só as ferramentas que a página registra (as dela, ou as do webmcpx nos nossos sites de teste).',
 			graded: 'Avaliado pelos fatos na resposta e pelo estado da página. Sem LLM como juiz.',
 			live: 'Um site no ar: ele publica as próprias ferramentas WebMCP.',
 			local: 'Um site de teste local: as ferramentas vêm do webmcpx.',
@@ -302,7 +305,7 @@ const ptBr: Messages = {
 			},
 			status: {
 				label: 'Status',
-				webmcp: 'Rascunho de Community Group do W3C; em origin trial no Chrome.',
+				webmcp: 'Rascunho de Community Group do W3C. ChatGPT desktop e Codex chamam; Chrome: origin trial.',
 				mcp: 'Um projeto da Linux Foundation, com mais de 10.000 servidores públicos.'
 			}
 		},
@@ -321,7 +324,16 @@ const ptBr: Messages = {
 			fetch_as_markdown: 'lê a página, paginada',
 			get_page_context: 'sabe onde está'
 		},
-		facts: '~2,7 KB ao carregar · Rust + WebAssembly · MIT'
+		facts: '~2,8 KB ao carregar · Rust + WebAssembly · MIT',
+		see: {
+			title: 'Veja funcionando',
+			chatgpt:
+				'Abra sua página no navegador do app de desktop do ChatGPT ou no Codex: os dois chamam ferramentas WebMCP ({docs}).',
+			docs: 'docs da OpenAI',
+			chrome: 'Ou no Chrome: ative {flag}, reinicie e abra DevTools › Application › WebMCP.',
+			live: 'Vai para produção no Chrome? Coloque seu token de origin trial numa tag {meta}.'
+		},
+		agent: 'Ou peça ao seu agente de código:'
 	},
 
 	issues: {
@@ -386,6 +398,10 @@ const ptBr: Messages = {
 				one: '{n} ferramenta que os agentes chamam direto. Boa.',
 				other: '{n} ferramentas que os agentes chamam direto. Boa.'
 			},
+			readySelf: {
+				one: '{n} ferramenta que os agentes chamam direto. Em casa de ferreiro, espeto de aço.',
+				other: '{n} ferramentas que os agentes chamam direto. Em casa de ferreiro, espeto de aço.'
+			},
 			tools: 'Ferramentas encontradas',
 			more: '+{n} outras',
 			findings: 'Resultados do lint',
@@ -402,7 +418,8 @@ const ptBr: Messages = {
 		},
 		badges: {
 			card: { name: 'Cartão', fits: 'Páginas claras' },
-			flat: { name: 'Plano', fits: 'READMEs e rodapés' },
+			flat: { name: 'Plano', fits: 'Rodapés' },
+			readme: { name: 'README', fits: 'GitHub e npm' },
 			dark: { name: 'Escuro', fits: 'Páginas escuras' }
 		},
 		errors: {

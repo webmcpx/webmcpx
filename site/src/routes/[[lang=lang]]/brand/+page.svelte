@@ -4,6 +4,7 @@
 	reports/Marca e logo do webmcpx.md; marks in site/static/brand-assets.
 -->
 <script lang="ts">
+	import Meta from '#lib/components/layout/Meta.svelte';
 	import Check from '@lucide/svelte/icons/check';
 	import Download from '@lucide/svelte/icons/download';
 	import X from '@lucide/svelte/icons/x';
@@ -40,10 +41,7 @@
 	const grid = Array.from({ length: 25 }, (_, i) => i);
 </script>
 
-<svelte:head>
-	<title>{i18n.m.meta.brand.title}</title>
-	<meta name="description" content={i18n.m.meta.brand.description} />
-</svelte:head>
+<Meta title={i18n.m.meta.brand.title} description={i18n.m.meta.brand.description} />
 
 {#snippet junction(cls: string, stretch = false)}
 	<svg

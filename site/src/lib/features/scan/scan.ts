@@ -139,13 +139,15 @@ export const shareLink = (origin: string, url: string, home = '/') =>
 	`${origin}${home}?scan=${encodeURIComponent(url)}`;
 
 /**
- * The badge styles, inlined into the embed code: sites never load an image from our server. Their names
+ * The badge styles. All but `readme` are inlined into the embed code, so those sites load nothing from our server. Their names
  * are in the dictionary (`scan.badges.<id>`); the artwork's own <title> stays English, like the logo.
  */
 export const BADGES = [
 	{ id: 'card', svg: cardSvg.trim() },
 	{ id: 'flat', svg: flatSvg.trim() },
-	{ id: 'dark', svg: darkSvg.trim() }
+	{ id: 'dark', svg: darkSvg.trim() },
+	// READMEs can't hold inline SVG (GitHub strips it): an image of the site's latest verdict, served by us.
+	{ id: 'readme', svg: flatSvg.trim() }
 ] as const;
 export type BadgeStyle = (typeof BADGES)[number]['id'];
 
@@ -163,7 +165,11 @@ export function badgeEmbed(
 	title: string,
 	home = '/'
 ): string {
-	const href = attr(`${shareLink(origin, url, home)}#scan`);
+	const href = `${shareLink(origin, url, home)}#scan`;
+	if (style === 'readme') {
+		const image = `${origin}/badge/${host(url)}.svg`;
+		return `[![${title.replace(/[[\]]/g, '')}](${image})](${href})`;
+	}
 	const svg = BADGES.find((b) => b.id === style)?.svg ?? BADGES[0].svg;
-	return `<a href="${href}" title="${attr(title)}">${svg}</a>`;
+	return `<a href="${attr(href)}" title="${attr(title)}">${svg}</a>`;
 }

@@ -3,6 +3,7 @@
 	links stacked one per line with their icons, the giant lockup, and the license and trademark notices.
 -->
 <script lang="ts">
+	import { BADGES } from '#lib/features/scan/scan.ts';
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import Bug from '@lucide/svelte/icons/bug';
 	import ChartColumn from '@lucide/svelte/icons/chart-no-axes-column';
@@ -29,6 +30,7 @@
 	}
 
 	const i18n = useI18n();
+	const FLAT_BADGE = BADGES.find((b) => b.id === 'flat')?.svg ?? '';
 	const m = $derived(i18n.m.footer);
 	const home = $derived(i18n.href('/'));
 	// Product and site names (GitHub, npm, crates.io, webmcp.zone) are not translated.
@@ -117,10 +119,22 @@
 			/>
 		</div>
 
-		<div class="mt-8 border-t-2 border-paper/20 px-6 py-6 sm:px-10">
+		<div
+			class="mt-8 flex flex-wrap items-start justify-between gap-4 border-t-2 border-paper/20 px-6 py-6 sm:px-10"
+		>
 			<ul class="space-y-1 text-xs">
 				{#each m.notices as n (n)}<li>{n}</li>{/each}
 			</ul>
+			<!-- Our own badge: a link to a live scan of this site, like the one we offer everyone. -->
+			<a
+				href="{i18n.href('/')}?scan={encodeURIComponent('https://webmcpx.dev/')}#scan"
+				class="shrink-0"
+				title={m.badge}
+			>
+				<!-- Our own artwork (content/badges/flat.svg), not user input. -->
+				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+				{@html FLAT_BADGE}
+			</a>
 		</div>
 	</div>
 </footer>

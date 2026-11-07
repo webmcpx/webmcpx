@@ -49,6 +49,7 @@ const zh: Messages = {
 	footer: {
 		tagline: '为任意网站提供标准 WebMCP 工具，再为你自己的工具配一个 linter。',
 		license: 'MIT 许可证 · 独立社区项目。',
+		badge: '本站已智能体就绪：点击实时检测',
 		columns: { product: '产品', project: '项目', webmcp: 'WebMCP' },
 		links: {
 			scan: '扫描你的网站',
@@ -145,7 +146,8 @@ const zh: Messages = {
 			}
 		},
 		status:
-			'WebMCP 是 W3C 社区组草案（2026 年 11 月 2 日），不是 W3C 标准，目前处于 Chrome 源试用（origin trial）阶段。注解是网站自行声明的提示，不是保证。'
+			'WebMCP 是 W3C 社区组草案（2026 年 11 月 2 日），不是 W3C 标准。ChatGPT 桌面版的内置浏览器和 Codex 可以调用网站的 WebMCP 工具；Chrome 则需要开启 flag 或加入源试用（origin trial）。注解是网站自行声明的提示，不是保证。',
+		also: '另外：'
 	},
 
 	proof: {
@@ -172,7 +174,7 @@ const zh: Messages = {
 			text: '每个问题和两组的数据都在上方的全部结果里。'
 		},
 		local: '本地',
-		arms: { baseline: '不用 WebMCP', webmcp: '用 webmcpx' },
+		arms: { baseline: '不用 WebMCP', webmcp: '用 WebMCP' },
 		tokens: 'token',
 		stats: '{time} · {steps} 步 · 每千次 {cost}',
 		na: '暂无',
@@ -222,7 +224,7 @@ const zh: Messages = {
 				other: '{model}，无头 Chrome。两组使用相同的提示词和步数上限；每个问题每组运行 {n} 次。'
 			},
 			baseline: '不用 WebMCP：基于 DOM 快照的智能体，靠读、点、填完成操作。',
-			webmcp: '用 webmcpx：只能使用页面注册的工具。',
+			webmcp: '用 WebMCP：只能使用页面注册的工具（网站自带的，或在我们的测试站点上由 webmcpx 提供）。',
 			graded: '按答案中的事实和页面状态评分，不用 LLM 当评委。',
 			live: '真实网站：自带 WebMCP 工具。',
 			local: '本地测试网站：工具由 webmcpx 提供。',
@@ -295,7 +297,7 @@ const zh: Messages = {
 			},
 			status: {
 				label: '状态',
-				webmcp: 'W3C 社区组草案；Chrome 源试用中。',
+				webmcp: 'W3C 社区组草案。ChatGPT 桌面版和 Codex 可调用；Chrome：源试用。',
 				mcp: 'Linux 基金会旗下项目，公开服务器超过 10,000 个。'
 			}
 		},
@@ -314,7 +316,15 @@ const zh: Messages = {
 			fetch_as_markdown: '分页读取页面',
 			get_page_context: '知道自己在哪'
 		},
-		facts: '加载约 2.7 KB · Rust + WebAssembly · MIT 许可证'
+		facts: '加载约 2.8 KB · Rust + WebAssembly · MIT 许可证',
+		see: {
+			title: '眼见为实',
+			chatgpt: '在 ChatGPT 桌面版的内置浏览器或 Codex 里打开你的页面：它们会调用 WebMCP 工具（{docs}）。',
+			docs: 'OpenAI 文档',
+			chrome: '也可以用 Chrome：开启 {flag}，重启浏览器，再打开 DevTools › Application › WebMCP。',
+			live: '要在 Chrome 里正式上线？把你的源试用 token 放进 {meta} 标签。'
+		},
+		agent: '或者直接交给你的 AI 编程智能体：'
 	},
 
 	issues: {
@@ -367,6 +377,9 @@ const zh: Messages = {
 			issues: { other: '{tools}，但有 {n} 个 lint 错误会让智能体出错。' },
 			toolCount: { other: '{n} 个工具' },
 			ready: { other: '{n} 个工具可供智能体直接调用。漂亮。' },
+			readySelf: {
+				other: '{n} 个工具可供智能体直接调用。打铁还需自身硬。'
+			},
 			tools: '发现的工具',
 			more: '+{n} 个',
 			findings: 'lint 结果',
@@ -383,7 +396,8 @@ const zh: Messages = {
 		},
 		badges: {
 			card: { name: '卡片', fits: '浅色页面' },
-			flat: { name: '扁平', fits: 'README 和页脚' },
+			flat: { name: '扁平', fits: '页脚' },
+			readme: { name: 'README', fits: 'GitHub 和 npm' },
 			dark: { name: '深色', fits: '深色页面' }
 		},
 		errors: {

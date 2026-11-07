@@ -5,7 +5,7 @@ import { createHighlighterCore, type HighlighterCore } from 'shiki/core';
 import { createJavaScriptRegexEngine } from 'shiki/engine/javascript';
 import type { CodeSample, Highlighted } from '#lib/content/snippets.ts';
 
-const LANGS = { html: 'html', js: 'javascript', sh: 'shellscript', json: 'json' } as const;
+const LANGS = { html: 'html', js: 'javascript', sh: 'shellscript', json: 'json', text: 'text' } as const;
 
 let highlighter: Promise<HighlighterCore> | undefined;
 

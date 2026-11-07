@@ -138,13 +138,13 @@ test('a long tool description wraps inside the tooltip on a phone', async ({ pag
 	expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test('an agent-ready site can pick one of three badge styles, each embedded inline', async ({ page }) => {
+test('an agent-ready site can pick one of four badge styles, inline or a README image', async ({ page }) => {
 	await mockScan(page);
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
 	await page.getByRole('button', { name: 'Scan it' }).first().click();
 	const styles = page.getByRole('group', { name: 'Badge style' }).getByRole('radio');
-	await expect(styles).toHaveCount(3);
+	await expect(styles).toHaveCount(4);
 	await expect(styles.first()).toBeChecked();
 	const embed = page.locator('#scan').getByRole('figure').filter({ hasText: 'badge.html' });
 	const card = await embed.textContent();
@@ -155,6 +155,12 @@ test('an agent-ready site can pick one of three badge styles, each embedded inli
 	await page.getByText('Dark', { exact: true }).click();
 	await expect(embed).toContainText('#3d3c37');
 	await expect(embed).not.toContainText('<img');
+	// READMEs can't hold inline SVG: Markdown for an image of the latest verdict, linking to a live scan.
+	await page.getByText('README', { exact: true }).click();
+	const readme = page.locator('#scan').getByRole('figure').filter({ hasText: 'README.md' });
+	await expect(readme).toContainText('[![');
+	await expect(readme).toContainText('/badge/docs.example.com.svg)](');
+	await expect(readme).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan)');
 });
 
 test('the menu marks the section in view and opens on phones', async ({ page }) => {
@@ -426,15 +432,19 @@ test('every page carries the trademark notices', async ({ page }) => {
 	await expect(page.getByText(/not affiliated with or endorsed by LF Projects/)).toBeVisible();
 });
 
-test('Why WebMCP ranks eight sourced reasons and states the draft status', async ({ page }) => {
+test('Why WebMCP gives four sourced reasons, lists the rest and states the draft status', async ({
+	page
+}) => {
 	await page.goto('/#why');
 	const why = page.locator('#why');
-	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(8);
+	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(4);
 	await expect(
 		why.getByText(/up to \d+(\.\d)?× fewer tokens on \S+ in our benchmark \(best case\)/)
 	).toBeVisible();
 	// Every reason names where its claim comes from.
-	await expect(why.getByText('Sources', { exact: true })).toHaveCount(8);
+	await expect(why.getByText('Sources', { exact: true })).toHaveCount(4);
+	await expect(why.getByText('Also:', { exact: true })).toBeVisible();
+	await expect(why.getByText('Same cart, same form', { exact: true })).toBeVisible();
 	await expect(why.getByText(/Community Group draft .* not a W3C standard/)).toBeVisible();
 });
 
@@ -483,7 +493,7 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	await expect(result.locator('img[src^="data:image/png"]')).toHaveCount(1);
 	// A preview of each style (decorative: the radios carry the names).
 	await expect(result.locator('fieldset svg[aria-label^="Agent-ready: WebMCP tools checked"]')).toHaveCount(
-		3
+		4
 	);
 	const embed = result.getByRole('figure').filter({ hasText: 'badge.html' });
 	await expect(embed).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');

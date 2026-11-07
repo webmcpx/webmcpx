@@ -15,6 +15,9 @@ WORKDIR /site
 COPY site/package.json site/package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 COPY site/ ./
+# llms-full.txt quotes the README and the agent skill.
+COPY README.md /README.md
+COPY skills/webmcpx/SKILL.md /skills/webmcpx/SKILL.md
 RUN npm run build
 
 FROM gcr.io/distroless/cc-debian13:nonroot

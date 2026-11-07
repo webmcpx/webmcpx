@@ -151,7 +151,10 @@
 								tools: i18n.plural(r.tools.length, m.result.toolCount)
 							})}
 						{:else}
-							{i18n.plural(r.tools.length, m.result.ready)}
+							{i18n.plural(
+								r.tools.length,
+								host(r.final_url) === 'webmcpx.dev' ? m.result.readySelf : m.result.ready
+							)}
 						{/if}
 					</p>
 				</div>
@@ -204,14 +207,18 @@
 			{:else if r.verdict === 'issues'}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="mb-3 font-medium">{m.result.lint}</p>
-					<CodeBlock snippet={plain('webmcpx lint src/')} title={m.result.terminal} class="shadow-none" />
+					<CodeBlock
+						snippet={plain('cargo install webmcpx   # needs Rust\nwebmcpx lint src/')}
+						title={m.result.terminal}
+						class="shadow-none"
+					/>
 				</div>
 			{:else}
 				{@const embed = badgeEmbed(location.origin, r.url, badge, m.result.badgeTitle, i18n.href('/'))}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="font-medium">{m.result.badge}</p>
 					<p class="mt-1 text-sm text-ink-3">{m.result.badgeNote}</p>
-					<fieldset class="mt-4 grid gap-3 sm:grid-cols-3">
+					<fieldset class="mt-4 grid gap-3 sm:grid-cols-2">
 						<legend class="sr-only">{m.result.badgeStyle}</legend>
 						{#each BADGES as b (b.id)}
 							<label
@@ -236,7 +243,11 @@
 							</label>
 						{/each}
 					</fieldset>
-					<CodeBlock snippet={plain(embed)} title="badge.html" class="mt-4 shadow-none" />
+					<CodeBlock
+						snippet={plain(embed)}
+						title={badge === 'readme' ? 'README.md' : 'badge.html'}
+						class="mt-4 shadow-none"
+					/>
 				</div>
 			{/if}
 
