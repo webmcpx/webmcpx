@@ -39,11 +39,11 @@ const same = (a, b) =>
   (typeof a === "object" && typeof b === "object" && a !== null && b !== null && Array.isArray(a) === Array.isArray(b) &&
     Object.keys(a).length === Object.keys(b).length && Object.keys(a).every((k) => Object.hasOwn(b, k) && same(a[k], b[k])));
 
-// The schema being checked, for local $refs ("#/$defs/x"); checks are synchronous, one at a time.
-// `steps` bounds one check's work: no schema can freeze the page.
+// Per check (synchronous): the root for local $refs, ref depth, steps, a fatal error.
 let root;
 let depth = 0;
 let steps = 0;
+let fatal = "";
 // RFC 6901: "#" is the root; after "#/", every token counts, empty ones included.
 const resolve = (ref) =>
   ref === "#"
@@ -60,7 +60,7 @@ function check(s, value, at = "input") {
   if (s.$ref) {
     // Unknown or remote refs and runaway recursion refuse the input rather than skip the check.
     const target = depth < 32 ? resolve(s.$ref) : undefined;
-    if (target === undefined) return `${at}: can't check $ref ${s.$ref}`;
+    if (target === undefined) return (fatal = `${at}: can't check $ref ${s.$ref}`);
     depth++;
     const problem = check(target, value, at);
     depth--;
@@ -68,7 +68,7 @@ function check(s, value, at = "input") {
   }
   const types = s.type === undefined ? [] : [].concat(s.type);
   if (types.length && !types.some((t) => TYPES[t]?.(value))) return `${at} must be of type ${types.join(" or ")}`;
-  if (s.enum && !s.enum.includes(value)) return `${at} must be one of ${s.enum.join(", ")}`;
+  if (s.enum && !s.enum.some((e) => same(e, value))) return `${at} must be one of ${s.enum.join(", ")}`;
   if ("const" in s && !same(value, s.const)) return `${at} must be ${JSON.stringify(s.const)}`;
   for (const b of s.allOf ?? []) {
     const problem = check(b, value, at);
@@ -119,9 +119,11 @@ const contract = (inputSchema, run) => async (raw, client) => {
     root = inputSchema;
     depth = 0;
     steps = 0;
+    fatal = "";
     let problem = TYPES.object(args) ? check(inputSchema, args) : "the input must be an object";
-    // Out of steps anywhere (even in a oneOf branch): refuse.
+    // Out of steps or an uncheckable $ref anywhere (even in a oneOf branch): refuse.
     if (steps > 100_000) problem = "the input is too complex to check";
+    if (fatal) problem = fatal;
     if (problem) return fail("INVALID_INPUT", problem);
     const out = envelope({ ok: true, data: (await run(args, client)) ?? null });
     return out.length > LIMITS.OUTPUT_MAX

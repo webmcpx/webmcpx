@@ -138,6 +138,25 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   });
   assert.equal((await page.call("bulk", { sku: "MUG", items: Array(200_000).fill(1) })).error.code, "INVALID_INPUT");
   assert.equal(bulkRuns, 0);
+  // A $ref that can't be checked inside a oneOf branch refuses the input too.
+  let deepRuns = 0;
+  tool({
+    name: "deep",
+    description: "Deep.",
+    inputSchema: {
+      type: "object",
+      oneOf: [{ type: "object" }, { $ref: "#/$defs/node" }],
+      $defs: { node: { type: "object", properties: { next: { $ref: "#/$defs/node" } } } },
+    },
+    run: () => ++deepRuns,
+  });
+  let nested = {};
+  for (let i = 0; i < 40; i++) nested = { next: nested };
+  assert.equal((await page.call("deep", nested)).error.code, "INVALID_INPUT");
+  assert.equal(deepRuns, 0);
+  // enum choices that are objects compare by content.
+  tool({ name: "status", description: "Status.", input: { filter: { enum: [{ status: "open" }] } }, run: () => "ok" });
+  assert.equal((await page.call("status", { filter: { status: "open" } })).ok, true);
   // An empty pointer token names a member called "" (RFC 6901), not the container.
   tool({
     name: "empty",
