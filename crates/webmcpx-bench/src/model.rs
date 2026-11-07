@@ -385,12 +385,10 @@ impl Price {
 ///   Gemini 3.8 Flash until 2026-12-31). A run stores the price it used.
 pub fn list_price(model: &str) -> Option<Price> {
     let (input, cached_input, output) = match model {
-        "gpt-6-luna" => (0.10, 0.01, 0.50),
-        "gpt-6.1-sol" => (2.00, 0.10, 10.00),
-        "claude-haiku-5-5" => (0.10, 0.01, 0.50),
+        "gpt-6-luna" | "claude-haiku-5-5" => (0.10, 0.01, 0.50),
+        "gpt-6.1-sol" | "gemini-4-argon" => (2.00, 0.10, 10.00),
         "claude-opus-5-5" => (4.00, 0.20, 20.00),
         "gemini-3.8-flash" => (0.75, 0.075, 3.75),
-        "gemini-4-argon" => (2.00, 0.10, 10.00),
         _ => return None,
     };
     Some(Price {
