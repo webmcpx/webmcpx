@@ -7,7 +7,8 @@ The harness is `crates/webmcpx-bench`; this directory holds what it runs.
   call the same functions as the UI.
 - `tasks/<id>.toml` — one task: `site` (a fixture) or `url` (a live page), `prompt`, optional `max_steps`, and a `[check]` with
   `answer_contains` (all), `answer_any` (at least one), `answer_excludes` (none) and/or `state` (a JS expression that must be truthy after the run).
-- `results/` — run outputs (git-ignored). `latest.json` follows `schema_version` 4 (`report.rs`); it records the task metadata (site or URL, prompt) of the run, so editing a task never relabels old numbers, and the tools (name, description) each WebMCP run was given.
+- `results/` — run outputs (git-ignored). `just bench --model <id>` publishes the run as
+  `site/src/lib/content/bench/<id>.json`, one file per model. `latest.json` follows `schema_version` 4 (`report.rs`); it records the task metadata (site or URL, prompt) of the run, so editing a task never relabels old numbers, and the tools (name, description) each WebMCP run was given.
 
 Rules:
 1. Grading is deterministic. Never add an LLM judge.
@@ -22,4 +23,8 @@ Rules:
    before anyone blames an arm.
 6. A check found wrong after a run (it rejected a correct answer, or passed a wrong one) is fixed in the task
    file and applied with `just bench-regrade`: it re-grades the stored answers of both arms and never
-   re-runs anything. Say which runs changed and why in the commit.
+   re-runs anything (every published model). Say which runs changed and why in the commit.
+7. Models: the cheap and the frontier model of OpenAI, Anthropic and Google (`site/src/lib/content/models.ts`),
+   all at effort medium. The provider follows the model name (`claude-*`, `gemini-*`, else OpenAI) and its
+   key comes from `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` or `GEMINI_API_KEY`. List prices live in
+   `model.rs` with the date they were read; a run stores the price it used.

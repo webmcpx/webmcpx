@@ -15,7 +15,7 @@ use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
 use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, Session, registered_tools, webmcp_tools};
 use webmcpx_bench::cdp::Browser;
-use webmcpx_bench::model::{OpenAi, Price, list_price};
+use webmcpx_bench::model::{Client, Price, list_price};
 use webmcpx_bench::report::{Results, SCHEMA_VERSION, Summary, markdown};
 use webmcpx_bench::scan::Scanner;
 use webmcpx_bench::{Job, repo_root, run_jobs, server, task};
@@ -32,7 +32,8 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Run tasks in both arms and write a results file. Needs `OPENAI_API_KEY` and Chrome.
+    /// Run tasks in both arms and write a results file. Needs Chrome and the model's API key:
+    /// `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` (`claude-*`) or `GEMINI_API_KEY` (`gemini-*`).
     Run {
         /// Only these task ids (repeatable; default: all in bench/tasks).
         #[arg(long = "task", value_name = "ID")]
@@ -42,7 +43,8 @@ enum Command {
         arms: Vec<Arm>,
         #[arg(long, default_value = "gpt-6-luna")]
         model: String,
-        /// Reasoning effort (none, low, medium, high). Medium is the project default for every run.
+        /// Reasoning effort (low, medium, high): OpenAI `reasoning.effort`, Anthropic `effort`, Gemini
+        /// `thinking_level`. Medium is the project default for every run.
         #[arg(long, default_value = "medium")]
         reasoning_effort: String,
         /// Attempts per task and arm.
@@ -70,8 +72,11 @@ enum Command {
     },
     /// List tasks (tab-separated).
     Tasks,
-    /// Re-grade bench/results/latest.json with today's answer checks (answers are not re-run).
-    Regrade,
+    /// Re-grade results files with today's answer checks (answers are not re-run).
+    Regrade {
+        /// Results files (default: bench/results/latest.json).
+        files: Vec<PathBuf>,
+    },
     /// Call one WebMCP tool on a live page and print what the agent would get (for writing tasks).
     Call {
         url: String,
@@ -115,20 +120,26 @@ fn parse_price(s: &str) -> Result<Price, String> {
 async fn main() -> Result<()> {
     let root = repo_root();
     match Cli::parse().command {
-        Command::Regrade => {
-            let path = root.join("bench/results/latest.json");
-            let mut results: Results = serde_json::from_str(
-                &std::fs::read_to_string(&path)
-                    .with_context(|| format!("reading {}", path.display()))?,
-            )?;
+        Command::Regrade { files } => {
+            let files = if files.is_empty() {
+                vec![root.join("bench/results/latest.json")]
+            } else {
+                files
+            };
             let tasks = task::load_dir(&root.join("bench/tasks"))?;
-            let r = webmcpx_bench::regrade(&mut results, &tasks);
-            std::fs::write(&path, serde_json::to_string_pretty(&results)?)?;
-            eprintln!("re-graded {}: {} run(s) changed", path.display(), r.changed);
-            for id in &r.skipped {
-                eprintln!("skipped {id}: the task changed since the run (prompt, site or URL)");
+            for path in files {
+                let mut results: Results = serde_json::from_str(
+                    &std::fs::read_to_string(&path)
+                        .with_context(|| format!("reading {}", path.display()))?,
+                )?;
+                let r = webmcpx_bench::regrade(&mut results, &tasks);
+                std::fs::write(&path, serde_json::to_string_pretty(&results)?)?;
+                eprintln!("re-graded {}: {} run(s) changed", path.display(), r.changed);
+                for id in &r.skipped {
+                    eprintln!("skipped {id}: the task changed since the run (prompt, site or URL)");
+                }
+                writeln!(std::io::stdout().lock(), "{}", markdown(&results))?;
             }
-            writeln!(std::io::stdout().lock(), "{}", markdown(&results))?;
         }
         Command::Tasks => {
             let mut out = std::io::stdout().lock();
@@ -222,7 +233,7 @@ async fn main() -> Result<()> {
                 arms
             };
             let price = price.or_else(|| list_price(&model));
-            let client = OpenAi::from_env(model.clone(), Some(reasoning_effort.clone()))?;
+            let client = Client::from_env(model.clone(), Some(reasoning_effort.clone()))?;
             let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into(), None).await?;
             let browser = Browser::launch(chrome.as_deref()).await?;
 
