@@ -3,6 +3,7 @@
 	proof it matters (benchmark) → how it relates to MCP → the fix (one line) → what the community asked for .
 -->
 <script lang="ts">
+	import Divider from '#lib/components/ui/Divider.svelte';
 	import Fix from '#lib/features/fix/Fix.svelte';
 	import Hero from '#lib/features/hero/Hero.svelte';
 	import Issues from '#lib/features/issues/Issues.svelte';
@@ -24,8 +25,15 @@
 
 <Hero scriptTag={page.code.scriptTag} />
 <LogoWall />
-{#if page.best}<Why bestSaving={page.best.saving} bestSite={page.best.site} />{/if}
+{#if page.best}
+	<Divider />
+	<Why bestSaving={page.best.saving} bestSite={page.best.site} />
+{/if}
+<Divider />
 <Proof runs={page.runs} reproduce={page.code.reproduce} />
+<Divider />
 <Versus />
+<Divider />
 <Fix scriptTag={page.code.scriptTag} />
+<Divider />
 <Issues />
