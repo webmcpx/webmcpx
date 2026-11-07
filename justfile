@@ -18,7 +18,11 @@ setup:
     cd site && npm ci
 
 # Everything CI checks.
-check: fmt-check lint wasm test js-test size site deny
+check: fmt-check lint wasm test js-test size site deny deploy-test
+
+# Deploy config: the scan limit's visitor keys, checked against real nginx (needs Docker).
+deploy-test:
+    deploy/test-visitor.sh
 
 fmt:
     cargo fmt --all
