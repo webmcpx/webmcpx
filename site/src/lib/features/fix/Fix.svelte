@@ -61,11 +61,7 @@
 			</ul>
 		</div>
 		<p class="mt-8 text-left text-sm font-medium text-ink-2">{m.agent}</p>
-		<CodeBlock
-			snippet={agentPrompt}
-			title="prompt"
-			class="code-wrap mt-2"
-		/>
+		<CodeBlock snippet={agentPrompt} title="prompt" class="code-wrap mt-2" />
 	</Reveal>
 	<ul class="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
 		{#each GIVES as tool, i (tool)}
