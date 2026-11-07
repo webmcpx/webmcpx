@@ -9,7 +9,6 @@
 	import ChartColumn from '@lucide/svelte/icons/chart-no-axes-column';
 	import Download from '@lucide/svelte/icons/download';
 	import FileText from '@lucide/svelte/icons/file-text';
-	import Globe from '@lucide/svelte/icons/globe';
 	import ListChecks from '@lucide/svelte/icons/list-checks';
 	import Package from '@lucide/svelte/icons/package';
 	import Palette from '@lucide/svelte/icons/palette';
@@ -19,7 +18,7 @@
 	import { siGithub, siNpm } from 'simple-icons';
 	import type { Component } from 'svelte';
 	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
-	import { COMMUNITY, NPM, REPO, SPEC, SPEC_ISSUES } from '#lib/content/site.ts';
+	import { NPM, REPO, SPEC, SPEC_ISSUES } from '#lib/content/site.ts';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import Logo from './Logo.svelte';
 
@@ -34,7 +33,7 @@
 	const FLAT_BADGE = BADGES.find((b) => b.id === 'flat')?.svg ?? '';
 	const m = $derived(i18n.m.footer);
 	const home = $derived(i18n.href('/'));
-	// Product and site names (GitHub, npm, crates.io, webmcp.zone) are not translated.
+	// Product and site names (GitHub, npm, crates.io) are not translated.
 	const COLUMNS: { title: string; links: Link[] }[] = $derived([
 		{
 			title: m.columns.product,
@@ -60,8 +59,7 @@
 			title: m.columns.webmcp,
 			links: [
 				{ label: m.links.spec, href: SPEC, icon: { lucide: FileText } },
-				{ label: m.links.specIssues, href: SPEC_ISSUES, icon: { lucide: ScrollText } },
-				{ label: 'webmcp.zone', href: COMMUNITY, icon: { lucide: Globe } }
+				{ label: m.links.specIssues, href: SPEC_ISSUES, icon: { lucide: ScrollText } }
 			]
 		}
 	]);

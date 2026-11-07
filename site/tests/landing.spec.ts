@@ -502,30 +502,29 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	await expect(embed).not.toContainText('<img');
 });
 
-test('your own tools: one tool, written five ways, most used first, as keyboard-friendly tabs', async ({
+test('your own tools: the coding agent first, then the same tool written five ways, as keyboard tabs', async ({
 	page
 }) => {
 	await page.goto('/#own');
 	const own = page.locator('#own');
 	const tabs = own.getByRole('tab');
-	await expect(tabs).toHaveText(['React', 'Vue', 'Svelte', 'JavaScript', 'HTML']);
+	await expect(tabs).toHaveText(['Your coding agent', 'React', 'Vue', 'Svelte', 'JavaScript', 'HTML']);
 	await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
-	await expect(tabs.first().locator('svg')).toHaveCount(1);
+	await expect(tabs.nth(1).locator('svg')).toHaveCount(1);
 	await expect(own.getByRole('tabpanel')).toHaveCount(1);
-	await expect(own.getByRole('tabpanel')).toContainText('from "webmcpx/react"');
+	await expect(own.getByRole('tabpanel')).toContainText('webmcpx.dev/llms.txt');
 	await tabs.first().focus();
-	await page.keyboard.press('ArrowLeft');
-	await expect(tabs.last()).toHaveAttribute('aria-selected', 'true');
+	await page.keyboard.press('ArrowRight');
+	await expect(own.getByRole('tabpanel')).toContainText('from "webmcpx/react"');
+	await page.keyboard.press('End');
 	await expect(own.getByRole('tabpanel')).toContainText('toolname="add_to_cart"');
-	// The check command has its own copy button.
-	const terminal = own.getByRole('figure').filter({ hasText: 'npx webmcpx tools localhost:3000' });
-	await expect(terminal.getByRole('button', { name: /Copy/ })).toBeVisible();
+	await expect(own.getByRole('tabpanel').getByRole('button', { name: /Copy/ })).toBeVisible();
 });
 
 test('without JavaScript every way to write a tool still shows', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
-	await expect(page.locator('#own [role=tabpanel]')).toHaveCount(5);
+	await expect(page.locator('#own [role=tabpanel]')).toHaveCount(6);
 	await page.close();
 });
 

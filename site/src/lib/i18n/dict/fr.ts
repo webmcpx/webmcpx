@@ -342,14 +342,15 @@ const fr: Messages = {
 	},
 
 	own: {
-		title: 'Vos propres outils, en cinq lignes',
-		lead: 'Les outils standard lisent la page. Les vôtres agissent : ajouter au panier, réserver une table, filtrer des résultats. Même contrat : entrée vérifiée, un seul format de résultat, aucun échec silencieux.',
+		title: 'Laissez les agents agir, pas deviner',
+		lead: 'Aujourd’hui, un agent qui veut ajouter un article au panier clique au hasard et devine, et se trompe souvent. Donnez-lui la fonction que votre bouton appelle déjà : une entrée typée, une réponse claire, la session de l’utilisateur.',
 		notes: {
+			agent:
+				'Votre agent lit ce que fait webmcpx, repère dans votre projet les actions qui valent la peine d’être exposées, vous demande lesquelles ajouter, puis les ajoute et les vérifie.',
 			form: 'Sans JavaScript : l’API déclarative de WebMCP. La balise script l’ajoute là où le navigateur ne l’a pas encore.',
 			js: 'Depuis npm, ou importé depuis le même CDN que la balise script.',
 			hook: 'Enregistré tant que le composant est monté, retiré quand il disparaît.'
-		},
-		check: 'Ensuite, vérifiez-le, sans flag dans le navigateur :'
+		}
 	},
 
 	closing: {
@@ -493,7 +494,7 @@ const fr: Messages = {
 			rules: [
 				'Toujours en minuscules : webmcpx, même en début de phrase (reformulez plutôt la phrase).',
 				'Dans le code et les commandes, composez-le en Geist Mono.',
-				'WebMCP est l’API du navigateur, écrite comme l’écrit le brouillon. webmcp.zone est le site de la communauté.',
+				'WebMCP est l’API du navigateur, écrite comme l’écrit le brouillon.',
 				'webmcpx n’est pas WebMCP et ne revendique jamais le nom WebMCP.'
 			]
 		},

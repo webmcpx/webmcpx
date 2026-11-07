@@ -338,14 +338,15 @@ const ptBr: Messages = {
 	},
 
 	own: {
-		title: 'Suas próprias ferramentas, em cinco linhas',
-		lead: 'As ferramentas padrão leem a página. As suas agem: põem no carrinho, reservam uma mesa, filtram resultados. Mesmo contrato: entrada validada, um formato de resultado, nada de falha silenciosa.',
+		title: 'Deixe os agentes agirem, não adivinharem',
+		lead: 'Hoje, um agente que quer pôr algo no carrinho sai clicando e adivinhando, e muitas vezes erra. Entregue a ele a função que o seu botão já chama: entrada tipada, resposta clara e a sessão do próprio usuário.',
 		notes: {
+			agent:
+				'Seu agente lê o que o webmcpx faz, encontra no projeto as ações que vale expor, pergunta quais você quer, depois adiciona e confere.',
 			form: 'Sem JavaScript: a API declarativa do WebMCP. A tag de script adiciona onde o navegador ainda não tem.',
 			js: 'Pelo npm, ou importando da mesma CDN da tag de script.',
 			hook: 'Registrada enquanto o componente está montado, removida quando ele sai.'
-		},
-		check: 'Depois confira, sem flag no navegador:'
+		}
 	},
 
 	closing: {
@@ -490,7 +491,7 @@ const ptBr: Messages = {
 			rules: [
 				'Sempre em minúsculas: webmcpx, inclusive no início da frase (nesse caso, reescreva a frase).',
 				'Em código e comandos, use Geist Mono.',
-				'WebMCP é a API do navegador, escrita como o rascunho a escreve. webmcp.zone é o site da comunidade.',
+				'WebMCP é a API do navegador, escrita como o rascunho a escreve.',
 				'webmcpx não é o WebMCP em si e nunca reivindica o nome WebMCP.'
 			]
 		},

@@ -59,8 +59,6 @@ register(); // the standard tools; tool() adds your own`
   }
 }`
 	},
-	// Lists a page's WebMCP tools from the terminal (localhost included), no browser flag.
-	checkTools: { lang: 'sh', code: 'npx webmcpx tools localhost:3000' },
 	reproduce: {
 		lang: 'sh',
 		code: `git clone https://github.com/webmcpx/webmcpx
@@ -82,6 +80,10 @@ const DEFINITION = `{
 const indent = (s: string, by: string) => s.replaceAll('\n', `\n${by}`);
 
 export const OWN = {
+	agent: {
+		lang: 'text',
+		code: 'Read https://webmcpx.dev/llms.txt. Then look through this project and list the 3 to 5 actions an AI agent would most want to do on this site (search, add to cart, book, filter...). For each, propose a WebMCP tool with webmcpx (tool(), useTool or <form toolname>) that reuses the function the UI already calls. Ask me which to add, add them, then check them with `npx webmcpx tools <local URL>`.'
+	},
 	react: {
 		lang: 'jsx',
 		code: `import { useTool } from "webmcpx/react";
@@ -127,10 +129,10 @@ tool(${DEFINITION});`
 
 export type OwnId = keyof typeof OWN;
 /**
- * Tab labels (product names, not translated), most used first: the frameworks by developer surveys,
- * then plain JavaScript, then the form that needs none. The first one opens by default.
+ * Tab labels (product names, not translated), after "your coding agent" (its label is translated): the
+ * frameworks by developer surveys, then plain JavaScript, then the form that needs none.
  */
-export const OWN_TABS: Record<OwnId, string> = {
+export const OWN_TABS: Record<Exclude<OwnId, 'agent'>, string> = {
 	react: 'React',
 	vue: 'Vue',
 	svelte: 'Svelte',

@@ -29,7 +29,7 @@
 <Divider />
 <Fix code={page.code} />
 <Divider />
-<Own samples={page.own} check={page.code.checkTools} />
+<Own samples={page.own} />
 {#if page.best}
 	<Divider />
 	<Why bestSaving={page.best.saving} bestSite={page.best.site} />

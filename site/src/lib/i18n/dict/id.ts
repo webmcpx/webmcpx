@@ -334,14 +334,15 @@ const id: Messages = {
 	},
 
 	own: {
-		title: 'Tool Anda sendiri, dalam lima baris',
-		lead: 'Tool standar membaca halaman. Tool Anda bertindak: menambah ke keranjang, memesan meja, menyaring hasil. Kontrak yang sama: input divalidasi, satu bentuk hasil, tanpa gagal diam-diam.',
+		title: 'Biarkan agen bertindak, bukan menebak',
+		lead: 'Saat ini, agen yang ingin menambah barang ke keranjang mengeklik ke sana kemari dan menebak, dan sering salah. Berikan fungsi yang sudah dipanggil tombol Anda: input bertipe, jawaban jelas, sesi milik pengguna sendiri.',
 		notes: {
+			agent:
+				'Agen Anda membaca apa yang dilakukan webmcpx, menemukan aksi yang layak diekspos di proyek Anda, menanyakan mana yang ingin ditambahkan, lalu menambahkan dan mengeceknya.',
 			form: 'Tanpa JavaScript: API deklaratif WebMCP. Tag script menambahkannya di browser yang belum punya.',
 			js: 'Lewat npm, atau diimpor dari CDN yang sama dengan tag script.',
 			hook: 'Terdaftar selama komponen terpasang, hilang saat dilepas.'
-		},
-		check: 'Lalu cek, tanpa flag browser:'
+		}
 	},
 
 	closing: {
@@ -482,7 +483,7 @@ const id: Messages = {
 			rules: [
 				'Selalu huruf kecil: webmcpx, juga di awal kalimat (lebih baik susun ulang kalimatnya).',
 				'Di kode dan perintah, tulis dengan Geist Mono.',
-				'WebMCP adalah API browser, ditulis sesuai ejaan di draf. webmcp.zone adalah situs komunitas.',
+				'WebMCP adalah API browser, ditulis sesuai ejaan di draf.',
 				'webmcpx bukan WebMCP itu sendiri dan tidak pernah mengklaim nama WebMCP.'
 			]
 		},

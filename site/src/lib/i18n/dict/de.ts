@@ -341,14 +341,15 @@ const de: Messages = {
 	},
 
 	own: {
-		title: 'Eigene Tools, in fünf Zeilen',
-		lead: 'Die Standard-Tools lesen die Seite. Deine handeln: in den Warenkorb legen, einen Tisch buchen, Ergebnisse filtern. Gleicher Vertrag: geprüfte Eingaben, ein Ergebnisformat, keine stillen Fehler.',
+		title: 'Agenten handeln lassen statt raten',
+		lead: 'Ein Agent, der heute etwas in den Warenkorb legen will, klickt sich durch und rät – und liegt oft daneben. Gib ihm die Funktion, die dein Button schon aufruft: typisierte Eingabe, klare Antwort, die Sitzung des Nutzers.',
 		notes: {
+			agent:
+				'Dein Agent liest, was webmcpx macht, findet in deinem Projekt die Aktionen, die sich lohnen, fragt dich, welche er hinzufügen soll, und fügt sie dann hinzu und prüft sie.',
 			form: 'Ohne JavaScript: die deklarative WebMCP-API. Das Script-Tag ergänzt sie, wo der Browser sie noch nicht hat.',
 			js: 'Über npm, oder aus demselben CDN importiert wie das Script-Tag.',
 			hook: 'Registriert, solange die Komponente gemountet ist, und wieder weg, wenn sie verschwindet.'
-		},
-		check: 'Dann prüfen, ohne Browser-Flag:'
+		}
 	},
 
 	closing: {
@@ -492,7 +493,7 @@ const de: Messages = {
 			rules: [
 				'Immer klein: webmcpx, auch am Satzanfang (stellen Sie den Satz dann lieber um).',
 				'In Code und Befehlen in Geist Mono setzen.',
-				'WebMCP ist die Browser-API, geschrieben wie im Entwurf. webmcp.zone ist die Community-Website.',
+				'WebMCP ist die Browser-API, geschrieben wie im Entwurf.',
 				'webmcpx ist nicht WebMCP selbst und beansprucht nie den Namen WebMCP.'
 			]
 		},

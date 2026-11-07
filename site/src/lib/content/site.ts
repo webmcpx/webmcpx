@@ -6,7 +6,6 @@ export const REPO = 'https://github.com/webmcpx/webmcpx';
 export const NPM = 'https://www.npmjs.com/package/webmcpx';
 export const SPEC = 'https://webmachinelearning.github.io/webmcp/';
 export const SPEC_ISSUES = 'https://github.com/webmachinelearning/webmcp/issues';
-export const COMMUNITY = 'https://webmcp.zone';
 /** The public site, for absolute links (hreflang, canonical). */
 export const ORIGIN = 'https://webmcpx.dev';
 

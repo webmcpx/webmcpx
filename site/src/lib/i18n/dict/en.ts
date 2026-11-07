@@ -440,14 +440,15 @@ const en = {
 	},
 
 	own: {
-		title: 'Your own tools, in five lines',
-		lead: 'The standard tools read the page. Yours act: add to cart, book a table, filter results. Same contract: checked input, one result shape, no silent failures.',
+		title: 'Let agents act, not guess',
+		lead: 'An agent that wants to add something to a cart today clicks around and guesses, and often gets it wrong. Hand it the function your button already calls: a typed input, a clear answer, the user’s own session.',
 		notes: {
+			agent:
+				'Your agent reads what webmcpx does, finds the actions worth exposing in your project, asks you which ones to add, then adds and checks them.',
 			form: 'No JavaScript: the WebMCP declarative API. The script tag adds it where the browser doesn’t have it yet.',
 			js: 'From npm, or imported from the same CDN as the script tag.',
 			hook: 'Registered while the component is mounted, gone when it unmounts.'
-		},
-		check: 'Then see it, no browser flag:'
+		}
 	},
 
 	closing: {
@@ -618,7 +619,7 @@ const en = {
 			rules: [
 				'Always lowercase: webmcpx, also at the start of a sentence (rewrite the sentence instead).',
 				'In code and commands, set it in Geist Mono.',
-				'WebMCP is the browser API, spelled as the draft spells it. webmcp.zone is the community site.',
+				'WebMCP is the browser API, spelled as the draft spells it.',
 				'webmcpx is not WebMCP itself and never claims the name WebMCP.'
 			]
 		},
