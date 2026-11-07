@@ -556,15 +556,6 @@ test('the verdicts page explains each stamp and is linked from every scan result
 	);
 });
 
-test('the closing form scans and brings the result into view', async ({ page }) => {
-	await mockScan(page);
-	await page.goto('/#scan-now');
-	const closing = page.locator('#scan-now');
-	await closing.getByLabel("Your site's address").fill('docs.example.com');
-	await closing.getByRole('button', { name: 'Scan it' }).click();
-	await expect(page.locator('#scan').getByText('docs.example.com', { exact: true }).first()).toBeInViewport();
-});
-
 test('a scan with same-named tools in two frames shows both', async ({ page }) => {
 	const errors: string[] = [];
 	page.on('pageerror', (e) => errors.push(e.message));

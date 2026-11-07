@@ -6,7 +6,6 @@
 <script lang="ts">
 	import Meta from '#lib/components/layout/Meta.svelte';
 	import Divider from '#lib/components/ui/Divider.svelte';
-	import Closing from '#lib/features/closing/Closing.svelte';
 	import Fix from '#lib/features/fix/Fix.svelte';
 	import Own from '#lib/features/own/Own.svelte';
 	import Hero from '#lib/features/hero/Hero.svelte';
@@ -40,5 +39,3 @@
 <Versus />
 <Divider />
 <Issues />
-<Divider />
-<Closing />

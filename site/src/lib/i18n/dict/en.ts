@@ -451,11 +451,6 @@ const en = {
 		}
 	},
 
-	closing: {
-		title: 'Scan the site you have open right now.',
-		lead: 'The verdict, its tools and what an agent would read instead, with a card to share.'
-	},
-
 	verdicts: {
 		title: 'How the scanner decides',
 		lead: 'Three verdicts, open rules. If one looks wrong, tell us: that is the feedback that makes it better.',

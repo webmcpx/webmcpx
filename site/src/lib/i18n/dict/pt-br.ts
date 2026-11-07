@@ -349,11 +349,6 @@ const ptBr: Messages = {
 		}
 	},
 
-	closing: {
-		title: 'Escaneie agora o site que você tem aberto.',
-		lead: 'O veredito, as ferramentas e o que um agente leria no lugar delas, com um card para compartilhar.'
-	},
-
 	verdicts: {
 		title: 'Como o scanner decide',
 		lead: 'Três vereditos, regras abertas. Se algum parecer errado, avise: é esse o feedback que melhora o scanner.',

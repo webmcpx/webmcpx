@@ -16,7 +16,7 @@ Scan your site (hero) → sites already on WebMCP (logos, each one scans live) �
 HTML, npm, coding agent; "see it work" with the MCP setup per client) → your own tools (`tool()`, forms,
 React/Vue/Svelte as tabs) → why WebMCP (four pains it removes, each backed by the draft or the benchmark;
 the saving is computed) → proof (pick a site by logo; biggest savings first) → WebMCP vs MCP → what the
-community asked for → closing scan call → the footer (giant lockup, every link with its icon, notices).
+community asked for → the footer (giant lockup, every link with its icon, notices).
 Tabs list "your coding agent" first, always, then the most used options; the first opens by default
 (`CodeTabs`, built on `Tabs`). Step 2 is one prompt, not a list of clients.
 Few words per section; numbers over adjectives.

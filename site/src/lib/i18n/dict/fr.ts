@@ -353,11 +353,6 @@ const fr: Messages = {
 		}
 	},
 
-	closing: {
-		title: 'Scannez tout de suite le site que vous avez ouvert.',
-		lead: 'Le verdict, ses outils et ce qu’un agent lirait à la place, avec une carte à partager.'
-	},
-
 	verdicts: {
 		title: 'Comment le scanner décide',
 		lead: 'Trois verdicts, des règles ouvertes. Si l’un vous semble faux, dites-le-nous : c’est ce retour qui l’améliore.',

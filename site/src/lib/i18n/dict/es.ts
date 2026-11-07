@@ -350,11 +350,6 @@ const es: Messages = {
 		}
 	},
 
-	closing: {
-		title: 'Escanea ahora el sitio que tienes abierto.',
-		lead: 'El veredicto, sus herramientas y lo que un agente leería en su lugar, con una tarjeta para compartir.'
-	},
-
 	verdicts: {
 		title: 'Cómo decide el escáner',
 		lead: 'Tres veredictos, reglas abiertas. Si alguno te parece mal, avísanos: ese feedback es el que lo mejora.',

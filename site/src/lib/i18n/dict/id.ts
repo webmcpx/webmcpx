@@ -345,11 +345,6 @@ const id: Messages = {
 		}
 	},
 
-	closing: {
-		title: 'Pindai situs yang sedang Anda buka sekarang.',
-		lead: 'Verdiknya, tool-nya, dan apa yang akan dibaca agen sebagai gantinya, lengkap dengan kartu untuk dibagikan.'
-	},
-
 	verdicts: {
 		title: 'Cara pemindai memutuskan',
 		lead: 'Tiga verdik, aturan terbuka. Kalau ada yang terasa salah, beri tahu kami: masukan itulah yang membuatnya lebih baik.',

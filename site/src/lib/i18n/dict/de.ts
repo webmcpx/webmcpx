@@ -352,11 +352,6 @@ const de: Messages = {
 		}
 	},
 
-	closing: {
-		title: 'Scanne jetzt die Website, die du gerade offen hast.',
-		lead: 'Das Urteil, ihre Tools und was ein Agent stattdessen lesen würde, mit einer Karte zum Teilen.'
-	},
-
 	verdicts: {
 		title: 'So entscheidet der Scanner',
 		lead: 'Drei Urteile, offene Regeln. Wirkt eins falsch, sag Bescheid: Genau dieses Feedback macht ihn besser.',
