@@ -12,7 +12,8 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 
 ## Page narrative (keep this order; cut before adding)
 
-Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → proof (pick a site by logo;
+Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → why WebMCP (four pains it
+removes, each backed by the draft or the benchmark; the saving is computed) → proof (pick a site by logo;
 a site's questions rotate on their own; biggest savings first) → the fix (one line) → what the community
 asked for → the footer (giant lockup, every link with its icon, notices).
 Few words per section; numbers over adjectives.

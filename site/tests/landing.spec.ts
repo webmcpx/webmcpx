@@ -275,3 +275,20 @@ test('every page carries the trademark notices', async ({ page }) => {
 	await page.goto('/');
 	await expect(page.getByText(/not affiliated with or endorsed by LF Projects/)).toBeVisible();
 });
+
+test('Why WebMCP shows four reasons, the saving computed from the run', async ({ page }) => {
+	await page.goto('/#why');
+	const why = page.locator('#why');
+	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(4);
+	await expect(why.getByText(/up to \d+(\.\d)?× fewer tokens on \S/)).toBeVisible();
+});
+
+test('a scan submitted before JavaScript is ready still runs', async ({ browser }) => {
+	const page = await browser.newPage({ javaScriptEnabled: false });
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('notion.com');
+	await page.keyboard.press('Enter');
+	// The plain form submission lands on the shareable scan link the page runs on load.
+	await expect(page).toHaveURL(/\?scan=notion\.com#scan$/);
+	await page.close();
+});

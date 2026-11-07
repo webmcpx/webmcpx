@@ -3,6 +3,7 @@
 	import ScanSearch from '@lucide/svelte/icons/scan-search';
 	import { onMount, type Snippet } from 'svelte';
 	import Button from '#lib/components/ui/Button.svelte';
+	import { HOME } from '#lib/content/site.ts';
 	import { scanner } from './scanner.svelte.ts';
 
 	interface Props {
@@ -27,8 +28,14 @@
 	}
 </script>
 
+<!--
+	Progressive: before (or without) hydration the form is a plain GET to /?scan=<url>, which the hero form
+	runs on load, so a scan typed early is never lost. Once hydrated, onsubmit runs it in place.
+-->
 <form
 	{onsubmit}
+	method="get"
+	action="{HOME}#scan"
 	role="search"
 	aria-label="Scan a site"
 	class="mx-auto grid w-full max-w-2xl gap-3 sm:grid-cols-[1fr_auto]"
@@ -36,6 +43,7 @@
 	<label for="{uid}-url" class="sr-only">Your site's address</label>
 	<input
 		id="{uid}-url"
+		name="scan"
 		bind:value={scanner.input}
 		type="text"
 		inputmode="url"
