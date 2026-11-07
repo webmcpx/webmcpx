@@ -588,6 +588,14 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
     assert_eq!(html.headers()["vary"], "Accept");
     let html = html.text().await.unwrap();
     assert!(html.contains("landing</body>"), "{html}");
+    // A file that does not exist is a 404, never a server error.
+    for missing in ["favicon.ico", "x/y.txt", "nope/"] {
+        let status = reqwest::get(format!("http://{addr}/{missing}"))
+            .await
+            .unwrap()
+            .status();
+        assert_eq!(status, reqwest::StatusCode::NOT_FOUND, "{missing}");
+    }
 
     let page = reqwest::get(format!("http://{addr}/?scan={target}"))
         .await

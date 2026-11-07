@@ -130,20 +130,20 @@ async fn page(
         )
             .into_response();
     }
-    match ServeDir::new(state.site.as_ref()).try_call(request).await {
-        Ok(response) => {
-            let mut response = response.into_response();
-            // The same URL can also answer in Markdown: caches must key on Accept.
-            if path.ends_with('/') {
-                response.headers_mut().append(
-                    axum::http::header::VARY,
-                    axum::http::HeaderValue::from_static("Accept"),
-                );
-            }
-            response
-        }
+    let mut response = match ServeDir::new(state.site.as_ref()).try_call(request).await {
+        Ok(response) => response.into_response(),
+        // try_call hands back I/O errors: a missing file is a 404, not a server error.
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => StatusCode::NOT_FOUND.into_response(),
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    };
+    // The same URL can also answer in Markdown: caches must key on Accept.
+    if path.ends_with('/') {
+        response.headers_mut().append(
+            axum::http::header::VARY,
+            axum::http::HeaderValue::from_static("Accept"),
+        );
     }
+    response
 }
 
 /// `https://host`, from our proxy's headers (plain `http://` locally).
