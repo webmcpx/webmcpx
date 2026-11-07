@@ -1,6 +1,9 @@
 [package]
 name = "webmcpx-lint"
 description = "Fast linter for WebMCP tool definitions in JS/TS sources and JSON manifests."
+readme = "README.md"
+keywords = ["webmcp", "mcp", "linter", "ai-agents", "javascript"]
+categories = ["development-tools", "web-programming"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

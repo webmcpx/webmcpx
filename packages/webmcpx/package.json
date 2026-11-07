@@ -4,20 +4,44 @@
   "description": "Standard WebMCP tools for any website: one script tag, zero config.",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://webmcp.zone",
-  "repository": { "type": "git", "url": "git+https://github.com/webmcpx/webmcpx.git", "directory": "packages/webmcpx" },
-  "keywords": ["webmcp", "mcp", "ai-agents", "model-context", "wasm"],
+  "homepage": "https://webmcpx.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webmcpx/webmcpx.git",
+    "directory": "packages/webmcpx"
+  },
+  "keywords": [
+    "webmcp",
+    "mcp",
+    "ai-agents",
+    "model-context",
+    "wasm"
+  ],
   "exports": {
-    ".": { "types": "./src/index.d.ts", "default": "./src/index.js" },
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
     "./auto": "./src/auto.js"
   },
   "types": "./src/index.d.ts",
-  "files": ["src", "wasm/webmcpx_wasm.js", "wasm/webmcpx_wasm_bg.wasm"],
-  "sideEffects": ["./src/auto.js"],
+  "files": [
+    "src",
+    "wasm/webmcpx_wasm.js",
+    "wasm/webmcpx_wasm_bg.wasm",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "./src/auto.js"
+  ],
   "scripts": {
     "test": "node --test"
   },
   "devDependencies": {
     "linkedom": "0.18.15"
+  },
+  "bugs": {
+    "url": "https://github.com/webmcpx/webmcpx/issues"
   }
 }

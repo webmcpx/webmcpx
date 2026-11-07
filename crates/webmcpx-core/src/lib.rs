@@ -24,3 +24,8 @@ pub use codes::Code;
 pub use envelope::{Envelope, push_json_str};
 pub use name::{NameError, validate_name};
 pub use tool::{Annotation, ToolDef};
+
+/// The README examples, run as doctests so they never go stale.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

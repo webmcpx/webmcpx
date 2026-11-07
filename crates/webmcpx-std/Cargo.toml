@@ -1,6 +1,9 @@
 [package]
 name = "webmcpx-std"
 description = "Standard WebMCP tools (search_page, fetch_as_markdown, get_page_context, search_site) as pure, tested Rust."
+readme = "README.md"
+keywords = ["webmcp", "mcp", "ai-agents", "markdown", "search"]
+categories = ["web-programming", "no-std", "text-processing"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

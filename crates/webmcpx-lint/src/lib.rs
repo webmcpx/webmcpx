@@ -108,3 +108,8 @@ pub(crate) mod test_util {
             .collect()
     }
 }
+
+/// The README examples, run as doctests so they never go stale.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;

@@ -1,6 +1,9 @@
 [package]
 name = "webmcpx-core"
 description = "Canonical WebMCP tool contracts: validation, limits, invisible-Unicode detection, result envelope and error codes."
+readme = "README.md"
+keywords = ["webmcp", "mcp", "ai-agents", "llm", "tools"]
+categories = ["web-programming", "no-std", "development-tools"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

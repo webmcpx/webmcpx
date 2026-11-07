@@ -1,6 +1,9 @@
 [package]
 name = "webmcpx"
 description = "The webmcpx CLI: lint WebMCP tools, explain rules and error codes."
+readme = "README.md"
+keywords = ["webmcp", "mcp", "linter", "ai-agents", "cli"]
+categories = ["command-line-utilities", "development-tools", "web-programming"]
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
