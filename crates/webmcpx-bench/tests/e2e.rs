@@ -871,6 +871,38 @@ async fn a_page_cannot_send_the_scanner_megabytes() {
 }
 
 #[tokio::test]
+async fn a_huge_title_or_text_never_breaks_the_shared_connection() {
+    use axum::response::Html;
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::Scanner;
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        get(|| {
+            std::future::ready(Html(
+                r#"<!doctype html><main id="m"></main><script>
+              const big = "word ".repeat(15_000_000);
+              document.title = big;
+              document.getElementById("m").textContent = big;
+            </script>"#,
+            ))
+        }),
+    ))
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    assert!(report.title.chars().count() <= 300);
+    assert!(report.page_tokens > 1_000_000);
+    // The same connection still serves the next scan.
+    assert!(scanner.scan(&format!("http://{site}/?again")).await.is_ok());
+}
+
+#[tokio::test]
 async fn a_stalled_or_endless_favicon_never_costs_the_report() {
     use axum::body::Body;
     use axum::response::{Html, Response};

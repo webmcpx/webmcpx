@@ -246,13 +246,7 @@ export class Page {
     if (this.#handles.length > 50) {
       this.#send("Runtime.releaseObject", { objectId: this.#handles.shift() }).catch(() => {});
     }
-    const count = new Map();
-    for (const t of list.value) count.set(`${t.origin} ${t.name}`, (count.get(`${t.origin} ${t.name}`) ?? 0) + 1);
-    return list.value.map((tool) => ({
-      ...tool,
-      list: result.objectId,
-      unique: count.get(`${tool.origin} ${tool.name}`) === 1,
-    }));
+    return list.value.map((tool) => ({ ...tool, list: result.objectId }));
   }
 
   /**
@@ -305,4 +299,4 @@ export class Page {
 
 const describeException = (d) => d.exception?.description?.split("\n")[0] ?? d.text;
 
-/** @typedef {{index: number, list: string, unique: boolean, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string, owner?: number}} PageTool */
+/** @typedef {{index: number, list: string, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string, owner?: number}} PageTool */

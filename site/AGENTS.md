@@ -76,7 +76,8 @@ tests/                       Playwright e2e against the prerendered build
 - Motion: wrap blocks in `<Reveal>` (stagger with `delay`); transitions use `ease-out-expo`. Everything must
   respect `prefers-reduced-motion` (base.css has the global switch) and stay readable without JavaScript.
 - No count-up numbers: figures are prerendered text, so crawlers and agents read them.
-- Code samples live in `content/snippets.ts` and are highlighted at build time.
+- Code samples live in `content/snippets.ts` and are highlighted at build time. Code always wraps and shows
+  whole (`CodeBlock`, `code.css`): never a sideways scroll that hides part of a command (owner's rule).
 
 ## Data and copy
 

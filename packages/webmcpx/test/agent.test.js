@@ -67,6 +67,8 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
 </form>
 <form toolname="Book a class" tooldescription="Book a pottery class." method="post" toolautosubmit>
   <input type="hidden" name="price" value="40">
+  <input name="total" value="40" readonly>
+  <fieldset disabled><input name="coupon"></fieldset>
   <input name="name" required toolparamdescription="Who comes.">
   <select name="day"><option>monday</option><option>friday</option></select>
   <label><input type="checkbox" name="wheel"> Wheel</label>
@@ -270,6 +272,9 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     // With it, the page's submit handler sees agentInvoked and answers through respondWith().
     const booked = JSON.parse(await session.call(book, { name: "Ana", day: "friday", wheel: true }));
     assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true, price: "40", glazes: [] } });
+    // Fields the user can't edit (readonly, inside a disabled fieldset) are not inputs either.
+    assert.equal(book.inputSchema.properties.total, undefined);
+    assert.equal(book.inputSchema.properties.coupon, undefined);
     // Several checkboxes with one name are a set of choices.
     assert.deepEqual(book.inputSchema.properties.glazes, { type: "array", items: { enum: ["celadon", "tenmoku"] } });
     const picked = JSON.parse(await session.call(book, { name: "Ana", day: "monday", glazes: ["tenmoku"] }));
@@ -331,7 +336,7 @@ test("overlapping requests each get their own page", { skip, timeout: 90_000 }, 
       mcp.rpc("tools/call", { name: "add_to_cart", arguments: { sku: "MUG-1" } }),
     ]);
     assert.equal(stale.result.isError, true);
-    assert.match(stale.result.content[0].text, /the page changed and no longer has the tool "add_to_cart"/);
+    assert.match(stale.result.content[0].text, /the page changed since "add_to_cart" was listed/);
   } finally {
     mcp.close();
   }

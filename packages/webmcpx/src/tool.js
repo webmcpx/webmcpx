@@ -166,9 +166,9 @@ export function formSchema(form) {
   return { type: "object", properties, ...(required.length && { required }), additionalProperties: false };
 }
 
-/** A control an agent may fill: named, enabled, not hidden, password, file or a button. */
+/** A control a user could edit: named, enabled (fieldsets too), not readonly, hidden, password or a file. */
 const fillable = (el) =>
-  el.name && !el.disabled && !SKIPPED.test(el.type) && "value" in el && el.tagName !== "BUTTON";
+  el.name && !el.matches(":disabled, [readonly]") && !SKIPPED.test(el.type) && "value" in el && el.tagName !== "BUTTON";
 
 function fill(form, args) {
   for (const [name, value] of Object.entries(args)) {

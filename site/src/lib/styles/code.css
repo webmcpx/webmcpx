@@ -1,21 +1,12 @@
 /* Shiki output (highlighted at build time, see `server/highlight.ts`) on the ink code background. */
 .shiki {
 	background: transparent !important;
+	/* Code always wraps and shows whole (owner's rule: nothing hidden behind a sideways scroll). Long
+	   tokens (a CDN URL, inline JSON) break too, so a phone never cuts them off. */
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 
 .shiki code {
 	display: block;
-	width: max-content;
-	min-width: 100%;
-}
-
-/* Prose in a code block (the agent prompt): wrap instead of scrolling sideways. */
-.code-wrap .shiki {
-	white-space: pre-wrap;
-	/* Long tokens (a CDN URL, inline JSON) break too, so a phone never cuts them off. */
-	overflow-wrap: anywhere;
-}
-
-.code-wrap .shiki code {
-	width: auto;
 }

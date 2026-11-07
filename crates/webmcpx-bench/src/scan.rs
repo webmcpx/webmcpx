@@ -414,19 +414,31 @@ impl Scanner {
 
     async fn inspect(&self, page: &Page, url: &Url) -> Result<Report, ScanError> {
         page.goto(url.as_str()).await.map_err(failed)?;
-        let final_url = page.eval("location.href").await.map_err(failed)?;
+        // Everything read from the page is bounded inside Chrome: the CDP connection is shared by every
+        // scan, and a message past its size limit would end it for all of them.
+        let final_url = page
+            .eval("location.href.slice(0, 4096)")
+            .await
+            .map_err(failed)?;
         let final_url = final_url.as_str().unwrap_or(url.as_str()).to_owned();
         // A refused redirect leaves Chrome on an error page for that URL: say why.
         self.check(&parse_url(&final_url)?).await?;
         let tools = registered_tools(page, TOOL_WAIT).await.map_err(failed)?;
-        let snapshot = page.eval("__bench.snapshot()").await.map_err(failed)?;
-        let title = page.eval("document.title").await.map_err(failed)?;
+        // Only the snapshot's size travels: that is all the token estimate needs.
+        let snapshot_chars = page
+            .eval("__bench.snapshot().length")
+            .await
+            .map_err(failed)?;
+        let title = page
+            .eval("document.title.slice(0, 300)")
+            .await
+            .map_err(failed)?;
         let mut report = report(
             url.as_str(),
             final_url,
             title.as_str().unwrap_or_default(),
             &tools,
-            snapshot.as_str().unwrap_or_default(),
+            usize::try_from(snapshot_chars.as_u64().unwrap_or(0)).unwrap_or(usize::MAX),
         );
         // Best effort: a site without a readable icon still gets its report.
         report.favicon = tokio::time::timeout(FAVICON_WAIT, page.eval(FAVICON_JS))
@@ -602,7 +614,7 @@ pub fn report(
     final_url: String,
     title: &str,
     tools: &[Value],
-    snapshot: &str,
+    snapshot_chars: usize,
 ) -> Report {
     let diagnostics = lint(tools);
     let verdict = if tools.is_empty() {
@@ -632,7 +644,7 @@ pub fn report(
         verdict,
         tools,
         diagnostics,
-        page_tokens: snapshot.chars().count().div_ceil(CHARS_PER_TOKEN),
+        page_tokens: snapshot_chars.div_ceil(CHARS_PER_TOKEN),
         favicon: None,
         elapsed_ms: 0,
     }
@@ -754,7 +766,7 @@ mod tests {
             "https://a.example/".into(),
             " A ",
             &[],
-            "abcdefgh",
+            "abcdefgh".len(),
         );
         assert_eq!(r.verdict, Verdict::Missing);
         assert_eq!(r.page_tokens, 2);
@@ -769,7 +781,7 @@ mod tests {
             "Find passages on the current page that match a query.",
             &json!({ "readOnlyHint": true, "untrustedContentHint": true }),
         )];
-        let r = report("u", "u".into(), "t", &tools, "");
+        let r = report("u", "u".into(), "t", &tools, 0);
         assert_eq!(r.verdict, Verdict::Ready, "{:?}", r.diagnostics);
         assert_eq!(r.tools[0].params, ["query"]);
         assert_eq!(r.tools[0].read_only, Some(true));
@@ -779,7 +791,7 @@ mod tests {
     fn a_schema_the_host_could_not_read_is_an_error() {
         let mut t = tool("search", "Find a product.", &json!({ "type": "object" }));
         t["schemaError"] = json!("the input schema is over 50,000 chars");
-        let r = report("u", "u".into(), "t", &[t], "");
+        let r = report("u", "u".into(), "t", &[t], 0);
         assert_eq!(r.verdict, Verdict::Issues);
         assert!(
             r.diagnostics
@@ -791,7 +803,7 @@ mod tests {
     #[test]
     fn lint_errors_mean_issues() {
         let tools = [tool("Search Products", "", &json!({}))];
-        let r = report("u", "u".into(), "t", &tools, "");
+        let r = report("u", "u".into(), "t", &tools, 0);
         assert_eq!(r.verdict, Verdict::Issues);
         let rules: Vec<_> = r.diagnostics.iter().map(|d| d.rule).collect();
         assert!(rules.contains(&"invalid-name"), "{rules:?}");
@@ -816,7 +828,7 @@ mod tests {
             &"x".repeat(description_len),
             &json!({ "readOnlyHint": true }),
         )];
-        report(url, url.to_owned(), "", &tools, "")
+        report(url, url.to_owned(), "", &tools, 0)
     }
 
     #[test]

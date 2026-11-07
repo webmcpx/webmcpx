@@ -45,7 +45,7 @@
 	{/snippet}
 	{#snippet panel(item)}
 		<div class="mt-4">
-			<CodeBlock snippet={item.snippet} title={item.title} class="code-wrap" />
+			<CodeBlock snippet={item.snippet} title={item.title} />
 			{#if item.note}<p class="mt-3 text-left text-sm text-pretty text-ink-2">{item.note}</p>{/if}
 		</div>
 	{/snippet}

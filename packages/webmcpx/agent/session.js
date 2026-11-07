@@ -61,7 +61,7 @@ export class Session {
     return this.#serial(async () => (this.#page ? withStandard((await this.#page.tools()) ?? []) : []));
   }
 
-  /** Calls a tool from the latest list; a page tool whose list went stale is found again by name and origin. */
+  /** Calls a tool from a list the page gave; one from a page that has since navigated is refused. */
   call(tool, input) {
     return this.#serial(async () => {
       if (!this.#page) throw new Error("no page is open yet: call open_page first");
@@ -73,13 +73,9 @@ export class Session {
         // A frozen page can't be used again: drop the browser (or, attached, our tab); the next page
         // starts fresh instead of waiting on it forever.
         if (page.broken) await this.#reset();
-        if (!stale(e)) throw e;
-        // The document the tool was listed in is gone: run the same tool in the new one only when no
-        // other tool shares its name and origin there or then; otherwise refuse rather than guess.
-        const now = ((await page.tools()) ?? []).filter((t) => t.name === tool.name && t.origin === tool.origin);
-        const again = tool.unique && now.length === 1 ? now[0] : undefined;
-        if (!again) throw new Error(`the page changed and no longer has the tool "${tool.name}": call open_page again`);
-        return page.call(again, input);
+        // The tool's list is gone only when the page navigated: never guess which new tool is "the same".
+        if (stale(e)) throw new Error(`the page changed since "${tool.name}" was listed: open it again or use the new tools`);
+        throw e;
       }
     });
   }
