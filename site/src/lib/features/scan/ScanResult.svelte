@@ -16,7 +16,7 @@
 	import type { Highlighted } from '#lib/content/snippets.ts';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import { tokens } from '#lib/features/benchmark/bench.ts';
-	import { BADGE_SVG, badgeEmbed, errors, host, shareLink } from './scan.ts';
+	import { BADGES, badgeEmbed, errors, host, shareLink, type BadgeStyle } from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
 
 	const STEPS = [
@@ -42,6 +42,27 @@
 	});
 
 	let step = $state(0);
+	let badge: BadgeStyle = $state('card');
+	/** The tool whose description shows in the tooltip, and where (page coordinates, so scrolling keeps it in place). */
+	let tip: { text: string; left: number; top: number; above: boolean } | null = $state(null);
+
+	function showTip(e: Event, text: string) {
+		const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+		const width = Math.min(320, innerWidth - 32);
+		const above = r.bottom + 120 > innerHeight;
+		tip = {
+			text,
+			left: scrollX + Math.max(16, Math.min(r.left, innerWidth - 16 - width)),
+			top: scrollY + (above ? r.top - 8 : r.bottom + 8),
+			above
+		};
+	}
+	const hideTip = () => (tip = null);
+	/** The tooltip lives on <body>, so the card's rounded clipping never cuts it. */
+	const portal = (node: HTMLElement) => {
+		document.body.append(node);
+		return () => node.remove();
+	};
 	let shared = $state(false);
 	let box: HTMLElement | undefined = $state();
 
@@ -130,8 +151,17 @@
 				<div class="border-t-2 border-ink bg-paper-2 px-5 py-4 sm:px-7">
 					<ul class="flex flex-wrap gap-2" aria-label="Tools found">
 						{#each r.tools.slice(0, 10) as t (t.name)}
-							<li class="rounded-full border-2 border-ink bg-card px-2.5 py-0.5 font-mono text-xs">
-								{t.name}
+							<li>
+								<!-- Hover, focus or tap shows the description; screen readers get it as part of the name. -->
+								<button
+									type="button"
+									onclick={(e) => showTip(e, t.description)}
+									class="inline-block cursor-help rounded-full border-2 border-ink bg-card px-2.5 py-0.5 font-mono text-xs outline-offset-2 hover:bg-marker focus-visible:bg-marker"
+									onpointerenter={(e) => showTip(e, t.description)}
+									onpointerleave={hideTip}
+									onfocus={(e) => showTip(e, t.description)}
+									onblur={hideTip}>{t.name}<span class="sr-only">: {t.description}</span></button
+								>
 							</li>
 						{/each}
 						{#if r.tools.length > 10}<li class="px-1 py-0.5 text-xs text-ink-3">
@@ -167,16 +197,38 @@
 					<CodeBlock snippet={plain('webmcpx lint src/')} title="terminal" class="shadow-none" />
 				</div>
 			{:else}
-				{@const embed = badgeEmbed(location.origin, r.url)}
+				{@const embed = badgeEmbed(location.origin, r.url, badge)}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
-					<p class="font-medium">Show it. Paste this badge on your site:</p>
+					<p class="font-medium">Show it. Pick a badge and paste it on your site:</p>
 					<p class="mt-1 text-sm text-ink-3">
 						The SVG is in the code, so nothing loads from us. It links to a live scan of your site, so anyone
 						can check it.
 					</p>
-					<!-- Our own artwork (content/badge.svg), the same markup the embed code carries. -->
-					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-					<div class="mt-4 w-fit">{@html BADGE_SVG}</div>
+					<fieldset class="mt-4 grid gap-3 sm:grid-cols-3">
+						<legend class="sr-only">Badge style</legend>
+						{#each BADGES as b (b.id)}
+							<label
+								class="flex cursor-pointer flex-col overflow-hidden rounded-card border-2 border-hairline transition hover:border-ink has-checked:border-ink has-checked:shadow-hard-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink"
+							>
+								<input type="radio" name="badge-style" value={b.id} bind:group={badge} class="sr-only" />
+								<!-- Our own artwork (content/badges/), the same markup the embed code carries. -->
+								<span
+									class={[
+										'grid h-20 place-items-center px-3 [&_svg]:max-w-full',
+										b.id === 'dark' ? 'bg-ink' : 'bg-paper'
+									]}
+									aria-hidden="true"
+								>
+									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+									{@html b.svg}
+								</span>
+								<span class="flex items-baseline justify-between gap-2 border-t-2 border-inherit px-3 py-2">
+									<span class="font-medium">{b.name}</span>
+									<span class="text-xs text-ink-3">{b.fits}</span>
+								</span>
+							</label>
+						{/each}
+					</fieldset>
 					<CodeBlock snippet={plain(embed)} title="badge.html" class="mt-4 shadow-none" />
 				</div>
 			{/if}
@@ -189,3 +241,16 @@
 		</Card>
 	{/if}
 </div>
+
+{#if tip}
+	<div
+		{@attach portal}
+		aria-hidden="true"
+		class="pointer-events-none absolute z-50 w-max max-w-[min(20rem,calc(100vw-2rem))] rounded-xl border-2 border-ink bg-ink px-3 py-2 text-sm text-paper shadow-hard-sm"
+		style:left="{tip.left}px"
+		style:top="{tip.top}px"
+		style:translate={tip.above ? '0 -100%' : undefined}
+	>
+		{tip.text}
+	</div>
+{/if}

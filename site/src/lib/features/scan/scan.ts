@@ -1,4 +1,6 @@
-import badgeSvg from '#lib/content/badge.svg?raw';
+import cardSvg from '#lib/content/badges/card.svg?raw';
+import darkSvg from '#lib/content/badges/dark.svg?raw';
+import flatSvg from '#lib/content/badges/flat.svg?raw';
 
 // Client for `GET /api/scan?url=` (crates/webmcpx-bench/src/scan.rs). Types mirror the Rust `Report`.
 
@@ -79,8 +81,13 @@ export const warnings = (r: Report) => r.diagnostics.filter((d) => d.severity ==
 /** The link that re-runs this scan when opened: `/?scan=<url>`. */
 export const shareLink = (origin: string, url: string) => `${origin}/?scan=${encodeURIComponent(url)}`;
 
-/** The badge artwork, inlined into the embed code: sites never load an image from our server. */
-export const BADGE_SVG = badgeSvg.trim();
+/** The badge styles, inlined into the embed code: sites never load an image from our server. */
+export const BADGES = [
+	{ id: 'card', name: 'Card', fits: 'Light pages', svg: cardSvg.trim() },
+	{ id: 'flat', name: 'Flat', fits: 'READMEs and footers', svg: flatSvg.trim() },
+	{ id: 'dark', name: 'Dark', fits: 'Dark pages', svg: darkSvg.trim() }
+] as const;
+export type BadgeStyle = (typeof BADGES)[number]['id'];
 
 const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
@@ -88,7 +95,8 @@ const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').rep
  * The HTML a site pastes to show it is agent-ready: the badge SVG itself, inside a link back to a live
  * scan of that site. Nothing is fetched from us; the link lets anyone check the claim (and credits us).
  */
-export function badgeEmbed(origin: string, url: string): string {
+export function badgeEmbed(origin: string, url: string, style: BadgeStyle = 'card'): string {
 	const href = attr(`${shareLink(origin, url)}#scan`);
-	return `<a href="${href}" title="Agent-ready: check it live with webmcpx">${BADGE_SVG}</a>`;
+	const svg = BADGES.find((b) => b.id === style)?.svg ?? BADGES[0].svg;
+	return `<a href="${href}" title="Agent-ready: check it live with webmcpx">${svg}</a>`;
 }

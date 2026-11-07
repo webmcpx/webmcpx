@@ -102,6 +102,48 @@ test('without JavaScript, every model is a link to its own prerendered benchmark
 	await page.close();
 });
 
+test('the site address input has focus on load, ready to type', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByLabel("Your site's address").first()).toBeFocused();
+	await page.keyboard.type('docs.example.com');
+	await expect(page.getByLabel("Your site's address").first()).toHaveValue('docs.example.com');
+});
+
+test('hovering or focusing a tool shows its description', async ({ page }) => {
+	await mockScan(page);
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	const tools = page.getByRole('list', { name: 'Tools found' });
+	const first = tools.getByRole('button').first();
+	await first.hover();
+	const tip = page.locator('body > div.absolute');
+	await expect(tip).toBeVisible();
+	// Screen readers get the description in the chip's name.
+	expect((await first.textContent()) ?? '').toContain(((await tip.textContent()) ?? '').trim());
+	await page.mouse.move(0, 0);
+	await expect(tip).toHaveCount(0);
+});
+
+test('an agent-ready site can pick one of three badge styles, each embedded inline', async ({ page }) => {
+	await mockScan(page);
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	const styles = page.getByRole('group', { name: 'Badge style' }).getByRole('radio');
+	await expect(styles).toHaveCount(3);
+	await expect(styles.first()).toBeChecked();
+	const embed = page.locator('#scan').getByRole('figure').filter({ hasText: 'badge.html' });
+	const card = await embed.textContent();
+	await page.getByText('Flat', { exact: true }).click();
+	await expect(styles.nth(1)).toBeChecked();
+	await expect(embed).toContainText('width="158" height="20"');
+	expect(await embed.textContent()).not.toBe(card);
+	await page.getByText('Dark', { exact: true }).click();
+	await expect(embed).toContainText('#3d3c37');
+	await expect(embed).not.toContainText('<img');
+});
+
 test('scanning a site shows the verdict and its tools', async ({ page }) => {
 	const seen = await mockScan(page);
 	await page.goto('/');
@@ -381,7 +423,10 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	const result = page.locator('#scan');
 	await expect(result.getByText('Agent-ready').first()).toBeVisible();
 	await expect(result.locator('img[src^="data:image/png"]')).toHaveCount(1);
-	await expect(result.getByRole('img', { name: /Agent-ready: WebMCP tools checked/ })).toBeVisible();
+	// A preview of each style (decorative: the radios carry the names).
+	await expect(result.locator('fieldset svg[aria-label^="Agent-ready: WebMCP tools checked"]')).toHaveCount(
+		3
+	);
 	const embed = result.getByRole('figure').filter({ hasText: 'badge.html' });
 	await expect(embed).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');
 	// The badge SVG is inlined: the embed loads nothing from our server.

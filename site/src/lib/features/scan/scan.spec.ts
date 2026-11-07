@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BADGE_SVG, badgeEmbed, errors, host, normalize, scan, shareLink, type Report } from './scan.ts';
+import { BADGES, badgeEmbed, errors, host, normalize, scan, shareLink, type Report } from './scan.ts';
 
 const report: Report = {
 	url: 'https://a.example/',
@@ -76,9 +76,10 @@ describe('badgeEmbed', () => {
 		expect(html).not.toMatch(/<img|src=|href="[^"]*\.svg/);
 	});
 
-	it('ships a small, script-free badge', () => {
-		expect(BADGE_SVG.length).toBeLessThan(2000);
-		expect(BADGE_SVG).not.toMatch(/<script|on\w+=|<image|xlink:href|href=/i);
-		expect(BADGE_SVG).toContain('<title>');
+	it.each(BADGES)('ships a small, script-free $id badge', ({ id, svg }) => {
+		expect(svg.length).toBeLessThan(2000);
+		expect(svg).not.toMatch(/<script|on\w+=|<image|xlink:href|href=|\sid=/i);
+		expect(svg).toContain('<title>Agent-ready: WebMCP tools checked with webmcpx</title>');
+		expect(badgeEmbed('https://webmcp.zone', 'https://a.example/', id)).toContain(svg);
 	});
 });
