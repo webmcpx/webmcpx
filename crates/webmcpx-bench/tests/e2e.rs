@@ -422,6 +422,52 @@ async fn a_cancelled_scan_frees_its_place_in_line() {
     );
 }
 
+/// The public scanner: one scan per visitor per period, the visitor read from our proxy's header.
+#[tokio::test]
+async fn scan_api_limits_each_visitor() {
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));
+    let visitors = Arc::new(webmcpx_bench::visitors::Visitors::new(
+        std::time::Duration::from_secs(60),
+        true,
+    ));
+    let addr = server::spawn_with(
+        &repo_root(),
+        ([127, 0, 0, 1], 0).into(),
+        Some(scanner),
+        Some(visitors),
+    )
+    .await
+    .unwrap();
+    let client = reqwest::Client::new();
+    let scan = |from: &'static str| {
+        client
+            .get(format!("http://{addr}/api/scan?url=http://127.0.0.1:9/"))
+            .header("X-Forwarded-For", from)
+            .send()
+    };
+    // A refused URL still counts: the limit comes first.
+    assert_eq!(
+        scan("2600::1:2:3:4:5").await.unwrap().status().as_u16(),
+        400
+    );
+    let again = scan("2600:0:0:1::99").await.unwrap();
+    assert_eq!(again.status().as_u16(), 429, "same /64, same visitor");
+    assert!(again.headers().contains_key("retry-after"));
+    let body: serde_json::Value = again.json().await.unwrap();
+    assert!(
+        body["error"]
+            .as_str()
+            .unwrap()
+            .contains("One scan per minute"),
+        "{body}"
+    );
+    assert_eq!(
+        scan("2600:0:0:2::1").await.unwrap().status().as_u16(),
+        400,
+        "another visitor"
+    );
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

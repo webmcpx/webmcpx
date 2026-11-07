@@ -12,6 +12,7 @@ pub mod report;
 pub mod scan;
 pub mod server;
 pub mod task;
+pub mod visitors;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;

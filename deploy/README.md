@@ -19,6 +19,8 @@ internet:
   out is the egress proxy inside `web`, which resolves every host itself, refuses private, loopback,
   link-local and reserved addresses (redirects, subresources and DNS rebinding included), caps each
   connection at 60 s and 16 MiB, and serves only the `chrome` container.
+- **Fair use.** Each visitor (an IPv4 address or IPv6 /64, from `CF-Connecting-IP`) gets one scan a
+  minute and one at a time; reports are cached for 10 minutes and shared by everyone scanning the same URL.
 - **Least privilege everywhere.** Every container drops all Linux capabilities, runs with
   `no-new-privileges` and a read-only root filesystem, and has memory and process limits where it matters.
 - **One secret, never in git.** The tunnel token lives in `deploy/.env` on the server (git-ignored).
