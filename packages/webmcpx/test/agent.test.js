@@ -155,14 +155,17 @@ function client() {
   const pending = new Map();
   const notes = [];
   let id = 0;
+  const client = {};
   createInterface({ input: child.stdout }).on("line", (line) => {
     const msg = JSON.parse(line);
-    if (msg.id !== undefined) pending.get(msg.id)?.(msg);
-    else notes.push(msg.method);
+    if (msg.id !== undefined && pending.has(msg.id)) pending.get(msg.id)(msg);
+    else if (msg.method) notes.push(msg.method);
+    else client.onUnmatched?.(msg);
   });
   const send = (msg) => child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
-  return {
+  return Object.assign(client, {
     notes,
+    raw: (line) => child.stdin.write(`${line}\n`),
     rpc: (method, params) =>
       new Promise((resolve) => {
         pending.set(++id, resolve);
@@ -170,7 +173,7 @@ function client() {
       }),
     notify: (method) => send({ method }),
     close: () => child.stdin.end(),
-  };
+  });
 }
 
 const exec = promisify(execFile);
@@ -209,6 +212,11 @@ test("an MCP client gets the page's own tools, typed, plus the standard ones", {
 
     const missing = await mcp.rpc("tools/call", { name: "nope", arguments: {} });
     assert.equal(missing.result.isError, true);
+    // Valid JSON that is not a request gets -32600, and the server keeps serving.
+    const bad = new Promise((resolve) => mcp.onUnmatched = resolve);
+    mcp.raw("null");
+    assert.equal((await bad).error.code, -32600);
+    assert.deepEqual((await mcp.rpc("ping")).result, {});
   } finally {
     mcp.close();
   }

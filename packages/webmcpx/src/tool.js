@@ -23,6 +23,9 @@ export function schema(input = {}) {
   return { type: "object", properties, ...(required.length && { required }) };
 }
 
+// Assertions not checked here (if they appear, the input is refused): see check().
+const UNCHECKED = ["if", "patternProperties", "propertyNames", "dependentRequired", "dependentSchemas", "contains", "prefixItems", "unevaluatedProperties", "unevaluatedItems", "$dynamicRef"];
+
 const TYPES = {
   string: (v) => typeof v === "string",
   number: (v) => typeof v === "number" && Number.isFinite(v),
@@ -76,9 +79,16 @@ function check(s, value, at = "input") {
   }
   if (s.anyOf && s.anyOf.every((b) => check(b, value, at))) return `${at} matches none of the allowed shapes`;
   if (s.oneOf && s.oneOf.filter((b) => !check(b, value, at)).length !== 1) return `${at} must match exactly one allowed shape`;
+  // Fail closed: an assertion this checker doesn't run refuses the input instead of letting it through.
+  const unknown = UNCHECKED.find((k) => k in s);
+  if (unknown) return (fatal = `${at}: can't check ${unknown}`);
+  if (s.not && !check(s.not, value, at)) return `${at} matches a shape that is not allowed`;
   if (typeof value === "number") {
     if (value < s.minimum) return `${at} must be at least ${s.minimum}`;
     if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
+    if (value <= s.exclusiveMinimum) return `${at} must be more than ${s.exclusiveMinimum}`;
+    if (value >= s.exclusiveMaximum) return `${at} must be less than ${s.exclusiveMaximum}`;
+    if (s.multipleOf && !Number.isInteger(value / s.multipleOf)) return `${at} must be a multiple of ${s.multipleOf}`;
   }
   if (typeof value === "string") {
     if (value.length < s.minLength) return `${at} must have at least ${s.minLength} chars`;
@@ -88,12 +98,15 @@ function check(s, value, at = "input") {
   if (Array.isArray(value)) {
     if (value.length < s.minItems) return `${at} must have at least ${s.minItems} items`;
     if (value.length > s.maxItems) return `${at} must have at most ${s.maxItems} items`;
+    if (s.uniqueItems && value.some((v, i) => value.findIndex((w) => same(v, w)) !== i)) return `${at} must not repeat items`;
     for (let i = 0; i < value.length; i++) {
       const problem = check(s.items, value[i], `${at}[${i}]`);
       if (problem) return problem;
     }
   }
   if (TYPES.object(value)) {
+    const n = Object.keys(value).length;
+    if (n < s.minProperties || n > s.maxProperties) return `${at} has the wrong number of fields`;
     // Own properties only ("__proto__" is not a declared input).
     for (const key of s.required ?? []) if (!Object.hasOwn(value, key) || value[key] === undefined) return `\`${key}\` is required`;
     for (const [key, v] of Object.entries(value)) {

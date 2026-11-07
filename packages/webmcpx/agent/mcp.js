@@ -223,6 +223,11 @@ export async function serve(options = {}, { input = process.stdin, output = proc
       write({ id: null, error: { code: -32700, message: "parse error" } });
       continue;
     }
+    // Valid JSON that is not a request (null, a number, an array) gets an error, never a crash.
+    if (!msg || typeof msg !== "object" || Array.isArray(msg) || typeof msg.method !== "string") {
+      write({ id: msg?.id ?? null, error: { code: -32600, message: "invalid request" } });
+      continue;
+    }
     // Requests run concurrently: a slow page must not block ping or tools/list.
     handle(msg).then(
       (result) => msg.id !== undefined && result !== undefined && write({ id: msg.id, result }),

@@ -165,6 +165,32 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
     run: () => 1,
   });
   assert.equal((await page.call("empty", { amount: -5 })).error.code, "INVALID_INPUT");
+  // More numeric, array and object assertions, and fail-closed for ones not checked here.
+  tool({
+    name: "nums",
+    description: "Numbers.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        amount: { type: "number", exclusiveMinimum: 0, exclusiveMaximum: 100, multipleOf: 0.5 },
+        tags: { type: "array", uniqueItems: true },
+        code: { not: { const: "ADMIN" } },
+      },
+      maxProperties: 3,
+    },
+    run: () => "ok",
+  });
+  const nums = async (input) => (await page.call("nums", input)).error?.message;
+  assert.equal(await nums({ amount: -1 }), "`amount` must be more than 0");
+  assert.equal(await nums({ amount: 100 }), "`amount` must be less than 100");
+  assert.equal(await nums({ amount: 1.2 }), "`amount` must be a multiple of 0.5");
+  assert.equal(await nums({ tags: ["a", "a"] }), "`tags` must not repeat items");
+  assert.equal(await nums({ code: "ADMIN" }), "`code` matches a shape that is not allowed");
+  assert.equal(await nums({ amount: 1.5, tags: ["a"], code: "x" }), undefined);
+  let iffy = 0;
+  tool({ name: "iffy", description: "If.", inputSchema: { type: "object", if: { required: ["a"] }, then: { required: ["b"] } }, run: () => ++iffy });
+  assert.match(await (async () => (await page.call("iffy", { a: 1 })).error.message)(), /can't check if/);
+  assert.equal(iffy, 0);
   // Boolean schemas: false refuses, true accepts.
   tool({ name: "bools", description: "Boolean branches.", inputSchema: { type: "object", oneOf: [false, { required: ["sku"] }] }, run: () => "ok" });
   assert.equal((await page.call("bools", { sku: "MUG" })).ok, true);
