@@ -96,11 +96,11 @@ fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
     m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
 }
 
-/// A headless Chrome process. Killed on drop.
+/// A headless Chrome: a process we started (killed on drop), or one running elsewhere that we connected to.
 pub struct Browser {
     conn: Conn,
-    _child: Child,
-    _profile: tempfile::TempDir,
+    _child: Option<Child>,
+    _profile: Option<tempfile::TempDir>,
 }
 
 impl Browser {
@@ -158,8 +158,37 @@ impl Browser {
         tokio::spawn(async move { while let Ok(Some(_)) = lines.next_line().await {} });
         Ok(Self {
             conn: Conn::connect(&url).await?,
-            _child: child,
-            _profile: profile,
+            _child: Some(child),
+            _profile: Some(profile),
+        })
+    }
+
+    /// Connects to a Chrome that is already running elsewhere (another container), given the `host:port`
+    /// of its DevTools endpoint. That Chrome's own switches (proxy, sandbox) are set where it runs.
+    pub async fn connect(endpoint: &str) -> Result<Self> {
+        let addr = tokio::net::lookup_host(endpoint)
+            .await
+            .with_context(|| format!("resolving {endpoint}"))?
+            .next()
+            .with_context(|| format!("{endpoint} has no address"))?;
+        // Chrome only answers DevTools requests whose Host is an IP address or localhost.
+        let version: Value = reqwest::get(format!("http://{addr}/json/version"))
+            .await
+            .with_context(|| format!("reaching Chrome at {endpoint}"))?
+            .error_for_status()?
+            .json()
+            .await?;
+        let ws = version["webSocketDebuggerUrl"]
+            .as_str()
+            .context("Chrome did not report a DevTools URL")?;
+        let path = ws
+            .split_once("/devtools/")
+            .map(|(_, path)| path)
+            .context("unexpected DevTools URL")?;
+        Ok(Self {
+            conn: Conn::connect(&format!("ws://{addr}/devtools/{path}")).await?,
+            _child: None,
+            _profile: None,
         })
     }
 

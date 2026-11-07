@@ -17,7 +17,7 @@ use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, Session, registered_tools, webmcp_to
 use webmcpx_bench::cdp::Browser;
 use webmcpx_bench::model::{Client, Price, list_price};
 use webmcpx_bench::report::{Results, SCHEMA_VERSION, Summary, markdown};
-use webmcpx_bench::scan::Scanner;
+use webmcpx_bench::scan::{Remote, Scanner};
 use webmcpx_bench::{Job, repo_root, run_jobs, server, task};
 
 #[derive(Parser)]
@@ -69,6 +69,17 @@ enum Command {
         scan_private: bool,
         #[arg(long)]
         chrome: Option<PathBuf>,
+        /// What to serve from: `site/build`, `bench/sites` and `packages/webmcpx` under it (default: this
+        /// repository).
+        #[arg(long)]
+        root: Option<PathBuf>,
+        /// Use a Chrome running elsewhere (another container) at this DevTools `host:port`, instead of
+        /// starting one. It must use `--proxy-listen` as its proxy and have no other network route.
+        #[arg(long, requires = "proxy_listen")]
+        remote_chrome: Option<String>,
+        /// Where the egress proxy listens for the remote Chrome (e.g. `0.0.0.0:3128`).
+        #[arg(long, requires = "remote_chrome")]
+        proxy_listen: Option<SocketAddr>,
     },
     /// List tasks (tab-separated).
     Tasks,
@@ -203,11 +214,18 @@ async fn main() -> Result<()> {
             addr,
             scan_private,
             chrome,
+            root: served,
+            remote_chrome,
+            proxy_listen,
         } => {
-            let scanner = Arc::new(Scanner::new(chrome, scan_private));
-            let bound = server::spawn(&root, addr, Some(scanner)).await?;
+            let mut scanner = Scanner::new(chrome, scan_private);
+            if let (Some(chrome), Some(proxy)) = (remote_chrome, proxy_listen) {
+                scanner = scanner.remote(Remote { chrome, proxy });
+            }
+            let served = served.unwrap_or(root);
+            let bound = server::spawn(&served, addr, Some(Arc::new(scanner))).await?;
             eprintln!("serving http://{bound}/ (sites under /sites/); Ctrl-C to stop");
-            tokio::signal::ctrl_c().await?;
+            shutdown().await?;
         }
         Command::Run {
             tasks,
@@ -292,6 +310,21 @@ async fn main() -> Result<()> {
             eprintln!("wrote {} and {}", latest.display(), stamped.display());
         }
     }
+    Ok(())
+}
+
+/// Waits for Ctrl-C, or SIGTERM (how a container is stopped).
+async fn shutdown() -> Result<()> {
+    #[cfg(unix)]
+    {
+        let mut term = tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+        tokio::select! {
+            r = tokio::signal::ctrl_c() => r?,
+            _ = term.recv() => {}
+        }
+    }
+    #[cfg(not(unix))]
+    tokio::signal::ctrl_c().await?;
     Ok(())
 }
 

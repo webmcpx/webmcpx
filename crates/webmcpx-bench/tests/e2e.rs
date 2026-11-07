@@ -280,6 +280,53 @@ async fn scan_api_reports_the_tools_of_a_page() {
     assert_eq!(status, 400, "{bad}");
 }
 
+/// A free loopback port (bound and released at once).
+fn free_port() -> u16 {
+    std::net::TcpListener::bind("127.0.0.1:0")
+        .unwrap()
+        .local_addr()
+        .unwrap()
+        .port()
+}
+
+/// Production runs Chrome in its own container: the scanner connects to it and serves it the egress
+/// proxy. Here that Chrome is a local process started the same way.
+#[tokio::test]
+async fn scans_with_a_remote_chrome_through_the_shared_proxy() {
+    let root = repo_root();
+    if find_chrome().is_none() || !root.join("packages/webmcpx/wasm").exists() {
+        eprintln!("skipping: needs Chrome and `just wasm`");
+        return;
+    }
+    let (devtools, proxy) = (free_port(), free_port());
+    let _chrome = Browser::launch_with(
+        None,
+        &[
+            format!("--remote-debugging-port={devtools}"),
+            format!("--proxy-server=http://127.0.0.1:{proxy}"),
+            "--proxy-bypass-list=<-loopback>".to_owned(),
+        ],
+    )
+    .await
+    .unwrap();
+    let scanner =
+        webmcpx_bench::scan::Scanner::new(None, true).remote(webmcpx_bench::scan::Remote {
+            chrome: format!("127.0.0.1:{devtools}"),
+            proxy: ([127, 0, 0, 1], proxy).into(),
+        });
+    let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into(), Some(Arc::new(scanner)))
+        .await
+        .unwrap();
+    let r = reqwest::get(format!(
+        "http://{addr}/api/scan?url=http://{addr}/sites/store/"
+    ))
+    .await
+    .unwrap();
+    assert_eq!(r.status().as_u16(), 200);
+    let report: serde_json::Value = r.json().await.unwrap();
+    assert_eq!(report["verdict"], "ready", "{report}");
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

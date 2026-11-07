@@ -82,7 +82,27 @@ impl Drop for Proxy {
 
 /// Starts the proxy on a free loopback port.
 pub async fn spawn(egress: Egress) -> Result<Proxy> {
-    let listener = TcpListener::bind(("127.0.0.1", 0)).await?;
+    serve(TcpListener::bind(("127.0.0.1", 0)).await?, egress, None)
+}
+
+/// Starts the proxy on `addr` for a browser in another container: only clients whose address `client`
+/// (a host name, such as the browser's container) resolves to are served, checked on every connection,
+/// so a restarted browser with a new address keeps working and nothing else on the network can use it.
+pub async fn spawn_on(egress: Egress, addr: SocketAddr, client: String) -> Result<Proxy> {
+    let listener = TcpListener::bind(addr)
+        .await
+        .with_context(|| format!("binding the egress proxy on {addr}"))?;
+    serve(listener, egress, Some(Arc::new(client)))
+}
+
+/// Whether `peer` is one of the addresses `client` resolves to now.
+async fn is_client(client: &str, peer: IpAddr) -> bool {
+    tokio::net::lookup_host((client, 0))
+        .await
+        .is_ok_and(|mut addrs| addrs.any(|a| canonical(a.ip()) == canonical(peer)))
+}
+
+fn serve(listener: TcpListener, egress: Egress, client: Option<Arc<String>>) -> Result<Proxy> {
     let addr = listener.local_addr()?;
     let egress = Arc::new(egress);
     let task = tokio::spawn(async move {
@@ -91,11 +111,17 @@ pub async fn spawn(egress: Egress) -> Result<Proxy> {
         loop {
             tokio::select! {
                 accepted = listener.accept() => {
-                    let Ok((client, _)) = accepted else { break };
+                    let Ok((stream, peer)) = accepted else { break };
                     let egress = Arc::clone(&egress);
+                    let allowed = client.clone();
                     connections.spawn(async move {
+                        if let Some(allowed) = allowed
+                            && !is_client(&allowed, peer.ip()).await
+                        {
+                            return; // Dropping the stream closes it: not our browser.
+                        }
                         // A failed or refused connection only affects that request.
-                        let _ = tokio::time::timeout(MAX_CONNECTION, handle(client, &egress)).await;
+                        let _ = tokio::time::timeout(MAX_CONNECTION, handle(stream, &egress)).await;
                     });
                 }
                 Some(_) = connections.join_next(), if !connections.is_empty() => {}
@@ -259,6 +285,52 @@ mod tests {
         assert_eq!(v6.host, "[::1]");
         assert!(Request::parse("GET ftp://a.example/ HTTP/1.1\r\n\r\n").is_none());
         assert!(Request::parse("garbage").is_none());
+    }
+
+    #[tokio::test]
+    async fn a_shared_proxy_serves_only_its_browser() {
+        // Clients resolve to 127.0.0.1; a proxy for "localhost" serves them, one for another host does not.
+        let refuse = spawn_on(
+            Egress::Public,
+            "127.0.0.1:0".parse().unwrap(),
+            "192.0.2.1".into(),
+        )
+        .await
+        .unwrap();
+        let mut c = TcpStream::connect(refuse.addr).await.unwrap();
+        // Closed unanswered: the write or the read sees a reset, or the read sees an empty reply.
+        let mut reply = Vec::new();
+        let answered = c
+            .write_all(b"CONNECT example.com:443 HTTP/1.1\r\n\r\n")
+            .await
+            .is_ok()
+            && c.read_to_end(&mut reply).await.is_ok()
+            && !reply.is_empty();
+        assert!(
+            !answered,
+            "a stranger got {:?}",
+            String::from_utf8_lossy(&reply)
+        );
+
+        let serve = spawn_on(
+            Egress::Public,
+            "127.0.0.1:0".parse().unwrap(),
+            "localhost".into(),
+        )
+        .await
+        .unwrap();
+        let mut c = TcpStream::connect(serve.addr).await.unwrap();
+        // Its own browser gets the proxy's answer (here: a refused private destination).
+        c.write_all(b"CONNECT 127.0.0.1:9 HTTP/1.1\r\n\r\n")
+            .await
+            .unwrap();
+        let mut reply = Vec::new();
+        c.read_to_end(&mut reply).await.unwrap();
+        assert!(
+            reply.starts_with(b"HTTP/1.1 403"),
+            "{:?}",
+            String::from_utf8_lossy(&reply)
+        );
     }
 
     #[test]

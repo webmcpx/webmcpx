@@ -87,19 +87,33 @@ pub enum ScanError {
     Failed(String),
 }
 
+/// A Chrome running in another container (production): the `host:port` of its DevTools endpoint, and
+/// where our egress proxy listens for it. That Chrome must be started with `--proxy-server` pointing at
+/// this proxy and must have no other route to the network.
+#[derive(Debug, Clone)]
+pub struct Remote {
+    pub chrome: String,
+    pub proxy: std::net::SocketAddr,
+}
+
 /// Shares one headless Chrome (behind the egress proxy) between scans.
 pub struct Scanner {
     chrome: Option<PathBuf>,
+    remote: Option<Remote>,
+    /// The proxy a remote Chrome uses: it lives as long as the scanner, since that Chrome's address for it
+    /// is fixed when it starts.
+    remote_proxy: tokio::sync::OnceCell<proxy::Proxy>,
     egress: Egress,
     deadline: Duration,
     browser: Mutex<Option<Arc<Session>>>,
     slots: Semaphore,
 }
 
-/// A browser and the proxy it is locked to; both stop when the last scan using them ends.
+/// A browser and the proxy it is locked to; both stop when the last scan using them ends (a remote
+/// browser's proxy belongs to the scanner instead).
 struct Session {
     browser: Browser,
-    _proxy: proxy::Proxy,
+    _proxy: Option<proxy::Proxy>,
 }
 
 impl Scanner {
@@ -118,11 +132,20 @@ impl Scanner {
     pub fn with_egress(chrome: Option<PathBuf>, egress: Egress) -> Self {
         Self {
             chrome,
+            remote: None,
+            remote_proxy: tokio::sync::OnceCell::new(),
             egress,
             deadline: DEADLINE,
             browser: Mutex::new(None),
             slots: Semaphore::new(PARALLEL),
         }
+    }
+
+    /// Uses a Chrome running elsewhere instead of starting one (see [`Remote`]).
+    #[must_use]
+    pub fn remote(mut self, remote: Remote) -> Self {
+        self.remote = Some(remote);
+        self
     }
 
     /// Overrides the per-scan deadline (tests).
@@ -187,6 +210,23 @@ impl Scanner {
         if let Some(b) = slot.as_ref() {
             return Ok(Arc::clone(b));
         }
+        if let Some(remote) = &self.remote {
+            let host = remote
+                .chrome
+                .rsplit_once(':')
+                .map_or(remote.chrome.as_str(), |(h, _)| h);
+            self.remote_proxy
+                .get_or_try_init(|| {
+                    proxy::spawn_on(self.egress.clone(), remote.proxy, host.to_owned())
+                })
+                .await?;
+            let session = Arc::new(Session {
+                browser: Browser::connect(&remote.chrome).await?,
+                _proxy: None,
+            });
+            *slot = Some(Arc::clone(&session));
+            return Ok(session);
+        }
         let proxy = proxy::spawn(self.egress.clone()).await?;
         let args = [
             format!("--proxy-server=http://{}", proxy.addr),
@@ -198,7 +238,7 @@ impl Scanner {
         let browser = Browser::launch_with(self.chrome.as_deref(), &args).await?;
         let session = Arc::new(Session {
             browser,
-            _proxy: proxy,
+            _proxy: Some(proxy),
         });
         *slot = Some(Arc::clone(&session));
         Ok(session)
