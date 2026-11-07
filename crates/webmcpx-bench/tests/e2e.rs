@@ -468,6 +468,35 @@ async fn scan_api_limits_each_visitor() {
     );
 }
 
+/// SvelteKit (and others) wrap the whole page in a `display: contents` element, which has no box: the
+/// snapshot must read through it instead of dropping the page (it once measured webmcpx.dev at 16 tokens).
+#[tokio::test]
+async fn the_snapshot_reads_through_display_contents_wrappers() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let words = "Kettles carry a two-year warranty from the date of purchase. ".repeat(20);
+    let page = format!(
+        r#"<title>t</title><div style="display: contents"><main><h1>Care</h1><p>{words}</p></main></div>"#
+    );
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(move || {
+            let page = page.clone();
+            async move { axum::response::Html(page) }
+        }),
+    ))
+    .await;
+    let scanner = webmcpx_bench::scan::Scanner::new(None, true);
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    assert!(
+        report.page_tokens > 200,
+        "the wrapped page was dropped: {} tokens",
+        report.page_tokens
+    );
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

@@ -33,7 +33,14 @@
           line += ` ${child.textContent}`;
           continue;
         }
-        if (child.nodeType !== Node.ELEMENT_NODE || SKIP.has(child.tagName) || !child.checkVisibility()) continue;
+        if (child.nodeType !== Node.ELEMENT_NODE || SKIP.has(child.tagName)) continue;
+        // `display: contents` has no box, so checkVisibility() is false, but its children render: read
+        // through it (frameworks such as SvelteKit wrap the whole page in one).
+        if (getComputedStyle(child).display === "contents") {
+          walk(child);
+          continue;
+        }
+        if (!child.checkVisibility()) continue;
         if (child.matches(INTERACTIVE)) {
           flush();
           refs.push(child);
