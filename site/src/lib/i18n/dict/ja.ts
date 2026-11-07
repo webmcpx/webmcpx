@@ -319,12 +319,13 @@ const ja: Messages = {
 		},
 		facts: '読込時 ~2.8 KB · Rust + WebAssembly · MIT License',
 		see: {
-			title: '動作を確かめる',
-			chatgpt:
-				'ChatGPT デスクトップアプリのブラウザーか Codex でページを開いてください。どちらも WebMCP ツールを呼び出します（{docs}）。',
-			docs: 'OpenAI のドキュメント',
-			chrome: 'Chrome なら、{flag} を有効にして再起動し、DevTools › Application › WebMCP を開きます。',
-			live: 'Chrome で本番公開するなら、オリジントライアルのトークンを {meta} タグに追加します。'
+			title: 'どんなエージェントでも、今日から動く',
+			lead: 'コーディングエージェントに、開いたページすべての WebMCP ツールを渡せます。ブラウザーのフラグは不要。ページの読み込み前に W3C のポリフィルが入るので、サイト独自のツールもそのまま動きます。',
+			other: 'Codex、Cursor など MCP クライアントなら：{cmd}',
+			check: '自分のサイトを確認（localhost も可）：{cmd}',
+			native:
+				'ネイティブ対応：ChatGPT デスクトップアプリのブラウザーと Codex は WebMCP ツールを呼び出します（{docs}）。',
+			docs: 'OpenAI のドキュメント'
 		},
 		agent: 'コーディングエージェントに任せる場合：'
 	},

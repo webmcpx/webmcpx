@@ -14,6 +14,9 @@
 - `crates/webmcpx-wasm` — `#[wasm_bindgen]` exports of webmcpx-std. See its AGENTS.md.
 - `crates/webmcpx-lint` — rules, one file each in `src/rules/`. `crates/webmcpx` — the CLI.
 - `packages/webmcpx` — npm loader: the public browser API. Owns the DOM and `registerTool()`.
+  `agent/` + `bin/` are the Node side (`npx webmcpx mcp|tools|call`): a CDP-driven Chromium that injects
+  `@w3c/webmcp-polyfill` before page scripts and talks to tools only via the spec's `getTools()`/`executeTool()`.
+  Never ship removed APIs (`provideContext`, `navigator.modelContext`) there.
 - `crates/webmcpx-bench` + `bench/` — benchmark: same agent and pages, with vs without WebMCP. See `bench/AGENTS.md`.
   Run: `OPENAI_API_KEY=... just bench` (or `--model claude-haiku-5-5` with `ANTHROPIC_API_KEY`, `--model gemini-3.8-flash` with `GEMINI_API_KEY`). Also the local server (`just serve`) and the scan API (`src/scan.rs`).
 - `site/` — landing (SvelteKit 3, Svelte 5 runes, Tailwind 4, static). Shows `site/src/lib/content/bench/<model>.json`. See `site/AGENTS.md`.

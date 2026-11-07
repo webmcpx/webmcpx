@@ -42,9 +42,9 @@ function benchmarkLines(): string[] {
 	]);
 }
 
-const SEE_IT_WORK = `- ChatGPT desktop app's browser or Codex: they call a site's WebMCP tools (https://learn.chatgpt.com/docs/webmcp).
-- Chrome: turn on chrome://flags/#enable-webmcp-testing, relaunch, then DevTools > Application > WebMCP.
-- Live in Chrome: add your origin-trial token in a <meta http-equiv="origin-trial"> tag.`;
+const SEE_IT_WORK = `- Any agent, today: \`claude mcp add webmcpx -- npx -y webmcpx mcp\` (Codex, Cursor or any MCP client: \`npx -y webmcpx mcp\`). It opens pages in a local Chromium with the W3C WebMCP polyfill injected before page scripts (no browser flag), and gives the agent each page's WebMCP tools as MCP tools: the site's own plus search_page, fetch_as_markdown and get_page_context.
+- Check a site's tools, localhost included: \`npx webmcpx tools localhost:3000\`; call one: \`npx webmcpx call <url> <tool> '<json>'\`.
+- Native: the ChatGPT desktop app's browser and Codex call a site's WebMCP tools (https://learn.chatgpt.com/docs/webmcp). Chrome: chrome://flags/#enable-webmcp-testing, or an origin-trial token in a <meta http-equiv="origin-trial"> tag.`;
 
 const SCAN_API = `GET ${ORIGIN}/api/scan?url=<site> returns JSON: { url, final_url, title, verdict: "ready" | "issues" | "missing", tools: [{ name, description, ... }], diagnostics: [{ rule, severity, message }], page_tokens, elapsed_ms }. One scan per minute per visitor; results from the last minutes are free. Share a result: ${ORIGIN}/?scan=<site>. README badge: ${ORIGIN}/badge/<host>.svg.`;
 
@@ -59,6 +59,7 @@ WebMCP (${SPEC}) is a W3C Community Group draft, not a W3C standard: a page regi
 
 - Script tag: \`<script type="module" src="${LOADER_URL}"></script>\` before </body>. A no-op where WebMCP is missing.
 - npm: \`npm i webmcpx\`, then \`import { register } from "webmcpx"; await register();\`
+- MCP server for your agent: \`npx -y webmcpx mcp\` (Claude Code: \`claude mcp add webmcpx -- npx -y webmcpx mcp\`).
 - Coding agent: \`npx skills add webmcpx/webmcpx -y\` installs the webmcpx skill.
 - Linter: \`cargo install webmcpx\` (needs Rust), then \`webmcpx lint src/\` (\`--format json\` for machines).
 

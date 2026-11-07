@@ -3,12 +3,16 @@
 	import Check from '@lucide/svelte/icons/check';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
-	import { ALTERNATIVES, type Highlighted } from '#lib/content/snippets.ts';
+	import { ALTERNATIVES, CHECK_COMMAND, MCP_COMMAND, type Highlighted } from '#lib/content/snippets.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
 
-	let { scriptTag, agentPrompt }: { scriptTag: Highlighted; agentPrompt: Highlighted } = $props();
+	let {
+		scriptTag,
+		agentPrompt,
+		agentMcp
+	}: { scriptTag: Highlighted; agentPrompt: Highlighted; agentMcp: Highlighted } = $props();
 	const OPENAI_DOCS = 'https://learn.chatgpt.com/docs/webmcp';
 
 	const i18n = useI18n();
@@ -35,26 +39,24 @@
 			class="mt-8 rounded-card border-2 border-dashed border-ink/40 p-5 text-left text-sm text-ink-2 sm:p-6"
 		>
 			<p class="font-display text-base font-bold text-ink">{m.see.title}</p>
-			<ul class="mt-2 list-disc space-y-1.5 pl-5">
+			<p class="mt-1.5 text-pretty">{m.see.lead}</p>
+			<CodeBlock snippet={agentMcp} title="Claude Code" class="mt-4" />
+			<ul class="mt-4 list-disc space-y-1.5 pl-5">
+				{#each [m.see.other, m.see.check] as line, i (line)}
+					<li>
+						<Rich text={line}
+							>{#snippet cmd()}<code
+									class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono whitespace-nowrap text-ink"
+									>{i === 0 ? MCP_COMMAND : CHECK_COMMAND}</code
+								>{/snippet}</Rich
+						>
+					</li>
+				{/each}
 				<li>
-					<Rich text={m.see.chatgpt}
+					<Rich text={m.see.native}
 						>{#snippet docs()}<a
 								class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4"
 								href={OPENAI_DOCS}>{m.see.docs}</a
-							>{/snippet}</Rich
-					>
-				</li>
-				<li>
-					<Rich text={m.see.chrome}
-						>{#snippet flag()}<code class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-ink"
-								>chrome://flags/#enable-webmcp-testing</code
-							>{/snippet}</Rich
-					>
-				</li>
-				<li>
-					<Rich text={m.see.live}
-						>{#snippet meta()}<code class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-ink"
-								>&lt;meta http-equiv="origin-trial"&gt;</code
 							>{/snippet}</Rich
 					>
 				</li>

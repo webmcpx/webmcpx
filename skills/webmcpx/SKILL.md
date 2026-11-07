@@ -48,8 +48,8 @@ await document.modelContext.registerTool({
 
 1. **Lint.** Run `webmcpx lint <dir> --format json` (install: `cargo install webmcpx`, needs Rust; exit 1 means errors). Fix every error. `--fix` removes invisible characters.
    `webmcpx rule <name>` explains a rule, and `webmcpx explain <CODE>` explains a tool error code.
-2. **See the tools in a browser.** Tell the user to open the page in one of these, then confirm with them:
-   - the ChatGPT desktop app's browser or Codex, which call WebMCP tools;
-   - Chrome with `chrome://flags/#enable-webmcp-testing` turned on and relaunched: DevTools › Application › WebMCP lists the tools and can run one.
+2. **See the tools in a real browser, yourself.** With the dev server running, run
+   `npx webmcpx tools <local URL>` (e.g. `localhost:5173`): it lists the page's tools, no browser flag.
+   Then call one: `npx webmcpx call <local URL> <tool> '<json input>'` (exit 1 means the tool returned an error).
    For production in Chrome, the site needs an origin-trial token in a `<meta http-equiv="origin-trial">` tag.
 3. **Scan the live site.** Once deployed, `https://webmcpx.dev/?scan=<site>` (or `GET https://webmcpx.dev/api/scan?url=<site>` for JSON) should say agent-ready.

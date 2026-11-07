@@ -8,10 +8,23 @@ call a function instead of reading and clicking through the page.
 <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
 ```
 
-**See it work.** Open your page in the ChatGPT desktop app's browser or in Codex: they
-[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp). Or in Chrome: turn on
-`chrome://flags/#enable-webmcp-testing`, relaunch, then open DevTools › Application › WebMCP. Going live in
-Chrome? Add your origin-trial token in a `<meta http-equiv="origin-trial">` tag.
+**See it work in any agent, today.** Give your coding agent the WebMCP tools of every page it opens:
+
+```sh
+claude mcp add webmcpx -- npx -y webmcpx mcp     # Codex: codex mcp add webmcpx -- npx -y webmcpx mcp
+```
+
+Then ask it about any site. No browser flag: the agent's browser gets the
+[W3C WebMCP polyfill](https://github.com/w3c-oss/webmcp-polyfill) before the page loads, so the site's own
+tools work too, and every page gets the standard tools below. Check your own site, localhost included:
+
+```sh
+npx webmcpx tools localhost:3000
+npx webmcpx call localhost:3000 search_page '{"query": "pricing"}'
+```
+
+The ChatGPT desktop app's browser and Codex also [call WebMCP tools](https://learn.chatgpt.com/docs/webmcp)
+natively; in Chrome, turn on `chrome://flags/#enable-webmcp-testing` and open DevTools › Application › WebMCP.
 
 Or from npm (`npm i webmcpx`):
 
@@ -39,6 +52,9 @@ const { registered, dispose } = await register({
 - **A no-op where WebMCP is missing.** Uses `document.modelContext`, with a `navigator.modelContext`
   fallback.
 - **About 2.8 KB brotli on page load.** The WebAssembly engine loads on the first tool call.
+
+`npx webmcpx --help` shows the setup for Cursor, VS Code and Windsurf, `--headed` to watch the browser and
+`--cdp <url>` to use your own. Needs Node 22+ and Chrome, Chromium, Edge or Brave.
 
 Check your own tools with the [`webmcpx` linter](https://crates.io/crates/webmcpx), and scan any site at
 [webmcpx.dev](https://webmcpx.dev).

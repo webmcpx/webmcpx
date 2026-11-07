@@ -318,11 +318,12 @@ const zh: Messages = {
 		},
 		facts: '加载约 2.8 KB · Rust + WebAssembly · MIT 许可证',
 		see: {
-			title: '眼见为实',
-			chatgpt: '在 ChatGPT 桌面版的内置浏览器或 Codex 里打开你的页面：它们会调用 WebMCP 工具（{docs}）。',
-			docs: 'OpenAI 文档',
-			chrome: '也可以用 Chrome：开启 {flag}，重启浏览器，再打开 DevTools › Application › WebMCP。',
-			live: '要在 Chrome 里正式上线？把你的源试用 token 放进 {meta} 标签。'
+			title: '在任何智能体里都能用，就在今天',
+			lead: '让你的编程智能体拿到它打开的每个页面的 WebMCP 工具。无需开启浏览器 flag：页面加载前，它的浏览器就会注入 W3C polyfill，所以你网站自己的工具也能用。',
+			other: 'Codex、Cursor 或任何 MCP 客户端：{cmd}',
+			check: '检查你自己的网站，localhost 也行：{cmd}',
+			native: '原生支持：ChatGPT 桌面应用的浏览器和 Codex 会调用 WebMCP 工具（{docs}）。',
+			docs: 'OpenAI 文档'
 		},
 		agent: '或者直接交给你的 AI 编程智能体：'
 	},

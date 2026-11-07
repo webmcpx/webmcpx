@@ -319,12 +319,12 @@ const id: Messages = {
 		},
 		facts: '~2,8 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		see: {
-			title: 'Lihat langsung',
-			chatgpt:
-				'Buka halaman Anda di browser aplikasi desktop ChatGPT atau di Codex: keduanya memanggil tool WebMCP ({docs}).',
-			docs: 'dokumentasi OpenAI',
-			chrome: 'Atau di Chrome: aktifkan {flag}, jalankan ulang, lalu buka DevTools › Application › WebMCP.',
-			live: 'Mau live di Chrome? Tambahkan token origin trial Anda di tag {meta}.'
+			title: 'Lihat hasilnya di agen mana pun, sekarang',
+			lead: 'Beri agen coding Anda tool WebMCP dari setiap halaman yang dibukanya. Tanpa flag browser: browsernya mendapat polyfill W3C sebelum halaman dimuat, jadi tool milik situs Anda juga jalan.',
+			other: 'Codex, Cursor, atau klien MCP apa pun: {cmd}',
+			check: 'Cek situs Anda sendiri, termasuk localhost: {cmd}',
+			native: 'Bawaan: browser di aplikasi desktop ChatGPT dan Codex memanggil tool WebMCP ({docs}).',
+			docs: 'dokumentasi OpenAI'
 		},
 		agent: 'Atau minta coding agent Anda:'
 	},

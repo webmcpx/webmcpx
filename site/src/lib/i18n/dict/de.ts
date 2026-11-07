@@ -329,12 +329,12 @@ const de: Messages = {
 		},
 		facts: '~2,8 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		see: {
-			title: 'In Aktion sehen',
-			chatgpt:
-				'Öffnen Sie Ihre Seite im Browser der ChatGPT-Desktop-App oder in Codex: Beide rufen WebMCP-Tools auf ({docs}).',
-			docs: 'OpenAI-Doku',
-			chrome: 'Oder in Chrome: {flag} aktivieren, neu starten, dann DevTools › Application › WebMCP öffnen.',
-			live: 'Sie gehen in Chrome live? Tragen Sie Ihr Origin-Trial-Token in ein {meta}-Tag ein.'
+			title: 'In jedem Agenten sehen, schon heute',
+			lead: 'Gib deinem Coding-Agenten die WebMCP-Tools jeder Seite, die er öffnet. Kein Browser-Flag nötig: Sein Browser bekommt das W3C-Polyfill, bevor die Seite lädt, also laufen auch die Tools deiner Website.',
+			other: 'Codex, Cursor oder jeder MCP-Client: {cmd}',
+			check: 'Prüf deine eigene Website, auch auf localhost: {cmd}',
+			native: 'Eingebaut: Der Browser der ChatGPT-Desktop-App und Codex rufen WebMCP-Tools auf ({docs}).',
+			docs: 'OpenAI-Doku'
 		},
 		agent: 'Oder fragen Sie Ihren Coding-Agenten:'
 	},

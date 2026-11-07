@@ -326,12 +326,13 @@ const ptBr: Messages = {
 		},
 		facts: '~2,8 KB ao carregar · Rust + WebAssembly · MIT',
 		see: {
-			title: 'Veja funcionando',
-			chatgpt:
-				'Abra sua página no navegador do app de desktop do ChatGPT ou no Codex: os dois chamam ferramentas WebMCP ({docs}).',
-			docs: 'docs da OpenAI',
-			chrome: 'Ou no Chrome: ative {flag}, reinicie e abra DevTools › Application › WebMCP.',
-			live: 'Vai para produção no Chrome? Coloque seu token de origin trial numa tag {meta}.'
+			title: 'Veja funcionando em qualquer agente, hoje',
+			lead: 'Dê ao seu agente de código as ferramentas WebMCP de cada página que ele abrir. Sem flag no navegador: ele recebe o polyfill do W3C antes de a página carregar, então as ferramentas do seu site também funcionam.',
+			other: 'Codex, Cursor ou qualquer cliente MCP: {cmd}',
+			check: 'Confira o seu site, inclusive em localhost: {cmd}',
+			native:
+				'Já vem de fábrica: o navegador do app de desktop do ChatGPT e o Codex chamam ferramentas WebMCP ({docs}).',
+			docs: 'docs da OpenAI'
 		},
 		agent: 'Ou peça ao seu agente de código:'
 	},

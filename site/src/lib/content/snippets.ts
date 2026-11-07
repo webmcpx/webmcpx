@@ -21,8 +21,10 @@ export const SNIPPETS = {
 	// What people paste into their coding agent: plain English, which every agent reads.
 	agentPrompt: {
 		lang: 'text',
-		code: 'Add WebMCP to this site with webmcpx: run `npx skills add webmcpx/webmcpx -y`, follow the skill, then check that the tools show up in Chrome DevTools › Application › WebMCP.'
+		code: 'Add WebMCP to this site with webmcpx: run `npx skills add webmcpx/webmcpx -y`, follow the skill, then check the tools with `npx webmcpx tools <local URL>`.'
 	},
+	// Gives a coding agent the WebMCP tools of every page it opens (the MCP server in the npm package).
+	agentMcp: { lang: 'sh', code: 'claude mcp add webmcpx -- npx -y webmcpx mcp' },
 	reproduce: {
 		lang: 'sh',
 		code: `git clone https://github.com/webmcpx/webmcpx
@@ -32,6 +34,10 @@ OPENAI_API_KEY=sk-... just bench`
 } satisfies Record<string, CodeSample>;
 
 export type SnippetId = keyof typeof SNIPPETS;
+
+/** The MCP server for any client, and the local check (shown inline under "See it work"). */
+export const MCP_COMMAND = 'npx -y webmcpx mcp';
+export const CHECK_COMMAND = 'npx webmcpx tools localhost:3000';
 
 /** Other ways in, shown as one-liners next to the script tag (who each is for: `fix.alternatives.<id>`). */
 export const ALTERNATIVES = [

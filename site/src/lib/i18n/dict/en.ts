@@ -431,12 +431,12 @@ const en = {
 		// "See it work": where to watch the tools being called. {docs}, {flag} and {meta} are links or code;
 		// ChatGPT, Codex, Chrome, DevTools, Application and WebMCP are product and panel names: keep them.
 		see: {
-			title: 'See it work',
-			chatgpt:
-				'Open your page in the ChatGPT desktop app’s browser or in Codex: they call WebMCP tools ({docs}).',
-			docs: 'OpenAI docs',
-			chrome: 'Or in Chrome: turn on {flag}, relaunch, then open DevTools › Application › WebMCP.',
-			live: 'Going live in Chrome? Add your origin-trial token in a {meta} tag.'
+			title: 'See it work in any agent, today',
+			lead: 'Give your coding agent the WebMCP tools of every page it opens. No browser flag: its browser gets the W3C polyfill before the page loads, so your site’s own tools work too.',
+			other: 'Codex, Cursor or any MCP client: {cmd}',
+			check: 'Check your own site, localhost included: {cmd}',
+			native: 'Built in: the ChatGPT desktop app’s browser and Codex call WebMCP tools ({docs}).',
+			docs: 'OpenAI docs'
 		},
 		// Above the prompt people paste into their coding agent (the prompt itself stays in English).
 		agent: 'Or ask your coding agent:'

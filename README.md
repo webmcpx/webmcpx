@@ -26,16 +26,24 @@ That's it. Your page now registers `search_page`, `fetch_as_markdown` and `get_p
 in the browser calls a function instead of guessing at buttons. Where WebMCP is missing, the script does
 nothing.
 
-**See it work.** Open your page in the ChatGPT desktop app's browser or in Codex: they
-[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp). Or in Chrome: turn on
-`chrome://flags/#enable-webmcp-testing`, relaunch, then open DevTools › Application › WebMCP. Going live in
-Chrome? Add your origin-trial token in a `<meta http-equiv="origin-trial">` tag.
+**See it work in any agent, today.** Give your coding agent the WebMCP tools of every page it opens:
+
+```sh
+claude mcp add webmcpx -- npx -y webmcpx mcp     # Codex: codex mcp add webmcpx -- npx -y webmcpx mcp
+```
+
+Ask it about any site. No browser flag: the agent's browser gets the
+[W3C WebMCP polyfill](https://github.com/w3c-oss/webmcp-polyfill) before the page loads, so the site's own
+tools work (try a Shopify store), and every page gets the standard ones. Check yours, localhost included:
+`npx webmcpx tools localhost:3000`. The ChatGPT desktop app's browser and Codex also
+[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp) natively.
 
 ## What's inside
 
 | | |
 |---|---|
 | **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped. About 2.8 KB on load. |
+| **[Agent bridge](packages/webmcpx/agent)** · `npx webmcpx mcp` | An MCP server for Claude Code, Codex, Cursor and others: it opens pages in a local Chromium and hands the agent their WebMCP tools as typed tools. Also `npx webmcpx tools <url>` to check yours. |
 | **[Linter](crates/webmcpx)** · [crates.io](https://crates.io/crates/webmcpx) | `webmcpx lint` checks your own `registerTool()` calls. It catches the silent failures: too many tools, the removed `provideContext`, the legacy `navigator.modelContext`, hidden characters. |
 | **[Scanner](https://webmcpx.dev)** | Paste a URL: which tools a site registers, what the linter thinks, what an agent would read instead. Shareable result, README badge. |
 | **[Benchmark](bench)** | The same agent and question, with and without WebMCP, on live sites. Deterministic grading, losses included. |
@@ -66,14 +74,16 @@ more tokens there, with both models.
 ## More ways in
 
 ```sh
+npx -y webmcpx mcp                     # MCP server: your agent calls the tools of any page
+npx webmcpx tools localhost:3000       # list a page's WebMCP tools, no browser flag
 npm i webmcpx                          # import { register } from "webmcpx"; await register();
 npx skills add webmcpx/webmcpx -y      # teach your coding agent to add and check WebMCP tools
 cargo install webmcpx                  # the linter (needs Rust); webmcpx lint src/ --format json
 ```
 
 Or paste this into your coding agent: *Add WebMCP to this site with webmcpx: run
-`npx skills add webmcpx/webmcpx -y`, follow the skill, then check that the tools show up in Chrome DevTools ›
-Application › WebMCP.*
+`npx skills add webmcpx/webmcpx -y`, follow the skill, then check the tools with
+`npx webmcpx tools <local URL>`.*
 
 Got a scan result you disagree with? [Open an issue](https://github.com/webmcpx/webmcpx/issues/new/choose).
 That's the most useful feedback there is.
