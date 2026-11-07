@@ -10,4 +10,4 @@ export const SPEC_ISSUES = 'https://github.com/webmachinelearning/webmcp/issues'
 export const COMMUNITY = 'https://webmcp.zone';
 
 export const HOME = resolve('/');
-export const DESIGN = resolve('/design');
+export const BRAND = resolve('/brand');

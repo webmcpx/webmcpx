@@ -8,7 +8,7 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 - `just site`: everything CI runs: svelte-check, Prettier + ESLint, Vitest, build, then Playwright (axe,
   390 px layout, no-JS content, the scan flow with a mocked API, the benchmark tabs) against the build.
 - `just serve`: the build, the benchmark sites and the scan API (`/api/scan?url=`, Rust) on
-  http://127.0.0.1:4173. The style guide is at `/design`.
+  http://127.0.0.1:4173.
 
 ## Page narrative (keep this order; cut before adding)
 
@@ -30,9 +30,21 @@ src/
   lib/motion/                Reveal (scroll-in) and its attachment
   lib/server/                build-time only (shiki); never imported by components
   routes/                    +page.server.ts highlights code and trims bench.json at build time;
-                             design/ is the style guide
+                             brand/ is the brand manual and design system
 tests/                       Playwright e2e against the prerendered build
 ```
+
+## Brand
+
+- `/brand` is both the brand manual and the design system: name rules, the three marks with downloads
+  (`static/brand-assets/`), construction, clear space, color (hex and contrast computed from `tokens.css`),
+  type, components, misuse and trademark wording. Data lives in `lib/content/brand.ts`; the policy is the
+  repo's `TRADEMARK.md`. Research and brief: `reports/Marca e logo do webmcpx.md` (outside the repo).
+- The primary mark is the Junction; the lockup is "webmcp" with the Junction as the final x (`Logo`).
+  Real brands' logos are never redrawn; new marks of our own go through a brief, Codex and the four checks
+  (16px, one color, inverse, circle crop).
+- Every page carries the trademark notices (`NOTICES`) in the footer. Never call webmcpx official, a W3C
+  standard or MCP certified.
 
 ## Design system rules
 
