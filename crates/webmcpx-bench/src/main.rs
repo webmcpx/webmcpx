@@ -13,7 +13,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
-use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, Session, webmcp_tools};
+use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, Session, registered_tools, webmcp_tools};
 use webmcpx_bench::cdp::Browser;
 use webmcpx_bench::model::{OpenAi, Price, list_price};
 use webmcpx_bench::report::{Results, SCHEMA_VERSION, Summary, markdown};
@@ -80,6 +80,12 @@ enum Command {
         #[arg(long)]
         chrome: Option<PathBuf>,
     },
+    /// Snapshot the tools (name, description) every task's page registers today, as JSON for the
+    /// landing. Runs record what the agent saw; this fills in for runs older than schema 4.
+    Tools {
+        #[arg(long)]
+        chrome: Option<PathBuf>,
+    },
     /// Open live pages and print, as JSON lines, the WebMCP tools each one registers.
     Probe {
         urls: Vec<String>,
@@ -112,6 +118,33 @@ async fn main() -> Result<()> {
             for t in task::load_dir(&root.join("bench/tasks"))? {
                 writeln!(out, "{}\t{}\t{}", t.id, t.place(), t.prompt)?;
             }
+        }
+        Command::Tools { chrome } => {
+            let tasks = task::load_dir(&root.join("bench/tasks"))?;
+            let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into(), None).await?;
+            let base = format!("http://{addr}");
+            let browser = Browser::launch(chrome.as_deref()).await?;
+            let mut by_task = std::collections::BTreeMap::new();
+            for t in &tasks {
+                let page = browser.page(&INIT_SCRIPTS).await?;
+                page.goto(&t.page_url(&base)).await?;
+                let tools = registered_tools(&page, std::time::Duration::from_secs(10)).await?;
+                page.close().await?;
+                let mut tools: Vec<_> = tools
+                    .iter()
+                    .map(|t| serde_json::json!({ "name": t["name"], "description": t["description"] }))
+                    .collect();
+                tools.sort_by(|a, b| a["name"].as_str().cmp(&b["name"].as_str()));
+                eprintln!("{}: {} tools", t.id, tools.len());
+                by_task.insert(t.id.clone(), tools);
+            }
+            let now = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs();
+            let out = serde_json::json!({ "captured_on": utc_date(now), "tasks": by_task });
+            writeln!(
+                std::io::stdout().lock(),
+                "{}",
+                serde_json::to_string_pretty(&out)?
+            )?;
         }
         Command::Probe { urls, chrome } => {
             let browser = Browser::launch(chrome.as_deref()).await?;
@@ -272,4 +305,30 @@ fn progress(run: &webmcpx_bench::report::Run) {
         run.outcome.steps,
         f64::from(u32::try_from(run.outcome.duration_ms).unwrap_or(u32::MAX)) / 1000.0,
     );
+}
+
+/// `YYYY-MM-DD` (UTC) for Unix seconds (Howard Hinnant's days-to-civil algorithm).
+fn utc_date(secs: u64) -> String {
+    let z = i64::try_from(secs / 86_400).unwrap_or_default() + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z.rem_euclid(146_097);
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = yoe + era * 400 + i64::from(month <= 2);
+    format!("{year:04}-{month:02}-{day:02}")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::utc_date;
+
+    #[test]
+    fn utc_dates() {
+        assert_eq!(utc_date(0), "1970-01-01");
+        assert_eq!(utc_date(1_794_036_578), "2026-11-07");
+        assert_eq!(utc_date(951_782_400), "2000-02-29");
+    }
 }
