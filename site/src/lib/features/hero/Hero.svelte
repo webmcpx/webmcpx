@@ -1,84 +1,62 @@
+<!-- First screen: one question, one input, and the proof that others already answered it. -->
 <script lang="ts">
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
-	import Sparkles from '@lucide/svelte/icons/sparkles';
-	import { siGithub } from 'simple-icons';
-	import Badge from '#lib/components/ui/Badge.svelte';
-	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
-	import Button from '#lib/components/ui/Button.svelte';
-	import { REPO, SPEC } from '#lib/content/site.ts';
-	import type { Highlighted } from '#lib/content/snippets.ts';
+	import Stamp from '#lib/components/ui/Stamp.svelte';
+	import { SITES } from '#lib/content/sites.ts';
+	import { SPEC } from '#lib/content/site.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
-	import InstallTabs from './InstallTabs.svelte';
+	import ScanForm from '#lib/features/scan/ScanForm.svelte';
+	import ScanResult from '#lib/features/scan/ScanResult.svelte';
+	import { scanner } from '#lib/features/scan/scanner.svelte.ts';
 
-	interface Props {
-		snippets: { scriptTag: Highlighted; npm: Highlighted; agent: Highlighted; cli: Highlighted };
-	}
-
-	let { snippets }: Props = $props();
+	const TRY = SITES.slice(0, 3);
 </script>
 
-<section aria-labelledby="hero-title" class="relative isolate overflow-hidden">
-	<!-- Decoration: a faint grid that fades out, and a soft accent glow behind the headline. -->
+<section aria-labelledby="hero-title" class="px-3 pt-3 sm:px-5 sm:pt-5">
 	<div
-		aria-hidden="true"
-		class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_at_top,black_20%,transparent_70%)] bg-[size:56px_56px] opacity-60"
-	></div>
-	<div
-		aria-hidden="true"
-		class="glow absolute top-[-18rem] left-1/2 -z-10 h-[36rem] w-[min(64rem,140vw)] -translate-x-1/2 rounded-full bg-accent-soft blur-3xl"
-	></div>
+		class="relative isolate overflow-hidden rounded-frame border-2 border-ink bg-paper px-4 pt-28 pb-14 sm:pt-36 sm:pb-20"
+	>
+		<!-- Ruled-paper texture: quiet, structural, prints nothing for screen readers. -->
+		<div
+			aria-hidden="true"
+			class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--hairline)_1px,transparent_1px),linear-gradient(to_bottom,var(--hairline)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,black,transparent_85%)] bg-[size:64px_64px] opacity-70"
+		></div>
 
-	<div class="mx-auto max-w-5xl px-4 pt-20 pb-16 text-center sm:px-6 sm:pt-28">
-		<Reveal>
-			<a href={SPEC} class="inline-block transition hover:opacity-80">
-				<Badge tone="outline">
-					<Sparkles aria-hidden="true" />Tracks the WebMCP draft of 2026-11-02
-				</Badge>
-			</a>
-		</Reveal>
-		<Reveal delay={60}>
-			<h1 id="hero-title" class="mx-auto mt-8 max-w-4xl text-display font-semibold text-balance">
-				Make any site
-				<span
-					class="bg-linear-to-br from-accent to-accent-ink bg-clip-text whitespace-nowrap text-transparent"
-					>agent-ready</span
-				>
-				with one line.
-			</h1>
-		</Reveal>
-		<Reveal delay={120}>
-			<p class="mx-auto mt-7 max-w-2xl text-lg text-pretty text-muted sm:text-xl">
-				webmcpx registers standard WebMCP tools, so agents search and read your pages instead of scraping
-				them. About 2.7 KB on page load, built in Rust, with a linter for the tools you write yourself.
-			</p>
-		</Reveal>
-		<Reveal delay={180} class="mt-9 flex flex-wrap justify-center gap-3">
-			<Button href="#get-started" variant="primary" size="lg"
-				>Get started<ArrowRight aria-hidden="true" /></Button
-			>
-			<Button href={REPO} size="lg"><BrandIcon icon={siGithub} />Star on GitHub</Button>
-		</Reveal>
-		<Reveal delay={240} class="mx-auto mt-14 max-w-3xl">
-			<InstallTabs {...snippets} />
-		</Reveal>
+		<div class="mx-auto max-w-5xl text-center">
+			<Reveal>
+				<a href={SPEC} class="group inline-flex items-center gap-2 text-sm text-ink-2 hover:text-ink">
+					<Stamp tone="marker" size="sm">New</Stamp>
+					Tracks the WebMCP draft of 2026-11-02
+					<ArrowRight size={14} class="transition group-hover:translate-x-0.5" aria-hidden="true" />
+				</a>
+			</Reveal>
+			<Reveal delay={60}>
+				<h1 id="hero-title" class="mx-auto mt-8 max-w-4xl font-display text-giant font-bold text-balance">
+					Make your site <span class="marker">agent-ready</span>.
+				</h1>
+			</Reveal>
+			<Reveal delay={120}>
+				<p class="mx-auto mt-7 max-w-xl text-lg text-pretty text-ink-2 sm:text-xl">
+					AI agents are already reading your pages. See what they get, then give them real tools with one
+					line.
+				</p>
+			</Reveal>
+			<Reveal delay={180} class="mt-10">
+				<ScanForm fromQuery />
+				<p class="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink-3">
+					Try
+					{#each TRY as s (s.url)}
+						<button
+							type="button"
+							class="font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
+							onclick={() => scanner.run(s.url)}>{s.name}</button
+						>
+					{/each}
+				</p>
+			</Reveal>
+			<div class="mt-10">
+				<ScanResult />
+			</div>
+		</div>
 	</div>
 </section>
-
-<style>
-	@media (prefers-reduced-motion: no-preference) {
-		.glow {
-			animation: breathe 9s ease-in-out infinite alternate;
-		}
-	}
-
-	@keyframes breathe {
-		from {
-			opacity: 0.55;
-			scale: 0.92 1;
-		}
-		to {
-			opacity: 1;
-			scale: 1.05 1;
-		}
-	}
-</style>

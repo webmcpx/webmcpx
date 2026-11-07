@@ -7,6 +7,7 @@ import {
 	perThousand,
 	ratio,
 	rows,
+	spotlight,
 	tokens,
 	type ArmSummary,
 	type Results
@@ -99,5 +100,28 @@ describe('rows and losses', () => {
 		expect(losses(r, 'tokens')).toEqual(['tiny']);
 		expect(losses(r, 'duration_ms')).toEqual([]);
 		expect(losses(r, 'cost_usd')).toEqual(['tiny']);
+	});
+});
+
+describe('spotlight', () => {
+	const r = (tasks: Results['summary']['tasks']): Results => ({
+		...results({}),
+		summary: { arms: {}, tasks }
+	});
+
+	it('picks the biggest token saving among live tasks', () => {
+		const s = spotlight(
+			r({
+				fixture: { baseline: arm(100000, 1, 0), webmcp: arm(100, 1, 0) },
+				'live-a': { baseline: arm(9000, 1, 0), webmcp: arm(900, 1, 0) },
+				'live-b': { baseline: arm(58000, 1, 0), webmcp: arm(1100, 1, 0) }
+			})
+		);
+		expect(s?.task).toBe('live-b');
+	});
+
+	it('falls back to fixtures, and to null without data', () => {
+		expect(spotlight(r({ f: { baseline: arm(10, 1, 0), webmcp: arm(5, 1, 0) } }))?.task).toBe('f');
+		expect(spotlight(r({}))).toBeNull();
 	});
 });

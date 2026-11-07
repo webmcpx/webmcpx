@@ -9,13 +9,5 @@ export const SPEC = 'https://webmachinelearning.github.io/webmcp/';
 export const SPEC_ISSUES = 'https://github.com/webmachinelearning/webmcp/issues';
 export const COMMUNITY = 'https://webmcp.zone';
 
-export const NAV = [
-	{ label: 'Benchmark', href: `${resolve('/')}#benchmark` },
-	{ label: 'How it works', href: `${resolve('/')}#how` },
-	{ label: 'Issues', href: `${resolve('/')}#issues` },
-	{ label: 'Playground', href: `${resolve('/')}#playground` },
-	{ label: 'Lint', href: `${resolve('/')}#lint` }
-];
-
 export const HOME = resolve('/');
 export const DESIGN = resolve('/design');

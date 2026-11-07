@@ -5,7 +5,7 @@
 	Bars grow once when scrolled into view and resize when the metric changes.
 -->
 <script lang="ts">
-	import Badge from '#lib/components/ui/Badge.svelte';
+	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import { ARMS } from './arms.ts';
 	import { metricValue, percent, type Metric, type Row } from './bench.ts';
@@ -24,23 +24,23 @@
 
 <Reveal>
 	<div aria-hidden="true">
-		<div class="hidden grid-cols-[30%_1fr_4.5rem] gap-4 pb-3 text-xs text-subtle sm:grid">
+		<div class="hidden grid-cols-[30%_1fr_4.5rem] gap-4 pb-3 text-xs text-ink-3 sm:grid">
 			<span>Task</span><span>{metric.label} · {metric.unit}</span><span class="text-right">Solved</span>
 		</div>
 		<ul>
 			{#each rows as row (row.task)}
 				<li
-					class="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 border-t border-border py-3 [grid-template-areas:'name_solved''bars_bars'] sm:grid-cols-[30%_1fr_4.5rem] sm:items-center sm:[grid-template-areas:'name_bars_solved']"
+					class="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 border-t border-hairline py-3 [grid-template-areas:'name_solved''bars_bars'] sm:grid-cols-[30%_1fr_4.5rem] sm:items-center sm:[grid-template-areas:'name_bars_solved']"
 				>
 					<div class="flex min-w-0 flex-wrap items-center gap-1.5 [grid-area:name]">
 						<span class="font-mono text-xs break-words">{name(row.task)}</span>
-						{#if row.live}<Badge tone="accent" size="sm">live</Badge>{/if}
+						{#if row.live}<Stamp tone="marker" size="sm">live</Stamp>{/if}
 					</div>
 					<div class="min-w-0 [grid-area:bars]">
 						{#each ARMS as a (a.arm)}
 							{@const v = metricValue(row[a.arm], metric.id)}
 							<div class="flex items-center gap-3 py-0.5">
-								<div class="h-2.5 min-w-0 flex-1">
+								<div class="h-3.5 min-w-0 flex-1">
 									{#if v != null}<div class="bar h-full rounded-full {a.bar}" style:--w={v / max}></div>{/if}
 								</div>
 								<span class="w-14 shrink-0 text-right font-mono text-xs tabular-nums {a.text}"
