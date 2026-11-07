@@ -1,20 +1,25 @@
-<!-- The webmcpx mark (a tool slot between brackets) and wordmark. -->
+<!--
+	The webmcpx lockup: "webmcp" in Bricolage Grotesque with the Junction mark as the final x, at x-height.
+	`mark` shows the Junction alone. The name is announced once, as text.
+-->
 <script lang="ts">
-	let { class: className }: { class?: string } = $props();
+	import { JUNCTION } from '#lib/content/brand.ts';
+
+	let { class: className, mark = false }: { class?: string; mark?: boolean } = $props();
 </script>
 
-<span class={['inline-flex items-center gap-2', className]}>
-	<svg viewBox="0 0 32 32" class="size-8" aria-hidden="true">
-		<rect x="1.5" y="1.5" width="29" height="29" rx="9" class="fill-marker stroke-ink" stroke-width="3" />
-		<path
-			d="M11.5 10 8 16l3.5 6M20.5 10 24 16l-3.5 6"
-			fill="none"
-			stroke-width="3"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			class="stroke-ink"
-		/>
-		<circle cx="16" cy="16" r="2.4" class="fill-ink" />
-	</svg>
-	<span class="font-display text-xl font-bold tracking-tight">webmcpx</span>
+<!-- Size comes from `class` (a text-* utility); text-xl when none is given. -->
+<span class={['inline-flex items-baseline font-display font-bold tracking-tight', className ?? 'text-xl']}>
+	{#if mark}
+		<svg viewBox={JUNCTION.viewBox} class="size-[1em] self-center" fill="currentColor" aria-hidden="true">
+			{#each JUNCTION.paths as p, i (i)}<path d={p.d} />{/each}
+		</svg>
+		<span class="sr-only">webmcpx</span>
+	{:else}
+		<span aria-hidden="true">webmcp</span>
+		<svg viewBox="2 4 20 16" class="ml-[0.05em] h-[0.7em] w-auto" fill="currentColor" aria-hidden="true">
+			{#each JUNCTION.paths as p, i (i)}<path d={p.d} />{/each}
+		</svg>
+		<span class="sr-only">webmcpx</span>
+	{/if}
 </span>
