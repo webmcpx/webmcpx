@@ -43,8 +43,8 @@ const CALL = {
   annotations: { openWorldHint: true },
 };
 
-/** Who a tool is across refreshes: standard, or the page's (origin and name). */
-const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t.name}`);
+/** Who a tool is across refreshes: standard, or the page's (origin, owning frame and name). */
+const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t.owner ?? 0} ${t.name}`);
 
 /**
  * Gives each tool a unique MCP name: MCP allows [A-Za-z0-9_-] and 64 characters, WebMCP also "." and
@@ -172,8 +172,14 @@ export async function serve(options = {}, { input = process.stdin, output = proc
       return text(describe(page, entries));
     }
     const wanted = name === CALL.name ? String(args.name ?? "") : name;
+    // call_page_tool also takes the page's own name, but only when it is unambiguous and is not a name we
+    // gave (or retired) for another tool.
+    const byPageName = entries.filter((e) => e.tool.name === wanted);
     const entry =
-      entries.find((e) => e.name === wanted) ?? (name === CALL.name ? entries.find((e) => e.tool.name === wanted) : undefined);
+      entries.find((e) => e.name === wanted) ??
+      (name === CALL.name && byPageName.length === 1 && !retired.has(wanted) && (reserved.get(wanted) ?? byPageName[0].id) === byPageName[0].id
+        ? byPageName[0]
+        : undefined);
     if (!entry) return text(`Unknown tool "${wanted}". Call open_page first, then use the tools it lists.`, true);
     const out = await session.call(entry.tool, name === CALL.name ? args.input : args);
     return mcpResult(out) ?? text(out, failed(out));

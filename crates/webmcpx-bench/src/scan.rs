@@ -644,6 +644,26 @@ fn lint(tools: &[Value]) -> Vec<Finding> {
     if tools.is_empty() {
         return Vec::new();
     }
+    // The host reports a schema it could not read or send (`schemaError`): an error, as an invalid one is.
+    let unread = tools.iter().filter_map(|t| {
+        let why = t["schemaError"].as_str()?;
+        Some(Finding {
+            rule: "invalid-input-schema",
+            severity: "error",
+            message: format!("{}: {why}", t["name"].as_str().unwrap_or("a tool")),
+        })
+    });
+    let unread: Vec<Finding> = unread.collect();
+    let tools: Vec<Value> = tools
+        .iter()
+        .map(|t| {
+            let mut t = t.clone();
+            if let Some(o) = t.as_object_mut() {
+                o.remove("schemaError");
+            }
+            t
+        })
+        .collect();
     let manifest = serde_json::to_string_pretty(&json!({ "tools": tools })).unwrap_or_default();
     let report = webmcpx_lint::lint(
         std::path::Path::new("page.webmcp.json"),
@@ -658,6 +678,7 @@ fn lint(tools: &[Value]) -> Vec<Finding> {
             severity: d.severity.as_str(),
             message: d.message,
         })
+        .chain(unread)
         .collect()
 }
 
@@ -752,6 +773,19 @@ mod tests {
         assert_eq!(r.verdict, Verdict::Ready, "{:?}", r.diagnostics);
         assert_eq!(r.tools[0].params, ["query"]);
         assert_eq!(r.tools[0].read_only, Some(true));
+    }
+
+    #[test]
+    fn a_schema_the_host_could_not_read_is_an_error() {
+        let mut t = tool("search", "Find a product.", &json!({ "type": "object" }));
+        t["schemaError"] = json!("the input schema is over 50,000 chars");
+        let r = report("u", "u".into(), "t", &[t], "");
+        assert_eq!(r.verdict, Verdict::Issues);
+        assert!(
+            r.diagnostics
+                .iter()
+                .any(|d| d.rule == "invalid-input-schema" && d.message.contains("50,000"))
+        );
     }
 
     #[test]

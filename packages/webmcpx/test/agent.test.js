@@ -217,6 +217,9 @@ test("every tool stays reachable: clashing names, frames, schemas without a type
     const ran = [];
     for (const name of checkouts) ran.push((await mcp.rpc("tools/call", { name, arguments: {} })).result.content[0].text);
     assert.deepEqual(ran.sort(), ["frame", "top"]);
+    // By the page's own name, an ambiguous tool is refused rather than guessed.
+    const guess = await mcp.rpc("tools/call", { name: "call_page_tool", arguments: { name: "checkout" } });
+    assert.ok(guess.result.isError ? true : checkouts.includes("checkout"), JSON.stringify(guess.result));
 
     const find = tools.find((t) => t.name === "find");
     assert.deepEqual(find.inputSchema, { type: "object", properties: { q: { type: "string" } }, required: ["q"] });
@@ -388,18 +391,19 @@ test("a refresh never hands a client's tool name to another tool", async () => {
   // ...but the same tool, back on a later visit, gets its name back.
   assert.equal(named([a], new Map(), reserved)[0].name, "cart_add");
   // Same-named tools in two frames can't be told apart: when one goes, the other gets a new name.
-  const two = [{ name: "checkout", origin: "s" }, { name: "checkout", origin: "s" }];
+  // Two frames (owners 1 and 2) with the same tool name are two tools.
+  const two = [{ name: "checkout", origin: "s", owner: 1 }, { name: "checkout", origin: "s", owner: 2 }];
   const frames = named(two, new Map(), reserved);
   // An unchanged list keeps its names...
   assert.deepEqual(named(two, carry(frames), reserved).map((e) => e.name), frames.map((e) => e.name));
   const retired = new Set();
-  const one = [{ name: "checkout", origin: "s" }];
-  const after = named(one, carry(frames), reserved, retired);
-  assert.ok(!frames.map((e) => e.name).includes(after[0].name), after[0].name);
-  // [A, B] -> [B] -> [] -> [B]: the names A and B had are never handed out again.
-  const empty = named([], carry(after), reserved, retired);
-  const back = named(one, carry(empty), reserved, retired);
-  assert.ok(!frames.map((e) => e.name).includes(back[0].name), back[0].name);
+  // [A, B] -> [B, C]: B keeps its name, C (a third frame) never gets A's.
+  const swapped = named([two[1], { name: "checkout", origin: "s", owner: 3 }], carry(frames), reserved, retired);
+  assert.equal(swapped[0].name, frames[1].name);
+  assert.ok(!frames.map((e) => e.name).includes(swapped[1].name), swapped[1].name);
+  // [B, C] -> [] -> [B]: B gets its own name back, as the same tool.
+  const empty = named([], carry(swapped), reserved, retired);
+  assert.equal(named([two[1]], carry(empty), reserved, retired)[0].name, frames[1].name);
 });
 
 test("stopping the MCP server with a signal stops its browser", { skip, timeout: 60_000 }, async () => {

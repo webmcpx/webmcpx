@@ -70,16 +70,18 @@
       list: () =>
         [...all().values()].slice(0, 200).map((t) => {
           const cap = (v, n) => String(v ?? "").slice(0, n);
+          // A schema we can't read or that is too big to send is reported as a problem, never replaced.
           let inputSchema;
+          let schemaError;
           try {
             inputSchema = schema(t.inputSchema);
-            if (JSON.stringify(inputSchema).length > 50_000) inputSchema = { type: "object", description: "(schema over 50,000 chars)" };
+            if (JSON.stringify(inputSchema).length > 50_000) [inputSchema, schemaError] = [undefined, "the input schema is over 50,000 chars"];
           } catch {
-            inputSchema = { type: "object", description: "(schema could not be read)" };
+            schemaError = "the input schema is not valid JSON";
           }
           const annotations = {};
           for (const [k, v] of Object.entries(t.annotations ?? {}).slice(0, 20)) annotations[cap(k, 64)] = v === true;
-          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations };
+          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations, schemaError };
         }),
       async call(name, input) {
         const tool = all().get(name);

@@ -51,6 +51,18 @@ function summarize() {
       return undefined;
     }
   };
+  // The frame that owns each tool (the spec's RegisteredTool.window), as a number that stays the same
+  // while the page is open: same-named tools in two frames are two tools.
+  const owners = (globalThis.__webmcpxOwners ??= { ids: new WeakMap(), next: 1 });
+  const owner = (w) => {
+    if (!w || w === window) return 0;
+    try {
+      if (!owners.ids.has(w)) owners.ids.set(w, owners.next++);
+      return owners.ids.get(w);
+    } catch {
+      return -1;
+    }
+  };
   return this.map((t, index) => ({
     index,
     name: t.name,
@@ -58,6 +70,7 @@ function summarize() {
     inputSchema: parse(t.inputSchema),
     annotations: { ...(t.annotations ?? {}) },
     origin: t.origin,
+    owner: owner(t.window),
   }));
 }
 
@@ -292,4 +305,4 @@ export class Page {
 
 const describeException = (d) => d.exception?.description?.split("\n")[0] ?? d.text;
 
-/** @typedef {{index: number, list: string, unique: boolean, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string}} PageTool */
+/** @typedef {{index: number, list: string, unique: boolean, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string, owner?: number}} PageTool */
