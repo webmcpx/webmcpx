@@ -71,7 +71,6 @@ describe('bySite', () => {
 		expect(sites.reduce((n, s) => n + s.tasks.length, 0)).toBe(
 			Object.keys(parse(bench).summary.tasks).length
 		);
-		expect(sites[0].name).toBe('Notion');
 		const best = sites.map((s) => Math.max(...s.tasks.map(gain)));
 		expect(best).toEqual([...best].sort((a, b) => b - a));
 	});

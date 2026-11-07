@@ -64,8 +64,8 @@ test('the benchmark numbers are in the prerendered HTML', async ({ request }) =>
 	const html = await (await request.get('/')).text();
 	expect(html).toMatch(/fewer tokens|more tokens/);
 	// The featured site and its question are named in the HTML, not added by JavaScript.
-	// The best case (Notion) is first and already in the HTML, not added by JavaScript.
-	expect(html).toContain('How many requests per minute does the Notion API allow');
+	// The best case (Cloudflare, by token saving) is first and already in the HTML, not added by JavaScript.
+	expect(html).toContain('How many requests per day can my Workers handle');
 });
 
 test('content is visible without JavaScript', async ({ browser }) => {
@@ -128,7 +128,7 @@ test('the detail tabs switch metrics and only show the selected site', async ({ 
 	await details.getByRole('tab', { name: 'Time' }).click();
 	const table = proof.getByRole('table').filter({ hasText: 'seconds per run' });
 	await expect(table).toHaveCount(1);
-	await expect(table.locator('tbody tr')).toHaveCount(4);
+	await expect(table.locator('tbody tr')).toHaveCount(5);
 	await expect(table).not.toContainText('Notion');
 	await details.getByRole('tab', { name: 'Method' }).click();
 	await expect(
@@ -140,7 +140,10 @@ test('the site filter shows each site and each question on its own, never averag
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
 	const sites = proof.getByRole('tablist', { name: 'Site' });
-	await expect(sites.getByRole('tab', { name: /Notion/ })).toHaveAttribute('aria-selected', 'true');
+	// Sites are ordered by their biggest saving: Cloudflare first in this run.
+	await expect(sites.getByRole('tab').first()).toHaveAttribute('aria-selected', 'true');
+	await expect(sites.getByRole('tab').first()).toContainText('Cloudflare');
+	await sites.getByRole('tab', { name: /Notion/ }).click();
 	await expect(proof.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	await expect(proof.getByRole('link', { name: /developers\.notion\.com/ })).toBeVisible();
 
@@ -154,9 +157,9 @@ test('a site with several questions rotates them, and the rotation can be paused
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
 	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
-	const dots = proof.getByRole('button', { name: /^Question \d of 4$/ });
-	await expect(dots).toHaveCount(4);
-	await expect(proof.getByRole('button', { name: 'Question 1 of 4' })).toHaveAttribute(
+	const dots = proof.getByRole('button', { name: /^Question \d of 5$/ });
+	await expect(dots).toHaveCount(5);
+	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
@@ -164,7 +167,7 @@ test('a site with several questions rotates them, and the rotation can be paused
 	// Rotation pauses while the pointer is over it: move away, then let time pass.
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(5100);
-	await expect(proof.getByRole('button', { name: 'Question 2 of 4' })).toHaveAttribute(
+	await expect(proof.getByRole('button', { name: 'Question 2 of 5' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
@@ -174,8 +177,8 @@ test('a site with several questions rotates them, and the rotation can be paused
 		.filter({ visible: true })
 		.first()
 		.textContent();
-	await proof.getByRole('button', { name: 'Question 3 of 4' }).click();
-	await expect(proof.getByRole('button', { name: 'Question 3 of 4' })).toHaveAttribute(
+	await proof.getByRole('button', { name: 'Question 3 of 5' }).click();
+	await expect(proof.getByRole('button', { name: 'Question 3 of 5' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
@@ -185,7 +188,7 @@ test('a site with several questions rotates them, and the rotation can be paused
 	await proof.getByRole('button', { name: 'Pause rotation' }).click();
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(12000);
-	await expect(proof.getByRole('button', { name: 'Question 3 of 4' })).toHaveAttribute(
+	await expect(proof.getByRole('button', { name: 'Question 3 of 5' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
@@ -199,7 +202,7 @@ test('no automatic rotation for people who prefer reduced motion', async ({ page
 	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(12000);
-	await expect(proof.getByRole('button', { name: 'Question 1 of 4' })).toHaveAttribute(
+	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
@@ -210,9 +213,9 @@ test('switching sites starts the question rotation over', async ({ page }) => {
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
 	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
-	await proof.getByRole('button', { name: 'Question 4 of 4' }).click();
+	await proof.getByRole('button', { name: 'Question 4 of 5' }).click();
 	await proof.getByRole('tab', { name: /WooCommerce/ }).click();
-	await expect(proof.getByRole('button', { name: 'Question 1 of 2' })).toHaveAttribute(
+	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
@@ -225,14 +228,23 @@ test('the page says the first site is the best case', async ({ request }) => {
 
 test('the Tools tab shows the site tools, their descriptions and what the agent called', async ({ page }) => {
 	await page.goto('/#proof');
-	await page.locator('#proof').getByRole('tab', { name: 'Tools' }).first().click();
+	await page
+		.locator('#proof')
+		.getByRole('tab', { name: /Notion/ })
+		.click();
+	await page
+		.locator('#proof')
+		.getByRole('tablist', { name: 'Details for Notion' })
+		.getByRole('tab', { name: 'Tools' })
+		.click();
 	const tools = page.locator('#proof').getByRole('region', { name: 'WebMCP tools on Notion' });
 	await expect(tools.getByRole('heading', { name: /WebMCP tools Notion registers/ })).toBeVisible();
 	await expect(tools.locator('tbody tr')).toHaveCount(5);
 	await expect(tools.locator('tbody tr').first()).toContainText('search_docs');
 	await expect(tools.getByText(/Search the Notion Docs documentation/)).toBeVisible();
-	await expect(tools.getByText(/^search_docs\(/)).toBeVisible();
-	await expect(tools.getByText(/benchmark ran 2026-11-06/)).toBeVisible();
+	await expect(tools.getByText(/^search_docs\(/).first()).toBeVisible();
+	// Schema 4 runs record the tools the agent was given: no snapshot disclaimer.
+	await expect(tools.getByText(/as the agent saw them/)).toBeVisible();
 	await tools.getByRole('button', { name: 'Full descriptions' }).click();
 	await expect(tools.getByRole('button', { name: 'Shorter descriptions' })).toHaveAttribute(
 		'aria-expanded',

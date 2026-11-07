@@ -59,18 +59,23 @@
 		{/key}
 	</div>
 
-	<div class="mt-6 flex items-center justify-center gap-3">
+	<div class="mt-6 flex items-center justify-center gap-1">
 		{#each items, i (i)}
+			<!-- A 24 px hit area (WCAG 2.2 target size) around a small visual dot. -->
 			<button
 				type="button"
 				aria-label="{noun} {i + 1} of {items.length}"
 				aria-current={i === index ? 'true' : undefined}
 				onclick={() => (index = i)}
-				class={[
-					'h-2 rounded-full transition-all duration-300',
-					i === index ? 'w-6 bg-ink' : 'w-2 bg-ink/25 hover:bg-ink/50'
-				]}
-			></button>
+				class="group grid h-6 min-w-6 place-items-center"
+			>
+				<span
+					class={[
+						'h-2 rounded-full transition-all duration-300',
+						i === index ? 'w-6 bg-ink' : 'w-2 bg-ink/25 group-hover:bg-ink/50'
+					]}
+				></span>
+			</button>
 		{/each}
 		<button
 			type="button"
