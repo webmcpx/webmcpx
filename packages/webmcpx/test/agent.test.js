@@ -70,6 +70,8 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <input name="name" required toolparamdescription="Who comes.">
   <select name="day"><option>monday</option><option>friday</option></select>
   <label><input type="checkbox" name="wheel"> Wheel</label>
+  <label><input type="checkbox" name="glazes" value="celadon"> Celadon</label>
+  <label><input type="checkbox" name="glazes" value="tenmoku"> Tenmoku</label>
   <button>Book</button>
 </form>
 <script>
@@ -80,7 +82,8 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
     event.preventDefault();
     if (event.agentInvoked) {
       const data = Object.fromEntries(new FormData(event.target));
-      event.respondWith(Promise.resolve({ booked: data.name, day: data.day, wheel: data.wheel === "on", price: data.price }));
+      event.respondWith(Promise.resolve({ booked: data.name, day: data.day, wheel: data.wheel === "on", price: data.price,
+        glazes: new FormData(event.target).getAll("glazes") }));
     }
   });
 </script></main></body></html>`;
@@ -253,7 +256,11 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.deepEqual(filled, { ok: true, data: { submitted: false, next: "Ask the user to review the form and submit it." } });
     // With it, the page's submit handler sees agentInvoked and answers through respondWith().
     const booked = JSON.parse(await session.call(book, { name: "Ana", day: "friday", wheel: true }));
-    assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true, price: "40" } });
+    assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true, price: "40", glazes: [] } });
+    // Several checkboxes with one name are a set of choices.
+    assert.deepEqual(book.inputSchema.properties.glazes, { type: "array", items: { enum: ["celadon", "tenmoku"] } });
+    const picked = JSON.parse(await session.call(book, { name: "Ana", day: "monday", glazes: ["tenmoku"] }));
+    assert.deepEqual(picked.data.glazes, ["tenmoku"]);
     // A field the form does not show (hidden, password, disabled) is never set by an agent.
     const sneaky = JSON.parse(await session.call(book, { name: "Ana", day: "friday", price: "0" }));
     assert.deepEqual(sneaky.error.message, "`price` is not an input of this tool");
@@ -354,15 +361,43 @@ test("the CLI explains its usage errors and exits 2", async () => {
 });
 
 test("a refresh never hands a client's tool name to another tool", async () => {
-  const { named } = await import("../agent/mcp.js");
+  const { carry, named } = await import("../agent/mcp.js");
+  const reserved = new Map();
   const a = { name: "cart_add", origin: "o" };
   const b = { name: "cart.add", origin: "o" };
-  const first = named([a]);
-  const second = named([b, a], new Map(first.map((e) => [e.id, e.name])));
+  const first = named([a], new Map(), reserved);
+  const second = named([b, a], carry(first), reserved);
   assert.deepEqual(second.map((e) => [e.tool.name, e.name]), [["cart.add", "cart_add_2"], ["cart_add", "cart_add"]]);
-  // Once a tool is gone, its name is not reused by the next list.
-  const third = named([b, { name: "cart_add", origin: "other" }], new Map(second.map((e) => [e.id, e.name])));
-  assert.equal(third.find((e) => e.tool.origin === "other").name, "cart_add_3");
+  // A name handed out once is never given to another tool, even after an empty refresh...
+  named([], carry(second), reserved);
+  assert.equal(named([{ name: "cart_add", origin: "other" }], new Map(), reserved)[0].name, "cart_add_3");
+  // ...but the same tool, back on a later visit, gets its name back.
+  assert.equal(named([a], new Map(), reserved)[0].name, "cart_add");
+  // Same-named tools in two frames can't be told apart: when one goes, the other gets a new name.
+  const two = [{ name: "checkout", origin: "s" }, { name: "checkout", origin: "s" }];
+  const frames = named(two, new Map(), reserved);
+  // An unchanged list keeps its names...
+  assert.deepEqual(named(two, carry(frames), reserved).map((e) => e.name), frames.map((e) => e.name));
+  const after = named([{ name: "checkout", origin: "s" }], carry(frames), reserved);
+  assert.ok(!frames.map((e) => e.name).includes(after[0].name), after[0].name);
+});
+
+test("stopping the MCP server with a signal stops its browser", { skip, timeout: 60_000 }, async () => {
+  const { mkdtempSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const dir = mkdtempSync(join(tmpdir(), "sig-"));
+  const child = spawn(process.execPath, [BIN, "mcp"], { stdio: ["pipe", "pipe", "inherit"], env: { ...process.env, TMPDIR: dir } });
+  const lines = createInterface({ input: child.stdout });
+  const reply = new Promise((resolve) => lines.once("line", resolve));
+  child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "open_page", arguments: { url: `${origin}/plain` } } })}\n`);
+  await reply;
+  const browsers = async () => (await exec("pgrep", ["-f", dir]).catch(() => ({ stdout: "" }))).stdout.trim();
+  assert.notEqual(await browsers(), "", "the browser should be running");
+  child.kill("SIGTERM");
+  await new Promise((resolve) => child.once("exit", resolve));
+  for (let i = 0; i < 50 && (await browsers()); i++) await new Promise((resolve) => setTimeout(resolve, 100));
+  assert.equal(await browsers(), "");
 });
 
 test("bare hosts get a scheme: https for the web, http for localhost", () => {

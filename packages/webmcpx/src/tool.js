@@ -70,7 +70,7 @@ function check(s, value, at = "input") {
   return "";
 }
 
-/** Wraps `run` in the standard contract: parsed and checked input, `{ok, data}` or `{ok: false, error}`. */
+/** `run` in the standard contract: checked input, `{ok, data}` or `{ok: false, error}`. */
 const contract = (inputSchema, run) => async (raw, client) => {
   let args;
   try {
@@ -110,12 +110,7 @@ function register(definition, signal) {
   );
 }
 
-/**
- * Registers one of your own tools. `run(input)` returns the data (or throws; an error with a webmcpx
- * `code` keeps it). A no-op where WebMCP is missing.
- * @param {import("./index").ToolDefinition} definition
- * @returns {{ready: Promise<boolean>, dispose(): void}}
- */
+/** Registers one of your own tools (types and docs: index.d.ts). */
 export function tool({ name, description, input, inputSchema = schema(input), run, readOnly, acts, untrusted, signal } = {}) {
   const controller = new AbortController();
   if (signal?.aborted) return { ready: Promise.resolve(false), dispose() {} };
@@ -151,7 +146,10 @@ export function formSchema(form) {
     const { name, type } = el;
     if (!fillable(el)) continue;
     let p;
-    if (type === "checkbox") p = { type: "boolean" };
+    // One checkbox is a yes/no; several with one name are a set of choices.
+    if (type === "checkbox" && [...form.elements].filter((e) => e.name === name && fillable(e)).length > 1) {
+      (p = properties[name] ?? { type: "array", items: { enum: [] } }).items.enum.push(el.value);
+    } else if (type === "checkbox") p = { type: "boolean" };
     else if (type === "radio") (p = properties[name] ?? { type: "string", enum: [] }).enum.push(el.value);
     else if (el.tagName === "SELECT") {
       p = { type: "string", enum: [...el.options].map((o) => o.value) };
@@ -159,8 +157,9 @@ export function formSchema(form) {
     } else if (type === "number" || type === "range") {
       p = { type: "number", ...(el.min && { minimum: +el.min }), ...(el.max && { maximum: +el.max }) };
     } else p = { type: "string", ...(FORMATS[type] && { format: FORMATS[type] }) };
+    // A choice's label names that choice, not the field.
     const description =
-      el.getAttribute("toolparamdescription") || el.labels?.[0]?.textContent.trim() || el.getAttribute("placeholder");
+      el.getAttribute("toolparamdescription") || (!p.items && (el.labels?.[0]?.textContent.trim() || el.getAttribute("placeholder")));
     if (description) p.description = description;
     properties[name] = p;
     if (el.required && !required.includes(name)) required.push(name);
@@ -177,7 +176,7 @@ function fill(form, args) {
   for (const [name, value] of Object.entries(args)) {
     const field = form.elements.namedItem(name);
     for (const el of (field instanceof Element ? [field] : [...(field ?? [])]).filter(fillable)) {
-      if (el.type === "checkbox") el.checked = Boolean(value);
+      if (el.type === "checkbox") el.checked = Array.isArray(value) ? value.includes(el.value) : Boolean(value);
       else if (el.type === "radio") el.checked = el.value === String(value);
       else if (el.multiple) for (const o of el.options) o.selected = [].concat(value).includes(o.value);
       else el.value = String(value);
@@ -217,11 +216,7 @@ function runForm(form) {
   };
 }
 
-/**
- * Exposes every `<form toolname>` of the page as a tool, and follows them as the page changes. Does
- * nothing where WebMCP is missing or where the browser runs the declarative API itself.
- * @returns {{dispose(): void}}
- */
+/** Every `<form toolname>` as a tool, following DOM changes; not where the browser does it itself. */
 export function forms() {
   const doc = globalThis.document;
   if (!doc || typeof context()?.registerTool !== "function" || "toolName" in HTMLFormElement.prototype) {

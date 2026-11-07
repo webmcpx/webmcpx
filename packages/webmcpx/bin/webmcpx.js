@@ -91,6 +91,12 @@ function printTools(page) {
   console.log(dim(`\nTry one: npx webmcpx call ${page.url} search_page '{"query": "..."}'`));
 }
 
+// An MCP client stops its server with a signal: exit through process.exit, so the browser we started
+// is killed by its exit hook instead of being orphaned.
+for (const [signal, code] of [["SIGINT", 130], ["SIGTERM", 143], ["SIGHUP", 129]]) {
+  process.once(signal, () => process.exit(code));
+}
+
 async function main() {
   const { values, positionals } = parse(process.argv.slice(2));
   const [command, ...rest] = positionals;

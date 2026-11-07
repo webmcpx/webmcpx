@@ -43,45 +43,54 @@ const CALL = {
   annotations: { openWorldHint: true },
 };
 
-/** Who a tool is across refreshes: standard, or the page's (origin, name, rank among same-named ones). */
-function identities(tools) {
-  const seen = new Map();
-  return tools.map((t) => {
-    const key = t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t.name}`;
-    const rank = seen.get(key) ?? 0;
-    seen.set(key, rank + 1);
-    return `${key} ${rank}`;
-  });
-}
+/** Who a tool is across refreshes: standard, or the page's (origin and name). */
+const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t.name}`);
 
 /**
  * Gives each tool a unique MCP name: MCP allows [A-Za-z0-9_-] and 64 characters, WebMCP also "." and
- * 128, and two frames can register the same name. Clashes get "_2", "_3"... A tool keeps the name it had
- * in `previous` (identity -> name), so a refresh never moves a name a client already has to another tool.
+ * 128, and two frames can register the same name. Clashes get "_2", "_3"...
+ * `previous` (key -> names, in list order) carries names over when as many tools share that key as
+ * before. When that count changes, same-named tools in different frames can't be told apart, so their old
+ * names are retired. `reserved` (name -> key, every name handed out this session; updated here) lets a
+ * name come back only to the same key: a name a client already has never runs a different tool.
  * @returns {{name: string, id: string, tool: import("./session.js").Tool}[]}
  */
-export function named(tools, previous = new Map()) {
-  const ids = identities(tools);
+export function named(tools, previous = new Map(), reserved = new Map()) {
+  const ids = tools.map(keyOf);
+  const count = (id) => ids.filter((x) => x === id).length;
+  const retired = new Set();
+  for (const [id, names] of previous) if (names.length !== count(id)) for (const n of names) retired.add(n);
   const used = new Set([OPEN.name, CALL.name]);
+  const free = (name, id) => !used.has(name) && !retired.has(name) && (reserved.get(name) ?? id) === id;
+  const rank = new Map();
   const kept = ids.map((id) => {
-    const name = previous.get(id);
-    if (!name || used.has(name)) return undefined;
+    const i = rank.get(id) ?? 0;
+    rank.set(id, i + 1);
+    const name = previous.get(id)?.[i];
+    if (!name || !free(name, id)) return undefined;
     used.add(name);
     return name;
   });
-  // A name a client knew for a tool that is gone is not handed to another one.
-  for (const name of previous.values()) used.add(name);
-  return tools.map((tool, i) => {
+  const entries = tools.map((tool, i) => {
     let name = kept[i];
     if (!name) {
       const base = tool.name.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64) || "tool";
       name = base;
-      for (let n = 2; used.has(name); n++) name = `${base.slice(0, 64 - String(n).length - 1)}_${n}`;
+      for (let n = 2; !free(name, ids[i]); n++) name = `${base.slice(0, 64 - String(n).length - 1)}_${n}`;
       used.add(name);
     }
     return { name, id: ids[i], tool };
   });
+  for (const e of entries) reserved.set(e.name, e.id);
+  return entries;
 }
+
+/** What `named` needs from the last list: each key's names, in order. */
+export const carry = (entries) => {
+  const map = new Map();
+  for (const e of entries) map.set(e.id, [...(map.get(e.id) ?? []), e.name]);
+  return map;
+};
 
 /** MCP wants an object schema at the root; WebMCP schemas may leave `type` out. */
 export function objectSchema(schema) {
@@ -136,12 +145,13 @@ export function describe({ url, title, tools }, entries = tools && named(tools))
 /** Runs the server on stdin/stdout until stdin closes. Logs go to stderr only. */
 export async function serve(options = {}, { input = process.stdin, output = process.stdout } = {}) {
   let entries = [];
+  const reserved = new Map();
   let initialized = false;
   const write = (msg) => output.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
   // Replaces the tool list and tells the client when what it would see changed.
   const update = (tools) => {
     const before = JSON.stringify(entries.map(asMcp));
-    entries = named(tools, new Map(entries.map((e) => [e.id, e.name])));
+    entries = named(tools, carry(entries), reserved);
     if (initialized && JSON.stringify(entries.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
   };
   const session = new Session({

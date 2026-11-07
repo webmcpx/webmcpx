@@ -147,7 +147,15 @@ export async function launch({ headed = false, executable = findBrowser() } = {}
   ];
   const child = spawn(executable, args, { stdio: ["ignore", "ignore", "pipe"] });
   const cleanup = () => rmSync(profile, { recursive: true, force: true });
-  const kill = () => child.kill();
+  // Also runs on process exit (signals included, see bin/webmcpx.js): never leave a browser or its profile.
+  const kill = () => {
+    child.kill();
+    try {
+      cleanup();
+    } catch {
+      // still in use: removed when the browser exits
+    }
+  };
   process.once("exit", kill);
   child.once("exit", cleanup);
 
