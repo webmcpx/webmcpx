@@ -44,19 +44,21 @@ export function readPage(what, root) {
       selection: text(globalThis.getSelection?.()?.toString()).slice(0, 1000) || undefined,
     };
   }
-  const skipped = (el, s = globalThis.getComputedStyle?.(el)) =>
-    SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" ||
-    s?.display == "none" || s?.visibility == "hidden";
+  const css = (el) => globalThis.getComputedStyle?.(el) ?? {};
+  const skipped = (el) =>
+    SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" || css(el).display == "none";
+  // visibility is inherited and a child can undo it, so it is checked per text node.
+  const data = (n) => (css(n.parentNode).visibility == "hidden" ? "" : n.data);
   // Visible text; an element with no block inside is one block.
   const textOf = (el) =>
-    [...el.childNodes].map((n) => (n.nodeType === 3 ? n.data : n.nodeType === 1 && !skipped(n) ? textOf(n) : "")).join("");
+    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeType === 1 && !skipped(n) ? textOf(n) : "")).join("");
   const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   let out = "";
   let anchor = "";
   const add = (kind, s) => text(s) && (out += kind + FIELD + s + FIELD + anchor + RECORD);
   const visit = (el) => {
     for (const child of el.childNodes) {
-      if (child.nodeType === 3) add("p", child.data);
+      if (child.nodeType === 3) add("p", data(child));
       if (child.nodeType !== 1 || skipped(child)) continue;
       if (child.id) anchor = `${base}#${child.id}`;
       // A table row is one block ("Monday | Closed"), so search keeps a value next to its label.

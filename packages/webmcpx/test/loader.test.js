@@ -152,15 +152,22 @@ test("search_page reads loose text and never hidden parts of a visible block", a
 
 test("readPage skips CSS-hidden content but keeps display: contents children", async () => {
   const page = host();
-  document.body.innerHTML = '<main><p>Visible menu.</p><p class="none">SECRET one</p><div class="invisible"><p>SECRET two</p></div><div class="contents"><p>Wrapped note.</p></div></main>';
-  const styles = { none: { display: "none" }, invisible: { visibility: "hidden" }, contents: { display: "contents" } };
-  globalThis.getComputedStyle = (el) => styles[el.getAttribute("class")] ?? { display: "block", visibility: "visible" };
+  document.body.innerHTML = '<main><p>Visible menu.</p><p class="none">SECRET one</p><div class="invisible"><p>SECRET two</p><p class="shown">Shown again.</p></div><div class="contents"><p>Wrapped note.</p></div></main>';
+  const own = { none: { display: "none" }, invisible: { visibility: "hidden" }, shown: { visibility: "visible" }, contents: { display: "contents" } };
+  // visibility is inherited, like in a browser.
+  const style = (el) => ({
+    display: "block",
+    visibility: el.parentElement ? style(el.parentElement).visibility : "visible",
+    ...own[el.getAttribute("class")],
+  });
+  globalThis.getComputedStyle = style;
   try {
     await register({ wasm: WASM });
     const md = (await page.call("fetch_as_markdown", {})).data.markdown;
     assert.doesNotMatch(md, /SECRET/);
     assert.match(md, /Visible menu/);
     assert.match(md, /Wrapped note/);
+    assert.match(md, /Shown again/, "a visible child of a visibility:hidden parent is kept");
   } finally {
     delete globalThis.getComputedStyle;
   }
