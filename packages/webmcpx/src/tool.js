@@ -41,6 +41,7 @@ const same = (a, b) =>
 
 /** The first problem with `value` against JSON Schema `s` (the keywords tool inputs use), or "". */
 function check(s, value, at = "input") {
+  if (s === false) return `${at} is not allowed`;
   if (!s || typeof s !== "object") return "";
   const types = s.type === undefined ? [] : [].concat(s.type);
   if (types.length && !types.some((t) => TYPES[t]?.(value))) return `${at} must be of type ${types.join(" or ")}`;
