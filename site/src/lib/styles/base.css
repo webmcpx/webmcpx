@@ -79,3 +79,8 @@
 		translate: none;
 	}
 }
+
+/* Fallbacks for readers without JavaScript (e.g. content behind tabs): never shown once JS runs. */
+[data-js] .no-js-only {
+	display: none;
+}

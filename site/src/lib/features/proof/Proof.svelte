@@ -192,6 +192,11 @@
 				</details>
 			{/snippet}
 		</Tabs>
+		<!-- Without JavaScript the site tabs cannot switch, so every site's results are listed here. -->
+		<section class="no-js-only mt-12" aria-label="Every site's results">
+			<h3 class="mb-4 font-display text-xl font-bold tracking-tight">Every site's results</h3>
+			<TaskChart {questions} metric={METRICS[0]} />
+		</section>
 	{:else}
 		<Card padding="lg" shadow="none" class="border-dashed">
 			<p class="font-display font-bold">No run published yet.</p>

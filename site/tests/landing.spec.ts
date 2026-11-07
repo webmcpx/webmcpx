@@ -81,6 +81,9 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	await expect(tools.locator('code')).toHaveCount(5);
 	await expect(tools.getByText('read_skill', { exact: true })).toBeVisible();
 	await expect(tools.getByRole('button', { name: /Show/ })).toHaveCount(0);
+	// The other sites' results are listed too, since the tabs cannot switch without JavaScript.
+	const fallback = page.getByRole('region', { name: "Every site's results" });
+	await expect(fallback.getByText(/Cloudflare Workers KV/).first()).toBeVisible();
 	await page.close();
 });
 
@@ -131,6 +134,8 @@ test('the site details switch metrics and only show that site', async ({ page })
 	await expect(table).toContainText('seconds per run');
 	await expect(table.locator('tbody tr')).toHaveCount(4);
 	await expect(table).not.toContainText('Notion');
+	// The no-JS fallback is not shown when JavaScript runs.
+	await expect(page.getByRole('region', { name: "Every site's results" })).toBeHidden();
 });
 
 test('the site filter shows each site and each question on its own, never averaged', async ({ page }) => {
