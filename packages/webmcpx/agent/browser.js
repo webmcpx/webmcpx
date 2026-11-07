@@ -51,6 +51,8 @@ export class Cdp {
   #id = 0;
   #pending = new Map();
   #listeners = new Set();
+  #closed = false;
+  #onClose = new Set();
 
   static async connect(url) {
     const ws = new WebSocket(url);
@@ -74,17 +76,39 @@ export class Cdp {
       if (msg.error) pending?.reject(new Error(msg.error.message));
       else pending?.resolve(msg.result);
     });
-    ws.addEventListener("close", () => {
-      for (const { reject } of this.#pending.values()) reject(new Error("the browser connection closed"));
-      this.#pending.clear();
-    });
+    ws.addEventListener("close", () => this.#shut());
+    ws.addEventListener("error", () => this.#shut());
+  }
+
+  /** Once closed (the browser quit or crashed), every pending and later call fails at once. */
+  #shut() {
+    if (this.#closed) return;
+    this.#closed = true;
+    for (const { reject } of this.#pending.values()) reject(new Error("the browser connection closed"));
+    this.#pending.clear();
+    for (const listener of this.#onClose) listener();
+  }
+
+  get closed() {
+    return this.#closed;
+  }
+
+  /** Calls `listener` once the connection closes. */
+  onClose(listener) {
+    this.#onClose.add(listener);
   }
 
   send(method, params = {}, sessionId) {
+    if (this.#closed) return Promise.reject(new Error("the browser connection closed"));
     const id = ++this.#id;
     return new Promise((resolve, reject) => {
       this.#pending.set(id, { resolve, reject });
-      this.#ws.send(JSON.stringify({ id, method, params, ...(sessionId && { sessionId }) }));
+      try {
+        this.#ws.send(JSON.stringify({ id, method, params, ...(sessionId && { sessionId }) }));
+      } catch (e) {
+        this.#pending.delete(id);
+        reject(e);
+      }
     });
   }
 
@@ -96,6 +120,7 @@ export class Cdp {
 
   close() {
     this.#ws.close();
+    this.#shut();
   }
 }
 
@@ -126,6 +151,12 @@ export async function launch({ headed = false, executable = findBrowser() } = {}
   process.once("exit", kill);
   child.once("exit", cleanup);
 
+  // A browser that fails to start (no DevTools line, no connection) must not be left running.
+  const fail = (e) => {
+    process.removeListener("exit", kill);
+    kill();
+    throw e;
+  };
   const endpoint = await new Promise((resolve, reject) => {
     let log = "";
     const timer = setTimeout(() => reject(new Error(`${executable} did not start within 30 s`)), 30_000);
@@ -146,8 +177,9 @@ export async function launch({ headed = false, executable = findBrowser() } = {}
       clearTimeout(timer);
       reject(new Error(`${executable} exited (${code}) before it was ready: ${log.trim().slice(-500)}`));
     });
-  });
-  const cdp = await Cdp.connect(endpoint);
+  }).catch(fail);
+  const cdp = await Cdp.connect(endpoint).catch(fail);
+  cdp.onClose(() => process.removeListener("exit", kill));
   return {
     cdp,
     close() {

@@ -1,5 +1,4 @@
-// webmcpx standard tools: registers them on the page. Owns the DOM and registerTool();
-// all text processing runs in a WebAssembly module loaded on the first tool call.
+// The standard tools: DOM and registerTool() here, text work in WebAssembly (loaded on first call).
 import { CODES, TOOLS } from "./generated.js";
 
 const DEFAULT_TOOLS = ["get_page_context", "search_page", "fetch_as_markdown"];
@@ -46,16 +45,22 @@ export function readPage(what, root) {
     };
   }
   const skipped = (el) => SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true";
+  // Text without hidden parts; an element with no block inside is one block ("Free <b>delivery</b>").
+  const textOf = (el) =>
+    [...el.childNodes].map((n) => (n.nodeType === 3 ? n.data : n.nodeType === 1 && !skipped(n) ? textOf(n) : "")).join("");
+  const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   let out = "";
   let anchor = "";
+  const add = (kind, s) => text(s) && (out += kind + FIELD + s + FIELD + anchor + RECORD);
   const visit = (el) => {
-    for (const child of el.children) {
-      if (skipped(child)) continue;
+    for (const child of el.childNodes) {
+      if (child.nodeType === 3) add("p", child.data);
+      if (child.nodeType !== 1 || skipped(child)) continue;
       if (child.id) anchor = `${base}#${child.id}`;
       // A table row is one block ("Monday | Closed"), so search keeps a value next to its label.
-      const row = child.tagName === "TR" && [...child.children].filter((c) => !skipped(c)).map((c) => text(c.textContent)).join(" | ");
-      const kind = row ? "p" : KINDS[child.tagName] ?? (child.children.length === 0 && "p");
-      if (kind) out += kind + FIELD + (row || child.textContent) + FIELD + anchor + RECORD;
+      const row = child.tagName === "TR" && [...child.children].filter((c) => !skipped(c)).map((c) => text(textOf(c))).join(" | ");
+      const kind = row ? "p" : KINDS[child.tagName] ?? (!child.querySelector(BLOCKS) && "p");
+      if (kind) add(kind, row || textOf(child));
       else visit(child);
     }
   };
@@ -99,11 +104,7 @@ const guard = (run) => async (input, client) => {
   }
 };
 
-/**
- * Registers webmcpx standard tools on the current document.
- * @param {import("./index").Options} [options]
- * @returns {Promise<import("./index").Registration>}
- */
+/** Registers the standard tools (types: index.d.ts). */
 export async function register(options = {}) {
   const mc = globalThis.document?.modelContext ?? globalThis.navigator?.modelContext;
   const controller = new AbortController();

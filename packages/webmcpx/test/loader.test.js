@@ -137,3 +137,15 @@ test("is a no-op without WebMCP", async () => {
   const reg = await register();
   assert.deepEqual(reg, { ...reg, registered: [], failed: [] });
 });
+
+test("search_page reads loose text and never hidden parts of a visible block", async () => {
+  const page = host();
+  document.body.innerHTML = '<main>Delivery is free above 20 euros.<p>Public note<span hidden>SECRET</span></p><div>Opening <b>hours</b>: 9 to 5</div></main>';
+  await register({ wasm: WASM });
+  const loose = await page.call("search_page", { query: "delivery free" });
+  assert.equal(loose.ok, true);
+  assert.match(JSON.stringify(loose.data), /Delivery is free/);
+  const md = await page.call("fetch_as_markdown", {});
+  assert.doesNotMatch(md.data.markdown, /SECRET/);
+  assert.match(md.data.markdown, /Opening hours: 9 to 5/);
+});

@@ -142,7 +142,7 @@ async function main() {
     console.log(pretty);
     if (failed(out)) process.exitCode = 1;
   } finally {
-    session.close();
+    await session.close();
   }
 }
 

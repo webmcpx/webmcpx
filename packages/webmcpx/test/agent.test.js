@@ -66,6 +66,7 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <input name="limit" type="number" min="1" max="20" toolparamdescription="How many results.">
 </form>
 <form toolname="Book a class" tooldescription="Book a pottery class." method="post" toolautosubmit>
+  <input type="hidden" name="price" value="40">
   <input name="name" required toolparamdescription="Who comes.">
   <select name="day"><option>monday</option><option>friday</option></select>
   <label><input type="checkbox" name="wheel"> Wheel</label>
@@ -79,11 +80,21 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
     event.preventDefault();
     if (event.agentInvoked) {
       const data = Object.fromEntries(new FormData(event.target));
-      event.respondWith(Promise.resolve({ booked: data.name, day: data.day, wheel: data.wheel === "on" }));
+      event.respondWith(Promise.resolve({ booked: data.name, day: data.day, wheel: data.wheel === "on", price: data.price }));
     }
   });
 </script></main></body></html>`;
-const PAGES = { "/shop": SHOP, "/plain": PLAIN, "/names": NAMES, "/frame": FRAME, "/forms": FORMS };
+// Tools that misbehave: one never answers (but honors cancellation), one navigates away mid-call.
+const SLOW = `<!doctype html><html><head><title>Slow</title></head><body><main><p>Slow.</p></main><script>
+  window.cancelled = false;
+  document.modelContext.registerTool({ name: "hang", description: "Never answers.",
+    execute: (_, client) => new Promise(() => {}) });
+  document.modelContext.registerTool({ name: "wait_for_abort", description: "Answers only when cancelled.",
+    execute: () => new Promise(() => {}) });
+  document.modelContext.registerTool({ name: "pay", description: "Pays, then leaves the page.",
+    execute: () => { sessionStorage.paid = String(Number(sessionStorage.paid || 0) + 1); location.href = "/plain"; return new Promise(() => {}); } });
+</script></body></html>`;
+const PAGES = { "/shop": SHOP, "/plain": PLAIN, "/names": NAMES, "/frame": FRAME, "/forms": FORMS, "/slow": SLOW };
 const PKG = new URL("../", import.meta.url);
 
 let server;
@@ -212,7 +223,7 @@ test("a tool listed earlier never runs another owner's tool", { skip, timeout: 9
     await session.tools(); // a refresh: the frame's checkout is now the only one
     await assert.rejects(session.call(top, {}), (e) => !/frame/.test(String(e?.message)));
   } finally {
-    session.close();
+    await session.close();
   }
 });
 
@@ -230,6 +241,7 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
         limit: { type: "number", minimum: 1, maximum: 20, description: "How many results." },
       },
       required: ["glaze"],
+      additionalProperties: false,
     });
     // The polyfill fills in every annotation; GET forms read, others act.
     assert.equal(search.annotations.readOnlyHint, true);
@@ -241,7 +253,10 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.deepEqual(filled, { ok: true, data: { submitted: false, next: "Ask the user to review the form and submit it." } });
     // With it, the page's submit handler sees agentInvoked and answers through respondWith().
     const booked = JSON.parse(await session.call(book, { name: "Ana", day: "friday", wheel: true }));
-    assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true } });
+    assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true, price: "40" } });
+    // A field the form does not show (hidden, password, disabled) is never set by an agent.
+    const sneaky = JSON.parse(await session.call(book, { name: "Ana", day: "friday", price: "0" }));
+    assert.deepEqual(sneaky.error.message, "`price` is not an input of this tool");
     const invalid = JSON.parse(await session.call(book, { day: "friday" }));
     assert.equal(invalid.error.code, "INVALID_INPUT");
 
@@ -250,7 +265,22 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.deepEqual(updated.inputSchema.required, ["glaze", "kiln"]);
     assert.equal(updated.inputSchema.properties.kiln.description, "Which kiln.");
   } finally {
-    session.close();
+    await session.close();
+  }
+});
+
+test("a call past the time limit is cancelled, and a tool that navigates is never run twice", { skip, timeout: 90_000 }, async () => {
+  const session = new Session({ callTimeout: 1_000 });
+  try {
+    const { tools } = await session.goto(`${origin}/slow`);
+    const tool = (name) => tools.find((t) => t.name === name);
+    await assert.rejects(session.call(tool("hang"), {}), /took longer than 1 s and was cancelled/);
+    await assert.rejects(session.call(tool("pay"), {}), /navigated while "pay" ran: it may have done its work/);
+    // Exactly one payment, on the page it navigated to.
+    const paid = await session.call((await session.tools()).find((t) => t.name === "get_page_context"), {});
+    assert.match(paid, /"title":"Plain"/);
+  } finally {
+    await session.close();
   }
 });
 
@@ -321,6 +351,18 @@ test("the CLI explains its usage errors and exits 2", async () => {
   assert.match(notObject.stderr, /must be a JSON object/);
   const help = await cli("--help");
   assert.match(help.stdout, /claude mcp add webmcpx -- npx -y webmcpx mcp/);
+});
+
+test("a refresh never hands a client's tool name to another tool", async () => {
+  const { named } = await import("../agent/mcp.js");
+  const a = { name: "cart_add", origin: "o" };
+  const b = { name: "cart.add", origin: "o" };
+  const first = named([a]);
+  const second = named([b, a], new Map(first.map((e) => [e.id, e.name])));
+  assert.deepEqual(second.map((e) => [e.tool.name, e.name]), [["cart.add", "cart_add_2"], ["cart_add", "cart_add"]]);
+  // Once a tool is gone, its name is not reused by the next list.
+  const third = named([b, { name: "cart_add", origin: "other" }], new Map(second.map((e) => [e.id, e.name])));
+  assert.equal(third.find((e) => e.tool.origin === "other").name, "cart_add_3");
 });
 
 test("bare hosts get a scheme: https for the web, http for localhost", () => {

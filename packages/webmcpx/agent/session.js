@@ -9,18 +9,30 @@ export class Session {
   #browser;
   #page;
   #ready;
+  #closed = false;
   #queue = Promise.resolve();
 
-  /** @param {{headed?: boolean, browser?: string, cdp?: string, onChange?: () => void}} options */
+  /** @param {{headed?: boolean, browser?: string, cdp?: string, onChange?: () => void, callTimeout?: number}} options */
   constructor(options = {}) {
     this.#options = options;
   }
 
   #start() {
+    if (this.#closed) return Promise.reject(new Error("the session is closed"));
     this.#ready ??= (async () => {
-      const { cdp, headed, browser, onChange } = this.#options;
-      this.#browser = cdp ? await attach(cdp) : await launch({ headed, executable: browser });
-      return Page.create(this.#browser.cdp, { onChange });
+      const { cdp, headed, browser, onChange, callTimeout } = this.#options;
+      const opened = cdp ? await attach(cdp) : await launch({ headed, executable: browser });
+      // Closed while the browser was starting: shut it instead of leaving it running.
+      if (this.#closed) {
+        opened.close();
+        throw new Error("the session is closed");
+      }
+      this.#browser = opened;
+      // A browser that quits or crashes is started again on the next page.
+      opened.cdp.onClose(() => {
+        if (this.#browser === opened) [this.#browser, this.#ready, this.#page] = [];
+      });
+      return Page.create(opened.cdp, { onChange, callTimeout });
     })().catch((e) => {
       this.#ready = undefined;
       throw e;
@@ -69,7 +81,11 @@ export class Session {
     });
   }
 
-  close() {
+  /** Closes our tab and the browser (or only our tab's connection, in a browser we attached to). */
+  async close() {
+    this.#closed = true;
+    const page = await this.#ready?.catch(() => undefined);
+    await page?.close();
     this.#browser?.close();
   }
 }

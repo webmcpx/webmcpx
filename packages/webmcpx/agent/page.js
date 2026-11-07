@@ -61,10 +61,18 @@ function summarize() {
   }));
 }
 
-// Called on the same array: runs one descriptor. executeTool() returns the result JSON-serialized; a tool
-// that returned a string (like the webmcpx envelope) comes back as a JSON string literal: unwrap it once.
-async function execute(index, input) {
-  const out = await document.modelContext.executeTool(this[index], input);
+// Called on the same array: runs one descriptor, cancellable through `cancel` below. executeTool() returns
+// the result JSON-serialized; a tool that returned a string (like the webmcpx envelope) comes back as a
+// JSON string literal: unwrap it once.
+async function execute(index, input, call) {
+  const controller = new AbortController();
+  (this.__webmcpxCalls ??= new Map()).set(call, controller);
+  let out;
+  try {
+    out = await document.modelContext.executeTool(this[index], input, { signal: controller.signal });
+  } finally {
+    this.__webmcpxCalls.delete(call);
+  }
   let value = out;
   try {
     value = typeof out === "string" ? JSON.parse(out) : out;
@@ -72,6 +80,10 @@ async function execute(index, input) {
     // not JSON: keep the text
   }
   return typeof value === "string" ? value : JSON.stringify(value ?? null);
+}
+
+function cancel(call) {
+  this.__webmcpxCalls?.get(call)?.abort();
 }
 
 const GROUP = "webmcpx-tools";
@@ -85,32 +97,47 @@ const timeout = (ms, what) =>
     setTimeout(() => reject(new Error(`${what} took longer than ${ms / 1000} s`)), ms).unref();
   });
 
-/** Whether an error means the page navigated or the tool list was replaced since it was read. */
-export const stale = (e) =>
-  /Could not find object|Cannot find context|context was destroyed|Inspected target navigated/i.test(e?.message);
+/** The tool's list is gone (the page navigated since it was read): the call never started. */
+export const stale = (e) => /Could not find object|Cannot find context/i.test(e?.message);
+/** The page navigated while the tool ran: it may have done its work. */
+const interrupted = (e) => /context was destroyed|Inspected target navigated|Execution context/i.test(e?.message);
 
 export class Page {
   #cdp;
   #session;
+  #target;
+  #unsubscribe;
   #onChange;
+  #calls = 0;
+  #callTimeout = CALL_TIMEOUT;
   #loads = new Set();
   #handles = [];
   #debounce;
 
   /** Opens a new tab. `onChange()` fires when the page's tools may have changed on their own. */
-  static async create(cdp, { onChange = () => {} } = {}) {
+  /** `callTimeout` (ms) bounds one tool call; tests shorten it. */
+  static async create(cdp, { onChange = () => {}, callTimeout = CALL_TIMEOUT } = {}) {
     const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" });
     const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
-    const page = new Page(cdp, sessionId, onChange);
+    const page = new Page(cdp, sessionId, targetId, onChange);
+    page.#callTimeout = callTimeout;
     await page.#init();
     return page;
   }
 
-  constructor(cdp, session, onChange) {
+  constructor(cdp, session, target, onChange) {
     this.#cdp = cdp;
     this.#session = session;
+    this.#target = target;
     this.#onChange = onChange;
-    cdp.on((msg) => msg.sessionId === session && this.#event(msg));
+    this.#unsubscribe = cdp.on((msg) => msg.sessionId === session && this.#event(msg));
+  }
+
+  /** Closes this tab (in a browser we attached to, it is the only thing we opened there). */
+  async close() {
+    clearTimeout(this.#debounce);
+    this.#unsubscribe();
+    await this.#cdp.send("Target.closeTarget", { targetId: this.#target }).catch(() => {});
   }
 
   #send(method, params) {
@@ -211,17 +238,37 @@ export class Page {
     }));
   }
 
-  /** Runs a tool on the list it came from; resolves with its result text. */
+  /**
+   * Runs a tool on the list it came from; resolves with its result text. A tool past the time limit is
+   * cancelled (its AbortSignal fires); a page that navigates mid-call reports that the tool may have run.
+   */
   async call(tool, input) {
+    const call = ++this.#calls;
     const run = this.#send("Runtime.callFunctionOn", {
       objectId: tool.list,
       functionDeclaration: execute.toString(),
-      arguments: [{ value: tool.index }, { value: input ?? {} }],
+      arguments: [{ value: tool.index }, { value: input ?? {} }, { value: call }],
       awaitPromise: true,
       returnByValue: true,
       userGesture: true,
     });
-    const { result, exceptionDetails } = await Promise.race([run, timeout(CALL_TIMEOUT, "the tool")]);
+    let reply;
+    try {
+      reply = await Promise.race([run, timeout(this.#callTimeout, "the tool")]);
+    } catch (e) {
+      if (stale(e)) throw e;
+      if (interrupted(e)) {
+        throw new Error(`the page navigated while "${tool.name}" ran: it may have done its work, so check before calling it again`);
+      }
+      if (!/took longer than/.test(e?.message)) throw e;
+      await this.#send("Runtime.callFunctionOn", {
+        objectId: tool.list,
+        functionDeclaration: cancel.toString(),
+        arguments: [{ value: call }],
+      }).catch(() => {});
+      throw new Error(`"${tool.name}" took longer than ${this.#callTimeout / 1000} s and was cancelled; it may have partly run`);
+    }
+    const { result, exceptionDetails } = reply;
     if (exceptionDetails) throw new Error(describeException(exceptionDetails));
     return result.value;
   }

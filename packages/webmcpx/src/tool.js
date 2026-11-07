@@ -149,7 +149,7 @@ export function formSchema(form) {
   const required = [];
   for (const el of form.elements) {
     const { name, type } = el;
-    if (!name || el.disabled || SKIPPED.test(type) || !("value" in el) || el.tagName === "BUTTON") continue;
+    if (!fillable(el)) continue;
     let p;
     if (type === "checkbox") p = { type: "boolean" };
     else if (type === "radio") (p = properties[name] ?? { type: "string", enum: [] }).enum.push(el.value);
@@ -165,13 +165,18 @@ export function formSchema(form) {
     properties[name] = p;
     if (el.required && !required.includes(name)) required.push(name);
   }
-  return { type: "object", properties, ...(required.length && { required }) };
+  // Only the fields it shows: hidden, password and disabled controls are never set by an agent.
+  return { type: "object", properties, ...(required.length && { required }), additionalProperties: false };
 }
+
+/** A control an agent may fill: named, enabled, not hidden, password, file or a button. */
+const fillable = (el) =>
+  el.name && !el.disabled && !SKIPPED.test(el.type) && "value" in el && el.tagName !== "BUTTON";
 
 function fill(form, args) {
   for (const [name, value] of Object.entries(args)) {
     const field = form.elements.namedItem(name);
-    for (const el of field instanceof Element ? [field] : [...(field ?? [])]) {
+    for (const el of (field instanceof Element ? [field] : [...(field ?? [])]).filter(fillable)) {
       if (el.type === "checkbox") el.checked = Boolean(value);
       else if (el.type === "radio") el.checked = el.value === String(value);
       else if (el.multiple) for (const o of el.options) o.selected = [].concat(value).includes(o.value);

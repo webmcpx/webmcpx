@@ -1,6 +1,5 @@
 // Drop-in: <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
-// Registers the standard tools, and turns every <form toolname> into a tool (that code loads only
-// on pages that have one).
+// Standard tools, plus <form toolname> as tools (that code loads only where such a form exists).
 import { register } from "./loader.js";
 
 register();

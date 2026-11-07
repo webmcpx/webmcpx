@@ -43,19 +43,43 @@ const CALL = {
   annotations: { openWorldHint: true },
 };
 
+/** Who a tool is across refreshes: standard, or the page's (origin, name, rank among same-named ones). */
+function identities(tools) {
+  const seen = new Map();
+  return tools.map((t) => {
+    const key = t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t.name}`;
+    const rank = seen.get(key) ?? 0;
+    seen.set(key, rank + 1);
+    return `${key} ${rank}`;
+  });
+}
+
 /**
- * Gives each tool a unique MCP name, in list order: MCP allows [A-Za-z0-9_-] and 64 characters, WebMCP
- * also "." and 128, and two frames can register the same name. Clashes get "_2", "_3"...
- * @returns {{name: string, tool: import("./session.js").Tool}[]}
+ * Gives each tool a unique MCP name: MCP allows [A-Za-z0-9_-] and 64 characters, WebMCP also "." and
+ * 128, and two frames can register the same name. Clashes get "_2", "_3"... A tool keeps the name it had
+ * in `previous` (identity -> name), so a refresh never moves a name a client already has to another tool.
+ * @returns {{name: string, id: string, tool: import("./session.js").Tool}[]}
  */
-export function named(tools) {
+export function named(tools, previous = new Map()) {
+  const ids = identities(tools);
   const used = new Set([OPEN.name, CALL.name]);
-  return tools.map((tool) => {
-    const base = tool.name.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64) || "tool";
-    let name = base;
-    for (let n = 2; used.has(name); n++) name = `${base.slice(0, 64 - String(n).length - 1)}_${n}`;
+  const kept = ids.map((id) => {
+    const name = previous.get(id);
+    if (!name || used.has(name)) return undefined;
     used.add(name);
-    return { name, tool };
+    return name;
+  });
+  // A name a client knew for a tool that is gone is not handed to another one.
+  for (const name of previous.values()) used.add(name);
+  return tools.map((tool, i) => {
+    let name = kept[i];
+    if (!name) {
+      const base = tool.name.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64) || "tool";
+      name = base;
+      for (let n = 2; used.has(name); n++) name = `${base.slice(0, 64 - String(n).length - 1)}_${n}`;
+      used.add(name);
+    }
+    return { name, id: ids[i], tool };
   });
 }
 
@@ -93,11 +117,10 @@ function asMcp({ name, tool }) {
 }
 
 /** A short, readable summary of an opened page for the model. */
-export function describe({ url, title, tools }) {
+export function describe({ url, title, tools }, entries = tools && named(tools)) {
   if (tools === null) {
     return `Opened ${url}, but it is not a secure context, so it has no WebMCP. Use https:// or localhost.`;
   }
-  const entries = named(tools);
   const own = entries.filter((e) => !e.tool.standard);
   const lines = [`Opened "${title}" (${url}).`, ""];
   lines.push(own.length ? `The site's own WebMCP tools (${own.length}):` : "The site registers no WebMCP tools of its own.");
@@ -118,7 +141,7 @@ export async function serve(options = {}, { input = process.stdin, output = proc
   // Replaces the tool list and tells the client when what it would see changed.
   const update = (tools) => {
     const before = JSON.stringify(entries.map(asMcp));
-    entries = named(tools);
+    entries = named(tools, new Map(entries.map((e) => [e.id, e.name])));
     if (initialized && JSON.stringify(entries.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
   };
   const session = new Session({
@@ -132,7 +155,7 @@ export async function serve(options = {}, { input = process.stdin, output = proc
     if (name === OPEN.name) {
       const page = await session.goto(args.url);
       update(page.tools ?? []);
-      return text(describe(page));
+      return text(describe(page, entries));
     }
     const wanted = name === CALL.name ? String(args.name ?? "") : name;
     const entry =
@@ -186,5 +209,5 @@ export async function serve(options = {}, { input = process.stdin, output = proc
       (e) => msg.id !== undefined && write({ id: msg.id, error: { code: e.code ?? -32603, message: e.message } }),
     );
   }
-  session.close();
+  await session.close();
 }
