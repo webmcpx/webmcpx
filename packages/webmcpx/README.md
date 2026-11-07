@@ -8,6 +8,11 @@ call a function instead of reading and clicking through the page.
 <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
 ```
 
+**See it work.** Open your page in the ChatGPT desktop app's browser or in Codex: they
+[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp). Or in Chrome: turn on
+`chrome://flags/#enable-webmcp-testing`, relaunch, then open DevTools › Application › WebMCP. Going live in
+Chrome? Add your origin-trial token in a `<meta http-equiv="origin-trial">` tag.
+
 Or from npm (`npm i webmcpx`):
 
 ```js
@@ -33,7 +38,7 @@ const { registered, dispose } = await register({
 - **Invisible characters stripped** from page text.
 - **A no-op where WebMCP is missing.** Uses `document.modelContext`, with a `navigator.modelContext`
   fallback.
-- **About 2.7 KB brotli on page load.** The WebAssembly engine loads on the first tool call.
+- **About 2.8 KB brotli on page load.** The WebAssembly engine loads on the first tool call.
 
 Check your own tools with the [`webmcpx` linter](https://crates.io/crates/webmcpx), and scan any site at
 [webmcpx.dev](https://webmcpx.dev).

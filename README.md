@@ -5,158 +5,77 @@
   <img src="site/static/brand-assets/lockup/lockup-ink.svg" width="360" alt="webmcpx">
 </picture>
 
-**Make your site agent-ready.** Standard WebMCP tools in one script tag, a linter for your own tools,
-and a public benchmark that shows what changes.
+**Make your site agent-ready.** One script tag gives AI agents real tools on your pages,
+instead of making them read and click their way through.
 
 [![npm](https://img.shields.io/npm/v/webmcpx.svg?label=npm&color=121210)](https://www.npmjs.com/package/webmcpx)
 [![crates.io](https://img.shields.io/crates/v/webmcpx.svg?color=121210)](https://crates.io/crates/webmcpx)
-[![docs.rs](https://img.shields.io/docsrs/webmcpx-lint?label=docs.rs)](https://docs.rs/webmcpx-lint)
 [![CI](https://github.com/webmcpx/webmcpx/actions/workflows/ci.yml/badge.svg)](https://github.com/webmcpx/webmcpx/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-121210.svg)](LICENSE)
-[![WebMCP draft](https://img.shields.io/badge/WebMCP-draft%202026--11--02-fcd948.svg)](https://webmachinelearning.github.io/webmcp/)
 
-[**Scan your site**](https://webmcpx.dev) · [Benchmark](https://webmcpx.dev/#proof) ·
-[WebMCP vs MCP](https://webmcpx.dev/#vs-mcp) · [Contributing](CONTRIBUTING.md)
+[**Scan your site →**](https://webmcpx.dev)
 
 </div>
-
----
-
-[WebMCP](https://webmachinelearning.github.io/webmcp/) lets a web page hand AI agents typed tools with
-`document.modelContext.registerTool()`, so agents call a function instead of reading and clicking through
-the page. Thousands of sites already register tools, and each one reinvents the same few, with its own
-truncation, errors and safety hints. **webmcpx gives them one contract, checks it, and measures it.**
-
-> [!NOTE]
-> WebMCP is a W3C Community Group **draft**, not a W3C standard, and runs in a Chrome origin trial. webmcpx
-> tracks the draft of 2 November 2026 and is pre-1.0.
-
-## What's inside
-
-| | |
-|---|---|
-| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | One `<script>` tag registers standard tools on any page: page context, search, Markdown, site search. |
-| **[Linter](crates/webmcpx)** · [crates.io](https://crates.io/crates/webmcpx) | `webmcpx lint` checks your own `registerTool()` calls: names, descriptions, hidden text, schemas, annotations. |
-| **[Benchmark](bench)** | The same agent and question, with and without WebMCP, on live and local sites. Deterministic grading. |
-| **[Scanner](https://webmcpx.dev)** | Paste a URL and see which tools a site registers, what the linter thinks and what an agent would read. |
-
-## Add standard tools to a page
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
 ```
 
-The `@0.1` keeps you on compatible updates; webmcpx is pre-1.0, so a minor release may change things.
+That's it. Your page now registers `search_page`, `fetch_as_markdown` and `get_page_context` with
+[WebMCP](https://webmachinelearning.github.io/webmcp/) (`document.modelContext.registerTool()`), so an agent
+in the browser calls a function instead of guessing at buttons. Where WebMCP is missing, the script does
+nothing.
 
-Or from npm, `npm i webmcpx`:
+**See it work.** Open your page in the ChatGPT desktop app's browser or in Codex: they
+[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp). Or in Chrome: turn on
+`chrome://flags/#enable-webmcp-testing`, relaunch, then open DevTools › Application › WebMCP. Going live in
+Chrome? Add your origin-trial token in a `<meta http-equiv="origin-trial">` tag.
 
-```js
-import { register } from "webmcpx";
+## What's inside
 
-const { registered, dispose } = await register({
-  // Optional: also expose your backend search as `search_site`.
-  searchSite: async (query, { limit }) => (await fetch(`/api/search?q=${query}&n=${limit}`)).json(),
-});
-```
-
-| Tool | What the agent gets |
+| | |
 |---|---|
-| `get_page_context` | Title, URL, language, meta description, heading outline, the user's selection |
-| `search_page` | BM25-ranked passages of the main content, each linked to its section |
-| `fetch_as_markdown` | The main content as Markdown, paged with `cursor` |
-| `search_site` | Your site search, with limits and a uniform result shape (when `searchSite` is given) |
-
-With nothing to configure:
-- **One result shape.** Every tool resolves with `{ ok, data, truncated?, next_cursor?, hint? }` or
-  `{ ok: false, error: { code, message, retryable }, hint? }`, and never rejects for expected failures
-  (webmcp#282).
-- **Output budgets and paging.** Results stay within about 2,000 characters by default.
-- **Correct annotations.** Every tool sets `readOnlyHint` and `untrustedContentHint`.
-- **Invisible-character stripping** in page text (webmcp#360).
-- **Works on today's browsers.** `document.modelContext` with a `navigator.modelContext` fallback, and a
-  no-op where WebMCP is missing.
-- **About 2.8 KB brotli on page load.** The ~12 KB WebAssembly engine loads on the first tool call.
-
-## Lint your tools
-
-```sh
-cargo install webmcpx
-webmcpx lint src/
-webmcpx lint --fix             # removes invisible characters
-webmcpx lint --format json     # stable schema for agents and CI; also sarif, github, concise
-webmcpx rules                  # every rule; `webmcpx rule <name>` explains one
-```
-
-Prefer a library? The rules are in [`webmcpx-lint`](https://crates.io/crates/webmcpx-lint)
-([docs](https://docs.rs/webmcpx-lint)); the shared contract is [`webmcpx-core`](https://crates.io/crates/webmcpx-core)
-and the standard tools are [`webmcpx-std`](https://crates.io/crates/webmcpx-std).
-
-It finds `registerTool()` calls in JS/TS (and `*webmcp*.json` manifests), then checks:
-names (spec rules, length, duplicates), descriptions (missing, empty, too long), hidden text (zero-width,
-bidi and tag characters), input schemas, annotations, the per-page tool budget and removed origin-trial
-APIs. Exit codes: `0` no errors, `1` errors, `2` usage or I/O error.
+| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped. About 2.8 KB on load. |
+| **[Linter](crates/webmcpx)** · [crates.io](https://crates.io/crates/webmcpx) | `webmcpx lint` checks your own `registerTool()` calls. It catches the silent failures: too many tools, the removed `provideContext`, the legacy `navigator.modelContext`, hidden characters. |
+| **[Scanner](https://webmcpx.dev)** | Paste a URL: which tools a site registers, what the linter thinks, what an agent would read instead. Shareable result, README badge. |
+| **[Benchmark](bench)** | The same agent and question, with and without WebMCP, on live sites. Deterministic grading, losses included. |
 
 ## Benchmark
 
-The same agent answers the same question on the same page twice: once reading, clicking and filling with
-DOM snapshots, once with only the WebMCP tools the page registers. Same model, prompt and step limit in
-both arms; graded by facts in the answer and page state, never by an LLM. On the best case so far,
-WebMCP used **97× fewer tokens**. Every question, both arms and every model are
-[published](site/src/lib/content/bench), losses included.
+Same model, prompt and step limit; one arm reads the page through DOM snapshots, the other only calls the
+WebMCP tools the page registers. 35 questions on 7 sites (Cloudflare, Notion and Allbirds use their own
+tools), 3 runs each, graded by facts in the answer, never by an LLM.
+
+| Model | Solved | Tokens per run | Time per run |
+|---|---|---|---|
+| GPT-6.1 Sol | 95% → **100%** | 11.6k → **3.8k** | 7.1 s → **4.8 s** |
+| GPT-6 Luna | 93% → **100%** | 18.3k → **3.2k** | 7.2 s → **4.2 s** |
+
+Best case: 97× fewer tokens (a Cloudflare docs question). Not every case wins: on the WooCommerce demo store,
+whose tools return more than a page snapshot, WebMCP used the same or more tokens.
+[Every question, both arms, every model.](site/src/lib/content/bench)
+
+## More ways in
 
 ```sh
-just setup
-OPENAI_API_KEY=...    just bench                              # gpt-6-luna, effort medium, 3 runs per question
-ANTHROPIC_API_KEY=... just bench --model claude-haiku-5-5
-GEMINI_API_KEY=...    just bench --model gemini-3.8-flash
+npm i webmcpx                          # import { register } from "webmcpx"; await register();
+npx skills add webmcpx/webmcpx -y      # teach your coding agent to add and check WebMCP tools
+cargo install webmcpx                  # the linter (needs Rust); webmcpx lint src/ --format json
 ```
 
-Questions live in [`bench/tasks`](bench/tasks) and local test sites in [`bench/sites`](bench/sites).
-See [bench/AGENTS.md](bench/AGENTS.md) for the rules every question follows.
+Or paste this into your coding agent: *Add WebMCP to this site with webmcpx: run
+`npx skills add webmcpx/webmcpx -y`, follow the skill, then check that the tools show up in Chrome DevTools ›
+Application › WebMCP.*
 
-## Repository
-
-| Path | What | Published as |
-|---|---|---|
-| `crates/webmcpx-core` | The contract: name rules, limits, result envelope, error codes (`no_std`) | [crates.io](https://crates.io/crates/webmcpx-core) |
-| `crates/webmcpx-std` | The standard tools, as pure functions (`no_std`) | [crates.io](https://crates.io/crates/webmcpx-std) |
-| `crates/webmcpx-lint` | Lint rules, one file each | [crates.io](https://crates.io/crates/webmcpx-lint) |
-| `crates/webmcpx` | The CLI | [crates.io](https://crates.io/crates/webmcpx) |
-| `crates/webmcpx-wasm` | The standard tools for the browser | inside the npm package |
-| `packages/webmcpx` | The npm loader: the public browser API | [npm](https://www.npmjs.com/package/webmcpx) |
-| `crates/webmcpx-bench` | Benchmark harness, local server and the scan API | not published |
-| `site/` | [webmcpx.dev](https://webmcpx.dev) (SvelteKit, prerendered) | [deploy/](deploy) |
-
-Everything is checked by one command, the same one CI runs: `just check`.
-
-## Self-hosting the site and scanner
-
-[`deploy/`](deploy) runs webmcpx.dev: distroless, nonroot images behind a Cloudflare Tunnel (no open
-ports), with the scan browser isolated on a network that can only reach public addresses through an
-egress filter.
-
-```sh
-echo "TUNNEL_TOKEN=<token>" > deploy/.env
-docker compose -f deploy/compose.yaml --env-file deploy/.env up -d --build
-```
-
-See [deploy/README.md](deploy/README.md) for the security model and a rootless setup.
-
-## Using an AI coding agent?
-
-`npx skills add webmcpx/webmcpx` installs [the webmcpx skill](skills/webmcpx/SKILL.md), so your agent can
-add WebMCP tools to your app and lint them.
+Got a scan result you disagree with? [Open an issue](https://github.com/webmcpx/webmcpx/issues/new/choose).
+That's the most useful feedback there is.
 
 ## Community
 
-- **Contributing:** start with [CONTRIBUTING.md](CONTRIBUTING.md). Ideas the WebMCP spec repo closes as out
-  of scope (tools, conventions, rules) are welcome here as proposals.
-- **Security:** please report vulnerabilities privately, as described in [SECURITY.md](SECURITY.md).
-- **Conduct:** everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
-- **Bugs and ideas:** [open an issue](https://github.com/webmcpx/webmcpx/issues/new/choose).
+[CONTRIBUTING.md](CONTRIBUTING.md) · [Security](SECURITY.md) · [Code of Conduct](CODE_OF_CONDUCT.md) ·
+[Self-hosting the site and scanner](deploy/README.md) · [For agents: llms.txt](https://webmcpx.dev/llms.txt)
 
-## License
-
-[MIT](LICENSE). The name and logos are covered by the [trademark policy](TRADEMARK.md). webmcpx is an
-independent project, not affiliated with or endorsed by W3C, Google, Microsoft, Anthropic or the Model
-Context Protocol project.
+WebMCP is a W3C Community Group draft (2 November 2026), not a W3C standard. webmcpx tracks it and is
+pre-1.0. [MIT](LICENSE); the name and logos follow the [trademark policy](TRADEMARK.md). An independent
+project, not affiliated with or endorsed by W3C, Google, Microsoft, OpenAI, Anthropic or the Model Context
+Protocol project.

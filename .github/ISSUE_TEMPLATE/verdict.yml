@@ -1,0 +1,32 @@
+name: Wrong scan verdict
+description: The scanner at webmcpx.dev got your site wrong (tools missing, a lint error that isn't one, a bad token count).
+title: "Verdict: <site>"
+labels: [scanner]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: Site
+      description: The URL you scanned.
+      placeholder: https://example.com/
+    validations:
+      required: true
+  - type: dropdown
+    id: what
+    attributes:
+      label: What's wrong
+      options:
+        - It registers tools, but the scan found none
+        - The scan lists tools it doesn't have
+        - A lint finding is wrong
+        - The token count is off
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What you expected, and how you checked (for example DevTools › Application › WebMCP).
+    validations:
+      required: true

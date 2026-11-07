@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Scan a site
+    url: https://webmcpx.dev
+    about: See which WebMCP tools a site registers and what the linter thinks, before opening an issue.
+  - name: Report a security problem
+    url: https://github.com/webmcpx/webmcpx/security/advisories/new
+    about: Please report vulnerabilities privately, not as an issue.
