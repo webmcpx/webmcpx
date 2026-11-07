@@ -18,6 +18,7 @@
 	import Section from '#lib/components/ui/Section.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import Tabs from '#lib/components/ui/Tabs.svelte';
+	import { REPO } from '#lib/content/site.ts';
 	import type { Highlighted } from '#lib/content/snippets.ts';
 	import {
 		compare,
@@ -40,10 +41,13 @@
 		sites: BenchSite[];
 		/** Per question: the site's WebMCP tools and the calls the agent made. */
 		tools: Record<string, QuestionTools>;
+		/** Questions in the whole run, of which `sites` shows a selection. */
+		totalQuestions: number;
 		reproduce: Highlighted;
 	}
 
-	let { results, sites, tools, reproduce }: Props = $props();
+	let { results, sites, tools, totalQuestions, reproduce }: Props = $props();
+	const shown = $derived(sites.reduce((n, s) => n + s.tasks.length, 0));
 
 	const all = $derived(rows(results));
 	// Sites come best case first (see sites.ts), so the first one is shown by default, already in the
@@ -128,8 +132,17 @@
 	id="proof"
 	kicker="Benchmark · {results.model}"
 	title="Same agent. Same question."
-	lead="Sites are sorted by their biggest saving, so the best case comes first. One agent reads, clicks and fills using page snapshots; the other calls the site's WebMCP tools."
+	lead="One agent reads, clicks and fills using page snapshots; the other calls the site's WebMCP tools. Biggest savings first."
 >
+	<p class="-mt-6 mb-10 text-sm text-ink-3">
+		Selected cases: {shown} of {totalQuestions} questions, where WebMCP used at most half the tokens.
+		<a
+			href="{REPO}/blob/main/site/src/lib/content/bench.json"
+			class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
+			>All results</a
+		>
+		are public, or run it yourself with <code class="font-mono text-ink">just bench</code>.
+	</p>
 	{#if sites.length}
 		<Tabs
 			{items}

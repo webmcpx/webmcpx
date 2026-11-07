@@ -68,6 +68,10 @@ tests/                       Playwright e2e against the prerendered build
   Tools and calls come from the same attempt. `Tabs` puts every panel in the HTML and hides inactive ones
   only when JavaScript runs, so all of it reads without JavaScript. Schema 4 runs record the tools the agent was given; for older runs the page uses
   `lib/content/tools.json` (`just bench-tools`, a dated snapshot) and says it was captured after the run.
+- The benchmark section shows selected cases (owner's decision): questions where webmcpx used at most half
+  the tokens and solved at least as often (`showcase()` in `features/benchmark/sites.ts`); sites without one
+  are hidden. The rule, the "N of M questions" count and the link to the full results must stay visible
+  next to it, and no number on the page may be computed over the selection as if it were the whole run.
 - `lib/content/issues.ts`: every row must describe what the code does today.
 - Words follow the WebMCP draft (Draft Community Group Report, 2 November 2026): tool, `name`/`title`/
   `description`, `inputSchema`, annotations (`readOnlyHint`, `untrustedContentHint`, `consequentialHint`),

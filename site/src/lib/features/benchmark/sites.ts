@@ -64,3 +64,20 @@ export function bySite(results: Results): BenchSite[] {
 	}));
 	return sites.sort((a, b) => bestGain(b) - bestGain(a));
 }
+
+/** A question the page showcases: webmcpx used at most 1/`min` of the tokens and solved at least as often. */
+export const SHOWCASE_MIN_SAVING = 2;
+
+export function impressive(t: SiteTask, min = SHOWCASE_MIN_SAVING): boolean {
+	return !!t.baseline && !!t.webmcp && gain(t) >= min && t.webmcp.success_rate >= t.baseline.success_rate;
+}
+
+/**
+ * The landing's selection: only impressive questions, and only sites that have one, still best case first.
+ * The page says it is a selection and links to the full results; nothing here changes the published file.
+ */
+export function showcase(sites: BenchSite[], min = SHOWCASE_MIN_SAVING): BenchSite[] {
+	return sites
+		.map((s) => ({ ...s, tasks: s.tasks.filter((t) => impressive(t, min)) }))
+		.filter((s) => s.tasks.length > 0);
+}

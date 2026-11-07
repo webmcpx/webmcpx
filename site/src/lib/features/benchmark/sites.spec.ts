@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import bench from '#lib/content/bench.json';
 import { parse, type ArmSummary, type Results, type TaskInfo } from './bench.ts';
-import { bySite, gain, siteKey } from './sites.ts';
+import { bySite, gain, showcase, siteKey } from './sites.ts';
 
 const arm = (tokens: number, success_rate: number, cost_usd: number | null = 0.001): ArmSummary => ({
 	runs: 3,
@@ -73,5 +73,33 @@ describe('bySite', () => {
 		);
 		const best = sites.map((s) => Math.max(...s.tasks.map(gain)));
 		expect(best).toEqual([...best].sort((a, b) => b - a));
+	});
+});
+
+describe('showcase', () => {
+	it('keeps only questions with at least a 2x saving and no loss in solved rate', () => {
+		const sites = bySite(
+			results(
+				{
+					big: { baseline: arm(100, 1), webmcp: arm(10, 1) },
+					small: { baseline: arm(100, 1), webmcp: arm(80, 1) },
+					worse: { baseline: arm(100, 1), webmcp: arm(10, 0.5) },
+					lost: { baseline: arm(10, 1), webmcp: arm(30, 1) }
+				},
+				{
+					big: { prompt: 'a', site: 'docs' },
+					small: { prompt: 'b', site: 'docs' },
+					worse: { prompt: 'c', site: 'docs' },
+					lost: { prompt: 'd', site: 'store' }
+				}
+			)
+		);
+		const shown = showcase(sites);
+		expect(shown.map((s) => [s.id, s.tasks.map((t) => t.task)])).toEqual([['docs', ['big']]]);
+	});
+
+	it('every showcased question of the published run saves at least 2x', () => {
+		for (const site of showcase(bySite(parse(bench))))
+			for (const t of site.tasks) expect(gain(t), t.task).toBeGreaterThanOrEqual(2);
 	});
 });

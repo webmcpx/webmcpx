@@ -4,7 +4,7 @@
 import data from '#lib/content/bench.json';
 import snapshot from '#lib/content/tools.json';
 import { parse } from '#lib/features/benchmark/bench.ts';
-import { bySite } from '#lib/features/benchmark/sites.ts';
+import { bySite, showcase } from '#lib/features/benchmark/sites.ts';
 import { toolsFor } from '#lib/features/benchmark/tools.ts';
 import { SNIPPETS } from '#lib/content/snippets.ts';
 import { highlightAll } from '#lib/server/highlight.ts';
@@ -17,6 +17,8 @@ export const load: PageServerLoad = async () => {
 		tools: toolsFor(full, snapshot),
 		code: await highlightAll(SNIPPETS),
 		results,
-		sites: bySite(results)
+		// The landing shows selected cases (see showcase()); the page links to the full results.
+		sites: showcase(bySite(results)),
+		totalQuestions: Object.keys(results.summary.tasks).length
 	};
 };

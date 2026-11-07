@@ -122,8 +122,8 @@ test('logos scan their site, and shared links rerun a scan', async ({ page }) =>
 test('the detail tabs switch metrics and only show the selected site', async ({ page }) => {
 	await page.goto('/');
 	const proof = page.locator('#proof');
-	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
-	const details = proof.getByRole('tablist', { name: 'Details for Orbit docs' });
+	await proof.getByRole('tab', { name: /specification\.website/ }).click();
+	const details = proof.getByRole('tablist', { name: 'Details for specification.website' });
 	await expect(details.getByRole('tab')).toHaveText(['Tokens', 'Time', 'Steps', 'Cost', 'Tools', 'Method']);
 	await details.getByRole('tab', { name: 'Time' }).click();
 	const table = proof.getByRole('table').filter({ hasText: 'seconds per run' });
@@ -132,7 +132,7 @@ test('the detail tabs switch metrics and only show the selected site', async ({ 
 	await expect(table).not.toContainText('Notion');
 	await details.getByRole('tab', { name: 'Method' }).click();
 	await expect(
-		proof.getByText('A local test site: its tools come from webmcpx.').filter({ visible: true })
+		proof.getByText('A live site: it ships its own WebMCP tools.').filter({ visible: true })
 	).toBeVisible();
 });
 
@@ -156,7 +156,7 @@ test('a site with several questions rotates them, and the rotation can be paused
 	await page.clock.install();
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
-	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
+	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	const dots = proof.getByRole('button', { name: /^Question \d of 5$/ });
 	await expect(dots).toHaveCount(5);
 	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
@@ -199,7 +199,7 @@ test('no automatic rotation for people who prefer reduced motion', async ({ page
 	await page.clock.install();
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
-	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
+	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(12000);
 	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
@@ -212,18 +212,22 @@ test('switching sites starts the question rotation over', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
-	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
+	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	await proof.getByRole('button', { name: 'Question 4 of 5' }).click();
-	await proof.getByRole('tab', { name: /WooCommerce/ }).click();
-	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
+	await proof.getByRole('tab', { name: /Kiln/ }).click();
+	await expect(proof.getByRole('button', { name: 'Question 1 of 4' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
 });
 
-test('the page says the first site is the best case', async ({ request }) => {
-	const html = await (await request.get('/')).text();
-	expect(html).toContain('sorted by their biggest saving');
+test('the page says its benchmark shows selected cases and links to all results', async ({ page }) => {
+	await page.goto('/#proof');
+	const proof = page.locator('#proof');
+	await expect(proof.getByText(/Selected cases: \d+ of \d+ questions/)).toBeVisible();
+	await expect(proof.getByRole('link', { name: 'All results' })).toHaveAttribute('href', /bench\.json$/);
+	// Sites without an impressive case are not shown.
+	await expect(proof.getByRole('tab', { name: /WooCommerce/ })).toHaveCount(0);
 });
 
 test('the Tools tab shows the site tools, their descriptions and what the agent called', async ({ page }) => {

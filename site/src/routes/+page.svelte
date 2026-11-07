@@ -24,7 +24,13 @@
 
 <Hero />
 <LogoWall />
-<Proof results={page.results} sites={page.sites} tools={page.tools} reproduce={page.code.reproduce} />
+<Proof
+	results={page.results}
+	sites={page.sites}
+	tools={page.tools}
+	totalQuestions={page.totalQuestions}
+	reproduce={page.code.reproduce}
+/>
 <Fix scriptTag={page.code.scriptTag} />
 <Issues />
 <FinalCta />
