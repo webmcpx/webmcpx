@@ -44,6 +44,9 @@ pub struct Report {
     pub diagnostics: Vec<Finding>,
     /// Estimated tokens of the text snapshot a DOM-reading agent gets for this page.
     pub page_tokens: usize,
+    /// The site's icon as a small `data:image/...` URI, fetched by the scan browser (through the egress
+    /// proxy), so the page showing the report never requests anything from the scanned site.
+    pub favicon: Option<String>,
     pub elapsed_ms: u64,
 }
 
@@ -210,19 +213,64 @@ impl Scanner {
         let tools = registered_tools(page, TOOL_WAIT).await.map_err(failed)?;
         let snapshot = page.eval("__bench.snapshot()").await.map_err(failed)?;
         let title = page.eval("document.title").await.map_err(failed)?;
-        Ok(report(
+        let mut report = report(
             url.as_str(),
             final_url,
             title.as_str().unwrap_or_default(),
             &tools,
             snapshot.as_str().unwrap_or_default(),
-        ))
+        );
+        // Best effort: a site without a readable icon still gets its report.
+        report.favicon = page
+            .eval(FAVICON_JS)
+            .await
+            .ok()
+            .and_then(|v| v.as_str().map(str::to_owned))
+            .filter(|uri| is_icon_data_uri(uri));
+        Ok(report)
     }
 }
 
 #[expect(clippy::needless_pass_by_value, reason = "used as `map_err(failed)`")]
 fn failed(e: anyhow::Error) -> ScanError {
     ScanError::Failed(format!("{e:#}"))
+}
+
+/// Reads the page's declared icon (else `/favicon.ico`) as a data URI, if it is a small image.
+const FAVICON_JS: &str = r#"(async () => {
+  const link = document.querySelector('link[rel~="icon" i], link[rel="apple-touch-icon" i]');
+  const href = link?.href || new URL('/favicon.ico', location.origin).href;
+  try {
+    const res = await fetch(href, { credentials: 'omit' });
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    if (blob.size > 65536) return null;
+    return await new Promise((done) => {
+      const reader = new FileReader();
+      reader.onload = () => done(reader.result);
+      reader.onerror = () => done(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+})()"#;
+
+/// Largest icon accepted, as a data URI (base64 of 64 KiB, plus the header).
+const MAX_ICON_URI: usize = 90_000;
+
+/// Only small raster or SVG images: `<img>` never runs scripts, but anything else is dropped.
+pub fn is_icon_data_uri(uri: &str) -> bool {
+    const TYPES: [&str; 7] = [
+        "data:image/png;",
+        "data:image/x-icon;",
+        "data:image/vnd.microsoft.icon;",
+        "data:image/svg+xml;",
+        "data:image/jpeg;",
+        "data:image/webp;",
+        "data:image/gif;",
+    ];
+    uri.len() <= MAX_ICON_URI && TYPES.iter().any(|t| uri.starts_with(t))
 }
 
 /// Builds the report from what the page exposed. Pure, so it is tested without a browser.
@@ -262,6 +310,7 @@ pub fn report(
         tools,
         diagnostics,
         page_tokens: snapshot.chars().count().div_ceil(CHARS_PER_TOKEN),
+        favicon: None,
         elapsed_ms: 0,
     }
 }
@@ -390,6 +439,18 @@ mod tests {
         let rules: Vec<_> = r.diagnostics.iter().map(|d| d.rule).collect();
         assert!(rules.contains(&"invalid-name"), "{rules:?}");
         assert!(rules.contains(&"missing-description"), "{rules:?}");
+    }
+
+    #[test]
+    fn only_small_image_data_uris_are_icons() {
+        assert!(is_icon_data_uri("data:image/png;base64,iVBORw0KGgo="));
+        assert!(is_icon_data_uri("data:image/svg+xml;base64,PHN2Zz4="));
+        assert!(!is_icon_data_uri("data:text/html;base64,PHNjcmlwdD4="));
+        assert!(!is_icon_data_uri("https://example.com/favicon.ico"));
+        assert!(!is_icon_data_uri(&format!(
+            "data:image/png;base64,{}",
+            "A".repeat(MAX_ICON_URI)
+        )));
     }
 
     #[test]
