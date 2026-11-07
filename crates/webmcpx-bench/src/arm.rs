@@ -3,8 +3,9 @@
 //! - `webmcp`: only the tools the page registered with `document.modelContext`.
 
 use std::fmt;
+use std::time::Duration;
 
-use anyhow::{Context as _, Result};
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -140,23 +141,7 @@ fn baseline_tools() -> Vec<ToolSpec> {
 /// Waits for the page to register its tools (up to 10 s; live sites register after hydration),
 /// then lists them.
 pub async fn webmcp_tools(page: &Page) -> Result<Vec<ToolSpec>> {
-    let mut listed = Value::Null;
-    let mut stable = 0;
-    for _ in 0..400 {
-        let now = page.eval("__webmcpHost.list()").await?;
-        // Registration is async; take the list once it is non-empty and unchanged for 100 ms.
-        stable = if now == listed && now.as_array().is_some_and(|a| !a.is_empty()) {
-            stable + 1
-        } else {
-            0
-        };
-        listed = now;
-        if stable == 4 {
-            break;
-        }
-        tokio::time::sleep(std::time::Duration::from_millis(25)).await;
-    }
-    let tools = listed.as_array().context("the page registered no tools")?;
+    let tools = registered_tools(page, Duration::from_secs(10)).await?;
     let mut specs: Vec<ToolSpec> = tools
         .iter()
         .map(|t| ToolSpec {
@@ -168,6 +153,35 @@ pub async fn webmcp_tools(page: &Page) -> Result<Vec<ToolSpec>> {
     anyhow::ensure!(!specs.is_empty(), "the page registered no tools");
     specs.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(specs)
+}
+
+/// The tools the page registered with the reference host (`name`, `description`, `inputSchema`,
+/// `annotations`), as soon as the list is non-empty and unchanged for 100 ms, or whatever is there
+/// after `wait` (possibly nothing).
+pub async fn registered_tools(page: &Page, wait: Duration) -> Result<Vec<Value>> {
+    const POLL: Duration = Duration::from_millis(25);
+    let mut listed = Value::Null;
+    let mut stable = 0;
+    let deadline = tokio::time::Instant::now() + wait;
+    while tokio::time::Instant::now() < deadline {
+        let now = page.eval("__webmcpHost.list()").await?;
+        // Registration is async; take the list once it is non-empty and unchanged for 100 ms.
+        stable = if now == listed && now.as_array().is_some_and(|a| !a.is_empty()) {
+            stable + 1
+        } else {
+            0
+        };
+        listed = now;
+        if stable == 4 {
+            break;
+        }
+        tokio::time::sleep(POLL).await;
+    }
+    match listed {
+        Value::Array(tools) => Ok(tools),
+        Value::Null => Ok(Vec::new()),
+        other => anyhow::bail!("unexpected tool list: {other}"),
+    }
 }
 
 #[cfg(test)]
