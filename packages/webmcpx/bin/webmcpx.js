@@ -115,6 +115,7 @@ async function main() {
     } catch {
       usage(`The input is not JSON: ${json}`);
     }
+    if (!input || typeof input !== "object" || Array.isArray(input)) usage(`The input must be a JSON object, like '{"query": "pricing"}'.`);
   }
 
   const session = new Session(options);

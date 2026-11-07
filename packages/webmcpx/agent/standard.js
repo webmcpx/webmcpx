@@ -12,10 +12,15 @@ export const READ_PAGE = `(${readPage})`;
 
 let engine;
 const load = () =>
-  (engine ??= import("../wasm/webmcpx_wasm.js").then(async (m) => {
-    await m.default({ module_or_path: readFileSync(new URL("../wasm/webmcpx_wasm_bg.wasm", import.meta.url)) });
-    return m;
-  }));
+  (engine ??= import("../wasm/webmcpx_wasm.js")
+    .then(async (m) => {
+      await m.default({ module_or_path: readFileSync(new URL("../wasm/webmcpx_wasm_bg.wasm", import.meta.url)) });
+      return m;
+    })
+    .catch((e) => {
+      engine = undefined;
+      throw e;
+    }));
 
 const envelope = (body) => JSON.stringify(body);
 const err = (code, message) => envelope({ ok: false, error: { code, message, retryable: CODES[code] } });
@@ -29,17 +34,24 @@ export const standardTools = () =>
 
 /**
  * Runs a standard tool. `read(what)` returns `readPage(what)` evaluated in the page.
- * Resolves with the same envelope the in-page tool would return.
+ * Like the in-page tools, it never rejects: any input and any failure yield an envelope.
  */
-export async function runStandard(name, input = {}, read) {
-  if (name === "get_page_context") return envelope({ ok: true, data: await read("context") });
-  const page = await read("blocks");
-  const m = await load();
-  if (name === "search_page") {
-    return typeof input.query === "string"
-      ? m.search(page, input.query, input.limit ?? 0)
-      : err("INVALID_INPUT", "`query` must be a string");
+export async function runStandard(name, input, read) {
+  const args = input && typeof input === "object" && !Array.isArray(input) ? input : {};
+  try {
+    if (name === "get_page_context") return envelope({ ok: true, data: await read("context") });
+    if (name === "search_page" && typeof args.query !== "string") return err("INVALID_INPUT", "`query` must be a string");
+    const page = await read("blocks");
+    let m;
+    try {
+      m = await load();
+    } catch (e) {
+      return err("UNAVAILABLE", `the text engine could not load: ${e?.message ?? e}`);
+    }
+    if (name === "search_page") return m.search(page, args.query, args.limit ?? 0);
+    if (name === "fetch_as_markdown") return m.markdown(page, String(args.cursor ?? ""), args.max_chars ?? 0);
+    return err("NOT_FOUND", `no standard tool named ${name}`);
+  } catch (e) {
+    return err("UNAVAILABLE", String(e?.message ?? e));
   }
-  if (name === "fetch_as_markdown") return m.markdown(page, String(input.cursor ?? ""), input.max_chars ?? 0);
-  return err("NOT_FOUND", `no standard tool named ${name}`);
 }

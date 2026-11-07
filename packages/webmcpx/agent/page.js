@@ -86,7 +86,8 @@ const timeout = (ms, what) =>
   });
 
 /** Whether an error means the page navigated or the tool list was replaced since it was read. */
-export const stale = (e) => /Could not find object|Cannot find context|context was destroyed|Inspected target navigated/i.test(e?.message);
+export const stale = (e) =>
+  /stale tool list|Could not find object|Cannot find context|context was destroyed|Inspected target navigated/i.test(e?.message);
 
 export class Page {
   #cdp;
@@ -195,16 +196,24 @@ export class Page {
     const previous = this.#handle;
     this.#handle = result.objectId;
     if (previous) this.#send("Runtime.releaseObject", { objectId: previous }).catch(() => {});
-    return list.value;
+    // Each tool names the list it came from (a call never runs an index against a newer list) and its
+    // rank among same-named tools of its origin (frames), to find it again in a newer list.
+    const seen = new Map();
+    return list.value.map((tool) => {
+      const key = `${tool.origin} ${tool.name}`;
+      const nth = seen.get(key) ?? 0;
+      seen.set(key, nth + 1);
+      return { ...tool, nth, list: result.objectId };
+    });
   }
 
-  /** Runs the tool at `index` of the last list `tools()` returned; resolves with its result text. */
-  async call(index, input) {
-    if (!this.#handle) throw new Error("no tool list yet");
+  /** Runs a tool from the latest list `tools()` returned; resolves with its result text. */
+  async call(tool, input) {
+    if (!this.#handle || tool.list !== this.#handle) throw new Error("stale tool list");
     const run = this.#send("Runtime.callFunctionOn", {
       objectId: this.#handle,
       functionDeclaration: execute.toString(),
-      arguments: [{ value: index }, { value: input ?? {} }],
+      arguments: [{ value: tool.index }, { value: input ?? {} }],
       awaitPromise: true,
       returnByValue: true,
       userGesture: true,
@@ -222,4 +231,4 @@ export class Page {
 
 const describeException = (d) => d.exception?.description?.split("\n")[0] ?? d.text;
 
-/** @typedef {{index: number, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string}} PageTool */
+/** @typedef {{index: number, nth: number, list: string, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string}} PageTool */

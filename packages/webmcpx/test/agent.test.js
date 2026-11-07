@@ -8,6 +8,7 @@ import { after, before, test } from "node:test";
 import { promisify } from "node:util";
 import { findBrowser } from "../agent/browser.js";
 import { normalize } from "../agent/session.js";
+import { runStandard } from "../agent/standard.js";
 
 const BIN = new URL("../bin/webmcpx.js", import.meta.url).pathname;
 const skip = findBrowser() ? false : "no Chromium-based browser installed (set WEBMCPX_CHROME)";
@@ -182,9 +183,28 @@ test("overlapping requests each get their own page", { skip, timeout: 90_000 }, 
       mcp.rpc("tools/call", { name: "open_page", arguments: { url: `${origin}/shop` } }),
     ]);
     assert.deepEqual(pong.result, {});
+
+    // A call queued behind a navigation never runs on the next page's tools.
+    const [, stale] = await Promise.all([
+      mcp.rpc("tools/call", { name: "open_page", arguments: { url: `${origin}/names` } }),
+      mcp.rpc("tools/call", { name: "add_to_cart", arguments: { sku: "MUG-1" } }),
+    ]);
+    assert.equal(stale.result.isError, true);
+    assert.match(stale.result.content[0].text, /the page changed and no longer has the tool "add_to_cart"/);
   } finally {
     mcp.close();
   }
+});
+
+test("standard tools answer with an envelope whatever the input or failure", async () => {
+  const read = async (what) => (what === "context" ? { title: "T" } : "p\x1fMugs ship in two days.\x1f\x1e");
+  const bad = JSON.parse(await runStandard("search_page", null, read));
+  assert.equal(bad.error.code, "INVALID_INPUT");
+  const found = JSON.parse(await runStandard("search_page", { query: "ship" }, read));
+  assert.equal(found.ok, true);
+  const broken = JSON.parse(await runStandard("fetch_as_markdown", {}, async () => { throw new Error("tab closed"); }));
+  assert.deepEqual(broken.error, { code: "UNAVAILABLE", message: "tab closed", retryable: true });
+  assert.equal(JSON.parse(await runStandard("get_page_context", [], read)).data.title, "T");
 });
 
 test("a site with no tools and a strict CSP still gets the standard tools", { skip, timeout: 90_000 }, async () => {
@@ -209,6 +229,9 @@ test("the CLI explains its usage errors and exits 2", async () => {
   assert.match(none.stderr, /Give a URL/);
   const json = await cli("call", "example.com", "search_page", "{nope");
   assert.equal(json.code, 2);
+  const notObject = await cli("call", "example.com", "search_page", "null");
+  assert.equal(notObject.code, 2);
+  assert.match(notObject.stderr, /must be a JSON object/);
   const help = await cli("--help");
   assert.match(help.stdout, /claude mcp add webmcpx -- npx -y webmcpx mcp/);
 });

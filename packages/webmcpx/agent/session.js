@@ -56,12 +56,15 @@ export class Session {
       const page = this.#page;
       if (tool.standard) return runStandard(tool.name, input, (what) => page.read(what));
       try {
-        return await page.call(tool.index, input);
+        return await page.call(tool, input);
       } catch (e) {
         if (!stale(e)) throw e;
-        const again = ((await page.tools()) ?? []).find((t) => t.name === tool.name && t.origin === tool.origin);
-        if (!again) throw new Error(`the page no longer has a tool named "${tool.name}"`);
-        return page.call(again.index, input);
+        // The list changed since the tool was listed: run the same tool (name, origin, rank) or nothing.
+        const again = ((await page.tools()) ?? []).find(
+          (t) => t.name === tool.name && t.origin === tool.origin && t.nth === tool.nth,
+        );
+        if (!again) throw new Error(`the page changed and no longer has the tool "${tool.name}": call open_page again`);
+        return page.call(again, input);
       }
     });
   }
