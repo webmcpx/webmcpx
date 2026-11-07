@@ -36,6 +36,9 @@ const TYPES = {
   object: (v) => v !== null && typeof v === "object" && !Array.isArray(v),
 };
 
+const canonical = (v) =>
+  JSON.stringify(v, (_, x) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort()) : x));
+
 // JSON equality, by content.
 const same = (a, b) =>
   a === b ||
@@ -88,7 +91,9 @@ function check(s, value, at = "input") {
     if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
     if (value <= s.exclusiveMinimum) return `${at} must be more than ${s.exclusiveMinimum}`;
     if (value >= s.exclusiveMaximum) return `${at} must be less than ${s.exclusiveMaximum}`;
-    if (s.multipleOf && !Number.isInteger(value / s.multipleOf)) return `${at} must be a multiple of ${s.multipleOf}`;
+    // Within float error: 4.1 is a multiple of 0.01 even though 4.1 / 0.01 is 409.99999999999994.
+    const q = s.multipleOf && value / s.multipleOf;
+    if (q && Math.abs(q - Math.round(q)) > 1e-9 * Math.max(1, Math.abs(q))) return `${at} must be a multiple of ${s.multipleOf}`;
   }
   if (typeof value === "string") {
     if (value.length < s.minLength) return `${at} must have at least ${s.minLength} chars`;
@@ -98,8 +103,10 @@ function check(s, value, at = "input") {
   if (Array.isArray(value)) {
     if (value.length < s.minItems) return `${at} must have at least ${s.minItems} items`;
     if (value.length > s.maxItems) return `${at} must have at most ${s.maxItems} items`;
-    if (s.uniqueItems && value.some((v, i) => value.findIndex((w) => same(v, w)) !== i)) return `${at} must not repeat items`;
-    for (let i = 0; i < value.length; i++) {
+    // Linear: each item's canonical JSON (object keys sorted) in a Set; it counts against the step budget.
+    steps += s.uniqueItems ? value.length : 0;
+    if (s.uniqueItems && new Set(value.map(canonical)).size !== value.length) return `${at} must not repeat items`;
+    for (let i = 0; s.items !== undefined && i < value.length; i++) {
       const problem = check(s.items, value[i], `${at}[${i}]`);
       if (problem) return problem;
     }
