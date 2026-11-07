@@ -54,9 +54,12 @@ tests/                       Playwright e2e against the prerendered build
 
 ## Data and copy
 
-- `lib/content/bench.json` is copied from `bench/results/latest.json` by `just bench`. Never edit it by hand
-  and never publish numbers that did not come from a run. Formatting lives in `features/benchmark/bench.ts`
-  (the summary itself is computed in Rust, `crates/webmcpx-bench/src/report.rs`). Losses are shown, not hidden.
+- `lib/content/bench.json` is copied from `bench/results/latest.json` by `just bench`; never edit it by hand
+  and never publish numbers that did not come from a run. `just bench` also writes `lib/content/tasks.json`
+  (where each task ran and what it asked; run `just bench-tasks` after editing `bench/tasks`). The page
+  groups results per site (`features/benchmark/sites.ts`); display names live in
+  `lib/content/benchSites.ts`. The summary itself is computed in Rust (`crates/webmcpx-bench/src/report.rs`).
+  Losses are shown, not hidden.
 - `lib/content/issues.ts`: every row must describe what the code does today.
 - `lib/content/sites.ts`: only sites the scanner verified, with the date; re-check before keeping one.
 

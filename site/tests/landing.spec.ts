@@ -65,7 +65,9 @@ test('fits a 390 px phone without horizontal scroll', async ({ page }) => {
 test('the benchmark numbers are in the prerendered HTML', async ({ request }) => {
 	const html = await (await request.get('/')).text();
 	expect(html).toMatch(/fewer tokens|more tokens/);
-	expect(html).toContain('notion request limit');
+	// The featured site and its question are named in the HTML, not added by JavaScript.
+	expect(html).toContain('Notion docs');
+	expect(html).toContain('How many requests per minute does the Notion API allow');
 });
 
 test('content is visible without JavaScript', async ({ browser }) => {
@@ -114,8 +116,30 @@ test('logos scan their site, and shared links rerun a scan', async ({ page }) =>
 
 test('the full benchmark switches metrics', async ({ page }) => {
 	await page.goto('/');
-	await page.getByText(/All \d+ tasks and how we measured/).click();
+	await page.getByText(/All \d+ tasks on one chart/).click();
 	const proof = page.locator('#proof');
 	await proof.getByRole('tab', { name: 'Time' }).click();
 	await expect(proof.getByRole('table')).toContainText('seconds per run');
+});
+
+test('the site filter shows each site with its own question and numbers', async ({ page }) => {
+	await page.goto('/#proof');
+	const proof = page.locator('#proof');
+	const sites = proof.getByRole('tablist', { name: 'Site' });
+	await expect(sites.getByRole('tab', { name: 'Notion docs' })).toHaveAttribute('aria-selected', 'true');
+
+	await sites.getByRole('tab', { name: 'Cloudflare docs' }).click();
+	await expect(proof.getByRole('heading', { name: 'Cloudflare docs' })).toBeVisible();
+	await expect(proof.getByText(/Workers KV/)).toBeVisible();
+
+	await sites.getByRole('tab', { name: 'Orbit docs' }).click();
+	await expect(proof.getByText('local fixture', { exact: true })).toBeVisible();
+	await expect(
+		proof.getByRole('list', { name: 'Questions on Orbit docs' }).getByRole('listitem')
+	).toHaveCount(4);
+
+	await sites.getByRole('tab', { name: 'All sites' }).click();
+	await expect(proof.getByRole('list', { name: 'Questions on All sites' }).getByRole('listitem')).toHaveCount(
+		13
+	);
 });
