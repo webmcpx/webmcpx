@@ -54,12 +54,29 @@ impl Task {
     }
 
     /// Where the task runs, for listings: the fixture name or the live URL.
+    /// Where the task runs and what it asks, for readers of the results (the landing page).
+    pub fn info(&self) -> serde_json::Value {
+        let mut info = serde_json::json!({ "prompt": self.prompt });
+        if let Some(site) = &self.site {
+            info["site"] = site.as_str().into();
+        }
+        if let Some(url) = &self.url {
+            info["url"] = url.as_str().into();
+        }
+        info
+    }
+
     pub fn place(&self) -> &str {
         self.url
             .as_deref()
             .or(self.site.as_deref())
             .unwrap_or_default()
     }
+}
+
+/// `{id: info}` for every task, sorted by id (deterministic output).
+pub fn index(tasks: &[Task]) -> std::collections::BTreeMap<&str, serde_json::Value> {
+    tasks.iter().map(|t| (t.id.as_str(), t.info())).collect()
 }
 
 impl Check {
@@ -266,6 +283,27 @@ mod tests {
         assert!(
             err.contains("needs answer_contains, answer_any or state"),
             "{err}"
+        );
+    }
+
+    #[test]
+    fn index_exports_where_each_task_runs() {
+        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
+        let index = index(&tasks);
+        assert_eq!(index.len(), tasks.len());
+        let notion = &index["live-notion-request-limit"];
+        assert!(
+            notion["url"]
+                .as_str()
+                .unwrap()
+                .starts_with("https://developers.notion.com/")
+        );
+        assert!(notion.get("site").is_none());
+        assert_eq!(index["docs-deploy-timeout"]["site"], "docs");
+        assert!(
+            index
+                .values()
+                .all(|i| i["prompt"].as_str().is_some_and(|p| !p.is_empty()))
         );
     }
 }

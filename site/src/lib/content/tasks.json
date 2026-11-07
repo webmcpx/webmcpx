@@ -1,0 +1,54 @@
+{
+	"docs-config-path": {
+		"prompt": "Which environment variable makes Orbit read its config file from a different path?",
+		"site": "docs"
+	},
+	"docs-deploy-timeout": {
+		"prompt": "What is the default timeout of `orbit deploy`, and which flag changes it?",
+		"site": "docs"
+	},
+	"docs-exit-code": {
+		"prompt": "My CI step failed with orbit exit code 4. What does that mean?",
+		"site": "docs"
+	},
+	"docs-retained-releases": {
+		"prompt": "By default, how many past releases does Orbit keep for rollback?",
+		"site": "docs"
+	},
+	"live-allbirds-return-window": {
+		"prompt": "How many days do I have to return a pair of Allbirds shoes?",
+		"url": "https://www.allbirds.com/"
+	},
+	"live-cloudflare-kv-value-size": {
+		"prompt": "What is the maximum size of a single value stored in Cloudflare Workers KV?",
+		"url": "https://developers.cloudflare.com/"
+	},
+	"live-notion-request-limit": {
+		"prompt": "How many requests per minute does the Notion API allow per connection on plans other than Business and Enterprise?",
+		"url": "https://developers.notion.com/guides/get-started/overview"
+	},
+	"live-spec-contrast": {
+		"prompt": "What minimum contrast ratio does this site's spec require for normal-size body text?",
+		"url": "https://specification.website/"
+	},
+	"live-woo-cheapest-in-stock": {
+		"prompt": "What is the cheapest product in this store that is in stock, and what does it cost?",
+		"url": "https://demo.openforagents.com/"
+	},
+	"live-woo-out-of-stock": {
+		"prompt": "Which product in this store is out of stock?",
+		"url": "https://demo.openforagents.com/"
+	},
+	"store-cart-total": {
+		"prompt": "Add one Stoneware Teapot and one Speckled Bowl to my cart, then tell me the cart total.",
+		"site": "store"
+	},
+	"store-cheapest-blue-mug": {
+		"prompt": "Add two of the cheapest blue mug to my cart.",
+		"site": "store"
+	},
+	"store-restock-date": {
+		"prompt": "When will the Ash Glaze Vase be back in stock? Give the date as the store writes it.",
+		"site": "store"
+	}
+}

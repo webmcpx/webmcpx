@@ -73,6 +73,11 @@ review-reply reply:
 bench *args: wasm
     cargo run -q --release -p webmcpx-bench -- run {{args}}
     cp bench/results/latest.json site/src/lib/content/bench.json
+    just bench-tasks
+
+# Export task metadata (site or URL, prompt) for the landing; run after editing bench/tasks.
+bench-tasks:
+    cargo run -q --release -p webmcpx-bench -- tasks --json > site/src/lib/content/tasks.json
 
 # Landing: types, lint + format, unit tests, prerendered build, then e2e + axe in Chrome against the build.
 site: wasm

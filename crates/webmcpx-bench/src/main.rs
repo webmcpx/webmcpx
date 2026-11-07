@@ -68,8 +68,11 @@ enum Command {
         #[arg(long)]
         chrome: Option<PathBuf>,
     },
-    /// List tasks.
-    Tasks,
+    /// List tasks (tab-separated), or with `--json` an object `{id: {site | url, prompt}}` for the landing.
+    Tasks {
+        #[arg(long)]
+        json: bool,
+    },
     /// Call one WebMCP tool on a live page and print what the agent would get (for writing tasks).
     Call {
         url: String,
@@ -107,10 +110,19 @@ fn parse_price(s: &str) -> Result<Price, String> {
 async fn main() -> Result<()> {
     let root = repo_root();
     match Cli::parse().command {
-        Command::Tasks => {
+        Command::Tasks { json } => {
+            let tasks = task::load_dir(&root.join("bench/tasks"))?;
             let mut out = std::io::stdout().lock();
-            for t in task::load_dir(&root.join("bench/tasks"))? {
-                writeln!(out, "{}\t{}\t{}", t.id, t.place(), t.prompt)?;
+            if json {
+                writeln!(
+                    out,
+                    "{}",
+                    serde_json::to_string_pretty(&task::index(&tasks))?
+                )?;
+            } else {
+                for t in tasks {
+                    writeln!(out, "{}\t{}\t{}", t.id, t.place(), t.prompt)?;
+                }
             }
         }
         Command::Probe { urls, chrome } => {
