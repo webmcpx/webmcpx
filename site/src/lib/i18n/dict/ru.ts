@@ -1,4 +1,4 @@
-// Russian. Transcreated from en.ts (see the notes there). Numbers use a no-break space ( ) as the
+// Russian. Transcreated from en.ts (see the notes there). Numbers use a no-break space ( ) as the
 // thousands separator and a decimal comma; plurals give one/few/many/other for Intl.PluralRules('ru-RU').
 // Key term: "agent-ready" = «готов для агентов» (the marked phrase «для агентов»; «Готов» on short stamps).
 

@@ -9,6 +9,8 @@ export const trailingSlash = 'always';
 
 /** The page's language comes from its path: `/` is English, `/ja/...` Japanese. */
 export const load: LayoutLoad = async ({ params }) => {
-	const code = 'lang' in params && isLocale(params.lang) ? params.lang : DEFAULT_LOCALE;
+	// Read `params.lang` even when absent: SvelteKit then reruns this load when it appears or changes.
+	const lang = (params as { lang?: string }).lang;
+	const code = isLocale(lang) ? lang : DEFAULT_LOCALE;
 	return { code, m: await loadMessages(code) };
 };

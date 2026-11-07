@@ -52,6 +52,7 @@
 		<a
 			href={localized(unlocalized(page.url.pathname), offer.code)}
 			onclick={remember}
+			data-sveltekit-reload
 			class="font-bold underline underline-offset-4">{offer.action}</a
 		>
 		<button

@@ -85,4 +85,13 @@ test.describe('a visitor whose browser is in Portuguese', () => {
 		await page.reload();
 		await expect(page.locator('aside[lang="pt-BR"]')).toHaveCount(0);
 	});
+
+	test('accepting the offer opens the page in Portuguese', async ({ page }) => {
+		await page.goto('/brand/');
+		await page.locator('aside[lang="pt-BR"]').getByRole('link').click();
+		await expect(page).toHaveURL(/\/pt-br\/brand\/$/);
+		await expect(page.locator('html')).toHaveAttribute('lang', 'pt-BR');
+		await expect(page.getByRole('link', { name: 'Pular para o conteúdo' })).toHaveCount(1);
+		await expect(page.locator('aside[lang="pt-BR"]')).toHaveCount(0);
+	});
 });
