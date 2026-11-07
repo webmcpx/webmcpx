@@ -4,6 +4,16 @@ url = "https://www.allbirds.com/"
 prompt = "I bought my Allbirds in the US but I'm moving to London next month. Can I exchange them for another size over there?"
 
 [check]
-# The answer must tie the exchange to the country of purchase, in any wording.
-answer_contains = ["country"]
-answer_any = ["purchase", "purchased", "bought"]
+# The answer must state the restriction itself, in one of its wordings ("any country" must not pass).
+answer_any = [
+  "country of purchase",
+  "country where you bought",
+  "country where you purchased",
+  "country you bought",
+  "country you purchased",
+  "same country",
+  "country where the item was purchased",
+  "country where it was purchased",
+  "country where they were purchased",
+  "country where you made the purchase",
+]

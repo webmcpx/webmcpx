@@ -138,16 +138,40 @@ async fn attempt(
     result
 }
 
+/// What [`regrade`] did.
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct Regraded {
+    /// Runs whose grade changed.
+    pub changed: usize,
+    /// Tasks left as graded because today's task asks something else (prompt, site or URL changed
+    /// since the run): their answers answer the old question.
+    pub skipped: Vec<String>,
+}
+
 /// Re-applies today's answer checks to the answers a run recorded, for tasks graded on the answer alone
-/// (a `state` check needs the live page, so those runs keep their grade). Answers never change; only
-/// the grading does, identically for both arms. Returns how many runs changed grade.
-pub fn regrade(results: &mut report::Results, tasks: &[Task]) -> usize {
-    let mut changed = 0;
+/// (a `state` check needs the live page, so those runs keep their grade) and only where today's task
+/// still asks what the run asked (`results.tasks`). Answers never change; only the grading does,
+/// identically for both arms.
+pub fn regrade(results: &mut report::Results, tasks: &[Task]) -> Regraded {
+    let mut out = Regraded::default();
+    for task in tasks {
+        if results
+            .tasks
+            .get(&task.id)
+            .is_some_and(|recorded| *recorded != task.info())
+        {
+            out.skipped.push(task.id.clone());
+        }
+    }
     for run in &mut results.runs {
         let Some(task) = tasks.iter().find(|t| t.id == run.task) else {
             continue;
         };
-        if task.check.state.is_some() || run.harness_error.is_some() {
+        if out.skipped.contains(&task.id)
+            || !results.tasks.contains_key(&task.id)
+            || task.check.state.is_some()
+            || run.harness_error.is_some()
+        {
             continue;
         }
         let answer_ok = !task.check.has_answer_check()
@@ -159,11 +183,11 @@ pub fn regrade(results: &mut report::Results, tasks: &[Task]) -> usize {
         let success = run.outcome.stop == agent::Stop::Answered && answer_ok;
         if success != run.success {
             run.success = success;
-            changed += 1;
+            out.changed += 1;
         }
     }
     results.summary = report::Summary::of(&results.runs);
-    changed
+    out
 }
 
 #[cfg(test)]
@@ -209,7 +233,7 @@ mod tests {
             reasoning_effort: None,
             price_per_mtok: None,
             started_at: 0,
-            tasks: std::collections::BTreeMap::new(),
+            tasks: tasks.iter().map(|t| (t.id.clone(), t.info())).collect(),
             runs: vec![
                 run("unit", false, "20 MiB"),
                 run("unit", false, "20 GB"),
@@ -217,12 +241,39 @@ mod tests {
             ],
             summary: report::Summary::default(),
         };
-        assert_eq!(regrade(&mut results, &tasks), 1);
+        assert_eq!(
+            regrade(&mut results, &tasks),
+            Regraded {
+                changed: 1,
+                skipped: Vec::new()
+            }
+        );
         let grades: Vec<bool> = results.runs.iter().map(|r| r.success).collect();
         assert_eq!(grades, [true, false, false]);
         assert_eq!(
             results.summary.tasks["unit"][&Arm::Webmcp].success_rate,
             0.5
         );
+    }
+
+    #[test]
+    fn regrade_skips_tasks_that_changed_since_the_run() {
+        let mut edited = task("unit", r#"answer_any = ["MiB"]"#);
+        let original = task("unit", r#"answer_any = ["MiB"]"#);
+        edited.prompt = "a different question".into();
+        let mut results = Results {
+            schema_version: report::SCHEMA_VERSION,
+            model: "m".into(),
+            reasoning_effort: None,
+            price_per_mtok: None,
+            started_at: 0,
+            tasks: [(original.id.clone(), original.info())].into(),
+            runs: vec![run("unit", false, "20 MiB")],
+            summary: report::Summary::default(),
+        };
+        let r = regrade(&mut results, &[edited]);
+        assert_eq!(r.skipped, ["unit"]);
+        assert_eq!(r.changed, 0);
+        assert!(!results.runs[0].success);
     }
 }

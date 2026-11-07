@@ -306,4 +306,40 @@ mod tests {
                 .all(|i| i["prompt"].as_str().is_some_and(|p| !p.is_empty()))
         );
     }
+
+    #[test]
+    fn allbirds_exchange_check_needs_the_restriction() {
+        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
+        let check = &tasks
+            .iter()
+            .find(|t| t.id == "live-allbirds-exchange-country")
+            .unwrap()
+            .check;
+        for ok in [
+            "No. Allbirds only allows exchanges in the country where the item was purchased.",
+            "No, exchanges must be made in the same country.",
+            "Returns/exchanges can only be done in the country of purchase.",
+        ] {
+            assert!(check.answer_passes(ok), "{ok}");
+        }
+        for wrong in [
+            "Yes, an item bought in the US can be exchanged in any country, including London.",
+            "Probably not; US purchases go through the US returns process.",
+        ] {
+            assert!(!check.answer_passes(wrong), "{wrong}");
+        }
+    }
+
+    #[test]
+    fn notion_upload_check_accepts_both_units() {
+        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
+        let check = &tasks
+            .iter()
+            .find(|t| t.id == "live-notion-upload-size")
+            .unwrap()
+            .check;
+        assert!(check.answer_passes("The limit is **20 MiB**."));
+        assert!(check.answer_passes("Files up to 20 MB."));
+        assert!(!check.answer_passes("Files up to 5 GiB."));
+    }
 }

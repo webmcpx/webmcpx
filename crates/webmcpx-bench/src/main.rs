@@ -122,9 +122,12 @@ async fn main() -> Result<()> {
                     .with_context(|| format!("reading {}", path.display()))?,
             )?;
             let tasks = task::load_dir(&root.join("bench/tasks"))?;
-            let changed = webmcpx_bench::regrade(&mut results, &tasks);
+            let r = webmcpx_bench::regrade(&mut results, &tasks);
             std::fs::write(&path, serde_json::to_string_pretty(&results)?)?;
-            eprintln!("re-graded {}: {changed} run(s) changed", path.display());
+            eprintln!("re-graded {}: {} run(s) changed", path.display(), r.changed);
+            for id in &r.skipped {
+                eprintln!("skipped {id}: the task changed since the run (prompt, site or URL)");
+            }
             writeln!(std::io::stdout().lock(), "{}", markdown(&results))?;
         }
         Command::Tasks => {
