@@ -19,6 +19,9 @@ const REPORT = {
 	tools: [{ name: 'search_docs', description: 'Search.', params: ['query'], read_only: true }],
 	diagnostics: [],
 	page_tokens: 2100,
+	// A 1x1 transparent PNG, as the scanner would return it.
+	favicon:
+		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
 	elapsed_ms: 900
 };
 
@@ -98,7 +101,10 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await page.getByLabel("Your site's address").first().fill('plain.example.com');
 	await page.keyboard.press('Enter');
 	await expect(page.getByText('Not yet')).toBeVisible();
-	await expect(page.getByRole('link', { name: 'Fix it with one line' })).toHaveAttribute('href', '#fix');
+	// The fix is right there, ready to copy.
+	const fix = page.locator('#scan').getByRole('figure').filter({ hasText: 'index.html' });
+	await expect(fix).toContainText('cdn.jsdelivr.net/npm/webmcpx/src/auto.js');
+	await expect(fix.getByRole('button', { name: /Copy/ })).toBeVisible();
 });
 
 test('scan errors are shown, not swallowed', async ({ page }) => {
@@ -305,4 +311,22 @@ test('keyboard focus is visible on the ink footer', async ({ page }) => {
 	]);
 	expect(outline).not.toBe(panel);
 	expect(await link.evaluate((a) => getComputedStyle(a).outlineStyle)).toBe('solid');
+});
+
+test('an agent-ready site gets its favicon and a badge to embed that links to a live scan', async ({
+	page
+}) => {
+	await mockScan(page);
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	const result = page.locator('#scan');
+	await expect(result.getByText('Agent-ready').first()).toBeVisible();
+	await expect(result.locator('img[src^="data:image/png"]')).toHaveCount(1);
+	await expect(result.getByRole('img', { name: /Agent-ready: WebMCP tools checked/ })).toBeVisible();
+	const embed = result.getByRole('figure').filter({ hasText: 'badge.html' });
+	await expect(embed).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');
+	await expect(embed).toContainText('/badge/agent-ready.svg');
+	const badge = await page.request.get('/badge/agent-ready.svg');
+	expect(badge.status()).toBe(200);
 });

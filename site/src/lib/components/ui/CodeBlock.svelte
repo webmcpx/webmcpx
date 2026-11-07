@@ -19,7 +19,17 @@
 		<span class="truncate font-mono text-xs text-on-code">{title ?? snippet.lang}</span>
 		{#if copy}<CopyButton text={snippet.code} label="Copy {title ?? snippet.lang}" />{/if}
 	</figcaption>
-	<!-- Shiki escapes the code; the HTML is generated at build time from our own snippets. -->
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	<div class="overflow-x-auto px-4 pb-4 font-mono text-[13px] leading-relaxed">{@html snippet.html}</div>
+	<!-- Focusable so keyboard users can scroll long lines (WCAG; axe scrollable-region-focusable); text-on-code
+	     for samples without highlighting. -->
+	<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+	<div
+		class="overflow-x-auto px-4 pb-4 font-mono text-[13px] leading-relaxed text-on-code"
+		tabindex="0"
+		role="region"
+		aria-label="{title ?? snippet.lang} code"
+	>
+		<!-- Escaped HTML: shiki at build time, or plain code escaped by the caller (see ScanResult). -->
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html snippet.html}
+	</div>
 </figure>

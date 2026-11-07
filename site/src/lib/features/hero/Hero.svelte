@@ -8,6 +8,9 @@
 	import ScanForm from '#lib/features/scan/ScanForm.svelte';
 	import ScanResult from '#lib/features/scan/ScanResult.svelte';
 	import { scanner } from '#lib/features/scan/scanner.svelte.ts';
+	import type { Highlighted } from '#lib/content/snippets.ts';
+
+	let { scriptTag }: { scriptTag: Highlighted } = $props();
 
 	const TRY = SITES.slice(0, 3);
 </script>
@@ -58,7 +61,7 @@
 				</ScanForm>
 			</Reveal>
 			<div class="mt-10">
-				<ScanResult />
+				<ScanResult {scriptTag} />
 			</div>
 		</div>
 	</div>

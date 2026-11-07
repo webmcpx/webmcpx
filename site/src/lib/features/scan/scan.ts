@@ -23,6 +23,8 @@ export interface Report {
 	tools: ScanTool[];
 	diagnostics: Finding[];
 	page_tokens: number;
+	/** The site's icon as a small data:image URI, or null. */
+	favicon: string | null;
 	elapsed_ms: number;
 }
 
@@ -74,3 +76,18 @@ export const warnings = (r: Report) => r.diagnostics.filter((d) => d.severity ==
 
 /** The link that re-runs this scan when opened: `/?scan=<url>`. */
 export const shareLink = (origin: string, url: string) => `${origin}/?scan=${encodeURIComponent(url)}`;
+
+/** Size of `static/badge/agent-ready.svg`. */
+export const BADGE = { width: 176, height: 40 };
+
+const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+/**
+ * The HTML a site pastes to show it is agent-ready. The badge links back to a live scan of that site, so
+ * anyone can check the claim instead of trusting the picture.
+ */
+export function badgeEmbed(origin: string, url: string): string {
+	const href = attr(`${shareLink(origin, url)}#scan`);
+	const src = attr(`${origin}/badge/agent-ready.svg`);
+	return `<a href="${href}"><img src="${src}" alt="Agent-ready: WebMCP tools checked with webmcpx" width="${BADGE.width}" height="${BADGE.height}"></a>`;
+}

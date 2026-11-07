@@ -22,7 +22,7 @@
 	/>
 </svelte:head>
 
-<Hero />
+<Hero scriptTag={page.code.scriptTag} />
 <LogoWall />
 {#if page.best}<Why bestSaving={page.best.saving} bestSite={page.best.site} />{/if}
 <Proof

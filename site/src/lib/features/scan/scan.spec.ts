@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { errors, host, normalize, scan, shareLink, type Report } from './scan.ts';
+import { badgeEmbed, errors, host, normalize, scan, shareLink, type Report } from './scan.ts';
 
 const report: Report = {
 	url: 'https://a.example/',
@@ -12,6 +12,7 @@ const report: Report = {
 		{ rule: 'missing-annotations', severity: 'warning', message: 'y' }
 	],
 	page_tokens: 100,
+	favicon: null,
 	elapsed_ms: 1
 };
 
@@ -62,5 +63,16 @@ describe('helpers', () => {
 		expect(shareLink('https://webmcp.zone', 'https://a.example/')).toBe(
 			'https://webmcp.zone/?scan=https%3A%2F%2Fa.example%2F'
 		);
+	});
+});
+
+describe('badgeEmbed', () => {
+	it('links the badge to a live re-scan of the site and escapes attributes', () => {
+		const html = badgeEmbed('https://webmcp.zone', 'https://a.example/?x=1&y="2"');
+		expect(html).toContain(
+			'href="https://webmcp.zone/?scan=https%3A%2F%2Fa.example%2F%3Fx%3D1%26y%3D%222%22#scan"'
+		);
+		expect(html).toContain('src="https://webmcp.zone/badge/agent-ready.svg"');
+		expect(html).toMatch(/^<a href="[^"]+"><img [^>]+><\/a>$/);
 	});
 });

@@ -45,6 +45,9 @@ tests/                       Playwright e2e against the prerendered build
 - The primary mark is the Junction; the lockup is "webmcp" with the Junction as the final x (`Logo`).
   Real brands' logos are never redrawn; new marks of our own go through a brief, Codex and the four checks
   (16px, one color, inverse, circle crop).
+- The agent-ready badge (`static/badge/agent-ready.svg`) is offered only after a scan says ready; its embed
+  code (`badgeEmbed()` in `features/scan/scan.ts`) always links to a live re-scan of that site, so the
+  badge is a claim anyone can check, never a static seal.
 - Every page carries the trademark notices (`NOTICES`) in the footer. Never call webmcpx official, a W3C
   standard or MCP certified.
 

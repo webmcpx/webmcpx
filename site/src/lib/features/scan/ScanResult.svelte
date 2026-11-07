@@ -1,6 +1,9 @@
-<!-- What the scan found, as a verdict first: ready, almost, or not yet, then the next step. -->
+<!--
+	What the scan found, as a verdict first (with the site's own icon), then the next step: the script to
+	paste when tools are missing, the lint findings when they need work, and the agent-ready badge to embed
+	when all is well.
+-->
 <script lang="ts">
-	import ArrowDown from '@lucide/svelte/icons/arrow-down';
 	import Link from '@lucide/svelte/icons/link';
 	import { tick } from 'svelte';
 	import CircleAlert from '@lucide/svelte/icons/circle-exclamation-point';
@@ -9,9 +12,11 @@
 	import LoaderCircle from '@lucide/svelte/icons/loader-circle';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
+	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
+	import type { Highlighted } from '#lib/content/snippets.ts';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import { tokens } from '#lib/features/benchmark/bench.ts';
-	import { errors, host, shareLink } from './scan.ts';
+	import { BADGE, badgeEmbed, errors, host, shareLink } from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
 
 	const STEPS = [
@@ -25,6 +30,16 @@
 		issues: { stamp: 'Almost', tone: 'marker', icon: CircleAlert, fill: 'bg-marker' },
 		missing: { stamp: 'Not yet', tone: 'bad', icon: CircleX, fill: 'bg-bad-soft' }
 	} as const;
+
+	/** The install line, highlighted at build time. */
+	let { scriptTag }: { scriptTag: Highlighted } = $props();
+
+	/** A code sample that is not highlighted (built in the browser), shown in the same CodeBlock. */
+	const plain = (code: string): Highlighted => ({
+		lang: 'html',
+		code,
+		html: `<pre class="shiki"><code>${code.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</code></pre>`
+	});
 
 	let step = $state(0);
 	let shared = $state(false);
@@ -79,9 +94,16 @@
 		<Card padding="none" shadow="lg" class="overflow-hidden text-left">
 			<div class="flex items-start gap-4 p-5 sm:p-7">
 				<span
-					class="hidden size-12 shrink-0 place-items-center rounded-xl border-2 border-ink sm:grid {v.fill}"
+					class="hidden size-12 shrink-0 place-items-center overflow-hidden rounded-xl border-2 border-ink sm:grid {r.favicon
+						? 'bg-card'
+						: v.fill}"
 				>
-					<v.icon aria-hidden="true" />
+					{#if r.favicon}
+						<!-- A data: URI fetched by the scanner: the visitor's browser never contacts the scanned site. -->
+						<img src={r.favicon} alt="" width="28" height="28" class="size-7 object-contain" />
+					{:else}
+						<v.icon aria-hidden="true" />
+					{/if}
 				</span>
 				<div class="min-w-0 flex-1">
 					<div class="flex flex-wrap items-center gap-3">
@@ -134,10 +156,33 @@
 				</div>
 			{/if}
 
+			{#if r.verdict === 'missing'}
+				<div class="border-t-2 border-ink p-5 sm:px-7">
+					<p class="mb-3 font-medium">Fix it with one line. Paste it before &lt;/body&gt;:</p>
+					<CodeBlock snippet={scriptTag} title="index.html" class="shadow-none" />
+				</div>
+			{:else if r.verdict === 'issues'}
+				<div class="border-t-2 border-ink p-5 sm:px-7">
+					<p class="mb-3 font-medium">Find every issue in your source, with fixes:</p>
+					<CodeBlock snippet={plain('webmcpx lint src/')} title="terminal" class="shadow-none" />
+				</div>
+			{:else}
+				{@const embed = badgeEmbed(location.origin, r.url)}
+				<div class="border-t-2 border-ink p-5 sm:px-7">
+					<p class="font-medium">Show it. Paste this badge on your site:</p>
+					<p class="mt-1 text-sm text-ink-3">It links to a live scan of your site, so anyone can check it.</p>
+					<img
+						src="/badge/agent-ready.svg"
+						alt="Agent-ready: WebMCP tools checked with webmcpx"
+						width={BADGE.width}
+						height={BADGE.height}
+						class="mt-4"
+					/>
+					<CodeBlock snippet={plain(embed)} title="badge.html" class="mt-4 shadow-none" />
+				</div>
+			{/if}
+
 			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7">
-				{#if r.verdict !== 'ready'}
-					<Button href="#fix" size="sm"><ArrowDown aria-hidden="true" />Fix it with one line</Button>
-				{/if}
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
 					<Link aria-hidden="true" />{shared ? 'Link copied' : 'Share result'}
 				</Button>
