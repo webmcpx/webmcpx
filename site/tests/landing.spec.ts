@@ -173,6 +173,15 @@ test('the menu marks the section in view and opens on phones', async ({ page }) 
 	await expect(menu.getByRole('link', { name: 'Install' }).last()).toBeHidden();
 });
 
+test('the menu still marks sections after coming from another page', async ({ page }) => {
+	await page.goto('/brand/');
+	await expect(page.locator('html[data-hydrated]')).toHaveCount(1);
+	const menu = page.getByRole('navigation', { name: 'Main' });
+	await menu.getByRole('link', { name: 'Benchmark' }).first().click();
+	await expect(page).toHaveURL(/\/#proof$/);
+	await expect(menu.getByRole('link', { name: 'Benchmark' }).first()).toHaveAttribute('aria-current', 'true');
+});
+
 test('scanning a site shows the verdict and its tools', async ({ page }) => {
 	const seen = await mockScan(page);
 	await page.goto('/');

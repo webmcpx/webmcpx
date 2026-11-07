@@ -14,7 +14,8 @@
 	import Terminal from '@lucide/svelte/icons/terminal';
 	import X from '@lucide/svelte/icons/x';
 	import { siGithub } from 'simple-icons';
-	import type { Component } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
+	import { onDestroy, type Component } from 'svelte';
 	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
@@ -42,13 +43,17 @@
 	let current: string | undefined = $state();
 	let menu: HTMLDetailsElement | undefined = $state();
 
-	$effect(() => {
+	// Rebuilt after every navigation: the header outlives pages, and each page has its own sections.
+	let io: IntersectionObserver | undefined;
+	function observe() {
+		io?.disconnect();
+		current = undefined;
 		const sections = NAV.flatMap((i) => (i.section ? [document.getElementById(i.section)] : [])).filter(
 			(s): s is HTMLElement => s !== null
 		);
 		if (!sections.length) return;
 		// A section counts as current while it crosses the band 30-40% down the viewport.
-		const io = new IntersectionObserver(
+		io = new IntersectionObserver(
 			(entries) => {
 				for (const e of entries) {
 					if (e.isIntersecting) current = e.target.id;
@@ -58,8 +63,12 @@
 			{ rootMargin: '-30% 0px -60% 0px' }
 		);
 		for (const s of sections) io.observe(s);
-		return () => io.disconnect();
+	}
+	afterNavigate((nav) => {
+		// Same page, new hash: the sections are the same ones.
+		if (nav.type === 'enter' || nav.from?.url.pathname !== nav.to?.url.pathname) observe();
 	});
+	onDestroy(() => io?.disconnect());
 </script>
 
 <header class="absolute inset-x-0 top-0 z-30 px-3 pt-3 sm:px-5 sm:pt-5">
