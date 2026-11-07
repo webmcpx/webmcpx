@@ -666,32 +666,37 @@ fn lint(tools: &[Value]) -> Vec<Finding> {
         })
     });
     let unread: Vec<Finding> = unread.collect();
-    let tools: Vec<Value> = tools
-        .iter()
-        .map(|t| {
-            let mut t = t.clone();
-            if let Some(o) = t.as_object_mut() {
-                o.remove("schemaError");
-            }
-            t
-        })
-        .collect();
-    let manifest = serde_json::to_string_pretty(&json!({ "tools": tools })).unwrap_or_default();
-    let report = webmcpx_lint::lint(
-        std::path::Path::new("page.webmcp.json"),
-        &manifest,
-        &webmcpx_lint::Options::default(),
-    );
-    report
-        .diagnostics
-        .into_iter()
-        .map(|d| Finding {
+    // Each document (the page, each same-origin frame) is its own set of tools: the same name in two of
+    // them is not a duplicate, but every definition is checked.
+    let mut documents: Vec<(String, Vec<Value>)> = Vec::new();
+    for t in tools {
+        let doc = t["document"].as_str().unwrap_or("0").to_owned();
+        let mut t = t.clone();
+        if let Some(o) = t.as_object_mut() {
+            o.remove("schemaError");
+            o.remove("document");
+        }
+        match documents.iter_mut().find(|(d, _)| *d == doc) {
+            Some((_, list)) => list.push(t),
+            None => documents.push((doc, vec![t])),
+        }
+    }
+    let mut findings: Vec<Finding> = Vec::new();
+    for (_, list) in &documents {
+        let manifest = serde_json::to_string_pretty(&json!({ "tools": list })).unwrap_or_default();
+        let report = webmcpx_lint::lint(
+            std::path::Path::new("page.webmcp.json"),
+            &manifest,
+            &webmcpx_lint::Options::default(),
+        );
+        findings.extend(report.diagnostics.into_iter().map(|d| Finding {
             rule: d.rule,
             severity: d.severity.as_str(),
             message: d.message,
-        })
-        .chain(unread)
-        .collect()
+        }));
+    }
+    findings.extend(unread);
+    findings
 }
 
 fn parse_url(raw: &str) -> Result<Url, ScanError> {

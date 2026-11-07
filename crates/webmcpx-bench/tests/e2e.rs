@@ -903,6 +903,38 @@ async fn a_huge_title_or_text_never_breaks_the_shared_connection() {
 }
 
 #[tokio::test]
+async fn a_frame_tool_named_like_the_pages_is_still_checked() {
+    use axum::response::Html;
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::{Scanner, Verdict};
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(
+        axum::Router::new()
+            .route("/", get(|| std::future::ready(Html(
+                r#"<!doctype html><title>Top</title><script>document.modelContext.registerTool({ name: "search", description: "Search the shop.", inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true }, execute: () => "" })</script><iframe src="/frame"></iframe>"#,
+            ))))
+            .route("/frame", get(|| std::future::ready(Html(
+                r#"<!doctype html><script>document.modelContext.registerTool({ name: "search", description: "Search the frame.", inputSchema: { type: "string" }, execute: () => "" })</script>"#,
+            )))),
+    )
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    // Both definitions are reported; the frame's invalid schema makes it "Almost", and the same name in
+    // two documents is not a duplicate.
+    assert_eq!(report.tools.len(), 2);
+    assert_eq!(report.verdict, Verdict::Issues);
+    let rules: Vec<_> = report.diagnostics.iter().map(|d| d.rule).collect();
+    assert!(rules.contains(&"invalid-input-schema"), "{rules:?}");
+    assert!(!rules.contains(&"duplicate-name"), "{rules:?}");
+}
+
+#[tokio::test]
 async fn a_stalled_or_endless_favicon_never_costs_the_report() {
     use axum::body::Body;
     use axum::response::{Html, Response};

@@ -70,6 +70,22 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   assert.equal(await problem({ qty: 1, tags: ["a", "b", "c"] }), "`tags` must have at most 2 items");
   assert.equal(await problem({ qty: 1, admin: true }), "`admin` is not an input of this tool");
   for (const input of ["null", "3", '"x"', "[]", null]) assert.equal(await problem(input), "the input must be an object");
+  // A schema for unlisted fields and combinators are checked too.
+  tool({
+    name: "stock",
+    description: "Sets stock per SKU.",
+    inputSchema: {
+      type: "object",
+      additionalProperties: { type: "integer", minimum: 1 },
+      anyOf: [{ required: ["MUG"] }, { required: ["CUP"] }],
+    },
+    run: () => "ok",
+  });
+  const stock = async (input) => (await page.call("stock", input)).error?.message;
+  assert.equal(await stock({ MUG: -5 }), "`MUG` must be at least 1");
+  assert.equal(await stock({ CUP: "free" }), "`CUP` must be of type integer");
+  assert.equal(await stock({ PLATE: 2 }), "input matches none of the allowed shapes");
+  assert.equal(await stock({ MUG: 3 }), undefined);
   // Inherited names are not declared inputs.
   assert.equal(await problem('{"qty":1,"__proto__":{"admin":true}}'), "`__proto__` is not an input of this tool");
   assert.equal(await problem('{"qty":1,"constructor":{"admin":true}}'), "`constructor` is not an input of this tool");

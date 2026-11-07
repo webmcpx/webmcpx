@@ -3,9 +3,9 @@
 	(skipped by agents with WebMCP built in; tabs, one per client, then your coding agent).  Tabs list the most used first; the first one opens.
 -->
 <script lang="ts">
-	import SquareTerminal from '@lucide/svelte/icons/square-terminal';
 	import Bot from '@lucide/svelte/icons/bot';
-	import { siClaude, siCursor, siGithubcopilot, siHtml5, siNpm, siWindsurf } from 'simple-icons';
+	import { siHtml5, siNpm } from 'simple-icons';
+	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import CodeTabs, { type CodeTab } from '#lib/components/ui/CodeTabs.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
 	import type { Highlighted, SnippetId } from '#lib/content/snippets.ts';
@@ -20,37 +20,24 @@
 	const m = $derived(i18n.m.fix);
 	const capital = (s: string) => s.charAt(0).toLocaleUpperCase(i18n.code) + s.slice(1);
 
+	// Your coding agent always comes first; then the paths by how many sites use them.
 	const install: CodeTab[] = $derived([
-		{ id: 'html', label: 'HTML', icon: siHtml5, snippet: code.scriptTag, title: 'index.html' },
-		{ id: 'npm', label: 'npm', icon: siNpm, snippet: code.npmUsage, title: 'app.js' },
 		{
 			id: 'agent',
 			label: capital(m.alternatives.agent),
 			icon: Bot,
 			snippet: code.agentPrompt,
 			title: 'prompt'
-		}
-	]);
-	// Clients by how widely their editor or CLI is used; each with its own MCP setup.
-	const agents: CodeTab[] = $derived([
-		{ id: 'vscode', label: 'VS Code', icon: siGithubcopilot, snippet: code.mcpVscode, title: 'terminal' },
-		{ id: 'cursor', label: 'Cursor', icon: siCursor, snippet: code.mcpCursor, title: '.cursor/mcp.json' },
-		{ id: 'claude', label: 'Claude Code', icon: siClaude, snippet: code.agentMcp, title: 'terminal' },
-		{ id: 'codex', label: 'Codex CLI', icon: SquareTerminal, snippet: code.mcpCodex, title: 'terminal' },
-		{
-			id: 'windsurf',
-			label: 'Windsurf',
-			icon: siWindsurf,
-			snippet: code.mcpWindsurf,
-			title: '~/.codeium/windsurf/mcp_config.json'
 		},
 		{
-			id: 'agent',
-			label: capital(m.alternatives.agent),
-			icon: Bot,
-			snippet: code.mcpPrompt,
-			title: 'prompt'
-		}
+			id: 'html',
+			label: 'HTML',
+			icon: siHtml5,
+			snippet: code.scriptTag,
+			title: 'index.html',
+			note: fmt(m.steps.site.lead, { tag: '</body>' })
+		},
+		{ id: 'npm', label: 'npm', icon: siNpm, snippet: code.npmUsage, title: 'app.js' }
 	]);
 </script>
 
@@ -67,10 +54,7 @@
 						<h3 class="font-display text-xl font-bold">{step.title}</h3>
 					</div>
 					{#if n === 1}
-						<p class="mt-2 mb-4 text-sm text-pretty text-ink-2">
-							{fmt(m.steps.site.lead, { tag: '</body>' })}
-						</p>
-						<CodeTabs label={step.title} tabs={install} />
+						<div class="mt-4"><CodeTabs label={step.title} tabs={install} /></div>
 					{:else}
 						<p class="mt-2 text-sm text-pretty text-ink-2">{m.steps.agent.lead}</p>
 						<p class="mt-3 mb-4 rounded-xl bg-paper-2 px-3.5 py-2.5 text-sm text-pretty text-ink">
@@ -81,7 +65,7 @@
 									>{/snippet}</Rich
 							>
 						</p>
-						<CodeTabs label={step.title} tabs={agents} />
+						<CodeBlock snippet={code.mcpPrompt} title="prompt" />
 					{/if}
 				</Reveal>
 			</li>

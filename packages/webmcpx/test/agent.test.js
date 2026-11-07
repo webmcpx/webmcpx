@@ -74,7 +74,7 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <label><input type="checkbox" name="wheel"> Wheel</label>
   <label><input type="checkbox" name="glazes" value="celadon"> Celadon</label>
   <label><input type="checkbox" name="glazes" value="tenmoku"> Tenmoku</label>
-  <button>Book</button>
+  <button name="action" value="book">Book</button>
 </form>
 <script>
   // Like React: the field's value is tracked by an own property, and onChange only fires when the
@@ -96,7 +96,7 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
     if (event.agentInvoked) {
       const data = Object.fromEntries(new FormData(event.target));
       event.respondWith(Promise.resolve({ booked: window.state.name, day: data.day, wheel: data.wheel === "on", price: data.price,
-        glazes: new FormData(event.target).getAll("glazes") }));
+        glazes: new FormData(event.target).getAll("glazes"), submitter: event.submitter?.value ?? null }));
     }
   });
 </script></main></body></html>`;
@@ -284,7 +284,7 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.deepEqual(filled, { ok: true, data: { submitted: false, next: "Ask the user to review the form and submit it." } });
     // With it, the page's submit handler sees agentInvoked and answers through respondWith().
     const booked = JSON.parse(await session.call(book, { name: "Ana", day: "friday", wheel: true }));
-    assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true, price: "40", glazes: [] } });
+    assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true, price: "40", glazes: [], submitter: "book" } });
     // Fields the user can't edit (readonly, inside a disabled fieldset) are not inputs either.
     assert.equal(book.inputSchema.properties.total, undefined);
     assert.equal(book.inputSchema.properties.coupon, undefined);

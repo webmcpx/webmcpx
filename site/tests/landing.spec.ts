@@ -528,34 +528,16 @@ test('without JavaScript every way to write a tool still shows', async ({ browse
 	await page.close();
 });
 
-test('install and agent setup are tabs with logos, the most used open, each with its own copy', async ({
-	page
-}) => {
+test('step 1 opens on your coding agent; step 2 is one prompt', async ({ page }) => {
 	await page.goto('/#fix');
 	const fix = page.locator('#fix');
 	const install = fix.getByRole('tablist', { name: 'On your site' }).getByRole('tab');
-	await expect(install).toHaveText(['HTML', 'npm', 'Your coding agent']);
+	await expect(install).toHaveText(['Your coding agent', 'HTML', 'npm']);
 	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
-	await install.nth(2).click();
 	await expect(fix.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
-
-	const agents = fix.getByRole('tablist', { name: 'In your agent' }).getByRole('tab');
-	await expect(agents).toHaveText([
-		'VS Code',
-		'Cursor',
-		'Claude Code',
-		'Codex CLI',
-		'Windsurf',
-		'Your coding agent'
-	]);
-	await expect(agents.locator('svg')).toHaveCount(6);
-	await agents.nth(2).click();
-	const panel = fix.locator('[role=tabpanel]:not([data-inactive])').nth(1);
-	await expect(panel).toContainText('claude mcp add webmcpx -- npx -y webmcpx mcp');
-	await expect(panel.getByRole('button', { name: /Copy/ })).toBeVisible();
-	// Or the agent sets itself up.
-	await agents.last().click();
-	await expect(fix.locator('[role=tabpanel]:not([data-inactive])').nth(1)).toContainText('npx');
+	await expect(fix.getByRole('tablist')).toHaveCount(1);
+	const prompt = fix.getByRole('figure').filter({ hasText: 'webmcpx MCP server' });
+	await expect(prompt.getByRole('button', { name: /Copy/ })).toBeVisible();
 });
 
 test('the verdicts page explains each stamp and is linked from every scan result and the footer', async ({

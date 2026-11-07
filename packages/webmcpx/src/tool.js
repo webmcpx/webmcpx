@@ -39,6 +39,10 @@ function check(s, value, at = "input") {
   const types = s.type === undefined ? [] : [].concat(s.type);
   if (types.length && !types.some((t) => TYPES[t]?.(value))) return `${at} must be of type ${types.join(" or ")}`;
   if (s.enum && !s.enum.includes(value)) return `${at} must be one of ${s.enum.join(", ")}`;
+  if ("const" in s && value !== s.const) return `${at} must be ${s.const}`;
+  // Combinators: every allOf branch, at least one anyOf / oneOf branch.
+  for (const b of s.allOf ?? []) if (check(b, value, at)) return check(b, value, at);
+  for (const k of ["anyOf", "oneOf"]) if (s[k] && s[k].every((b) => check(b, value, at))) return `${at} matches none of the allowed shapes`;
   if (typeof value === "number") {
     if (value < s.minimum) return `${at} must be at least ${s.minimum}`;
     if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
@@ -60,8 +64,9 @@ function check(s, value, at = "input") {
     // Own properties only ("__proto__" is not a declared input).
     for (const key of s.required ?? []) if (!Object.hasOwn(value, key) || value[key] === undefined) return `\`${key}\` is required`;
     for (const [key, v] of Object.entries(value)) {
-      const p = s.properties && Object.hasOwn(s.properties, key) ? s.properties[key] : undefined;
-      if (!p && s.additionalProperties === false) return `\`${key}\` is not an input of this tool`;
+      // A field not listed follows additionalProperties: false refuses it, a schema checks it.
+      const p = s.properties && Object.hasOwn(s.properties, key) ? s.properties[key] : s.additionalProperties;
+      if (p === false) return `\`${key}\` is not an input of this tool`;
       const problem = p && v !== undefined ? check(p, v, `\`${key}\``) : "";
       if (problem) return problem;
     }
@@ -210,7 +215,9 @@ function runForm(form) {
     };
     addEventListener("submit", mark, true);
     try {
-      form.requestSubmit();
+      // With its default submit button, as a user's click: its name and value go along, and
+      // event.submitter is set (HTML: requestSubmit(submitter)).
+      form.requestSubmit(form.querySelector(":is(button:not([type]), [type=submit]):not(:disabled)") ?? undefined);
     } finally {
       removeEventListener("submit", mark, true);
     }

@@ -30,34 +30,10 @@ import { register } from "webmcpx";
 
 register(); // the standard tools; tool() adds your own`
 	},
-	// Gives a coding agent the WebMCP tools of every page it opens (the MCP server in the npm package),
-	// one per client, as each client documents its MCP setup.
-	mcpVscode: {
-		lang: 'sh',
-		code: `code --add-mcp '{"name":"webmcpx","command":"npx","args":["-y","webmcpx","mcp"]}'`
-	},
-	mcpCursor: {
-		lang: 'json',
-		code: `{
-  "mcpServers": {
-    "webmcpx": { "command": "npx", "args": ["-y", "webmcpx", "mcp"] }
-  }
-}`
-	},
-	agentMcp: { lang: 'sh', code: 'claude mcp add webmcpx -- npx -y webmcpx mcp' },
 	// Step 2 for any coding agent: it adds the MCP server to its own config.
 	mcpPrompt: {
 		lang: 'text',
 		code: 'Add the webmcpx MCP server to your MCP config (command: `npx`, args: `["-y", "webmcpx", "mcp"]`), so you can call the WebMCP tools of any page you open.'
-	},
-	mcpCodex: { lang: 'sh', code: 'codex mcp add webmcpx -- npx -y webmcpx mcp' },
-	mcpWindsurf: {
-		lang: 'json',
-		code: `{
-  "mcpServers": {
-    "webmcpx": { "command": "npx", "args": ["-y", "webmcpx", "mcp"] }
-  }
-}`
 	},
 	reproduce: {
 		lang: 'sh',
@@ -82,7 +58,7 @@ const indent = (s: string, by: string) => s.replaceAll('\n', `\n${by}`);
 export const OWN = {
 	agent: {
 		lang: 'text',
-		code: 'Read https://webmcpx.dev/llms.txt. Then look through this project and list the 3 to 5 actions an AI agent would most want to do on this site (search, add to cart, book, filter...). For each, propose a WebMCP tool with webmcpx (tool(), useTool or <form toolname>) that reuses the function the UI already calls. Ask me which to add, add them, then check them with `npx webmcpx tools <local URL>`.'
+		code: 'Read https://webmcpx.dev/llms.txt, then look at this project and suggest the WebMCP tools an AI agent would find useful here. Ask me which to add, then add them with webmcpx.'
 	},
 	react: {
 		lang: 'jsx',

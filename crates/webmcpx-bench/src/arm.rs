@@ -151,6 +151,10 @@ pub async fn webmcp_tools(page: &Page) -> Result<Vec<ToolSpec>> {
         })
         .collect();
     anyhow::ensure!(!specs.is_empty(), "the page registered no tools");
+    // A model needs unique names; a call by name runs the page's own tool first (the host's `call`),
+    // so a frame's same-named tool is left out here as it would be unreachable.
+    let mut seen = std::collections::HashSet::new();
+    specs.retain(|s| seen.insert(s.name.clone()));
     specs.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(specs)
 }

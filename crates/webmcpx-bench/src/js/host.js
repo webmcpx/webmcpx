@@ -49,26 +49,33 @@
   }
 
   const schema = (s) => (typeof s === "string" ? JSON.parse(s) : s ?? { type: "object", properties: {} });
-  // This window's tools, then those of same-origin frames inside it (a name the page already has is
-  // left out, so a frame never shadows the page). Cross-origin frames can't be read and stay out.
-  const all = () => {
-    const found = new Map(tools);
+  // This window's tools, then those of same-origin frames inside it, each with the document it lives in
+  // (0 for this one): same names in different documents are different tools. Cross-origin frames can't
+  // be read and stay out.
+  const every = () => {
+    const found = [...tools.values()].map((tool) => [tool, "0"]);
     for (let i = 0; i < window.length; i++) {
       try {
-        for (const [name, tool] of window[i].__webmcpHost?.tools() ?? []) if (!found.has(name)) found.set(name, tool);
+        for (const [tool, doc] of window[i].__webmcpHost?.every() ?? []) found.push([tool, `${i + 1}.${doc}`]);
       } catch {
         // cross-origin
       }
     }
     return found;
   };
+  // By name, the page's own first (what an agent calling a name gets).
+  const all = () => {
+    const found = new Map();
+    for (const [tool] of every()) if (!found.has(tool.name)) found.set(tool.name, tool);
+    return found;
+  };
   Object.defineProperty(window, "__webmcpHost", {
     value: Object.freeze({
-      tools: all,
+      every,
       // Bounded before it leaves the page: a page must not be able to send the scanner megabytes. The
       // caps sit far above every lint limit, so the linter still sees what is too long or too many.
       list: () =>
-        [...all().values()].slice(0, 200).map((t) => {
+        every().slice(0, 200).map(([t, doc]) => {
           const cap = (v, n) => String(v ?? "").slice(0, n);
           // A schema we can't read or that is too big to send is reported as a problem, never replaced.
           let inputSchema;
@@ -81,7 +88,7 @@
           }
           const annotations = {};
           for (const [k, v] of Object.entries(t.annotations ?? {}).slice(0, 20)) annotations[cap(k, 64)] = v === true;
-          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations, schemaError };
+          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations, schemaError, document: doc };
         }),
       async call(name, input) {
         const tool = all().get(name);
