@@ -54,6 +54,7 @@
 	const best = $derived(spotlight(results));
 	// The default is decided from the data, so the prerendered HTML already shows it (no flash).
 	const featured = () => sites.find((s) => s.tasks.some((t) => t.task === best?.task))?.id ?? 'all';
+	const featuredId = $derived(featured());
 	let siteId = $state(featured());
 	const repeats = $derived(all[0]?.webmcp?.runs ?? all[0]?.baseline?.runs ?? 0);
 
@@ -86,6 +87,24 @@
 	lead="Pick a site. One agent reads the page like a browser agent; the other calls the site's WebMCP tools."
 >
 	{#if h}
+		<!-- The averages stay outside the filter: prerendered, readable without JavaScript, never hidden. -->
+		<dl
+			class="mb-10 grid grid-cols-2 gap-px overflow-hidden rounded-card border-2 border-ink bg-ink lg:grid-cols-4"
+			aria-label="All {all.length} tasks"
+		>
+			{#each [compare(h.baseline.tokens, h.webmcp.tokens, 'fewer tokens', 'more tokens'), compare(h.baseline.duration_ms, h.webmcp.duration_ms, 'faster', 'slower'), { value: percent(h.webmcp.success_rate), label: `solved, vs ${percent(h.baseline.success_rate)}` }, { value: perThousand(h.webmcp.cost_usd), label: `per 1k questions, vs ${perThousand(h.baseline.cost_usd)}` }] as stat (stat.label)}
+				<div class="flex flex-col bg-card p-4 text-center sm:p-5">
+					<dt class="order-last text-sm text-ink-2">{stat.label}</dt>
+					<dd class="font-display text-3xl font-bold tracking-tight tabular-nums sm:text-4xl">
+						{stat.value}
+					</dd>
+				</div>
+			{/each}
+		</dl>
+		<p class="-mt-7 mb-10 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">
+			Average over all {all.length} questions on {sites.length} sites
+		</p>
+
 		<Tabs items={choices} bind:value={siteId} label="Site" listClass="mb-8 flex-wrap gap-y-2">
 			{#snippet tab(site)}
 				{#if site.live}<span class="size-2 rounded-full bg-good" aria-hidden="true"></span>{/if}
@@ -100,6 +119,9 @@
 								<Stamp tone={site.live ? 'good' : 'plain'} size="sm">
 									{site.live ? 'live site' : 'local fixture'}
 								</Stamp>
+							{/if}
+							{#if site.id === featuredId}
+								<Stamp tone="marker" size="sm">Best live case</Stamp>
 							{/if}
 						</div>
 						<p class="mt-2 max-w-3xl text-lg text-pretty text-ink-2">

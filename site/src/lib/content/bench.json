@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "model": "gpt-6-luna",
   "reasoning_effort": "medium",
   "price_per_mtok": {
@@ -8,6 +8,60 @@
     "output": 0.5
   },
   "started_at": 1794002978,
+  "tasks": {
+    "docs-config-path": {
+      "prompt": "Which environment variable makes Orbit read its config file from a different path?",
+      "site": "docs"
+    },
+    "docs-deploy-timeout": {
+      "prompt": "What is the default timeout of `orbit deploy`, and which flag changes it?",
+      "site": "docs"
+    },
+    "docs-exit-code": {
+      "prompt": "My CI step failed with orbit exit code 4. What does that mean?",
+      "site": "docs"
+    },
+    "docs-retained-releases": {
+      "prompt": "By default, how many past releases does Orbit keep for rollback?",
+      "site": "docs"
+    },
+    "live-allbirds-return-window": {
+      "prompt": "How many days do I have to return a pair of Allbirds shoes?",
+      "url": "https://www.allbirds.com/"
+    },
+    "live-cloudflare-kv-value-size": {
+      "prompt": "What is the maximum size of a single value stored in Cloudflare Workers KV?",
+      "url": "https://developers.cloudflare.com/"
+    },
+    "live-notion-request-limit": {
+      "prompt": "How many requests per minute does the Notion API allow per connection on plans other than Business and Enterprise?",
+      "url": "https://developers.notion.com/guides/get-started/overview"
+    },
+    "live-spec-contrast": {
+      "prompt": "What minimum contrast ratio does this site's spec require for normal-size body text?",
+      "url": "https://specification.website/"
+    },
+    "live-woo-cheapest-in-stock": {
+      "prompt": "What is the cheapest product in this store that is in stock, and what does it cost?",
+      "url": "https://demo.openforagents.com/"
+    },
+    "live-woo-out-of-stock": {
+      "prompt": "Which product in this store is out of stock?",
+      "url": "https://demo.openforagents.com/"
+    },
+    "store-cart-total": {
+      "prompt": "Add one Stoneware Teapot and one Speckled Bowl to my cart, then tell me the cart total.",
+      "site": "store"
+    },
+    "store-cheapest-blue-mug": {
+      "prompt": "Add two of the cheapest blue mug to my cart.",
+      "site": "store"
+    },
+    "store-restock-date": {
+      "prompt": "When will the Ash Glaze Vase be back in stock? Give the date as the store writes it.",
+      "site": "store"
+    }
+  },
   "runs": [
     {
       "task": "docs-config-path",
@@ -67,7 +121,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00006138,
+      "cost_usd": 6.138e-05,
       "answer": "`ORBIT_CONFIG` specifies the path to Orbit’s project config file.",
       "stop": "answered",
       "steps": 2,
@@ -197,7 +251,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00007159999999999999,
+      "cost_usd": 7.159999999999999e-05,
       "answer": "The default timeout for `orbit deploy` is **90 seconds**. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
       "stop": "answered",
       "steps": 2,
@@ -223,7 +277,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0000711,
+      "cost_usd": 7.11e-05,
       "answer": "The default `orbit deploy` timeout is **90 seconds**. Change it with the `--timeout` flag, for example: `orbit deploy --timeout 180`.",
       "stop": "answered",
       "steps": 2,
@@ -394,7 +448,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0000686,
+      "cost_usd": 6.86e-05,
       "answer": "Orbit exit code 4 means your plan’s build minutes or instance limit has been used up. Upgrade your plan or wait for the monthly reset.",
       "stop": "answered",
       "steps": 2,
@@ -524,7 +578,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.000059770000000000005,
+      "cost_usd": 5.9770000000000005e-05,
       "answer": "Orbit keeps **10 past releases** for rollback by default.",
       "stop": "answered",
       "steps": 2,
@@ -550,7 +604,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00005927,
+      "cost_usd": 5.927e-05,
       "answer": "Orbit keeps 10 past releases for rollback by default.",
       "stop": "answered",
       "steps": 2,
@@ -798,7 +852,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0000959,
+      "cost_usd": 9.59e-05,
       "answer": "You have 30 days from delivery to return Allbirds shoes. They must be unworn and unwashed, with the original tags attached; Final Sale items aren’t returnable.",
       "stop": "answered",
       "steps": 2,
@@ -824,7 +878,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0000959,
+      "cost_usd": 9.59e-05,
       "answer": "You have 30 days from delivery to return Allbirds shoes. They must be unworn and unwashed, with the original tags attached; Final Sale items can’t be returned.",
       "stop": "answered",
       "steps": 2,
@@ -1726,7 +1780,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00006175,
+      "cost_usd": 6.175e-05,
       "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00 USD**.",
       "stop": "answered",
       "steps": 2,
@@ -1752,7 +1806,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00006175,
+      "cost_usd": 6.175e-05,
       "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00 USD**.",
       "stop": "answered",
       "steps": 2,
@@ -1778,7 +1832,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00006175,
+      "cost_usd": 6.175e-05,
       "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00 USD**.",
       "stop": "answered",
       "steps": 2,
@@ -1974,7 +2028,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00009839,
+      "cost_usd": 9.839e-05,
       "answer": "The **Open Web Poster** is out of stock.",
       "stop": "answered",
       "steps": 2,
@@ -2518,7 +2572,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00004671,
+      "cost_usd": 4.671e-05,
       "answer": "3 January",
       "stop": "answered",
       "steps": 2,
@@ -2544,7 +2598,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00005371,
+      "cost_usd": 5.371e-05,
       "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
       "stop": "answered",
       "steps": 2,
@@ -2897,7 +2951,7 @@
           "steps": 2.0,
           "tool_calls": 1.0,
           "duration_ms": 4533.0,
-          "cost_usd": 0.00006175
+          "cost_usd": 6.175e-05
         }
       },
       "live-woo-out-of-stock": {

@@ -68,11 +68,8 @@ enum Command {
         #[arg(long)]
         chrome: Option<PathBuf>,
     },
-    /// List tasks (tab-separated), or with `--json` an object `{id: {site | url, prompt}}` for the landing.
-    Tasks {
-        #[arg(long)]
-        json: bool,
-    },
+    /// List tasks (tab-separated).
+    Tasks,
     /// Call one WebMCP tool on a live page and print what the agent would get (for writing tasks).
     Call {
         url: String,
@@ -110,19 +107,10 @@ fn parse_price(s: &str) -> Result<Price, String> {
 async fn main() -> Result<()> {
     let root = repo_root();
     match Cli::parse().command {
-        Command::Tasks { json } => {
-            let tasks = task::load_dir(&root.join("bench/tasks"))?;
+        Command::Tasks => {
             let mut out = std::io::stdout().lock();
-            if json {
-                writeln!(
-                    out,
-                    "{}",
-                    serde_json::to_string_pretty(&task::index(&tasks))?
-                )?;
-            } else {
-                for t in tasks {
-                    writeln!(out, "{}\t{}\t{}", t.id, t.place(), t.prompt)?;
-                }
+            for t in task::load_dir(&root.join("bench/tasks"))? {
+                writeln!(out, "{}\t{}\t{}", t.id, t.place(), t.prompt)?;
             }
         }
         Command::Probe { urls, chrome } => {
@@ -223,6 +211,10 @@ async fn main() -> Result<()> {
                 reasoning_effort: Some(reasoning_effort),
                 price_per_mtok: price,
                 started_at,
+                tasks: task::index(&selected)
+                    .into_iter()
+                    .map(|(id, info)| (id.to_owned(), info))
+                    .collect(),
                 summary: Summary::of(&runs),
                 runs,
             };

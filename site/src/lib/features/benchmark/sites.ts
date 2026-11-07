@@ -1,16 +1,8 @@
-// Groups benchmark tasks by the site they ran on, so each site gets its own numbers.
-// Task metadata comes from `tasks.json` (`just bench-tasks`, generated from bench/tasks).
+// Groups benchmark tasks by the site they ran on, so each site gets its own numbers. Task metadata
+// (site or URL, prompt) is read from the run itself (`results.tasks`), never from today's task files.
 
 import { BENCH_SITE_NAMES } from '#lib/content/benchSites.ts';
-import { rows, type ArmSummary, type Results, type Row } from './bench.ts';
-
-export interface TaskInfo {
-	prompt: string;
-	/** Local fixture directory under bench/sites. */
-	site?: string;
-	/** Live page on the public web. */
-	url?: string;
-}
+import { rows, type ArmSummary, type Results, type Row, type TaskInfo } from './bench.ts';
 
 export interface SiteTask extends Row {
 	prompt: string;
@@ -51,14 +43,15 @@ export function aggregate(summaries: (ArmSummary | undefined)[]): ArmSummary | n
 }
 
 /**
- * One entry per site, live sites first (in task order), then fixtures. Throws when a task in the
- * results has no metadata: tasks.json is stale, run `just bench-tasks`.
+ * One entry per site, live sites first (in task order), then fixtures. Throws when a task has no
+ * metadata in the run (a results file the harness did not write).
  */
-export function bySite(results: Results, info: Record<string, TaskInfo>): BenchSite[] {
+export function bySite(results: Results): BenchSite[] {
+	const info: Record<string, TaskInfo> = results.tasks;
 	const groups = new Map<string, BenchSite>();
 	for (const row of rows(results)) {
 		const meta = info[row.task];
-		if (!meta) throw new Error(`tasks.json has no entry for "${row.task}": run \`just bench-tasks\``);
+		if (!meta) throw new Error(`bench.json: no task metadata for "${row.task}"`);
 		const id = siteKey(meta);
 		let site = groups.get(id);
 		if (!site) {

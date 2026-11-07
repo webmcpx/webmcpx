@@ -74,6 +74,9 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
 	await expect(page.getByRole('heading', { name: 'One line. Agent-ready.' })).toBeVisible();
+	// The featured site is labelled as the best case, and the averages are there too.
+	await expect(page.getByText('Best live case')).toBeVisible();
+	await expect(page.getByLabel(/All \d+ tasks/)).toContainText(/fewer tokens|more tokens/);
 	await page.close();
 });
 

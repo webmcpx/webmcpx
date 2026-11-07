@@ -26,11 +26,12 @@ const arm = (tokens: number, duration_ms: number, cost_usd: number | null): ArmS
 });
 
 const results = (arms: Results['summary']['arms']): Results => ({
-	schema_version: 2,
+	schema_version: 3,
 	model: 'gpt-6-luna',
 	reasoning_effort: null,
 	price_per_mtok: { input: 0.1, cached_input: 0.01, output: 0.5 },
 	started_at: 0,
+	tasks: {},
 	runs: [],
 	summary: { arms, tasks: {} }
 });

@@ -2,7 +2,6 @@
 // the benchmark summary (bench.json also holds every run's trace, which the page never shows), grouped
 // by the site each task ran on.
 import data from '#lib/content/bench.json';
-import tasks from '#lib/content/tasks.json';
 import { parse } from '#lib/features/benchmark/bench.ts';
 import { bySite } from '#lib/features/benchmark/sites.ts';
 import { SNIPPETS } from '#lib/content/snippets.ts';
@@ -14,6 +13,6 @@ export const load: PageServerLoad = async () => {
 	return {
 		code: await highlightAll(SNIPPETS),
 		results,
-		sites: bySite(results, tasks)
+		sites: bySite(results)
 	};
 };

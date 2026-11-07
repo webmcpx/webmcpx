@@ -11,7 +11,8 @@ use crate::arm::Arm;
 use crate::model::{Price, Usage};
 
 /// 2: `price_per_mtok` became `{input, cached_input, output}`; usage gained `cache_write`.
-pub const SCHEMA_VERSION: u32 = 2;
+/// 3: `tasks` (where each task ran and what it asked) travels with the run.
+pub const SCHEMA_VERSION: u32 = 3;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Results {
@@ -22,6 +23,10 @@ pub struct Results {
     pub price_per_mtok: Option<Price>,
     /// Unix seconds.
     pub started_at: u64,
+    /// The tasks as they were when this run started: `{id: {site | url, prompt}}`. Readers must use
+    /// this, not the current task files, which may have changed since.
+    #[serde(default)]
+    pub tasks: std::collections::BTreeMap<String, serde_json::Value>,
     pub runs: Vec<Run>,
     pub summary: Summary,
 }
@@ -222,6 +227,7 @@ mod tests {
             reasoning_effort: None,
             price_per_mtok: crate::model::list_price("gpt-6-luna"),
             started_at: 0,
+            tasks: std::collections::BTreeMap::new(),
             summary: Summary::of(&runs),
             runs: runs.into(),
         };
