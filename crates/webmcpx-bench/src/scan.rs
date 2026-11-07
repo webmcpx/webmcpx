@@ -1,30 +1,34 @@
 //! Scan one public page: which WebMCP tools it registers, what `webmcpx lint` says about them, and
 //! roughly how much an agent must read without them. Backs `GET /api/scan?url=` (see `server.rs`).
 //!
-//! Safety: only `http(s)` URLs whose host resolves to public addresses are opened, one isolated
-//! browser context per scan, a few scans at a time, each with a deadline. Chrome still resolves
-//! subresources on its own, so a public deployment must also run without access to private networks
-//! (an egress-restricted container); by default `serve` binds to localhost only.
+//! Safety:
+//! - The scan browser connects only through [`proxy`](crate::proxy), which resolves every host itself and
+//!   refuses non-public addresses ([`Egress::Public`]) before any byte is sent: redirects, subresources,
+//!   fetches and DNS rebinding included. WebRTC is limited to the proxy too.
+//! - One isolated browser context per scan, closed even when the scan times out; if closing fails, the
+//!   browser is replaced. A few scans at a time, each with a deadline.
 
-use std::net::IpAddr;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use anyhow::{Context as _, Result};
+use anyhow::Result;
 use reqwest::Url;
 use serde::Serialize;
 use serde_json::{Value, json};
 use tokio::sync::{Mutex, Semaphore};
 
 use crate::arm::{INIT_SCRIPTS, registered_tools};
-use crate::cdp::Browser;
+use crate::cdp::{Browser, Page};
+use crate::proxy::{self, Egress};
 
 /// Scans running at once; more wait for a slot, up to `QUEUE_WAIT`.
 const PARALLEL: usize = 2;
 const QUEUE_WAIT: Duration = Duration::from_secs(20);
 /// Whole scan, navigation included.
 const DEADLINE: Duration = Duration::from_secs(45);
+/// Closing a context after a scan; longer means the browser is stuck and gets replaced.
+const CLOSE_WAIT: Duration = Duration::from_secs(10);
 /// How long to wait for tools after the page loaded (sites register them after hydration).
 const TOOL_WAIT: Duration = Duration::from_secs(6);
 /// Characters per token for the estimate (OpenAI's rule of thumb for English text).
@@ -80,49 +84,93 @@ pub enum ScanError {
     Failed(String),
 }
 
-/// Shares one headless Chrome between scans; relaunches it after a failure.
+/// Shares one headless Chrome (behind the egress proxy) between scans.
 pub struct Scanner {
     chrome: Option<PathBuf>,
-    allow_private: bool,
+    egress: Egress,
+    deadline: Duration,
     browser: Mutex<Option<Arc<Browser>>>,
     slots: Semaphore,
 }
 
 impl Scanner {
-    /// `allow_private` lets scans open localhost and private networks (tests, local fixtures).
+    /// `allow_private` lets scans open localhost and private networks (local testing only).
     pub fn new(chrome: Option<PathBuf>, allow_private: bool) -> Self {
+        Self::with_egress(
+            chrome,
+            if allow_private {
+                Egress::Any
+            } else {
+                Egress::Public
+            },
+        )
+    }
+
+    pub fn with_egress(chrome: Option<PathBuf>, egress: Egress) -> Self {
         Self {
             chrome,
-            allow_private,
+            egress,
+            deadline: DEADLINE,
             browser: Mutex::new(None),
             slots: Semaphore::new(PARALLEL),
         }
     }
 
+    /// Overrides the per-scan deadline (tests).
+    #[must_use]
+    pub const fn deadline(mut self, deadline: Duration) -> Self {
+        self.deadline = deadline;
+        self
+    }
+
     pub async fn scan(&self, raw: &str) -> Result<Report, ScanError> {
         let url = parse_url(raw)?;
-        if !self.allow_private {
-            ensure_public(&url).await?;
-        }
+        self.check(&url).await?;
         let _slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire())
             .await
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let started = Instant::now();
         let browser = self.browser().await.map_err(failed)?;
-        match tokio::time::timeout(DEADLINE, self.run(&browser, &url)).await {
-            Ok(Ok(mut report)) => {
-                report.elapsed_ms =
-                    u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX);
-                Ok(report)
-            }
-            Ok(Err(e)) => {
-                // The browser may be gone (crash, killed): start a fresh one next time.
+        let page = match browser.page(&INIT_SCRIPTS).await {
+            Ok(page) => page,
+            Err(e) => {
+                // The browser is unusable (crashed, killed): start a fresh one next time.
                 self.browser.lock().await.take();
-                Err(e)
+                return Err(failed(e));
             }
-            Err(_) => Err(ScanError::TimedOut),
+        };
+        let outcome = tokio::time::timeout(self.deadline, self.inspect(&page, &url)).await;
+        // Always close, also after a timeout: a page left running (say, an endless script) would keep
+        // using CPU and memory after its slot is released. A browser that cannot close it is replaced.
+        if !matches!(
+            tokio::time::timeout(CLOSE_WAIT, page.close()).await,
+            Ok(Ok(()))
+        ) {
+            self.browser.lock().await.take();
         }
+        let mut report = outcome.map_err(|_| ScanError::TimedOut)??;
+        report.elapsed_ms = u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX);
+        Ok(report)
+    }
+
+    /// Isolated contexts still open in the current browser (0 when none is running).
+    pub async fn open_contexts(&self) -> Result<usize> {
+        let browser = self.browser.lock().await.clone();
+        match browser {
+            Some(b) => b.open_contexts().await,
+            None => Ok(0),
+        }
+    }
+
+    async fn check(&self, url: &Url) -> Result<(), ScanError> {
+        let host = url.host_str().unwrap_or_default();
+        let port = url.port_or_known_default().unwrap_or(443);
+        self.egress
+            .resolve(host, port)
+            .await
+            .map(drop)
+            .map_err(|e| ScanError::BadUrl(format!("{e:#}")))
     }
 
     async fn browser(&self) -> Result<Arc<Browser>> {
@@ -130,36 +178,35 @@ impl Scanner {
         if let Some(b) = slot.as_ref() {
             return Ok(Arc::clone(b));
         }
-        let b = Arc::new(Browser::launch(self.chrome.as_deref()).await?);
+        let proxy = proxy::spawn(self.egress.clone()).await?;
+        let args = [
+            format!("--proxy-server=http://{proxy}"),
+            // Send loopback through the proxy too (Chrome bypasses it by default).
+            "--proxy-bypass-list=<-loopback>".to_owned(),
+            "--force-webrtc-ip-handling-policy=disable_non_proxied_udp".to_owned(),
+            "--disable-quic".to_owned(),
+        ];
+        let b = Arc::new(Browser::launch_with(self.chrome.as_deref(), &args).await?);
         *slot = Some(Arc::clone(&b));
         Ok(b)
     }
 
-    async fn run(&self, browser: &Browser, url: &Url) -> Result<Report, ScanError> {
-        let page = browser.page(&INIT_SCRIPTS).await.map_err(failed)?;
-        let result = async {
-            page.goto(url.as_str()).await.map_err(failed)?;
-            let final_url = page.eval("location.href").await.map_err(failed)?;
-            let final_url = final_url.as_str().unwrap_or(url.as_str()).to_owned();
-            // A redirect can land somewhere we would not have opened directly.
-            if !self.allow_private {
-                ensure_public(&parse_url(&final_url)?).await?;
-            }
-            let tools = registered_tools(&page, TOOL_WAIT).await.map_err(failed)?;
-            let snapshot = page.eval("__bench.snapshot()").await.map_err(failed)?;
-            let title = page.eval("document.title").await.map_err(failed)?;
-            Ok(report(
-                url.as_str(),
-                final_url,
-                title.as_str().unwrap_or_default(),
-                &tools,
-                snapshot.as_str().unwrap_or_default(),
-            ))
-        }
-        .await;
-        // Closing is best effort: the context dies with the browser anyway.
-        let _ = page.close().await;
-        result
+    async fn inspect(&self, page: &Page, url: &Url) -> Result<Report, ScanError> {
+        page.goto(url.as_str()).await.map_err(failed)?;
+        let final_url = page.eval("location.href").await.map_err(failed)?;
+        let final_url = final_url.as_str().unwrap_or(url.as_str()).to_owned();
+        // A refused redirect leaves Chrome on an error page for that URL: say why.
+        self.check(&parse_url(&final_url)?).await?;
+        let tools = registered_tools(page, TOOL_WAIT).await.map_err(failed)?;
+        let snapshot = page.eval("__bench.snapshot()").await.map_err(failed)?;
+        let title = page.eval("document.title").await.map_err(failed)?;
+        Ok(report(
+            url.as_str(),
+            final_url,
+            title.as_str().unwrap_or_default(),
+            &tools,
+            snapshot.as_str().unwrap_or_default(),
+        ))
     }
 }
 
@@ -252,25 +299,10 @@ fn parse_url(raw: &str) -> Result<Url, ScanError> {
     Ok(url)
 }
 
-/// Resolves the host and refuses loopback, private, link-local and other non-public addresses.
-async fn ensure_public(url: &Url) -> Result<(), ScanError> {
-    let host = url.host_str().context("no host").map_err(failed)?;
-    let port = url.port_or_known_default().unwrap_or(443);
-    let host = host.trim_start_matches('[').trim_end_matches(']');
-    let addrs: Vec<IpAddr> = tokio::net::lookup_host((host, port))
-        .await
-        .map_err(|e| ScanError::BadUrl(format!("cannot resolve {host}: {e}")))?
-        .map(|a| a.ip())
-        .collect();
-    if addrs.is_empty() || addrs.iter().any(|ip| !is_public(*ip)) {
-        return Err(ScanError::BadUrl(format!("{host} is not a public address")));
-    }
-    Ok(())
-}
-
-pub fn is_public(ip: IpAddr) -> bool {
+/// Whether `ip` is a public internet address (not loopback, private, link-local, reserved, ...).
+pub fn is_public(ip: std::net::IpAddr) -> bool {
     match ip {
-        IpAddr::V4(v4) => {
+        std::net::IpAddr::V4(v4) => {
             let [a, b, ..] = v4.octets();
             !(v4.is_private()
                 || v4.is_loopback()
@@ -284,9 +316,9 @@ pub fn is_public(ip: IpAddr) -> bool {
                 || (a == 198 && (b == 18 || b == 19)) // benchmarking
                 || a >= 240) // reserved
         }
-        IpAddr::V6(v6) => {
+        std::net::IpAddr::V6(v6) => {
             if let Some(v4) = v6.to_ipv4_mapped() {
-                return is_public(IpAddr::V4(v4));
+                return is_public(std::net::IpAddr::V4(v4));
             }
             let first = v6.segments()[0];
             !(v6.is_loopback()
@@ -391,9 +423,10 @@ mod tests {
 
     #[tokio::test]
     async fn localhost_is_refused() {
+        let scanner = Scanner::new(None, false);
         let url = parse_url("http://localhost:4173/").unwrap();
         assert!(matches!(
-            ensure_public(&url).await,
+            scanner.check(&url).await,
             Err(ScanError::BadUrl(_))
         ));
     }

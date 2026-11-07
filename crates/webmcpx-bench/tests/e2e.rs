@@ -295,3 +295,77 @@ async fn scan_api_refuses_private_hosts_by_default() {
         "{body}"
     );
 }
+
+/// Serves `routes` on a free loopback port.
+async fn serve_html(routes: axum::Router) -> std::net::SocketAddr {
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    tokio::spawn(async move { axum::serve(listener, routes).await });
+    addr
+}
+
+#[tokio::test]
+async fn scan_browser_never_reaches_refused_hosts() {
+    use axum::response::{Html, Redirect};
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::{ScanError, Scanner};
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    // The "private" endpoint: any connection to it is a failure.
+    let trap = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let t = trap.local_addr().unwrap();
+    let page = format!(
+        r#"<!doctype html><title>p</title><img src="http://{t}/img"><iframe src="http://{t}/frame"></iframe>
+        <script>fetch("http://{t}/fetch").catch(()=>{{}}); new WebSocket("ws://{t}/ws");</script>"#
+    );
+    let site = serve_html(
+        axum::Router::new()
+            .route("/", get(move || std::future::ready(Html(page.clone()))))
+            .route(
+                "/go",
+                get(move || std::future::ready(Redirect::temporary(&format!("http://{t}/secret")))),
+            ),
+    )
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+
+    let ok = scanner.scan(&format!("http://{site}/")).await;
+    assert!(ok.is_ok(), "{ok:?}");
+    let redirected = scanner.scan(&format!("http://{site}/go")).await;
+    assert!(
+        matches!(redirected, Err(ScanError::BadUrl(_) | ScanError::Failed(_))),
+        "{redirected:?}"
+    );
+
+    let hit = tokio::time::timeout(std::time::Duration::from_millis(500), trap.accept()).await;
+    assert!(hit.is_err(), "the scan browser connected to a refused host");
+}
+
+#[tokio::test]
+async fn timed_out_scans_leave_no_page_running() {
+    use axum::response::Html;
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::{ScanError, Scanner};
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        get(|| std::future::ready(Html("<!doctype html><script>while (true) {}</script>"))),
+    ))
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]))
+        .deadline(std::time::Duration::from_secs(3));
+    for _ in 0..2 {
+        let r = scanner.scan(&format!("http://{site}/")).await;
+        assert!(matches!(r, Err(ScanError::TimedOut)), "{r:?}");
+        assert_eq!(scanner.open_contexts().await.unwrap(), 0);
+    }
+}

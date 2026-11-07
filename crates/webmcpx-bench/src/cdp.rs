@@ -105,6 +105,11 @@ pub struct Browser {
 
 impl Browser {
     pub async fn launch(executable: Option<&Path>) -> Result<Self> {
+        Self::launch_with(executable, &[]).await
+    }
+
+    /// Like [`launch`](Self::launch), with extra command-line switches (e.g. a proxy).
+    pub async fn launch_with(executable: Option<&Path>, extra_args: &[String]) -> Result<Self> {
         let executable = match executable {
             Some(p) => p.to_path_buf(),
             None => find_chrome().context(
@@ -123,7 +128,8 @@ impl Browser {
             "--disable-extensions",
             "--window-size=1280,900",
         ])
-        .arg(format!("--user-data-dir={}", profile.path().display()));
+        .arg(format!("--user-data-dir={}", profile.path().display()))
+        .args(extra_args);
         if std::env::var_os("CI").is_some() {
             // CI containers often lack the user namespaces Chrome's sandbox needs.
             cmd.arg("--no-sandbox");
@@ -155,6 +161,15 @@ impl Browser {
             _child: child,
             _profile: profile,
         })
+    }
+
+    /// How many isolated contexts (pages opened with [`page`](Self::page)) are still alive.
+    pub async fn open_contexts(&self) -> Result<usize> {
+        let r = self
+            .conn
+            .call(None, "Target.getBrowserContexts", json!({}))
+            .await?;
+        Ok(r["browserContextIds"].as_array().map_or(0, Vec::len))
     }
 
     /// Opens a page in its own browser context (no shared cookies or storage), with `init_scripts`
