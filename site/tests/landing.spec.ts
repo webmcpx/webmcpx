@@ -502,19 +502,24 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	await expect(embed).not.toContainText('<img');
 });
 
-test('your own tools: one tool, written five ways, as keyboard-friendly tabs', async ({ page }) => {
+test('your own tools: one tool, written five ways, most used first, as keyboard-friendly tabs', async ({
+	page
+}) => {
 	await page.goto('/#own');
 	const own = page.locator('#own');
 	const tabs = own.getByRole('tab');
-	await expect(tabs).toHaveText(['HTML', 'JavaScript', 'React', 'Vue', 'Svelte']);
+	await expect(tabs).toHaveText(['React', 'Vue', 'Svelte', 'JavaScript', 'HTML']);
+	await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
+	await expect(tabs.first().locator('svg')).toHaveCount(1);
 	await expect(own.getByRole('tabpanel')).toHaveCount(1);
-	await expect(own.getByRole('tabpanel')).toContainText('toolname="search_flights"');
-	await tabs.first().focus();
-	await page.keyboard.press('ArrowRight');
-	await page.keyboard.press('ArrowRight');
-	await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'true');
 	await expect(own.getByRole('tabpanel')).toContainText('from "webmcpx/react"');
-	await expect(own.getByText('npx webmcpx tools localhost:3000')).toBeVisible();
+	await tabs.first().focus();
+	await page.keyboard.press('ArrowLeft');
+	await expect(tabs.last()).toHaveAttribute('aria-selected', 'true');
+	await expect(own.getByRole('tabpanel')).toContainText('toolname="search_flights"');
+	// The check command has its own copy button.
+	const terminal = own.getByRole('figure').filter({ hasText: 'npx webmcpx tools localhost:3000' });
+	await expect(terminal.getByRole('button', { name: /Copy/ })).toBeVisible();
 });
 
 test('without JavaScript every way to write a tool still shows', async ({ browser }) => {
@@ -522,4 +527,26 @@ test('without JavaScript every way to write a tool still shows', async ({ browse
 	await page.goto('/');
 	await expect(page.locator('#own [role=tabpanel]')).toHaveCount(5);
 	await page.close();
+});
+
+test('install and agent setup are tabs with logos, the most used open, each with its own copy', async ({
+	page
+}) => {
+	await page.goto('/#fix');
+	const fix = page.locator('#fix');
+	const install = fix.getByRole('tablist', { name: 'One line. Agent-ready.' }).getByRole('tab');
+	await expect(install).toHaveText(['HTML', 'npm', 'Your coding agent']);
+	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
+	await install.nth(2).click();
+	await expect(fix.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
+
+	const agents = fix.getByRole('tablist', { name: 'See it work in any agent, today' }).getByRole('tab');
+	await expect(agents).toHaveText(['VS Code', 'Cursor', 'Claude Code', 'Codex', 'Windsurf']);
+	await expect(agents.locator('svg')).toHaveCount(5);
+	await agents.nth(2).click();
+	const panel = fix.locator('[role=tabpanel]:not([hidden])').nth(1);
+	await expect(panel).toContainText('claude mcp add webmcpx -- npx -y webmcpx mcp');
+	await expect(panel.getByRole('button', { name: /Copy/ })).toBeVisible();
+	const check = fix.getByRole('figure').filter({ hasText: 'npx webmcpx tools localhost:3000' });
+	await expect(check.getByRole('button', { name: /Copy/ })).toBeVisible();
 });

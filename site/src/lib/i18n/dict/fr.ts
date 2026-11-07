@@ -321,7 +321,6 @@ const fr: Messages = {
 	fix: {
 		title: 'Une ligne. Prêt pour les agents.',
 		lead: 'Collez-la avant {tag}. Là où WebMCP est absent, elle ne fait rien.',
-		alternative: 'ou {code} pour {label}',
 		alternatives: { npm: 'npm', agent: 'votre agent de code' },
 		gives: {
 			search_page: 'trouve le passage',
@@ -332,13 +331,11 @@ const fr: Messages = {
 		see: {
 			title: 'Voyez-le marcher dans n’importe quel agent, dès aujourd’hui',
 			lead: 'Donnez à votre agent de code les outils WebMCP de chaque page qu’il ouvre. Aucun flag à activer : son navigateur reçoit le polyfill du W3C avant le chargement de la page, donc les outils de votre site marchent aussi.',
-			other: 'Codex, Cursor ou tout client MCP : {cmd}',
-			check: 'Vérifiez votre propre site, localhost compris : {cmd}',
+			check: 'Vérifiez votre propre site, localhost compris :',
 			native:
 				'En natif : le navigateur de l’app de bureau ChatGPT et Codex appellent les outils WebMCP ({docs}).',
 			docs: 'docs d’OpenAI'
-		},
-		agent: 'Ou demandez à votre agent de code :'
+		}
 	},
 
 	own: {
@@ -349,7 +346,7 @@ const fr: Messages = {
 			js: 'Depuis npm, ou importé depuis le même CDN que la balise script.',
 			hook: 'Enregistré tant que le composant est monté, retiré quand il disparaît.'
 		},
-		check: 'Ensuite, vérifiez-le, sans flag dans le navigateur : {cmd}'
+		check: 'Ensuite, vérifiez-le, sans flag dans le navigateur :'
 	},
 
 	issues: {

@@ -12,6 +12,8 @@
 /* Prose in a code block (the agent prompt): wrap instead of scrolling sideways. */
 .code-wrap .shiki {
 	white-space: pre-wrap;
+	/* Long tokens (a CDN URL, inline JSON) break too, so a phone never cuts them off. */
+	overflow-wrap: anywhere;
 }
 
 .code-wrap .shiki code {

@@ -417,8 +417,6 @@ const en = {
 		title: 'One line. Agent-ready.',
 		// {tag} is `</body>` (code): keep it.
 		lead: 'Paste it before {tag}. Where WebMCP is missing, it does nothing.',
-		// {code} is a command (npm i webmcpx), {label} who it is for (below).
-		alternative: 'or {code} for {label}',
 		alternatives: { npm: 'npm', agent: 'your coding agent' },
 		// What each standard tool does, under its name: max 24, verb first.
 		gives: {
@@ -433,13 +431,10 @@ const en = {
 		see: {
 			title: 'See it work in any agent, today',
 			lead: 'Give your coding agent the WebMCP tools of every page it opens. No browser flag: its browser gets the W3C polyfill before the page loads, so your site’s own tools work too.',
-			other: 'Codex, Cursor or any MCP client: {cmd}',
-			check: 'Check your own site, localhost included: {cmd}',
+			check: 'Check your own site, localhost included:',
 			native: 'Built in: the ChatGPT desktop app’s browser and Codex call WebMCP tools ({docs}).',
 			docs: 'OpenAI docs'
-		},
-		// Above the prompt people paste into their coding agent (the prompt itself stays in English).
-		agent: 'Or ask your coding agent:'
+		}
 	},
 
 	own: {
@@ -450,7 +445,7 @@ const en = {
 			js: 'From npm, or imported from the same CDN as the script tag.',
 			hook: 'Registered while the component is mounted, gone when it unmounts.'
 		},
-		check: 'Then see it, no browser flag: {cmd}'
+		check: 'Then see it, no browser flag:'
 	},
 
 	issues: {

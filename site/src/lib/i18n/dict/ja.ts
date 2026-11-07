@@ -310,7 +310,6 @@ const ja: Messages = {
 	fix: {
 		title: '1 行で、エージェント対応。',
 		lead: '{tag} の直前に貼り付けるだけ。WebMCP がない環境では何もしません。',
-		alternative: 'または {code}（{label}）',
 		alternatives: { npm: 'npm を使う場合', agent: 'コーディングエージェントの場合' },
 		gives: {
 			search_page: '該当箇所を見つける',
@@ -321,13 +320,11 @@ const ja: Messages = {
 		see: {
 			title: 'どんなエージェントでも、今日から動く',
 			lead: 'コーディングエージェントに、開いたページすべての WebMCP ツールを渡せます。ブラウザーのフラグは不要。ページの読み込み前に W3C のポリフィルが入るので、サイト独自のツールもそのまま動きます。',
-			other: 'Codex、Cursor など MCP クライアントなら：{cmd}',
-			check: '自分のサイトを確認（localhost も可）：{cmd}',
+			check: '自分のサイトを確認（localhost も可）：',
 			native:
 				'ネイティブ対応：ChatGPT デスクトップアプリのブラウザーと Codex は WebMCP ツールを呼び出します（{docs}）。',
 			docs: 'OpenAI のドキュメント'
-		},
-		agent: 'コーディングエージェントに任せる場合：'
+		}
 	},
 
 	own: {
@@ -338,7 +335,7 @@ const ja: Messages = {
 			js: 'npm から、またはスクリプトタグと同じ CDN からインポート。',
 			hook: 'コンポーネントがマウントされている間だけ登録され、外れると消えます。'
 		},
-		check: 'あとは確認するだけ（ブラウザーのフラグ不要）：{cmd}'
+		check: 'あとは確認するだけ（ブラウザーのフラグ不要）：'
 	},
 
 	issues: {

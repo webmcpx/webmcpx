@@ -1,69 +1,74 @@
-<!-- The fix, in one line, and what it gives agents. -->
+<!--
+	The fix: how to add it (tabs: script tag, npm, coding agent), how to see it work in an agent (tabs,
+	one per client), and what it gives agents. Tabs list the most used first; the first one opens.
+-->
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
+	import SquareTerminal from '@lucide/svelte/icons/square-terminal';
+	import Bot from '@lucide/svelte/icons/bot';
+	import { siClaude, siCursor, siGithubcopilot, siHtml5, siNpm, siWindsurf } from 'simple-icons';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
+	import CodeTabs, { type CodeTab } from '#lib/components/ui/CodeTabs.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
-	import { ALTERNATIVES, CHECK_COMMAND, MCP_COMMAND, type Highlighted } from '#lib/content/snippets.ts';
+	import type { Highlighted, SnippetId } from '#lib/content/snippets.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
 
-	let {
-		scriptTag,
-		agentPrompt,
-		agentMcp
-	}: { scriptTag: Highlighted; agentPrompt: Highlighted; agentMcp: Highlighted } = $props();
+	let { code }: { code: Record<SnippetId, Highlighted> } = $props();
 	const OPENAI_DOCS = 'https://learn.chatgpt.com/docs/webmcp';
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.fix);
 	/** The standard tools the script registers (what each does: `fix.gives.<tool>`). */
 	const GIVES = ['search_page', 'fetch_as_markdown', 'get_page_context'] as const;
+	const capital = (s: string) => s.charAt(0).toLocaleUpperCase(i18n.code) + s.slice(1);
+
+	const install: CodeTab[] = $derived([
+		{ id: 'html', label: 'HTML', icon: siHtml5, snippet: code.scriptTag, title: 'index.html' },
+		{ id: 'npm', label: 'npm', icon: siNpm, snippet: code.npmUsage, title: 'app.js' },
+		{
+			id: 'agent',
+			label: capital(m.alternatives.agent),
+			icon: Bot,
+			snippet: code.agentPrompt,
+			title: 'prompt'
+		}
+	]);
+	// Clients by how widely their editor or CLI is used; each with its own MCP setup.
+	const agents: CodeTab[] = $derived([
+		{ id: 'vscode', label: 'VS Code', icon: siGithubcopilot, snippet: code.mcpVscode, title: 'terminal' },
+		{ id: 'cursor', label: 'Cursor', icon: siCursor, snippet: code.mcpCursor, title: '.cursor/mcp.json' },
+		{ id: 'claude', label: 'Claude Code', icon: siClaude, snippet: code.agentMcp, title: 'terminal' },
+		{ id: 'codex', label: 'Codex', icon: SquareTerminal, snippet: code.mcpCodex, title: 'terminal' },
+		{
+			id: 'windsurf',
+			label: 'Windsurf',
+			icon: siWindsurf,
+			snippet: code.mcpWindsurf,
+			title: '~/.codeium/windsurf/mcp_config.json'
+		}
+	]);
 </script>
 
 <Section id="fix" title={m.title} lead={fmt(m.lead, { tag: '</body>' })} center>
-	<Reveal class="mx-auto max-w-3xl">
-		<CodeBlock snippet={scriptTag} title="index.html" />
-		<p class="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm text-ink-2">
-			{#each ALTERNATIVES as alt (alt.id)}
-				<span
-					><Rich text={fmt(m.alternative, { label: m.alternatives[alt.id] })}
-						>{#snippet code()}<code class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-ink"
-								>{alt.code}</code
-							>{/snippet}</Rich
-					></span
-				>
-			{/each}
-		</p>
-		<div
-			class="mt-8 rounded-card border-2 border-dashed border-ink/40 p-5 text-left text-sm text-ink-2 sm:p-6"
-		>
+	<Reveal class="mx-auto max-w-3xl text-left">
+		<CodeTabs id="install" label={m.title} tabs={install} />
+		<div class="mt-10 rounded-card border-2 border-dashed border-ink/40 p-5 text-sm text-ink-2 sm:p-6">
 			<p class="font-display text-base font-bold text-ink">{m.see.title}</p>
-			<p class="mt-1.5 text-pretty">{m.see.lead}</p>
-			<CodeBlock snippet={agentMcp} title="Claude Code" class="mt-4" />
-			<ul class="mt-4 list-disc space-y-1.5 pl-5">
-				{#each [m.see.other, m.see.check] as line, i (line)}
-					<li>
-						<Rich text={line}
-							>{#snippet cmd()}<code
-									class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono whitespace-nowrap text-ink"
-									>{i === 0 ? MCP_COMMAND : CHECK_COMMAND}</code
-								>{/snippet}</Rich
-						>
-					</li>
-				{/each}
-				<li>
-					<Rich text={m.see.native}
-						>{#snippet docs()}<a
-								class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4"
-								href={OPENAI_DOCS}>{m.see.docs}</a
-							>{/snippet}</Rich
-					>
-				</li>
-			</ul>
+			<p class="mt-1.5 mb-4 text-pretty">{m.see.lead}</p>
+			<CodeTabs id="agents" label={m.see.title} tabs={agents} />
+			<p class="mt-6 font-medium">{m.see.check}</p>
+			<CodeBlock snippet={code.checkTools} title="terminal" class="mt-2" />
+			<p class="mt-4 text-pretty">
+				<Rich text={m.see.native}
+					>{#snippet docs()}<a
+							class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4"
+							href={OPENAI_DOCS}>{m.see.docs}</a
+						>{/snippet}</Rich
+				>
+			</p>
 		</div>
-		<p class="mt-8 text-left text-sm font-medium text-ink-2">{m.agent}</p>
-		<CodeBlock snippet={agentPrompt} title="prompt" class="code-wrap mt-2" />
 	</Reveal>
 	<ul class="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
 		{#each GIVES as tool, i (tool)}
@@ -81,7 +86,5 @@
 			</li>
 		{/each}
 	</ul>
-	<p class="mt-8 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">
-		{m.facts}
-	</p>
+	<p class="mt-8 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">{m.facts}</p>
 </Section>

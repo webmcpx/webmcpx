@@ -26,9 +26,9 @@
 <Hero scriptTag={page.code.scriptTag} />
 <LogoWall />
 <Divider />
-<Fix scriptTag={page.code.scriptTag} agentPrompt={page.code.agentPrompt} agentMcp={page.code.agentMcp} />
+<Fix code={page.code} />
 <Divider />
-<Own samples={page.own} />
+<Own samples={page.own} check={page.code.checkTools} />
 {#if page.best}
 	<Divider />
 	<Why bestSaving={page.best.saving} bestSite={page.best.site} />

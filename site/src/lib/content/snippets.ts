@@ -23,8 +23,39 @@ export const SNIPPETS = {
 		lang: 'text',
 		code: 'Add WebMCP to this site with webmcpx: run `npx skills add webmcpx/webmcpx -y`, follow the skill, then check the tools with `npx webmcpx tools <local URL>`.'
 	},
-	// Gives a coding agent the WebMCP tools of every page it opens (the MCP server in the npm package).
+	npmUsage: {
+		lang: 'js',
+		code: `// npm i webmcpx
+import { register } from "webmcpx";
+
+register(); // the standard tools; tool() adds your own`
+	},
+	// Gives a coding agent the WebMCP tools of every page it opens (the MCP server in the npm package),
+	// one per client, as each client documents its MCP setup.
+	mcpVscode: {
+		lang: 'sh',
+		code: `code --add-mcp '{"name":"webmcpx","command":"npx","args":["-y","webmcpx","mcp"]}'`
+	},
+	mcpCursor: {
+		lang: 'json',
+		code: `{
+  "mcpServers": {
+    "webmcpx": { "command": "npx", "args": ["-y", "webmcpx", "mcp"] }
+  }
+}`
+	},
 	agentMcp: { lang: 'sh', code: 'claude mcp add webmcpx -- npx -y webmcpx mcp' },
+	mcpCodex: { lang: 'sh', code: 'codex mcp add webmcpx -- npx -y webmcpx mcp' },
+	mcpWindsurf: {
+		lang: 'json',
+		code: `{
+  "mcpServers": {
+    "webmcpx": { "command": "npx", "args": ["-y", "webmcpx", "mcp"] }
+  }
+}`
+	},
+	// Lists a page's WebMCP tools from the terminal (localhost included), no browser flag.
+	checkTools: { lang: 'sh', code: 'npx webmcpx tools localhost:3000' },
 	reproduce: {
 		lang: 'sh',
 		code: `git clone https://github.com/webmcpx/webmcpx
@@ -46,21 +77,6 @@ const DEFINITION = `{
 const indent = (s: string, by: string) => s.replaceAll('\n', `\n${by}`);
 
 export const OWN = {
-	form: {
-		lang: 'html',
-		code: `<form toolname="search_flights" tooldescription="Search flights by route and date." action="/search">
-  <input name="from" required toolparamdescription="Departure airport, e.g. GRU">
-  <input name="to" required toolparamdescription="Arrival airport, e.g. LIS">
-  <input name="date" type="date" required>
-  <button>Search</button>
-</form>`
-	},
-	js: {
-		lang: 'js',
-		code: `import { tool } from "webmcpx";
-
-tool(${DEFINITION});`
-	},
 	react: {
 		lang: 'jsx',
 		code: `import { useTool } from "webmcpx/react";
@@ -87,25 +103,33 @@ useTool(${DEFINITION});
 
   useTool(${indent(DEFINITION, '  ')});
 </` + 'script>'
+	},
+	js: {
+		lang: 'js',
+		code: `import { tool } from "webmcpx";
+
+tool(${DEFINITION});`
+	},
+	form: {
+		lang: 'html',
+		code: `<form toolname="search_flights" tooldescription="Search flights by route and date." action="/search">
+  <input name="from" required toolparamdescription="Departure airport, e.g. GRU">
+  <input name="to" required toolparamdescription="Arrival airport, e.g. LIS">
+  <input name="date" type="date" required>
+  <button>Search</button>
+</form>`
 	}
 } satisfies Record<string, CodeSample>;
 
 export type OwnId = keyof typeof OWN;
-/** Tab labels: product and language names, not translated. */
+/**
+ * Tab labels (product names, not translated), most used first: the frameworks by developer surveys,
+ * then plain JavaScript, then the form that needs none. The first one opens by default.
+ */
 export const OWN_TABS: Record<OwnId, string> = {
-	form: 'HTML',
-	js: 'JavaScript',
 	react: 'React',
 	vue: 'Vue',
-	svelte: 'Svelte'
+	svelte: 'Svelte',
+	js: 'JavaScript',
+	form: 'HTML'
 };
-
-/** The MCP server for any client, and the local check (shown inline under "See it work"). */
-export const MCP_COMMAND = 'npx -y webmcpx mcp';
-export const CHECK_COMMAND = 'npx webmcpx tools localhost:3000';
-
-/** Other ways in, shown as one-liners next to the script tag (who each is for: `fix.alternatives.<id>`). */
-export const ALTERNATIVES = [
-	{ id: 'npm', code: 'npm i webmcpx' },
-	{ id: 'agent', code: 'npx skills add webmcpx/webmcpx' }
-] as const;

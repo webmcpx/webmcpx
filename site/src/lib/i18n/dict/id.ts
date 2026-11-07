@@ -310,7 +310,6 @@ const id: Messages = {
 	fix: {
 		title: 'Satu baris. Siap agent.',
 		lead: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, baris ini tidak melakukan apa-apa.',
-		alternative: 'atau {code} untuk {label}',
 		alternatives: { npm: 'npm', agent: 'coding agent Anda' },
 		gives: {
 			search_page: 'menemukan bagian teks',
@@ -321,12 +320,10 @@ const id: Messages = {
 		see: {
 			title: 'Lihat hasilnya di agen mana pun, sekarang',
 			lead: 'Beri agen coding Anda tool WebMCP dari setiap halaman yang dibukanya. Tanpa flag browser: browsernya mendapat polyfill W3C sebelum halaman dimuat, jadi tool milik situs Anda juga jalan.',
-			other: 'Codex, Cursor, atau klien MCP apa pun: {cmd}',
-			check: 'Cek situs Anda sendiri, termasuk localhost: {cmd}',
+			check: 'Cek situs Anda sendiri, termasuk localhost:',
 			native: 'Bawaan: browser di aplikasi desktop ChatGPT dan Codex memanggil tool WebMCP ({docs}).',
 			docs: 'dokumentasi OpenAI'
-		},
-		agent: 'Atau minta coding agent Anda:'
+		}
 	},
 
 	own: {
@@ -337,7 +334,7 @@ const id: Messages = {
 			js: 'Lewat npm, atau diimpor dari CDN yang sama dengan tag script.',
 			hook: 'Terdaftar selama komponen terpasang, hilang saat dilepas.'
 		},
-		check: 'Lalu cek, tanpa flag browser: {cmd}'
+		check: 'Lalu cek, tanpa flag browser:'
 	},
 
 	issues: {

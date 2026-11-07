@@ -309,7 +309,6 @@ const zh: Messages = {
 	fix: {
 		title: '一行代码，智能体就绪。',
 		lead: '粘贴到 {tag} 之前。浏览器不支持 WebMCP 时，它什么也不做。',
-		alternative: '或者 {code}，适用于 {label}',
 		alternatives: { npm: 'npm', agent: 'AI 编程智能体' },
 		gives: {
 			search_page: '找到相关段落',
@@ -320,12 +319,10 @@ const zh: Messages = {
 		see: {
 			title: '在任何智能体里都能用，就在今天',
 			lead: '让你的编程智能体拿到它打开的每个页面的 WebMCP 工具。无需开启浏览器 flag：页面加载前，它的浏览器就会注入 W3C polyfill，所以你网站自己的工具也能用。',
-			other: 'Codex、Cursor 或任何 MCP 客户端：{cmd}',
-			check: '检查你自己的网站，localhost 也行：{cmd}',
+			check: '检查你自己的网站，localhost 也行：',
 			native: '原生支持：ChatGPT 桌面应用的浏览器和 Codex 会调用 WebMCP 工具（{docs}）。',
 			docs: 'OpenAI 文档'
-		},
-		agent: '或者直接交给你的 AI 编程智能体：'
+		}
 	},
 
 	own: {
@@ -336,7 +333,7 @@ const zh: Messages = {
 			js: '通过 npm，或从与脚本标签相同的 CDN 导入。',
 			hook: '组件挂载期间注册，卸载时自动移除。'
 		},
-		check: '然后查看效果，无需浏览器 flag：{cmd}'
+		check: '然后查看效果，无需浏览器 flag：'
 	},
 
 	issues: {

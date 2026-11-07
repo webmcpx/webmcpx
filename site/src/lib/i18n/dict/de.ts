@@ -320,7 +320,6 @@ const de: Messages = {
 	fix: {
 		title: 'Eine Zeile. Agentenfähig.',
 		lead: 'Fügen Sie sie vor {tag} ein. Wo WebMCP fehlt, bewirkt sie nichts.',
-		alternative: 'oder {code} für {label}',
 		alternatives: { npm: 'npm', agent: 'Ihren Coding-Agenten' },
 		gives: {
 			search_page: 'findet die Textstelle',
@@ -331,12 +330,10 @@ const de: Messages = {
 		see: {
 			title: 'In jedem Agenten sehen, schon heute',
 			lead: 'Gib deinem Coding-Agenten die WebMCP-Tools jeder Seite, die er öffnet. Kein Browser-Flag nötig: Sein Browser bekommt das W3C-Polyfill, bevor die Seite lädt, also laufen auch die Tools deiner Website.',
-			other: 'Codex, Cursor oder jeder MCP-Client: {cmd}',
-			check: 'Prüf deine eigene Website, auch auf localhost: {cmd}',
+			check: 'Prüf deine eigene Website, auch auf localhost:',
 			native: 'Eingebaut: Der Browser der ChatGPT-Desktop-App und Codex rufen WebMCP-Tools auf ({docs}).',
 			docs: 'OpenAI-Doku'
-		},
-		agent: 'Oder fragen Sie Ihren Coding-Agenten:'
+		}
 	},
 
 	own: {
@@ -347,7 +344,7 @@ const de: Messages = {
 			js: 'Über npm, oder aus demselben CDN importiert wie das Script-Tag.',
 			hook: 'Registriert, solange die Komponente gemountet ist, und wieder weg, wenn sie verschwindet.'
 		},
-		check: 'Dann prüfen, ohne Browser-Flag: {cmd}'
+		check: 'Dann prüfen, ohne Browser-Flag:'
 	},
 
 	issues: {
