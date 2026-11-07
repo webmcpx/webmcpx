@@ -85,9 +85,12 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   const native = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
   Object.defineProperty(sku, "value", { get() { return native.get.call(this); }, set(v) { tracked = v; native.set.call(this, v); } });
   sku.addEventListener("input", () => { if (sku.value !== tracked) { tracked = sku.value; window.state.name = sku.value; } });
-  // A field added later (as apps do) must reach the tool's schema.
-  setTimeout(() => document.querySelector("form[method=get]").insertAdjacentHTML("beforeend",
-    '<input name="kiln" required toolparamdescription="Which kiln.">'), 1500);
+  // A field added later (as apps do) must reach the tool's schema, and so must one that unlocks.
+  setTimeout(() => {
+    document.querySelector("form[method=get]").insertAdjacentHTML("beforeend",
+      '<input name="kiln" required toolparamdescription="Which kiln.">');
+    document.querySelector("[name=total]").removeAttribute("readonly");
+  }, 1500);
   document.querySelector('form[method=post]').addEventListener("submit", (event) => {
     event.preventDefault();
     if (event.agentInvoked) {
@@ -288,6 +291,8 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const updated = (await session.tools()).find((t) => t.name === "search_mugs");
     assert.deepEqual(updated.inputSchema.required, ["glaze", "kiln"]);
+    const unlocked = (await session.tools()).find((t) => t.name === "Book_a_class");
+    assert.ok(unlocked.inputSchema.properties.total, "an unlocked field becomes an input");
     assert.equal(updated.inputSchema.properties.kiln.description, "Which kiln.");
   } finally {
     await session.close();
@@ -406,6 +411,9 @@ test("a refresh never hands a client's tool name to another tool", async () => {
   const swapped = named([two[1], { name: "checkout", origin: "s", owner: 3 }], carry(frames), reserved, retired);
   assert.equal(swapped[0].name, frames[1].name);
   assert.ok(!frames.map((e) => e.name).includes(swapped[1].name), swapped[1].name);
+  // After a navigation, frame ids are new: a frame of the next page never gets an old frame's name.
+  const nextPage = named([{ name: "checkout", origin: "s", owner: "d2.1" }], carry(swapped), reserved, retired);
+  assert.ok(![...frames, ...swapped].map((e) => e.name).includes(nextPage[0].name), nextPage[0].name);
   // [B, C] -> [] -> [B]: B gets its own name back, as the same tool.
   const empty = named([], carry(swapped), reserved, retired);
   assert.equal(named([two[1]], carry(empty), reserved, retired)[0].name, frames[1].name);

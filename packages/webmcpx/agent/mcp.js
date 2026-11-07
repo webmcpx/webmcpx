@@ -44,7 +44,7 @@ const CALL = {
 };
 
 /** Who a tool is across refreshes: standard, or the page's (origin, owning frame and name). */
-const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t.owner ?? 0} ${t.name}`);
+const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t.owner ?? "0"} ${t.name}`);
 
 /**
  * Gives each tool a unique MCP name: MCP allows [A-Za-z0-9_-] and 64 characters, WebMCP also "." and

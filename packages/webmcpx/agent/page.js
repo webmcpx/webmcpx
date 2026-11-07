@@ -53,14 +53,16 @@ function summarize() {
   };
   // The frame that owns each tool (the spec's RegisteredTool.window), as a number that stays the same
   // while the page is open: same-named tools in two frames are two tools.
-  const owners = (globalThis.__webmcpxOwners ??= { ids: new WeakMap(), next: 1 });
+  // Frame ids are scoped to this document: after a navigation, a frame is never mistaken for an older
+  // one. The page itself is 0, so a site's own tools keep their names from visit to visit.
+  const owners = (globalThis.__webmcpxOwners ??= { ids: new WeakMap(), next: 1, doc: Math.random().toString(36).slice(2) });
   const owner = (w) => {
-    if (!w || w === window) return 0;
+    if (!w || w === window) return "0";
     try {
-      if (!owners.ids.has(w)) owners.ids.set(w, owners.next++);
+      if (!owners.ids.has(w)) owners.ids.set(w, `${owners.doc}.${owners.next++}`);
       return owners.ids.get(w);
     } catch {
-      return -1;
+      return "?";
     }
   };
   return this.map((t, index) => ({
@@ -299,4 +301,4 @@ export class Page {
 
 const describeException = (d) => d.exception?.description?.split("\n")[0] ?? d.text;
 
-/** @typedef {{index: number, list: string, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string, owner?: number}} PageTool */
+/** @typedef {{index: number, list: string, name: string, description: string, inputSchema?: object, annotations: Record<string, boolean>, origin?: string, owner?: string}} PageTool */

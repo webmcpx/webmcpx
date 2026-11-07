@@ -133,7 +133,7 @@ export function tool({ name, description, input, inputSchema = schema(input), ru
 
 const TOOL_ATTRIBUTES = ["toolname", "tooldescription", "toolautosubmit"];
 // What a control contributes to the schema (option values included).
-const CONTROL_ATTRIBUTES = ["name", "type", "required", "disabled", "min", "max", "multiple", "value", "toolparamdescription", "method"];
+const CONTROL_ATTRIBUTES = ["name", "type", "required", "disabled", "readonly", "min", "max", "multiple", "value", "toolparamdescription", "method"];
 const FORMATS = { email: "email", url: "uri", date: "date", "datetime-local": "date-time", time: "time" };
 const SKIPPED = /^(submit|button|reset|image|file|password|hidden)$/;
 
