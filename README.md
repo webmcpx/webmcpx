@@ -46,13 +46,21 @@ Same model, prompt and step limit; one arm reads the page through DOM snapshots,
 WebMCP tools the page registers. 35 questions on 7 sites (Cloudflare, Notion and Allbirds use their own
 tools), 3 runs each, graded by facts in the answer, never by an LLM.
 
-| Model | Solved | Tokens per run | Time per run |
-|---|---|---|---|
-| GPT-6.1 Sol | 95% → **100%** | 11.6k → **3.8k** | 7.1 s → **4.8 s** |
-| GPT-6 Luna | 93% → **100%** | 18.3k → **3.2k** | 7.2 s → **4.2 s** |
+Per site, never averaged (GPT-6.1 Sol; tokens per run on that site's best and worst question):
 
-Best case: 97× fewer tokens (a Cloudflare docs question). Not every case wins: on the WooCommerce demo store,
-whose tools return more than a page snapshot, WebMCP used the same or more tokens.
+| Site | Best question | Worst question | Fully solved (of 5) |
+|---|---|---|---|
+| Notion | 25.2k → **1.1k** (24×) | 1.8× fewer | 5 → 5 |
+| Cloudflare docs | 20.7k → **1.0k** (20×) | 2.1× fewer | 5 → 5 |
+| specification.website | 39.8k → **3.9k** (10×) | 3.0× fewer | 5 → 5 |
+| Kiln & Co (demo store) | 12.1k → **2.4k** (5×) | 1.8× fewer | 5 → 5 |
+| Allbirds | 20.4k → **6.0k** (3.4×) | 1.1× fewer | 3 → **5** |
+| Orbit docs (demo) | 2.5k → **1.0k** (2.5×) | 1.5× fewer | 5 → 5 |
+| WooCommerce demo | 3.1k → 3.2k (0.9×) | 2.4× **more** | 5 → 5 |
+
+With GPT-6 Luna the best case is 97× fewer tokens (113k → 1.2k on a Cloudflare docs question). Not every
+case wins: the WooCommerce demo store's tools return more than a page snapshot, so WebMCP used the same or
+more tokens there, with both models.
 [Every question, both arms, every model.](site/src/lib/content/bench)
 
 ## More ways in

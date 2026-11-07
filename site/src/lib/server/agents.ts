@@ -11,20 +11,35 @@ import { ORIGIN, REPO, SPEC } from '#lib/content/site.ts';
 import { LOADER_URL, SNIPPETS } from '#lib/content/snippets.ts';
 import { VERSUS as VERSUS_ROWS } from '#lib/content/versus.ts';
 import { REASONS } from '#lib/content/why.ts';
+import type { ArmSummary } from '#lib/features/benchmark/bench.ts';
+import { bySite } from '#lib/features/benchmark/sites.ts';
 import { loadRuns } from './bench.ts';
 
 // The build runs in site/; README.md and the skill live at the repository root (deploy copies them too).
 const read = (path: string) => readFile(resolve(process.cwd(), '..', path), 'utf8');
 
-/** One line per published model: solved and average tokens in both arms, from the run itself. */
+/**
+ * Per model, per site, per question: both arms' tokens and solve rate, from the run itself. Never averaged
+ * across questions or sites (site/AGENTS.md).
+ */
 function benchmarkLines(): string[] {
-	return loadRuns().flatMap(({ results }) => {
-		const { baseline, webmcp } = results.summary.arms;
-		if (!baseline || !webmcp) return [];
-		const pct = (x: number) => `${Math.round(x * 100)}%`;
-		const tok = (x: number) => `${(x / 1000).toFixed(1)}k`;
-		return `- ${results.model} (reasoning ${results.reasoning_effort ?? 'default'}): without WebMCP ${pct(baseline.success_rate)} solved, ${tok(baseline.tokens)} tokens per run; with WebMCP ${pct(webmcp.success_rate)} solved, ${tok(webmcp.tokens)} tokens per run. Details: ${ORIGIN}/benchmark/${results.model}/`;
-	});
+	const pct = (x: number) => `${Math.round(x * 100)}%`;
+	const tok = (x: number) => `${(x / 1000).toFixed(1)}k`;
+	const arm = (a: ArmSummary | undefined) =>
+		a ? `${tok(a.tokens)} tokens, ${pct(a.success_rate)} solved` : 'not run';
+	return loadRuns().flatMap(({ results }) => [
+		`### ${results.model} (reasoning ${results.reasoning_effort ?? 'default'})`,
+		'',
+		...bySite(results).flatMap((site) => [
+			`- ${site.name}`,
+			...site.tasks.map(
+				(t) => `  - "${t.prompt}": without WebMCP ${arm(t.baseline)}; with WebMCP ${arm(t.webmcp)}`
+			)
+		]),
+		'',
+		`Details: ${ORIGIN}/benchmark/${results.model}/`,
+		''
+	]);
 }
 
 const SEE_IT_WORK = `- ChatGPT desktop app's browser or Codex: they call a site's WebMCP tools (https://learn.chatgpt.com/docs/webmcp).
