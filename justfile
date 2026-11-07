@@ -72,11 +72,15 @@ review-reply reply:
 # Benchmark both arms (needs OPENAI_API_KEY and Chrome), e.g. `just bench --repeat 1 --task docs-exit-code`.
 bench *args: wasm
     cargo run -q --release -p webmcpx-bench -- run {{args}}
-    cp bench/results/latest.json site/src/lib/bench.json
+    cp bench/results/latest.json site/src/lib/content/bench.json
 
-# Landing: type check, unit tests, static build into site/build (needs `just wasm`).
-site:
-    cd site && npm run check && npm test && npm run build
+# Landing: types, lint + format, unit tests, prerendered build, then e2e + axe in Chrome against the build.
+site: wasm
+    cd site && npm run check && npm run lint && npm test && npm run build && npm run test:e2e
+
+# Format the landing (Prettier with the Svelte and Tailwind plugins).
+site-fmt:
+    cd site && npm run format
 
 # Landing dev server with hot reload on http://localhost:5173.
 site-dev: wasm
