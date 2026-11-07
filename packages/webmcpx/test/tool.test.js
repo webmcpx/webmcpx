@@ -70,8 +70,18 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   assert.equal(await problem({ qty: 1, tags: ["a", "b", "c"] }), "`tags` must have at most 2 items");
   assert.equal(await problem({ qty: 1, admin: true }), "`admin` is not an input of this tool");
   for (const input of ["null", "3", '"x"', "[]", null]) assert.equal(await problem(input), "the input must be an object");
+  // Inherited names are not declared inputs.
+  assert.equal(await problem('{"qty":1,"__proto__":{"admin":true}}'), "`__proto__` is not an input of this tool");
+  assert.equal(await problem('{"qty":1,"constructor":{"admin":true}}'), "`constructor` is not an input of this tool");
   assert.equal(ran.length, 0);
   assert.deepEqual(await page.call("book", { qty: 2, code: "LIS", guest: { name: "Ana" } }), { ok: true, data: "ok" });
+
+  tool({ name: "coupon", description: "Applies a coupon.", input: { coupon: { type: ["string", "null"] } }, run: () => "applied" });
+  assert.equal((await page.call("coupon", { coupon: null })).ok, true);
+  assert.equal((await page.call("coupon", { coupon: "SAVE" })).ok, true);
+  assert.equal((await page.call("coupon", { coupon: 42 })).error.message, "`coupon` must be of type string or null");
+  tool({ name: "required_only", description: "Needs toString.", input: { toString: "string" }, run: () => "ran" });
+  assert.equal((await page.call("required_only", {})).error.message, "`toString` is required");
 });
 
 test("a tool answers with the standard envelope and checks its input", async () => {

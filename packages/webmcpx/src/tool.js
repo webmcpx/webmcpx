@@ -10,11 +10,7 @@ const fail = (code, message, hint) =>
 const NAME = /^[A-Za-z0-9_.-]{1,128}$/;
 let count = 0;
 
-/**
- * Input shorthand to JSON Schema: `{ sku: "string", qty: "number?", size: ["S", "M"] }`. A "?" (on
- * the type or the key) makes a field optional; an array is a choice; an object is a property schema.
- * For a full JSON Schema, pass `inputSchema` to `tool()` instead.
- */
+/** Input shorthand to JSON Schema: `{ sku: "string", qty: "number?", size: ["S", "M"] }` (see index.d.ts). */
 export function schema(input = {}) {
   const properties = {};
   const required = [];
@@ -34,17 +30,15 @@ const TYPES = {
   integer: Number.isInteger,
   boolean: (v) => typeof v === "boolean",
   array: Array.isArray,
+  null: (v) => v === null,
   object: (v) => v !== null && typeof v === "object" && !Array.isArray(v),
 };
 
-/**
- * The first problem with `value` against `s`, or "". Covers what tool inputs use: type, enum,
- * required, properties, additionalProperties: false, items, minimum/maximum, minLength/maxLength,
- * pattern, minItems/maxItems, recursively.
- */
+/** The first problem with `value` against JSON Schema `s` (the keywords tool inputs use), or "". */
 function check(s, value, at = "input") {
   if (!s || typeof s !== "object") return "";
-  if (s.type && TYPES[s.type] && !TYPES[s.type](value)) return `${at} must be of type ${s.type}`;
+  const types = s.type === undefined ? [] : [].concat(s.type);
+  if (types.length && !types.some((t) => TYPES[t]?.(value))) return `${at} must be of type ${types.join(" or ")}`;
   if (s.enum && !s.enum.includes(value)) return `${at} must be one of ${s.enum.join(", ")}`;
   if (typeof value === "number") {
     if (value < s.minimum) return `${at} must be at least ${s.minimum}`;
@@ -64,9 +58,10 @@ function check(s, value, at = "input") {
     }
   }
   if (TYPES.object(value)) {
-    for (const key of s.required ?? []) if (value[key] === undefined) return `\`${key}\` is required`;
+    // Own properties only ("__proto__" is not a declared input).
+    for (const key of s.required ?? []) if (!Object.hasOwn(value, key) || value[key] === undefined) return `\`${key}\` is required`;
     for (const [key, v] of Object.entries(value)) {
-      const p = s.properties?.[key];
+      const p = s.properties && Object.hasOwn(s.properties, key) ? s.properties[key] : undefined;
       if (!p && s.additionalProperties === false) return `\`${key}\` is not an input of this tool`;
       const problem = p && v !== undefined ? check(p, v, `\`${key}\``) : "";
       if (problem) return problem;
