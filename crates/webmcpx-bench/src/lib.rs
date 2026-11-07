@@ -6,6 +6,7 @@ pub mod arm;
 pub mod cdp;
 pub mod model;
 pub mod report;
+pub mod scan;
 pub mod server;
 pub mod task;
 

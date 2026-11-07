@@ -92,7 +92,7 @@ async fn run_one<F: Fn(usize, &[Message]) -> Reply + Send + Sync + 'static>(
         .into_iter()
         .find(|t| t.id == task_id)
         .unwrap();
-    let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into())
+    let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into(), None)
         .await
         .unwrap();
     let browser = Arc::new(Browser::launch(None).await.unwrap());
@@ -227,4 +227,71 @@ async fn store_tools_answer_malformed_input_with_an_envelope() {
             "step {step}: {result}"
         );
     }
+}
+
+#[tokio::test]
+async fn scan_api_reports_the_tools_of_a_page() {
+    let root = repo_root();
+    if find_chrome().is_none()
+        || !root
+            .join("packages/webmcpx/wasm/webmcpx_wasm_bg.wasm")
+            .is_file()
+    {
+        eprintln!("skipping: needs Chrome and `just wasm`");
+        return;
+    }
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
+    let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into(), Some(scanner))
+        .await
+        .unwrap();
+    let get = |url: String| async move {
+        let r = reqwest::get(url).await.unwrap();
+        (
+            r.status().as_u16(),
+            r.json::<serde_json::Value>().await.unwrap(),
+        )
+    };
+
+    let (status, store) = get(format!(
+        "http://{addr}/api/scan?url=http://{addr}/sites/store/"
+    ))
+    .await;
+    assert_eq!(status, 200, "{store}");
+    assert_eq!(store["verdict"], "ready", "{store}");
+    let names: Vec<&str> = store["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|t| t["name"].as_str().unwrap())
+        .collect();
+    assert!(
+        names.contains(&"search_products") && names.contains(&"get_page_context"),
+        "{names:?}"
+    );
+    assert!(store["page_tokens"].as_u64().unwrap() > 0);
+
+    let (status, bad) = get(format!("http://{addr}/api/scan?url=file:///etc/passwd")).await;
+    assert_eq!(status, 400, "{bad}");
+}
+
+#[tokio::test]
+async fn scan_api_refuses_private_hosts_by_default() {
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));
+    let addr = server::spawn(&repo_root(), ([127, 0, 0, 1], 0).into(), Some(scanner))
+        .await
+        .unwrap();
+    let r = reqwest::get(format!(
+        "http://{addr}/api/scan?url=http://{addr}/sites/store/"
+    ))
+    .await
+    .unwrap();
+    assert_eq!(r.status().as_u16(), 400);
+    let body: serde_json::Value = r.json().await.unwrap();
+    assert!(
+        body["error"]
+            .as_str()
+            .unwrap()
+            .contains("not a public address"),
+        "{body}"
+    );
 }

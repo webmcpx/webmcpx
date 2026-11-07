@@ -1,0 +1,400 @@
+//! Scan one public page: which WebMCP tools it registers, what `webmcpx lint` says about them, and
+//! roughly how much an agent must read without them. Backs `GET /api/scan?url=` (see `server.rs`).
+//!
+//! Safety: only `http(s)` URLs whose host resolves to public addresses are opened, one isolated
+//! browser context per scan, a few scans at a time, each with a deadline. Chrome still resolves
+//! subresources on its own, so a public deployment must also run without access to private networks
+//! (an egress-restricted container); by default `serve` binds to localhost only.
+
+use std::net::IpAddr;
+use std::path::PathBuf;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
+
+use anyhow::{Context as _, Result};
+use reqwest::Url;
+use serde::Serialize;
+use serde_json::{Value, json};
+use tokio::sync::{Mutex, Semaphore};
+
+use crate::arm::{INIT_SCRIPTS, registered_tools};
+use crate::cdp::Browser;
+
+/// Scans running at once; more wait for a slot, up to `QUEUE_WAIT`.
+const PARALLEL: usize = 2;
+const QUEUE_WAIT: Duration = Duration::from_secs(20);
+/// Whole scan, navigation included.
+const DEADLINE: Duration = Duration::from_secs(45);
+/// How long to wait for tools after the page loaded (sites register them after hydration).
+const TOOL_WAIT: Duration = Duration::from_secs(6);
+/// Characters per token for the estimate (OpenAI's rule of thumb for English text).
+const CHARS_PER_TOKEN: usize = 4;
+
+#[derive(Debug, Serialize)]
+pub struct Report {
+    pub url: String,
+    pub final_url: String,
+    pub title: String,
+    pub verdict: Verdict,
+    pub tools: Vec<Tool>,
+    pub diagnostics: Vec<Finding>,
+    /// Estimated tokens of the text snapshot a DOM-reading agent gets for this page.
+    pub page_tokens: usize,
+    pub elapsed_ms: u64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Verdict {
+    /// Registers tools and the linter finds no errors.
+    Ready,
+    /// Registers tools, but the linter finds errors.
+    Issues,
+    /// Registers no WebMCP tools.
+    Missing,
+}
+
+#[derive(Debug, Serialize)]
+pub struct Tool {
+    pub name: String,
+    pub description: String,
+    pub params: Vec<String>,
+    pub read_only: Option<bool>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct Finding {
+    pub rule: &'static str,
+    pub severity: &'static str,
+    pub message: String,
+}
+
+/// Why a scan did not produce a report; each maps to an HTTP status in `server.rs`.
+#[derive(Debug)]
+pub enum ScanError {
+    /// Not an http(s) URL, or a host we refuse to open.
+    BadUrl(String),
+    Busy,
+    TimedOut,
+    /// The page could not be opened or read.
+    Failed(String),
+}
+
+/// Shares one headless Chrome between scans; relaunches it after a failure.
+pub struct Scanner {
+    chrome: Option<PathBuf>,
+    allow_private: bool,
+    browser: Mutex<Option<Arc<Browser>>>,
+    slots: Semaphore,
+}
+
+impl Scanner {
+    /// `allow_private` lets scans open localhost and private networks (tests, local fixtures).
+    pub fn new(chrome: Option<PathBuf>, allow_private: bool) -> Self {
+        Self {
+            chrome,
+            allow_private,
+            browser: Mutex::new(None),
+            slots: Semaphore::new(PARALLEL),
+        }
+    }
+
+    pub async fn scan(&self, raw: &str) -> Result<Report, ScanError> {
+        let url = parse_url(raw)?;
+        if !self.allow_private {
+            ensure_public(&url).await?;
+        }
+        let _slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire())
+            .await
+            .map_err(|_| ScanError::Busy)?
+            .map_err(|_| ScanError::Busy)?;
+        let started = Instant::now();
+        let browser = self.browser().await.map_err(failed)?;
+        match tokio::time::timeout(DEADLINE, self.run(&browser, &url)).await {
+            Ok(Ok(mut report)) => {
+                report.elapsed_ms =
+                    u64::try_from(started.elapsed().as_millis()).unwrap_or(u64::MAX);
+                Ok(report)
+            }
+            Ok(Err(e)) => {
+                // The browser may be gone (crash, killed): start a fresh one next time.
+                self.browser.lock().await.take();
+                Err(e)
+            }
+            Err(_) => Err(ScanError::TimedOut),
+        }
+    }
+
+    async fn browser(&self) -> Result<Arc<Browser>> {
+        let mut slot = self.browser.lock().await;
+        if let Some(b) = slot.as_ref() {
+            return Ok(Arc::clone(b));
+        }
+        let b = Arc::new(Browser::launch(self.chrome.as_deref()).await?);
+        *slot = Some(Arc::clone(&b));
+        Ok(b)
+    }
+
+    async fn run(&self, browser: &Browser, url: &Url) -> Result<Report, ScanError> {
+        let page = browser.page(&INIT_SCRIPTS).await.map_err(failed)?;
+        let result = async {
+            page.goto(url.as_str()).await.map_err(failed)?;
+            let final_url = page.eval("location.href").await.map_err(failed)?;
+            let final_url = final_url.as_str().unwrap_or(url.as_str()).to_owned();
+            // A redirect can land somewhere we would not have opened directly.
+            if !self.allow_private {
+                ensure_public(&parse_url(&final_url)?).await?;
+            }
+            let tools = registered_tools(&page, TOOL_WAIT).await.map_err(failed)?;
+            let snapshot = page.eval("__bench.snapshot()").await.map_err(failed)?;
+            let title = page.eval("document.title").await.map_err(failed)?;
+            Ok(report(
+                url.as_str(),
+                final_url,
+                title.as_str().unwrap_or_default(),
+                &tools,
+                snapshot.as_str().unwrap_or_default(),
+            ))
+        }
+        .await;
+        // Closing is best effort: the context dies with the browser anyway.
+        let _ = page.close().await;
+        result
+    }
+}
+
+#[expect(clippy::needless_pass_by_value, reason = "used as `map_err(failed)`")]
+fn failed(e: anyhow::Error) -> ScanError {
+    ScanError::Failed(format!("{e:#}"))
+}
+
+/// Builds the report from what the page exposed. Pure, so it is tested without a browser.
+pub fn report(
+    url: &str,
+    final_url: String,
+    title: &str,
+    tools: &[Value],
+    snapshot: &str,
+) -> Report {
+    let diagnostics = lint(tools);
+    let verdict = if tools.is_empty() {
+        Verdict::Missing
+    } else if diagnostics.iter().any(|d| d.severity == "error") {
+        Verdict::Issues
+    } else {
+        Verdict::Ready
+    };
+    let mut tools: Vec<Tool> = tools
+        .iter()
+        .map(|t| Tool {
+            name: t["name"].as_str().unwrap_or_default().to_owned(),
+            description: t["description"].as_str().unwrap_or_default().to_owned(),
+            params: t["inputSchema"]["properties"]
+                .as_object()
+                .map(|p| p.keys().cloned().collect())
+                .unwrap_or_default(),
+            read_only: t["annotations"]["readOnlyHint"].as_bool(),
+        })
+        .collect();
+    tools.sort_by(|a, b| a.name.cmp(&b.name));
+    Report {
+        url: url.to_owned(),
+        final_url,
+        title: title.trim().to_owned(),
+        verdict,
+        tools,
+        diagnostics,
+        page_tokens: snapshot.chars().count().div_ceil(CHARS_PER_TOKEN),
+        elapsed_ms: 0,
+    }
+}
+
+/// Runs `webmcpx lint` over the registered tools, as a manifest. Rules that only make sense for source
+/// code still apply to what the page actually registered.
+fn lint(tools: &[Value]) -> Vec<Finding> {
+    if tools.is_empty() {
+        return Vec::new();
+    }
+    let manifest = serde_json::to_string_pretty(&json!({ "tools": tools })).unwrap_or_default();
+    let report = webmcpx_lint::lint(
+        std::path::Path::new("page.webmcp.json"),
+        &manifest,
+        &webmcpx_lint::Options::default(),
+    );
+    report
+        .diagnostics
+        .into_iter()
+        .map(|d| Finding {
+            rule: d.rule,
+            severity: d.severity.as_str(),
+            message: d.message,
+        })
+        .collect()
+}
+
+fn parse_url(raw: &str) -> Result<Url, ScanError> {
+    let raw = raw.trim();
+    // People paste bare hosts: "example.com".
+    let with_scheme = if raw.contains("://") {
+        raw.to_owned()
+    } else {
+        format!("https://{raw}")
+    };
+    let url = Url::parse(&with_scheme).map_err(|e| ScanError::BadUrl(format!("not a URL: {e}")))?;
+    if !matches!(url.scheme(), "http" | "https") {
+        return Err(ScanError::BadUrl(
+            "only http and https URLs can be scanned".into(),
+        ));
+    }
+    if url.host_str().is_none_or(str::is_empty) {
+        return Err(ScanError::BadUrl("the URL has no host".into()));
+    }
+    Ok(url)
+}
+
+/// Resolves the host and refuses loopback, private, link-local and other non-public addresses.
+async fn ensure_public(url: &Url) -> Result<(), ScanError> {
+    let host = url.host_str().context("no host").map_err(failed)?;
+    let port = url.port_or_known_default().unwrap_or(443);
+    let host = host.trim_start_matches('[').trim_end_matches(']');
+    let addrs: Vec<IpAddr> = tokio::net::lookup_host((host, port))
+        .await
+        .map_err(|e| ScanError::BadUrl(format!("cannot resolve {host}: {e}")))?
+        .map(|a| a.ip())
+        .collect();
+    if addrs.is_empty() || addrs.iter().any(|ip| !is_public(*ip)) {
+        return Err(ScanError::BadUrl(format!("{host} is not a public address")));
+    }
+    Ok(())
+}
+
+pub fn is_public(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(v4) => {
+            let [a, b, ..] = v4.octets();
+            !(v4.is_private()
+                || v4.is_loopback()
+                || v4.is_link_local()
+                || v4.is_unspecified()
+                || v4.is_broadcast()
+                || v4.is_documentation()
+                || v4.is_multicast()
+                || a == 0
+                || (a == 100 && (64..128).contains(&b)) // shared address space (CGNAT)
+                || (a == 198 && (b == 18 || b == 19)) // benchmarking
+                || a >= 240) // reserved
+        }
+        IpAddr::V6(v6) => {
+            if let Some(v4) = v6.to_ipv4_mapped() {
+                return is_public(IpAddr::V4(v4));
+            }
+            let first = v6.segments()[0];
+            !(v6.is_loopback()
+                || v6.is_unspecified()
+                || v6.is_multicast()
+                || (first & 0xfe00) == 0xfc00 // unique local
+                || (first & 0xffc0) == 0xfe80 // link local
+                || first == 0x2001 && v6.segments()[1] == 0x0db8) // documentation
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tool(name: &str, description: &str, annotations: &Value) -> Value {
+        json!({
+            "name": name,
+            "description": description,
+            "inputSchema": { "type": "object", "properties": { "query": { "type": "string", "description": "Words to find." } } },
+            "annotations": annotations,
+        })
+    }
+
+    #[test]
+    fn no_tools_means_missing() {
+        let r = report(
+            "https://a.example",
+            "https://a.example/".into(),
+            " A ",
+            &[],
+            "abcdefgh",
+        );
+        assert_eq!(r.verdict, Verdict::Missing);
+        assert_eq!(r.page_tokens, 2);
+        assert_eq!(r.title, "A");
+        assert!(r.diagnostics.is_empty());
+    }
+
+    #[test]
+    fn clean_tools_are_ready() {
+        let tools = [tool(
+            "search_page",
+            "Find passages on the current page that match a query.",
+            &json!({ "readOnlyHint": true, "untrustedContentHint": true }),
+        )];
+        let r = report("u", "u".into(), "t", &tools, "");
+        assert_eq!(r.verdict, Verdict::Ready, "{:?}", r.diagnostics);
+        assert_eq!(r.tools[0].params, ["query"]);
+        assert_eq!(r.tools[0].read_only, Some(true));
+    }
+
+    #[test]
+    fn lint_errors_mean_issues() {
+        let tools = [tool("Search Products", "", &json!({}))];
+        let r = report("u", "u".into(), "t", &tools, "");
+        assert_eq!(r.verdict, Verdict::Issues);
+        let rules: Vec<_> = r.diagnostics.iter().map(|d| d.rule).collect();
+        assert!(rules.contains(&"invalid-name"), "{rules:?}");
+        assert!(rules.contains(&"missing-description"), "{rules:?}");
+    }
+
+    #[test]
+    fn urls_need_http_and_a_host() {
+        assert_eq!(
+            parse_url("example.com").unwrap().as_str(),
+            "https://example.com/"
+        );
+        assert!(matches!(
+            parse_url("file:///etc/passwd"),
+            Err(ScanError::BadUrl(_))
+        ));
+        assert!(matches!(
+            parse_url("javascript:alert(1)"),
+            Err(ScanError::BadUrl(_))
+        ));
+        assert!(matches!(parse_url("http://"), Err(ScanError::BadUrl(_))));
+    }
+
+    #[test]
+    fn private_addresses_are_not_public() {
+        for ip in [
+            "127.0.0.1",
+            "10.1.2.3",
+            "172.16.0.1",
+            "192.168.1.1",
+            "169.254.169.254",
+            "100.64.0.1",
+            "0.0.0.0",
+            "::1",
+            "fd00::1",
+            "fe80::1",
+            "::ffff:127.0.0.1",
+        ] {
+            assert!(!is_public(ip.parse().unwrap()), "{ip}");
+        }
+        for ip in ["1.1.1.1", "93.184.216.34", "2606:4700::1111"] {
+            assert!(is_public(ip.parse().unwrap()), "{ip}");
+        }
+    }
+
+    #[tokio::test]
+    async fn localhost_is_refused() {
+        let url = parse_url("http://localhost:4173/").unwrap();
+        assert!(matches!(
+            ensure_public(&url).await,
+            Err(ScanError::BadUrl(_))
+        ));
+    }
+}

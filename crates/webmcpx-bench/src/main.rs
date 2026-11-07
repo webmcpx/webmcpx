@@ -17,6 +17,7 @@ use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, Session, webmcp_tools};
 use webmcpx_bench::cdp::Browser;
 use webmcpx_bench::model::{OpenAi, Price, list_price};
 use webmcpx_bench::report::{Results, SCHEMA_VERSION, Summary, markdown};
+use webmcpx_bench::scan::Scanner;
 use webmcpx_bench::{Job, repo_root, run_jobs, server, task};
 
 #[derive(Parser)]
@@ -57,10 +58,15 @@ enum Command {
         #[arg(long)]
         chrome: Option<PathBuf>,
     },
-    /// Serve the benchmark sites and the built landing on localhost.
+    /// Serve the benchmark sites, the built landing and the scan API (`/api/scan?url=`) on localhost.
     Serve {
         #[arg(long, default_value = "127.0.0.1:4173")]
         addr: SocketAddr,
+        /// Let scans open localhost and private networks (for testing against local sites only).
+        #[arg(long)]
+        scan_private: bool,
+        #[arg(long)]
+        chrome: Option<PathBuf>,
     },
     /// List tasks.
     Tasks,
@@ -132,8 +138,13 @@ async fn main() -> Result<()> {
             page.close().await?;
             writeln!(std::io::stdout().lock(), "{result}")?;
         }
-        Command::Serve { addr } => {
-            let bound = server::spawn(&root, addr).await?;
+        Command::Serve {
+            addr,
+            scan_private,
+            chrome,
+        } => {
+            let scanner = Arc::new(Scanner::new(chrome, scan_private));
+            let bound = server::spawn(&root, addr, Some(scanner)).await?;
             eprintln!("serving http://{bound}/ (sites under /sites/); Ctrl-C to stop");
             tokio::signal::ctrl_c().await?;
         }
@@ -162,7 +173,7 @@ async fn main() -> Result<()> {
             };
             let price = price.or_else(|| list_price(&model));
             let client = OpenAi::from_env(model.clone(), Some(reasoning_effort.clone()))?;
-            let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into()).await?;
+            let addr = server::spawn(&root, ([127, 0, 0, 1], 0).into(), None).await?;
             let browser = Browser::launch(chrome.as_deref()).await?;
 
             let work: Vec<Job> = selected

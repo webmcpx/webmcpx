@@ -13,6 +13,7 @@ publish = false
 workspace = true
 
 [dependencies]
+webmcpx-lint.workspace = true
 anyhow.workspace = true
 axum.workspace = true
 clap.workspace = true
