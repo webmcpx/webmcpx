@@ -4,3 +4,6 @@ node_modules/
 *.snap.new
 /bench/results/*
 !/bench/results/.gitkeep
+
+# Deploy settings (domain); never committed.
+deploy/.env
