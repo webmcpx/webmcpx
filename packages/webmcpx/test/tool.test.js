@@ -192,6 +192,12 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   assert.equal((await page.call("price", { amount: 4.105 })).error.message, "`amount` must be a multiple of 0.01");
   assert.equal((await page.call("price", { amount: 10000000.005 })).ok, false);
   assert.equal((await page.call("price", { amount: 10000000.01 })).ok, true);
+  // Not exactly checkable: refused, never waved through by float division.
+  assert.equal((await page.call("price", { amount: 0.35000000000000003 })).ok, false);
+  // A uniqueItems array too big for the step budget is refused at once, before any work.
+  const startedHuge = Date.now();
+  assert.equal(await nums({ tags: Array.from({ length: 1_000_000 }, (_, i) => i) }), "the input is too complex to check");
+  assert.ok(Date.now() - startedHuge < 1_000, `took ${Date.now() - startedHuge} ms`);
   // Uniqueness is linear: a large distinct array is checked fast, objects compare by content.
   const startedUnique = Date.now();
   assert.equal(await nums({ tags: Array.from({ length: 90_000 }, (_, i) => i) }), undefined);

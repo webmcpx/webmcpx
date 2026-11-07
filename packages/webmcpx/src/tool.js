@@ -48,11 +48,12 @@ const decimals = (x) => {
   const [m, e = 0] = String(x).toLowerCase().split("e");
   return Math.max(0, (m.split(".")[1]?.length ?? 0) - e);
 };
-// Exact decimal divisibility (4.1 is a multiple of 0.01; 10000000.005 is not), not float division.
+// Exact decimal divisibility (4.1 is a multiple of 0.01; 10000000.005 is not).
 const multiple = (value, of) => {
   const f = 10 ** Math.max(decimals(value), decimals(of));
   const [a, b] = [Math.round(value * f), Math.round(of * f)];
-  return Number.isSafeInteger(a) && Number.isSafeInteger(b) ? a % b === 0 : Number.isInteger(value / of);
+  // Not exactly checkable (beyond safe integers once scaled): refuse rather than trust float division.
+  return Number.isSafeInteger(a) && Number.isSafeInteger(b) && a % b === 0;
 };
 
 // JSON equality, by content.
@@ -118,7 +119,8 @@ function check(s, value, at = "input") {
     if (value.length < s.minItems) return `${at} must have at least ${s.minItems} items`;
     if (value.length > s.maxItems) return `${at} must have at most ${s.maxItems} items`;
     // Linear: each item's canonical JSON (object keys sorted) in a Set; it counts against the step budget.
-    steps += s.uniqueItems ? value.length : 0;
+    // Budget first: an array too big for the remaining steps is refused before any work.
+    if (s.uniqueItems && (steps += value.length) > 100_000) return `${at}: too complex to check`;
     if (s.uniqueItems && new Set(value.map(canonical)).size !== value.length) return `${at} must not repeat items`;
     for (let i = 0; s.items !== undefined && i < value.length; i++) {
       const problem = check(s.items, value[i], `${at}[${i}]`);
