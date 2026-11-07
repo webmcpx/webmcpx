@@ -52,8 +52,13 @@
 			<li class="min-w-0">
 				<Reveal delay={(i % 4) * 60} class="h-full">
 					<div class="flex h-full flex-col rounded-card border-2 border-ink bg-card p-5 shadow-hard">
-						<h3 class="flex items-start gap-2.5 font-display text-xl leading-tight font-bold tracking-tight">
-							<Icon size={22} strokeWidth={2.25} class="mt-px shrink-0" aria-hidden="true" />
+						<h3 class="flex items-center gap-3 font-display text-xl leading-tight font-bold tracking-tight">
+							<span
+								class="grid size-10 shrink-0 place-items-center rounded-xl border-2 border-ink bg-marker"
+								aria-hidden="true"
+							>
+								<Icon size={20} strokeWidth={2} />
+							</span>
 							<span class="text-balance">{r.title}</span>
 						</h3>
 						<p class="mt-4 font-mono text-[10px] tracking-widest text-ink-3 uppercase">Today</p>
