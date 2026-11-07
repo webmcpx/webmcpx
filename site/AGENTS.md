@@ -74,6 +74,12 @@ tests/                       Playwright e2e against the prerendered build
 
 ## Data and copy
 
+- "Why WebMCP?" (`content/why.ts`) and "WebMCP vs MCP" (`content/versus.ts`) come from the research in
+  `reports/Por que adotar WebMCP.md` (outside the repo). Every reason names its source; our benchmark is
+  labelled as ours and quoted as a best case, never an average. Don't add "safer", accessibility,
+  analytics, discoverability or "faster than APIs" claims: the evidence is thin or points the other way.
+  WebMCP is a browser API, not MCP on the wire: never call it "MCP for the browser".
+
 - `lib/content/bench/<model>.json` (one per model) is copied from `bench/results/latest.json` by `just bench`;
   a model switcher picks the run (`lib/content/models.ts`: cheap and frontier per provider, provider logos
   in `logos.ts`), and the site and detail tabs stay put across models. Never edit a results file by hand

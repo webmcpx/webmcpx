@@ -309,11 +309,25 @@ test('every page carries the trademark notices', async ({ page }) => {
 	await expect(page.getByText(/not affiliated with or endorsed by LF Projects/)).toBeVisible();
 });
 
-test('Why WebMCP shows four reasons, the saving computed from the run', async ({ page }) => {
+test('Why WebMCP ranks seven sourced reasons and states the draft status', async ({ page }) => {
 	await page.goto('/#why');
 	const why = page.locator('#why');
-	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(4);
-	await expect(why.getByText(/up to \d+(\.\d)?× fewer tokens on \S/)).toBeVisible();
+	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(7);
+	await expect(
+		why.getByText(/up to \d+(\.\d)?× fewer tokens on \S+ in our benchmark \(best case\)/)
+	).toBeVisible();
+	// Every reason names where its claim comes from.
+	await expect(why.getByText('Sources', { exact: true })).toHaveCount(7);
+	await expect(why.getByText(/Community Group draft .* not a W3C standard/)).toBeVisible();
+});
+
+test('WebMCP vs MCP compares them row by row and says to use both', async ({ page }) => {
+	await page.goto('/#vs-mcp');
+	const vs = page.locator('#vs-mcp');
+	const table = vs.getByRole('table', { name: 'WebMCP compared with MCP' });
+	await expect(table.getByRole('rowheader')).toHaveCount(10);
+	await expect(table.getByRole('row', { name: /How agents call them/ })).toContainText('No JSON-RPC');
+	await expect(vs.getByText(/Run both on one backend/)).toBeVisible();
 });
 
 test('a scan submitted before JavaScript is ready still runs', async ({ browser }) => {
