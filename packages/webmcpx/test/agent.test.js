@@ -112,7 +112,17 @@ const SLOW = `<!doctype html><html><head><title>Slow</title></head><body><main><
   document.modelContext.registerTool({ name: "pay", description: "Pays, then leaves the page.",
     execute: () => { sessionStorage.paid = String(Number(sessionStorage.paid || 0) + 1); location.href = "/plain"; return new Promise(() => {}); } });
 </script></body></html>`;
-const PAGES = { "/shop": SHOP, "/plain": PLAIN, "/names": NAMES, "/frame": FRAME, "/forms": FORMS, "/slow": SLOW };
+// An iframe that navigates on its own, the page around it staying put.
+const NAVFRAME = `<!doctype html><html><head><title>Orders</title></head><body><main><p>Orders.</p></main>
+<iframe src="/order1"></iframe>
+<script>
+  document.modelContext.registerTool({ name: "next_order", description: "Shows the next order.",
+    execute: () => { document.querySelector("iframe").src = "/order2"; return "moved"; } });
+</script></body></html>`;
+const ORDER = (n) => `<!doctype html><html><body><script>
+  document.modelContext.registerTool({ name: "checkout", description: "Pays order ${n}.", execute: () => "paid ${n}" });
+</script></body></html>`;
+const PAGES = { "/navframe": NAVFRAME, "/order1": ORDER(1), "/order2": ORDER(2), "/shop": SHOP, "/plain": PLAIN, "/names": NAMES, "/frame": FRAME, "/forms": FORMS, "/slow": SLOW };
 const PKG = new URL("../", import.meta.url);
 
 let server;
@@ -313,6 +323,24 @@ test("a call past the time limit is cancelled, and a tool that navigates is neve
     const again = await session.goto(`${origin}/slow`);
     await assert.rejects(session.call(again.tools.find((t) => t.name === "freeze"), {}), /froze the page/);
     assert.equal((await session.goto(`${origin}/plain`)).title, "Plain");
+  } finally {
+    await session.close();
+  }
+});
+
+test("a tool from an iframe that has since navigated is refused, never run on the new page", { skip, timeout: 90_000 }, async () => {
+  const session = new Session();
+  try {
+    const { tools } = await session.goto(`${origin}/navframe`);
+    const checkout = tools.find((t) => t.name === "checkout");
+    assert.equal(await session.call(checkout, {}), "paid 1");
+    assert.equal(await session.call(tools.find((t) => t.name === "next_order"), {}), "moved");
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await assert.rejects(session.call(checkout, {}), /the page changed since "checkout" was listed/);
+    // The new order's checkout is a new tool, with its own owner.
+    const fresh = (await session.tools()).find((t) => t.name === "checkout");
+    assert.notEqual(fresh.owner, checkout.owner);
+    assert.equal(await session.call(fresh, {}), "paid 2");
   } finally {
     await session.close();
   }

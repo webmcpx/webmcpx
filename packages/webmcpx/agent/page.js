@@ -55,16 +55,27 @@ function summarize() {
   // while the page is open: same-named tools in two frames are two tools.
   // Frame ids are scoped to this document: after a navigation, a frame is never mistaken for an older
   // one. The page itself is 0, so a site's own tools keep their names from visit to visit.
+  // A frame is known by its document (same origin) or its window: a frame that navigates is a new owner.
   const owners = (globalThis.__webmcpxOwners ??= { ids: new WeakMap(), next: 1, doc: Math.random().toString(36).slice(2) });
+  const docOf = (w) => {
+    try {
+      return w.document;
+    } catch {
+      return w;
+    }
+  };
   const owner = (w) => {
     if (!w || w === window) return "0";
+    const key = docOf(w);
     try {
-      if (!owners.ids.has(w)) owners.ids.set(w, `${owners.doc}.${owners.next++}`);
-      return owners.ids.get(w);
+      if (!owners.ids.has(key)) owners.ids.set(key, `${owners.doc}.${owners.next++}`);
+      return owners.ids.get(key);
     } catch {
       return "?";
     }
   };
+  // What each tool's frame showed when listed: a call refuses a frame that has navigated since.
+  this.__webmcpxDocs = this.map((t) => (t.window ? docOf(t.window) : null));
   return this.map((t, index) => ({
     index,
     name: t.name,
@@ -80,6 +91,14 @@ function summarize() {
 // the result JSON-serialized; a tool that returned a string (like the webmcpx envelope) comes back as a
 // JSON string literal: unwrap it once.
 async function execute(index, input, call) {
+  const w = this[index].window;
+  let doc = w;
+  try {
+    doc = w?.document;
+  } catch {
+    // cross-origin: its window is all we know
+  }
+  if (w && this.__webmcpxDocs?.[index] !== doc) throw new Error("webmcpx: the frame navigated");
   const controller = new AbortController();
   (this.__webmcpxCalls ??= new Map()).set(call, controller);
   let out;
@@ -289,7 +308,12 @@ export class Page {
       throw new Error(`"${tool.name}" took longer than ${this.#callTimeout / 1000} s and was cancelled; it may have partly run`);
     }
     const { result, exceptionDetails } = reply;
-    if (exceptionDetails) throw new Error(describeException(exceptionDetails));
+    if (exceptionDetails) {
+      const message = describeException(exceptionDetails);
+      // Its frame navigated since the list was read: the call never started, like a stale list.
+      if (message.includes("webmcpx: the frame navigated")) throw new Error("Could not find object: the frame navigated");
+      throw new Error(message);
+    }
     return result.value;
   }
 

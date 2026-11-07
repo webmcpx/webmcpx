@@ -4,6 +4,9 @@ import { attach, launch } from "./browser.js";
 import { Page, stale } from "./page.js";
 import { runStandard, standardTools } from "./standard.js";
 
+/** Every session not yet closed, so a signal can close them (and their tabs) before the process exits. */
+export const openSessions = new Set();
+
 export class Session {
   #options;
   #browser;
@@ -15,6 +18,7 @@ export class Session {
   /** @param {{headed?: boolean, browser?: string, cdp?: string, onChange?: () => void, callTimeout?: number}} options */
   constructor(options = {}) {
     this.#options = options;
+    openSessions.add(this);
   }
 
   #start() {
@@ -91,6 +95,7 @@ export class Session {
   /** Closes our tab and the browser (or only our tab's connection, in a browser we attached to). */
   async close() {
     this.#closed = true;
+    openSessions.delete(this);
     const page = await this.#ready?.catch(() => undefined);
     await page?.close();
     this.#browser?.close();

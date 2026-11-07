@@ -5,7 +5,7 @@
 //   webmcpx call <url> <tool> [json] call one and print the result
 import { parseArgs } from "node:util";
 import { describe, named, serve } from "../agent/mcp.js";
-import { Session, failed, mcpResult } from "../agent/session.js";
+import { Session, failed, mcpResult, openSessions } from "../agent/session.js";
 
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
 const paint = (code) => (s) => (tty ? `\x1b[${code}m${s}\x1b[0m` : s);
@@ -91,10 +91,13 @@ function printTools(page) {
   console.log(dim(`\nTry one: npx webmcpx call ${page.url} search_page '{"query": "..."}'`));
 }
 
-// An MCP client stops its server with a signal: exit through process.exit, so the browser we started
-// is killed by its exit hook instead of being orphaned.
+// An MCP client stops its server with a signal: close our tabs (for 2 s at most), then exit through
+// process.exit, so the browser we started is killed by its exit hook instead of being orphaned.
 for (const [signal, code] of [["SIGINT", 130], ["SIGTERM", 143], ["SIGHUP", 129]]) {
-  process.once(signal, () => process.exit(code));
+  process.once(signal, () => {
+    const closing = Promise.allSettled([...openSessions].map((s) => s.close()));
+    Promise.race([closing, new Promise((resolve) => setTimeout(resolve, 2_000))]).finally(() => process.exit(code));
+  });
 }
 
 async function main() {
