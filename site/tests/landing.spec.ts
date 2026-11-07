@@ -159,8 +159,13 @@ test('a site with several questions rotates them, and the rotation can be paused
 		'true'
 	);
 
+	const before = await proof.locator('[aria-roledescription=carousel] p').first().textContent();
 	await proof.getByRole('button', { name: 'Question 3 of 4' }).click();
-	await expect(proof.getByText(/exit code 4/)).toBeVisible();
+	await expect(proof.getByRole('button', { name: 'Question 3 of 4' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
+	await expect(proof.locator('[aria-roledescription=carousel] p').first()).not.toHaveText(before ?? '');
 	await proof.getByRole('button', { name: 'Pause rotation' }).click();
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(12000);
@@ -182,4 +187,22 @@ test('no automatic rotation for people who prefer reduced motion', async ({ page
 		'aria-current',
 		'true'
 	);
+});
+
+test('switching sites starts the question rotation over', async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.goto('/#proof');
+	const proof = page.locator('#proof');
+	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
+	await proof.getByRole('button', { name: 'Question 4 of 4' }).click();
+	await proof.getByRole('tab', { name: /WooCommerce/ }).click();
+	await expect(proof.getByRole('button', { name: 'Question 1 of 2' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
+});
+
+test('the page says the first site is the best case', async ({ request }) => {
+	const html = await (await request.get('/')).text();
+	expect(html).toContain('sorted by their biggest saving');
 });

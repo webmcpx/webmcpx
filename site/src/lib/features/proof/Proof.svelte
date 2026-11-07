@@ -111,7 +111,7 @@
 	id="proof"
 	kicker="Benchmark · {results.model}"
 	title="Same agent. Same question."
-	lead="Pick a site. One agent reads the page like a browser agent; the other calls the site's WebMCP tools."
+	lead="Sites are sorted by their biggest saving, so the best case comes first. One agent reads the page like a browser agent; the other calls the site's WebMCP tools."
 >
 	{#if sites.length}
 		<Tabs
@@ -138,11 +138,14 @@
 				{#if site.tasks.length === 1}
 					{@render question(site, site.tasks[0])}
 				{:else}
-					<Rotator items={site.tasks} noun="Question">
-						{#snippet item(t)}
-							{@render question(site, t)}
-						{/snippet}
-					</Rotator>
+					<!-- Keyed by site: switching sites starts the rotation over. -->
+					{#key site.id}
+						<Rotator items={site.tasks} noun="Question">
+							{#snippet item(t)}
+								{@render question(site, t)}
+							{/snippet}
+						</Rotator>
+					{/key}
 				{/if}
 			{/snippet}
 		</Tabs>
