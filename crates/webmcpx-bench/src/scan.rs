@@ -108,6 +108,8 @@ pub struct Remote {
 
 /// One scan's result, awaited by everyone who asked for that URL meanwhile.
 type SharedScan = Arc<OnceCell<Result<Report, ScanError>>>;
+/// Shared scans by URL, with how many callers are waiting on each.
+type Inflight = std::sync::Mutex<HashMap<String, (SharedScan, usize)>>;
 
 /// Shares one headless Chrome (behind the egress proxy) between scans.
 pub struct Scanner {
@@ -126,7 +128,7 @@ pub struct Scanner {
     /// Recent reports by URL.
     cache: std::sync::Mutex<Cache>,
     /// Scans in flight by URL: callers asking for the same URL meanwhile share the one result.
-    inflight: std::sync::Mutex<HashMap<String, SharedScan>>,
+    inflight: Inflight,
 }
 
 /// A browser and the proxy it is locked to; both stop when the last scan using them ends (a remote
@@ -349,17 +351,20 @@ fn endpoint_host(endpoint: &str) -> &str {
         .unwrap_or(host)
 }
 
-/// One caller of a shared scan. The last caller to leave, finished or cancelled (a closed tab), removes
-/// the shared entry, so abandoned scans never pile up.
+/// One caller of a shared scan. Callers are counted under the map's lock; the last to leave, finished or
+/// cancelled (a closed tab), removes the entry, so abandoned scans never pile up.
 struct Caller<'a> {
-    inflight: &'a std::sync::Mutex<HashMap<String, SharedScan>>,
+    inflight: &'a Inflight,
     key: String,
     cell: SharedScan,
 }
 
 impl<'a> Caller<'a> {
-    fn join(inflight: &'a std::sync::Mutex<HashMap<String, SharedScan>>, key: String) -> Self {
-        let cell = Arc::clone(lock(inflight).entry(key.clone()).or_default());
+    fn join(inflight: &'a Inflight, key: String) -> Self {
+        let mut map = lock(inflight);
+        let (cell, callers) = map.entry(key.clone()).or_default();
+        *callers += 1;
+        let cell = Arc::clone(cell);
         Self {
             inflight,
             key,
@@ -370,15 +375,14 @@ impl<'a> Caller<'a> {
 
 impl Drop for Caller<'_> {
     fn drop(&mut self) {
-        let mut inflight = lock(self.inflight);
-        // Two references left: the map's and ours. Joining happens under this same lock, so no caller
-        // can pick the entry up in between.
-        if inflight
-            .get(&self.key)
-            .is_some_and(|c| Arc::ptr_eq(c, &self.cell))
-            && Arc::strong_count(&self.cell) == 2
+        let mut map = lock(self.inflight);
+        if let Some((cell, callers)) = map.get_mut(&self.key)
+            && Arc::ptr_eq(cell, &self.cell)
         {
-            inflight.remove(&self.key);
+            *callers -= 1;
+            if *callers == 0 {
+                map.remove(&self.key);
+            }
         }
     }
 }
@@ -709,6 +713,27 @@ mod tests {
         }
         assert!(cache.get("k19").is_some(), "the newest stays");
         assert!(cache.get("k0").is_none(), "the oldest went first");
+    }
+
+    #[test]
+    fn callers_leaving_at_once_never_leave_an_entry_behind() {
+        let inflight: Inflight = std::sync::Mutex::default();
+        for _ in 0..200 {
+            std::thread::scope(|scope| {
+                for _ in 0..8 {
+                    scope.spawn(|| drop(Caller::join(&inflight, "k".into())));
+                }
+            });
+            assert!(lock(&inflight).is_empty());
+        }
+        // Callers that overlap share one entry until the last leaves.
+        let a = Caller::join(&inflight, "k".into());
+        let b = Caller::join(&inflight, "k".into());
+        assert!(Arc::ptr_eq(&a.cell, &b.cell));
+        drop(a);
+        assert_eq!(lock(&inflight).len(), 1);
+        drop(b);
+        assert!(lock(&inflight).is_empty());
     }
 
     #[test]
