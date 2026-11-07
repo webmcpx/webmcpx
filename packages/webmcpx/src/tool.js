@@ -40,7 +40,7 @@ const same = (a, b) =>
     Object.keys(a).length === Object.keys(b).length && Object.keys(a).every((k) => Object.hasOwn(b, k) && same(a[k], b[k])));
 
 // The schema being checked, for local $refs ("#/$defs/x"); checks are synchronous, one at a time.
-// `steps` bounds the work of one check, so no schema can freeze the page.
+// `steps` bounds one check's work: no schema can freeze the page.
 let root;
 let depth = 0;
 let steps = 0;
@@ -120,7 +120,7 @@ const contract = (inputSchema, run) => async (raw, client) => {
     depth = 0;
     steps = 0;
     let problem = TYPES.object(args) ? check(inputSchema, args) : "the input must be an object";
-    // Running out of steps anywhere (even inside oneOf) refuses the whole input.
+    // Out of steps anywhere (even in a oneOf branch): refuse.
     if (steps > 100_000) problem = "the input is too complex to check";
     if (problem) return fail("INVALID_INPUT", problem);
     const out = envelope({ ok: true, data: (await run(args, client)) ?? null });
