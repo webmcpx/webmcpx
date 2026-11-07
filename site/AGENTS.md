@@ -12,8 +12,8 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 
 ## Page narrative (keep this order; cut before adding)
 
-Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → proof (pick a site by logo,
-then a question; best live case first; full table behind a disclosure) → the fix (one line) → what the community asked for → scan again.
+Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → proof (pick a site by logo; a site's questions rotate on their own; best live case first; full table behind a
+disclosure) → the fix (one line) → what the community asked for → scan again.
 Few words per section; numbers over adjectives.
 
 ## Layout
@@ -72,4 +72,5 @@ tests/                       Playwright e2e against the prerendered build
 - Components: PascalCase `.svelte`, typed `$props()` with an `interface Props`, snippets (not slots).
   Rune modules end in `.svelte.ts`.
 - Internal links go through `resolve()` (`content/site.ts`).
-- Must work at 390 px wide without horizontal scroll, and with keyboard only.
+- Must work at 390 px wide without horizontal scroll, and with keyboard only. Anything that moves on its own
+  (the question rotator) pauses on hover and focus, has a pause control, and stays still for reduced motion.

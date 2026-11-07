@@ -27,6 +27,7 @@
 	} from '#lib/features/benchmark/bench.ts';
 	import type { BenchSite, SiteTask } from '#lib/features/benchmark/sites.ts';
 	import TaskChart from '#lib/features/benchmark/TaskChart.svelte';
+	import Rotator from './Rotator.svelte';
 
 	interface Props {
 		results: Results;
@@ -68,7 +69,27 @@
 	</Card>
 {/snippet}
 
-{#snippet question(task: SiteTask)}
+{#snippet question(site: BenchSite, task: SiteTask)}
+	<div class="mb-8">
+		<div class="mb-3 flex flex-wrap gap-2">
+			<Stamp tone={site.live ? 'good' : 'plain'} size="sm">{site.live ? 'live site' : 'local fixture'}</Stamp>
+			{#if task.task === best?.task}<Stamp tone="marker" size="sm">Best live case</Stamp>{/if}
+		</div>
+		<div class="flex items-baseline justify-between gap-4 sm:gap-8">
+			<p class="max-w-3xl min-w-0 text-lg text-pretty sm:text-xl">“{task.prompt}”</p>
+			{#if site.url}
+				<a
+					href={site.url}
+					class="inline-flex shrink-0 items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
+				>
+					<span class="hidden sm:inline">{new URL(site.url).hostname}</span>
+					<span class="sm:hidden">Open</span>
+					<ArrowUpRight size={14} aria-hidden="true" />
+					<span class="sr-only">(opens {site.name})</span>
+				</a>
+			{/if}
+		</div>
+	</div>
 	{#if task.baseline && task.webmcp}
 		{@const r = compare(task.baseline.tokens, task.webmcp.tokens, 'fewer tokens', 'more tokens')}
 		<div class="grid items-center gap-6 lg:grid-cols-[1fr_auto_1fr] [&>*]:min-w-0">
@@ -117,46 +138,16 @@
 					>{/if}
 			{/snippet}
 			{#snippet panel(site)}
-				<div class="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
-					<div class="flex flex-wrap items-center gap-3">
-						<h3 class="font-display text-2xl font-bold tracking-tight sm:text-3xl">{site.name}</h3>
-						<Stamp tone={site.live ? 'good' : 'plain'} size="sm"
-							>{site.live ? 'live site' : 'local fixture'}</Stamp
-						>
-						{#if site.tasks.some((t) => t.task === best?.task)}
-							<Stamp tone="marker" size="sm">Best live case</Stamp>
-						{/if}
-					</div>
-					{#if site.url}
-						<a
-							href={site.url}
-							class="inline-flex items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
-						>
-							{new URL(site.url).hostname}<ArrowUpRight size={14} aria-hidden="true" />
-						</a>
-					{/if}
-				</div>
-
+				<!-- The selected logo already names the site: the heading is for screen readers only. -->
+				<h3 class="sr-only">{site.name}</h3>
 				{#if site.tasks.length === 1}
-					<p class="mb-8 max-w-3xl text-lg text-pretty text-ink-2">“{site.tasks[0].prompt}”</p>
-					{@render question(site.tasks[0])}
+					{@render question(site, site.tasks[0])}
 				{:else}
-					<p class="mb-3 font-mono text-xs tracking-wider text-ink-3 uppercase">
-						{site.tasks.length} questions · pick one
-					</p>
-					<Tabs
-						items={site.tasks.map((t) => ({ ...t, id: t.task, label: t.prompt }))}
-						label="Question on {site.name}"
-						listClass="mb-8 flex-col gap-2"
-						tabClass="h-auto min-h-12 justify-start rounded-2xl border-hairline bg-card px-4 py-2.5 text-left text-base text-ink-2 hover:border-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper"
-					>
-						{#snippet tab(t)}
-							<span class="text-pretty">“{t.prompt}”</span>
+					<Rotator items={site.tasks} noun="Question">
+						{#snippet item(t)}
+							{@render question(site, t)}
 						{/snippet}
-						{#snippet panel(t)}
-							{@render question(t)}
-						{/snippet}
-					</Tabs>
+					</Rotator>
 				{/if}
 			{/snippet}
 		</Tabs>

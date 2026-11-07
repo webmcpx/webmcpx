@@ -131,18 +131,55 @@ test('the site filter shows each site and each question on its own, never averag
 	const proof = page.locator('#proof');
 	const sites = proof.getByRole('tablist', { name: 'Site' });
 	await expect(sites.getByRole('tab', { name: /Notion/ })).toHaveAttribute('aria-selected', 'true');
-	await expect(sites.getByRole('tab', { name: /All sites/ })).toHaveCount(0);
+	await expect(proof.getByText(/requests per minute does the Notion API/)).toBeVisible();
+	await expect(proof.getByRole('link', { name: /developers\.notion\.com/ })).toBeVisible();
 
 	await sites.getByRole('tab', { name: /Cloudflare/ }).click();
-	await expect(proof.getByRole('heading', { name: 'Cloudflare' })).toBeVisible();
 	await expect(proof.getByText(/Workers KV/)).toBeVisible();
-
-	await sites.getByRole('tab', { name: /Orbit docs/ }).click();
-	await expect(proof.getByText('local fixture', { exact: true })).toBeVisible();
-	const questions = proof.getByRole('tablist', { name: 'Question on Orbit docs' });
-	await expect(questions.getByRole('tab')).toHaveCount(4);
-	await questions.getByRole('tab', { name: /exit code 4/ }).click();
-	await expect(questions.getByRole('tab', { name: /exit code 4/ })).toHaveAttribute('aria-selected', 'true');
-	await expect(proof.getByText(/fewer tokens|more tokens/).first()).toBeVisible();
 	await expect(proof.getByText(/average/i)).toHaveCount(0);
+});
+
+test('a site with several questions rotates them, and the rotation can be paused', async ({ page }) => {
+	await page.clock.install();
+	await page.goto('/#proof');
+	const proof = page.locator('#proof');
+	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
+	const dots = proof.getByRole('button', { name: /^Question \d of 4$/ });
+	await expect(dots).toHaveCount(4);
+	await expect(proof.getByRole('button', { name: 'Question 1 of 4' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
+
+	// Rotation pauses while the pointer is over it: move away, then let time pass.
+	await page.mouse.move(0, 0);
+	await page.clock.runFor(5100);
+	await expect(proof.getByRole('button', { name: 'Question 2 of 4' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
+
+	await proof.getByRole('button', { name: 'Question 3 of 4' }).click();
+	await expect(proof.getByText(/exit code 4/)).toBeVisible();
+	await proof.getByRole('button', { name: 'Pause rotation' }).click();
+	await page.mouse.move(0, 0);
+	await page.clock.runFor(12000);
+	await expect(proof.getByRole('button', { name: 'Question 3 of 4' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
+});
+
+test('no automatic rotation for people who prefer reduced motion', async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.clock.install();
+	await page.goto('/#proof');
+	const proof = page.locator('#proof');
+	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
+	await page.mouse.move(0, 0);
+	await page.clock.runFor(12000);
+	await expect(proof.getByRole('button', { name: 'Question 1 of 4' })).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
 });
