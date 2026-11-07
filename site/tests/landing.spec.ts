@@ -42,10 +42,8 @@ test('no axe violations', async ({ page }) => {
 			await page.getByLabel("Your site's address").first().fill('docs.example.com');
 			await page.getByRole('button', { name: 'Scan it' }).first().click();
 			await expect(page.getByText('Agent-ready').first()).toBeVisible();
-			await page
-				.locator('details')
-				.first()
-				.evaluate((d) => ((d as HTMLDetailsElement).open = true));
+			// Audit the tools table too.
+			await page.locator('#proof').getByRole('tab', { name: 'Tools' }).first().click();
 		}
 		await scrollThrough(page);
 		const { violations } = await new AxeBuilder({ page })
@@ -74,16 +72,13 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
 	await expect(page.getByRole('heading', { name: 'One line. Agent-ready.' })).toBeVisible();
-	// The best case shows first; its details open natively and list every tool in full.
+	// Every tab panel is in the HTML: the best case first, then every other site, tools included.
 	await expect(page.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
-	await page.getByText(/Its WebMCP tools, every question/).click();
 	const tools = page.getByRole('region', { name: 'WebMCP tools on Notion' });
-	await expect(tools.locator('code')).toHaveCount(5);
+	await expect(tools.locator('tbody tr')).toHaveCount(5);
 	await expect(tools.getByText('read_skill', { exact: true })).toBeVisible();
-	await expect(tools.getByRole('button', { name: /Show/ })).toHaveCount(0);
-	// The other sites' results are listed too, since the tabs cannot switch without JavaScript.
-	const fallback = page.getByRole('region', { name: "Every site's results" });
-	await expect(fallback.getByText(/Cloudflare Workers KV/).first()).toBeVisible();
+	await expect(tools.getByRole('button')).toHaveCount(0);
+	await expect(page.getByText(/Cloudflare Workers KV/).first()).toBeVisible();
 	await page.close();
 });
 
@@ -124,18 +119,21 @@ test('logos scan their site, and shared links rerun a scan', async ({ page }) =>
 	await expect.poll(() => seen).toEqual(['https://developers.notion.com/', 'https://kith.com/']);
 });
 
-test('the site details switch metrics and only show that site', async ({ page }) => {
+test('the detail tabs switch metrics and only show the selected site', async ({ page }) => {
 	await page.goto('/');
 	const proof = page.locator('#proof');
 	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
-	await proof.getByText(/Its WebMCP tools, every question/).click();
-	await proof.getByRole('tab', { name: 'Time' }).click();
-	const table = proof.getByRole('table');
-	await expect(table).toContainText('seconds per run');
+	const details = proof.getByRole('tablist', { name: 'Details for Orbit docs' });
+	await expect(details.getByRole('tab')).toHaveText(['Tokens', 'Time', 'Steps', 'Cost', 'Tools', 'Method']);
+	await details.getByRole('tab', { name: 'Time' }).click();
+	const table = proof.getByRole('table').filter({ hasText: 'seconds per run' });
+	await expect(table).toHaveCount(1);
 	await expect(table.locator('tbody tr')).toHaveCount(4);
 	await expect(table).not.toContainText('Notion');
-	// The no-JS fallback is not shown when JavaScript runs.
-	await expect(page.getByRole('region', { name: "Every site's results" })).toBeHidden();
+	await details.getByRole('tab', { name: 'Method' }).click();
+	await expect(
+		proof.getByText('A local test site: its tools come from webmcpx.').filter({ visible: true })
+	).toBeVisible();
 });
 
 test('the site filter shows each site and each question on its own, never averaged', async ({ page }) => {
@@ -171,13 +169,19 @@ test('a site with several questions rotates them, and the rotation can be paused
 		'true'
 	);
 
-	const before = await proof.locator('[aria-roledescription=carousel] p').first().textContent();
+	const before = await proof
+		.locator('[aria-roledescription=carousel] p')
+		.filter({ visible: true })
+		.first()
+		.textContent();
 	await proof.getByRole('button', { name: 'Question 3 of 4' }).click();
 	await expect(proof.getByRole('button', { name: 'Question 3 of 4' })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
-	await expect(proof.locator('[aria-roledescription=carousel] p').first()).not.toHaveText(before ?? '');
+	await expect(
+		proof.locator('[aria-roledescription=carousel] p').filter({ visible: true }).first()
+	).not.toHaveText(before ?? '');
 	await proof.getByRole('button', { name: 'Pause rotation' }).click();
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(12000);
@@ -219,21 +223,19 @@ test('the page says the first site is the best case', async ({ request }) => {
 	expect(html).toContain('sorted by their biggest saving');
 });
 
-test('the site details show its tools, their descriptions and what the agent called', async ({ page }) => {
+test('the Tools tab shows the site tools, their descriptions and what the agent called', async ({ page }) => {
 	await page.goto('/#proof');
-	await page
-		.locator('#proof')
-		.getByText(/Its WebMCP tools, every question/)
-		.click();
+	await page.locator('#proof').getByRole('tab', { name: 'Tools' }).first().click();
 	const tools = page.locator('#proof').getByRole('region', { name: 'WebMCP tools on Notion' });
 	await expect(tools.getByRole('heading', { name: /WebMCP tools Notion registers/ })).toBeVisible();
-	await expect(tools.getByText('search_docs', { exact: true })).toBeVisible();
+	await expect(tools.locator('tbody tr')).toHaveCount(5);
+	await expect(tools.locator('tbody tr').first()).toContainText('search_docs');
 	await expect(tools.getByText(/Search the Notion Docs documentation/)).toBeVisible();
-	await expect(tools.getByText('Called').first()).toBeVisible();
+	await expect(tools.getByText(/^search_docs\(/)).toBeVisible();
 	await expect(tools.getByText(/benchmark ran 2026-11-06/)).toBeVisible();
-	// Once the page is live, the list collapses to four tools until expanded.
-	await expect(tools.locator('code')).toHaveCount(4);
-	await tools.getByRole('button', { name: /Show/ }).click();
-	await expect(tools.locator('code')).toHaveCount(5);
-	await expect(tools.getByRole('button', { name: 'Show less' })).toHaveAttribute('aria-expanded', 'true');
+	await tools.getByRole('button', { name: 'Full descriptions' }).click();
+	await expect(tools.getByRole('button', { name: 'Shorter descriptions' })).toHaveAttribute(
+		'aria-expanded',
+		'true'
+	);
 });

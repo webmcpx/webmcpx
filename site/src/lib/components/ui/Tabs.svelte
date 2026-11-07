@@ -1,6 +1,8 @@
 <!--
 	Accessible tabs (WAI-ARIA tabs pattern): arrow keys, Home and End move between tabs; only the active
 	tab is in the tab order. The active tab is bindable: `<Tabs {items} bind:value>`.
+	Progressive: every panel is in the HTML. Inactive ones are hidden by base.css only when JavaScript runs
+	(`[data-js]`, set before first paint), so without JavaScript all panels are readable, stacked.
 -->
 <script lang="ts" generics="T extends { id: string; label: string }">
 	import type { Snippet } from 'svelte';
@@ -11,7 +13,8 @@
 		/** Names the tab list for screen readers. */
 		label: string;
 		tab?: Snippet<[T]>;
-		panel: Snippet<[T]>;
+		/** Renders one panel; `active` is false for panels hidden behind another tab. */
+		panel: Snippet<[T, boolean]>;
 		class?: string;
 		listClass?: string;
 		/** Replaces the default tab look (size, colors); style the selected tab with `aria-selected:`. */
@@ -66,7 +69,7 @@
 				role="tab"
 				id="{uid}-tab-{item.id}"
 				aria-selected={selected}
-				aria-controls="{uid}-panel"
+				aria-controls="{uid}-panel-{item.id}"
 				tabindex={selected ? 0 : -1}
 				onclick={() => (value = item.id)}
 				onkeydown={(e) => onkeydown(e, i)}
@@ -80,15 +83,17 @@
 			</button>
 		{/each}
 	</div>
-	{#if active}
+	{#each items as item (item.id)}
+		{@const on = item.id === active?.id}
 		<div
 			role="tabpanel"
-			id="{uid}-panel"
-			aria-labelledby="{uid}-tab-{active.id}"
+			id="{uid}-panel-{item.id}"
+			aria-labelledby="{uid}-tab-{item.id}"
 			tabindex="-1"
+			data-inactive={on ? undefined : ''}
 			class="outline-none"
 		>
-			{@render panel(active)}
+			{@render panel(item, on)}
 		</div>
-	{/if}
+	{/each}
 </div>

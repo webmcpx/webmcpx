@@ -80,7 +80,7 @@
 	}
 }
 
-/* Fallbacks for readers without JavaScript (e.g. content behind tabs): never shown once JS runs. */
-[data-js] .no-js-only {
+/* Tabs (components/ui/Tabs.svelte): inactive panels are in the HTML for readers without JavaScript. */
+[data-js] [role='tabpanel'][data-inactive] {
 	display: none;
 }

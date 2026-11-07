@@ -1,11 +1,17 @@
 <!--
-	The evidence, one site at a time and one question at a time: no averages. Logos pick the site
-	(default: the biggest saving on a live site); sites with several questions let you pick the question.
-	Every number is also in the full table behind the disclosure, which works without JavaScript.
+	The evidence, one site at a time and one question at a time: no averages. Logos pick the site (best
+	case first); a site's questions rotate. Under them, tabs show that site's questions per metric, its
+	WebMCP tools and the method. All tab panels are in the HTML, so everything reads without JavaScript.
 -->
 <script lang="ts">
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
-	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import Coins from '@lucide/svelte/icons/coins';
+	import FlaskConical from '@lucide/svelte/icons/flask-conical';
+	import Footprints from '@lucide/svelte/icons/footprints';
+	import Timer from '@lucide/svelte/icons/timer';
+	import Wrench from '@lucide/svelte/icons/wrench';
+	import Zap from '@lucide/svelte/icons/zap';
+	import type { Component } from 'svelte';
 	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
@@ -27,7 +33,7 @@
 	import TaskChart from '#lib/features/benchmark/TaskChart.svelte';
 	import { siteTools, type QuestionTools } from '#lib/features/benchmark/tools.ts';
 	import Rotator from './Rotator.svelte';
-	import ToolList from './ToolList.svelte';
+	import ToolTable from './ToolTable.svelte';
 
 	interface Props {
 		results: Results;
@@ -48,8 +54,16 @@
 	let siteId = $state(first());
 	const repeats = $derived(all[0]?.webmcp?.runs ?? all[0]?.baseline?.runs ?? 0);
 
-	let metricId = $state<string>(METRICS[0].id);
-	const metric = $derived(METRICS.find((m) => m.id === metricId) ?? METRICS[0]);
+	/** The tabs under a site's questions: one per metric, then its tools and the method. */
+	const DETAILS: { id: string; label: string; icon: Component }[] = [
+		{ id: 'tokens', label: 'Tokens', icon: Zap },
+		{ id: 'duration_ms', label: 'Time', icon: Timer },
+		{ id: 'steps', label: 'Steps', icon: Footprints },
+		{ id: 'cost_usd', label: 'Cost', icon: Coins },
+		{ id: 'tools', label: 'Tools', icon: Wrench },
+		{ id: 'method', label: 'Method', icon: FlaskConical }
+	];
+	let detailId = $state('tokens');
 	const solved = (s: ArmSummary) => `${Math.round(s.success_rate * s.runs)}/${s.runs}`;
 </script>
 
@@ -135,7 +149,7 @@
 				{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70">local</span
 					>{/if}
 			{/snippet}
-			{#snippet panel(site)}
+			{#snippet panel(site, visible)}
 				<!-- The selected logo already names the site: the heading is for screen readers only. -->
 				<h3 class="sr-only">{site.name}</h3>
 				{#if site.tasks.length === 1}
@@ -143,7 +157,7 @@
 				{:else}
 					<!-- Keyed by site: switching sites starts the rotation over. -->
 					{#key site.id}
-						<Rotator items={site.tasks} noun="Question">
+						<Rotator items={site.tasks} noun="Question" enabled={visible}>
 							{#snippet item(t)}
 								{@render question(site, t)}
 							{/snippet}
@@ -152,51 +166,46 @@
 				{/if}
 				{@const siteQuestions = questions.filter((q) => q.site.id === site.id)}
 				{@const st = siteTools(site.tasks.map((t) => tools[t.task]).filter(Boolean))}
-				<details class="group mt-12 rounded-card border-2 border-ink bg-card">
-					<summary
-						class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold sm:px-7 [&::-webkit-details-marker]:hidden"
-					>
-						Its WebMCP tools, every question, and how we measured
-						<ChevronDown class="shrink-0 transition group-open:rotate-180" aria-hidden="true" />
-					</summary>
-					<div class="space-y-12 border-t-2 border-ink p-5 sm:p-7">
-						{#if st}<ToolList tools={st} siteName={site.name} />{/if}
-						<section aria-label="Questions on {site.name}">
-							<h4 class="mb-4 font-display text-xl font-bold tracking-tight">
-								{siteQuestions.length === 1 ? 'The question' : `All ${siteQuestions.length} questions`}
-							</h4>
-							<Tabs items={METRICS} bind:value={metricId} label="Metric" listClass="mb-6 flex-wrap">
-								{#snippet panel()}
-									<TaskChart questions={siteQuestions} {metric} />
-								{/snippet}
-							</Tabs>
-						</section>
-						<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
-							<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
-								<li>
-									{results.model}{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
-									headless Chrome. Same prompt and step limit in both arms; {repeats} runs per question and arm.
-								</li>
-								<li>Without WebMCP: a DOM-snapshot agent that reads, clicks and fills.</li>
-								<li>With webmcpx: only the tools the page registers.</li>
-								<li>Graded by facts in the answer and page state. No LLM judge.</li>
-								<li>
-									{site.live
-										? 'A live site: it ships its own WebMCP tools.'
-										: 'A local test site: its tools come from webmcpx.'}
-								</li>
-							</ul>
-							<CodeBlock snippet={reproduce} title="reproduce it" />
+				<Tabs
+					items={DETAILS}
+					bind:value={detailId}
+					label="Details for {site.name}"
+					class="mt-12"
+					listClass="mb-6 flex-wrap"
+				>
+					{#snippet tab(d)}<d.icon aria-hidden="true" />{d.label}{/snippet}
+					{#snippet panel(d)}
+						{@const m = METRICS.find((x) => x.id === d.id)}
+						<div class="rounded-card border-2 border-ink bg-card p-5 sm:p-7">
+							{#if m}
+								<TaskChart questions={siteQuestions} metric={m} />
+							{:else if d.id === 'tools'}
+								{#if st}<ToolTable tools={st} siteName={site.name} />{/if}
+							{:else}
+								<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+									<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
+										<li>
+											{results.model}{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
+											headless Chrome. Same prompt and step limit in both arms; {repeats} runs per question and
+											arm.
+										</li>
+										<li>Without WebMCP: a DOM-snapshot agent that reads, clicks and fills.</li>
+										<li>With webmcpx: only the tools the page registers.</li>
+										<li>Graded by facts in the answer and page state. No LLM judge.</li>
+										<li>
+											{site.live
+												? 'A live site: it ships its own WebMCP tools.'
+												: 'A local test site: its tools come from webmcpx.'}
+										</li>
+									</ul>
+									<CodeBlock snippet={reproduce} title="reproduce it" />
+								</div>
+							{/if}
 						</div>
-					</div>
-				</details>
+					{/snippet}
+				</Tabs>
 			{/snippet}
 		</Tabs>
-		<!-- Without JavaScript the site tabs cannot switch, so every site's results are listed here. -->
-		<section class="no-js-only mt-12" aria-label="Every site's results">
-			<h3 class="mb-4 font-display text-xl font-bold tracking-tight">Every site's results</h3>
-			<TaskChart {questions} metric={METRICS[0]} />
-		</section>
 	{:else}
 		<Card padding="lg" shadow="none" class="border-dashed">
 			<p class="font-display font-bold">No run published yet.</p>

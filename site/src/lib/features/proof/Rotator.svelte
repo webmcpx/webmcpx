@@ -15,17 +15,19 @@
 		/** What one item is called, for the controls: "Question 2 of 4". */
 		noun: string;
 		interval?: number;
+		/** False while hidden (e.g. behind another tab): no rotation in the background. */
+		enabled?: boolean;
 		item: Snippet<[T]>;
 	}
 
-	let { items, noun, interval = 5000, item }: Props = $props();
+	let { items, noun, interval = 5000, enabled = true, item }: Props = $props();
 
 	let index = $state(0);
 	let paused = $state(false);
 	let hovering = $state(false);
 	let focused = $state(false);
 	const current = $derived(items[index % items.length]);
-	const running = $derived(!paused && !hovering && !focused && !prefersReducedMotion.current);
+	const running = $derived(enabled && !paused && !hovering && !focused && !prefersReducedMotion.current);
 
 	$effect(() => {
 		if (!running || items.length < 2) return;
