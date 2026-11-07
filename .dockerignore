@@ -1,0 +1,12 @@
+# Build context for deploy/*.Dockerfile: sources only.
+.git
+target
+**/node_modules
+site/build
+site/.svelte-kit
+site/test-results
+site/playwright-report
+bench/results
+packages/webmcpx/wasm
+.env
+deploy/.env

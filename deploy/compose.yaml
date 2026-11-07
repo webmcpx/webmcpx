@@ -1,0 +1,74 @@
+# webmcpx in production: three containers, least privilege each.
+#
+#   internet ──443──▶ caddy ──edge──▶ web ──scan (internal, no internet)──▶ chrome
+#                                      ▲                                       │
+#                                      └──── egress proxy (public IPs only) ◀──┘
+#
+# Chrome has no route to the network of its own: every request it makes goes through the egress proxy in
+# `web`, which resolves hosts itself and refuses private, loopback and reserved addresses (see
+# crates/webmcpx-bench/src/proxy.rs). Run: `docker compose -f deploy/compose.yaml up -d --build`,
+# with WEBMCPX_DOMAIN set (see deploy/README.md).
+
+name: webmcpx
+
+x-hardening: &hardening
+  restart: unless-stopped
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  logging:
+    driver: local
+    options: { max-size: 10m, max-file: "3" }
+
+services:
+  caddy:
+    <<: *hardening
+    build: { context: .., dockerfile: deploy/caddy.Dockerfile }
+    read_only: true
+    environment:
+      WEBMCPX_DOMAIN: ${WEBMCPX_DOMAIN:?set WEBMCPX_DOMAIN, e.g. webmcpx.dev}
+    ports: ["80:80", "443:443", "443:443/udp"]
+    volumes: [caddy-data:/data, caddy-config:/config]
+    networks: [edge]
+    depends_on: [web]
+
+  web:
+    <<: *hardening
+    build: { context: .., dockerfile: deploy/web.Dockerfile }
+    read_only: true
+    networks: [edge, scan]
+    depends_on: [chrome]
+    mem_limit: 512m
+    pids_limit: 256
+
+  chrome:
+    <<: *hardening
+    image: chromedp/headless-shell:158.0.8127.18
+    # The image starts headless-shell with DevTools on 0.0.0.0:9222 and --no-sandbox (the container and
+    # its network are the sandbox); these switches lock it to the egress proxy.
+    command:
+      - --proxy-server=http://web:3128
+      - --proxy-bypass-list=<-loopback>
+      - --force-webrtc-ip-handling-policy=disable_non_proxied_udp
+      - --disable-quic
+      - --disable-background-networking
+      - --disable-component-update
+      - --disable-extensions
+      - --no-first-run
+    user: "65534:65534"
+    environment:
+      HOME: /tmp
+    read_only: true
+    networks: [scan]
+    shm_size: 1g
+    mem_limit: 2g
+    pids_limit: 512
+    tmpfs: [/tmp]
+
+networks:
+  edge: {}
+  scan:
+    internal: true
+
+volumes:
+  caddy-data: {}
+  caddy-config: {}
