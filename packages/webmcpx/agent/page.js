@@ -32,6 +32,11 @@ ${POLYFILL}
   }
   install();
   const mc = document.modelContext;
+  // Also the page document's own property, as shipping hosts expose it (Shopify storefronts only
+  // register with that shape).
+  if (mc && !Object.prototype.hasOwnProperty.call(document, "modelContext")) {
+    Object.defineProperty(document, "modelContext", { value: mc, configurable: true });
+  }
   if (window === window.top && typeof mc?.addEventListener === "function" && typeof ${CHANGED} === "function") {
     mc.addEventListener("toolchange", () => ${CHANGED}(""));
   }

@@ -149,3 +149,19 @@ test("search_page reads loose text and never hidden parts of a visible block", a
   assert.doesNotMatch(md.data.markdown, /SECRET/);
   assert.match(md.data.markdown, /Opening hours: 9 to 5/);
 });
+
+test("readPage skips CSS-hidden content but keeps display: contents children", async () => {
+  const page = host();
+  document.body.innerHTML = '<main><p>Visible menu.</p><p class="none">SECRET one</p><div class="invisible"><p>SECRET two</p></div><div class="contents"><p>Wrapped note.</p></div></main>';
+  const styles = { none: { display: "none" }, invisible: { visibility: "hidden" }, contents: { display: "contents" } };
+  globalThis.getComputedStyle = (el) => styles[el.getAttribute("class")] ?? { display: "block", visibility: "visible" };
+  try {
+    await register({ wasm: WASM });
+    const md = (await page.call("fetch_as_markdown", {})).data.markdown;
+    assert.doesNotMatch(md, /SECRET/);
+    assert.match(md, /Visible menu/);
+    assert.match(md, /Wrapped note/);
+  } finally {
+    delete globalThis.getComputedStyle;
+  }
+});

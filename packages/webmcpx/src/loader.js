@@ -44,8 +44,10 @@ export function readPage(what, root) {
       selection: text(globalThis.getSelection?.()?.toString()).slice(0, 1000) || undefined,
     };
   }
-  const skipped = (el) => SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") === "true";
-  // Text without hidden parts; an element with no block inside is one block ("Free <b>delivery</b>").
+  const skipped = (el, s = globalThis.getComputedStyle?.(el)) =>
+    SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" ||
+    s?.display == "none" || s?.visibility == "hidden";
+  // Visible text; an element with no block inside is one block.
   const textOf = (el) =>
     [...el.childNodes].map((n) => (n.nodeType === 3 ? n.data : n.nodeType === 1 && !skipped(n) ? textOf(n) : "")).join("");
   const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";

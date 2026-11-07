@@ -20,7 +20,8 @@ const SHOP = `<!doctype html><html lang="en"><head><title>Kiln Shop</title></hea
 <main><h1>Mugs</h1><p>Every mug is fired at 1240 degrees and ships in two days.</p></main>
 <script>
   const cart = [];
-  if (document.modelContext) {
+  // Shopify storefronts only register when the context is the document's own property.
+  if (Object.getOwnPropertyDescriptor(document, "modelContext")) {
     document.modelContext.registerTool({
       name: "add_to_cart",
       description: "Add a mug to the cart by SKU.",

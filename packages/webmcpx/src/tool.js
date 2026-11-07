@@ -43,17 +43,17 @@ const canonical = (v) =>
       ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
       : x,
   );
-// Decimal digits of a number, exponent included (1e-7 has 7).
-const decimals = (x) => {
+// Exact decimal divisibility on each number's shortest decimal form (what JSON carried), as BigInt
+// mantissa and exponent: 4.1 is a multiple of 0.01; 10000000.005 and 4.500000000000005 are not.
+const decimal = (x) => {
   const [m, e = 0] = String(x).toLowerCase().split("e");
-  return Math.max(0, (m.split(".")[1]?.length ?? 0) - e);
+  const [i, f = ""] = m.split(".");
+  return [BigInt(i + f), f.length - e];
 };
-// Exact decimal divisibility (4.1 is a multiple of 0.01; 10000000.005 is not).
 const multiple = (value, of) => {
-  const f = 10 ** Math.max(decimals(value), decimals(of));
-  const [a, b] = [Math.round(value * f), Math.round(of * f)];
-  // undefined: not exactly checkable (beyond safe integers once scaled), which check() makes fatal.
-  return Number.isSafeInteger(a) && Number.isSafeInteger(b) ? a % b === 0 : undefined;
+  const [[a, x], [b, y]] = [decimal(value), decimal(of)];
+  const e = Math.max(x, y);
+  return b !== 0n && (a * 10n ** BigInt(e - x)) % (b * 10n ** BigInt(e - y)) === 0n;
 };
 
 // JSON equality, by content.
@@ -108,9 +108,7 @@ function check(s, value, at = "input") {
     if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
     if (value <= s.exclusiveMinimum) return `${at} must be more than ${s.exclusiveMinimum}`;
     if (value >= s.exclusiveMaximum) return `${at} must be less than ${s.exclusiveMaximum}`;
-    const divisible = s.multipleOf ? multiple(value, s.multipleOf) : true;
-    if (divisible === undefined) return (fatal = `${at}: can't check multipleOf exactly`);
-    if (!divisible) return `${at} must be a multiple of ${s.multipleOf}`;
+    if (s.multipleOf && !multiple(value, s.multipleOf)) return `${at} must be a multiple of ${s.multipleOf}`;
   }
   if (typeof value === "string") {
     if (value.length < s.minLength) return `${at} must have at least ${s.minLength} chars`;

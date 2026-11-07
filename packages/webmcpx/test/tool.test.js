@@ -194,6 +194,9 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   assert.equal((await page.call("price", { amount: 10000000.01 })).ok, true);
   // Not exactly checkable: refused, never waved through by float division.
   assert.equal((await page.call("price", { amount: 0.35000000000000003 })).ok, false);
+  tool({ name: "tiny", description: "Tiny step.", input: { v: { type: "number", multipleOf: 2e-15 } }, run: () => "ok" });
+  assert.equal((await page.call("tiny", { v: 4.500000000000005 })).ok, false);
+  assert.equal((await page.call("tiny", { v: 4.500000000000004 })).ok, true);
   // ...even under not or oneOf, where a plain mismatch would flip into acceptance.
   let notRuns = 0;
   tool({ name: "notmul", description: "Not a multiple.", input: { value: { not: { multipleOf: 1 } } }, run: () => ++notRuns });
