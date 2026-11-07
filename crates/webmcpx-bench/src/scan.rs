@@ -8,23 +8,32 @@
 //! - One isolated browser context per scan, closed even when the scan times out; if closing fails, the
 //!   browser is replaced. A few scans at a time, each with a deadline.
 
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
 use reqwest::Url;
 use serde::Serialize;
 use serde_json::{Value, json};
-use tokio::sync::{Mutex, Semaphore};
+use tokio::sync::{Mutex, OnceCell, Semaphore};
 
 use crate::arm::{INIT_SCRIPTS, registered_tools};
 use crate::cdp::{Browser, Page};
 use crate::proxy::{self, Egress};
 
-/// Scans running at once; more wait for a slot, up to `QUEUE_WAIT`.
+/// Scans running at once by default (`Scanner::parallel` overrides); more wait in line for a slot, up to
+/// `QUEUE_WAIT`, and no more than `MAX_WAITING` wait at a time.
 const PARALLEL: usize = 2;
-const QUEUE_WAIT: Duration = Duration::from_secs(20);
+const QUEUE_WAIT: Duration = Duration::from_secs(30);
+const MAX_WAITING: usize = 100;
+/// A site's report is reused for this long: many people scanning the same site (a shared link, a
+/// popular page) cost one browser visit.
+const CACHE_FOR: Duration = Duration::from_secs(10 * 60);
+/// Most reports kept; past that, expired ones go first, then all.
+const CACHE_SIZE: usize = 5_000;
 /// Whole scan, navigation included.
 const DEADLINE: Duration = Duration::from_secs(45);
 /// Closing a context after a scan; longer means the browser is stuck and gets replaced.
@@ -34,7 +43,7 @@ const TOOL_WAIT: Duration = Duration::from_secs(6);
 /// Characters per token for the estimate (OpenAI's rule of thumb for English text).
 const CHARS_PER_TOKEN: usize = 4;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Report {
     pub url: String,
     pub final_url: String,
@@ -61,7 +70,7 @@ pub enum Verdict {
     Missing,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Tool {
     pub name: String,
     pub description: String,
@@ -69,7 +78,7 @@ pub struct Tool {
     pub read_only: Option<bool>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct Finding {
     pub rule: &'static str,
     pub severity: &'static str,
@@ -77,7 +86,7 @@ pub struct Finding {
 }
 
 /// Why a scan did not produce a report; each maps to an HTTP status in `server.rs`.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ScanError {
     /// Not an http(s) URL, or a host we refuse to open.
     BadUrl(String),
@@ -107,6 +116,12 @@ pub struct Scanner {
     deadline: Duration,
     browser: Mutex<Option<Arc<Session>>>,
     slots: Semaphore,
+    /// Scans waiting for a slot right now.
+    waiting: AtomicUsize,
+    /// Recent reports by URL, with when they were made.
+    cache: std::sync::Mutex<HashMap<String, (Instant, Report)>>,
+    /// Scans in flight by URL: callers asking for the same URL meanwhile share the one result.
+    inflight: std::sync::Mutex<HashMap<String, Arc<OnceCell<Result<Report, ScanError>>>>>,
 }
 
 /// A browser and the proxy it is locked to; both stop when the last scan using them ends (a remote
@@ -138,7 +153,17 @@ impl Scanner {
             deadline: DEADLINE,
             browser: Mutex::new(None),
             slots: Semaphore::new(PARALLEL),
+            waiting: AtomicUsize::new(0),
+            cache: std::sync::Mutex::default(),
+            inflight: std::sync::Mutex::default(),
         }
+    }
+
+    /// Runs up to `n` scans at once (default 2).
+    #[must_use]
+    pub fn parallel(mut self, n: usize) -> Self {
+        self.slots = Semaphore::new(n.max(1));
+        self
     }
 
     /// Uses a Chrome running elsewhere instead of starting one (see [`Remote`]).
@@ -155,11 +180,54 @@ impl Scanner {
         self
     }
 
+    /// Scans `raw`: a recent report of the same URL is reused, and callers asking for a URL that is
+    /// being scanned share that scan.
     pub async fn scan(&self, raw: &str) -> Result<Report, ScanError> {
         let url = parse_url(raw)?;
         self.check(&url).await?;
-        let _slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire())
-            .await
+        let key = url.as_str().to_owned();
+        if let Some(report) = self.cached(&key) {
+            return Ok(report);
+        }
+        let cell = Arc::clone(lock(&self.inflight).entry(key.clone()).or_default());
+        let result = cell.get_or_init(|| self.scan_now(url)).await.clone();
+        // The first caller to get here retires the shared scan; later callers find a cached report.
+        let mut inflight = lock(&self.inflight);
+        if inflight.get(&key).is_some_and(|c| Arc::ptr_eq(c, &cell)) {
+            inflight.remove(&key);
+            if let Ok(report) = &result {
+                self.remember(key, report.clone());
+            }
+        }
+        result
+    }
+
+    fn cached(&self, key: &str) -> Option<Report> {
+        let cache = lock(&self.cache);
+        let (at, report) = cache.get(key)?;
+        (at.elapsed() < CACHE_FOR).then(|| report.clone())
+    }
+
+    fn remember(&self, key: String, report: Report) {
+        let mut cache = lock(&self.cache);
+        if cache.len() >= CACHE_SIZE {
+            cache.retain(|_, (at, _)| at.elapsed() < CACHE_FOR);
+            if cache.len() >= CACHE_SIZE {
+                cache.clear();
+            }
+        }
+        cache.insert(key, (Instant::now(), report));
+    }
+
+    /// One browser visit, after waiting in line for a slot.
+    async fn scan_now(&self, url: Url) -> Result<Report, ScanError> {
+        if self.waiting.fetch_add(1, Ordering::SeqCst) >= MAX_WAITING {
+            self.waiting.fetch_sub(1, Ordering::SeqCst);
+            return Err(ScanError::Busy);
+        }
+        let slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire()).await;
+        self.waiting.fetch_sub(1, Ordering::SeqCst);
+        let _slot = slot
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let started = Instant::now();
@@ -274,6 +342,11 @@ fn endpoint_host(endpoint: &str) -> &str {
     host.strip_prefix('[')
         .and_then(|h| h.strip_suffix(']'))
         .unwrap_or(host)
+}
+
+fn lock<T>(m: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    // No code panics while holding these locks; recover the data if one ever does.
+    m.lock().unwrap_or_else(std::sync::PoisonError::into_inner)
 }
 
 #[expect(clippy::needless_pass_by_value, reason = "used as `map_err(failed)`")]

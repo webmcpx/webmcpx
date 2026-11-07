@@ -80,6 +80,9 @@ enum Command {
         /// Where the egress proxy listens for the remote Chrome (e.g. `0.0.0.0:3128`).
         #[arg(long, requires = "remote_chrome")]
         proxy_listen: Option<SocketAddr>,
+        /// Scans running at once; more wait in line.
+        #[arg(long, default_value_t = 2)]
+        scan_parallel: usize,
     },
     /// List tasks (tab-separated).
     Tasks,
@@ -217,8 +220,9 @@ async fn main() -> Result<()> {
             root: served,
             remote_chrome,
             proxy_listen,
+            scan_parallel,
         } => {
-            let mut scanner = Scanner::new(chrome, scan_private);
+            let mut scanner = Scanner::new(chrome, scan_private).parallel(scan_parallel);
             if let (Some(chrome), Some(proxy)) = (remote_chrome, proxy_listen) {
                 scanner = scanner.remote(Remote { chrome, proxy });
             }

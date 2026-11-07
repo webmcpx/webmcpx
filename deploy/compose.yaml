@@ -46,6 +46,7 @@ services:
   web:
     <<: *hardening
     build: { context: .., dockerfile: deploy/web.Dockerfile }
+    command: [--scan-parallel, "12"]
     read_only: true
     networks: [edge, scan]
     depends_on: [chrome]
@@ -71,9 +72,9 @@ services:
       HOME: /tmp
     read_only: true
     networks: [scan]
-    shm_size: 1g
-    mem_limit: 2g
-    pids_limit: 512
+    shm_size: 2g
+    mem_limit: 8g
+    pids_limit: 2048
     tmpfs: [/tmp]
 
 networks:

@@ -353,6 +353,39 @@ async fn a_dropped_connection_closes_its_pages_in_a_remote_chrome() {
     panic!("the abandoned page is still open");
 }
 
+/// Many people scanning the same site at once (a viral link) cost one browser visit, and a repeat
+/// within the cache window costs none.
+#[tokio::test]
+async fn the_same_site_is_scanned_once_for_everyone() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let visits = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let counter = Arc::clone(&visits);
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(move || {
+            counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+            async { axum::response::Html("<title>t</title><p>Hello</p>") }
+        }),
+    ))
+    .await;
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
+    let url = format!("http://{site}/");
+    let scans: Vec<_> = (0..5)
+        .map(|_| {
+            let (scanner, url) = (Arc::clone(&scanner), url.clone());
+            tokio::spawn(async move { scanner.scan(&url).await.map(|r| r.verdict) })
+        })
+        .collect();
+    for scan in scans {
+        assert!(scan.await.unwrap().is_ok());
+    }
+    assert!(scanner.scan(&url).await.is_ok());
+    assert_eq!(visits.load(std::sync::atomic::Ordering::SeqCst), 1);
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));
