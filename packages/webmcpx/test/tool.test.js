@@ -120,6 +120,19 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   // A schema that refers to itself forever stops instead of hanging.
   tool({ name: "loop", description: "Loops.", inputSchema: { type: "object", properties: { a: { $ref: "#/properties/a" } } }, run: () => 1 });
   assert.match((await page.call("loop", { a: 1 })).error.message, /can't check \$ref/);
+  // Recursion through combinators stops quickly instead of freezing the page.
+  tool({ name: "spin", description: "Spins.", inputSchema: { type: "object", allOf: [{ $ref: "#" }] }, run: () => 1 });
+  const started = Date.now();
+  assert.equal((await page.call("spin", {})).ok, false);
+  assert.ok(Date.now() - started < 500, `took ${Date.now() - started} ms`);
+  // An empty pointer token names a member called "" (RFC 6901), not the container.
+  tool({
+    name: "empty",
+    description: "Empty token.",
+    inputSchema: { type: "object", properties: { amount: { $ref: "#/$defs/" } }, $defs: { "": { type: "integer", minimum: 1 } } },
+    run: () => 1,
+  });
+  assert.equal((await page.call("empty", { amount: -5 })).error.code, "INVALID_INPUT");
   // Boolean schemas: false refuses, true accepts.
   tool({ name: "bools", description: "Boolean branches.", inputSchema: { type: "object", oneOf: [false, { required: ["sku"] }] }, run: () => "ok" });
   assert.equal((await page.call("bools", { sku: "MUG" })).ok, true);

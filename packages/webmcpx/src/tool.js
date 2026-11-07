@@ -40,15 +40,21 @@ const same = (a, b) =>
     Object.keys(a).length === Object.keys(b).length && Object.keys(a).every((k) => Object.hasOwn(b, k) && same(a[k], b[k])));
 
 // The schema being checked, for local $refs ("#/$defs/x"); checks are synchronous, one at a time.
+// `steps` bounds the work of one check, so no schema can freeze the page.
 let root;
 let depth = 0;
+let steps = 0;
+// RFC 6901: "#" is the root; after "#/", every token counts, empty ones included.
 const resolve = (ref) =>
-  ref.startsWith("#")
-    ? ref.slice(1).split("/").filter(Boolean).reduce((o, k) => o?.[k.replaceAll("~1", "/").replaceAll("~0", "~")], root)
-    : undefined;
+  ref === "#"
+    ? root
+    : ref.startsWith("#/")
+      ? ref.slice(2).split("/").reduce((o, k) => o?.[k.replaceAll("~1", "/").replaceAll("~0", "~")], root)
+      : undefined;
 
 /** The first problem with `value` against JSON Schema `s` (the keywords tool inputs use), or "". */
 function check(s, value, at = "input") {
+  if (++steps > 10_000) return `${at}: the schema is too complex to check`;
   if (s === false) return `${at} is not allowed`;
   if (!s || typeof s !== "object") return "";
   if (s.$ref) {
@@ -64,7 +70,10 @@ function check(s, value, at = "input") {
   if (types.length && !types.some((t) => TYPES[t]?.(value))) return `${at} must be of type ${types.join(" or ")}`;
   if (s.enum && !s.enum.includes(value)) return `${at} must be one of ${s.enum.join(", ")}`;
   if ("const" in s && !same(value, s.const)) return `${at} must be ${JSON.stringify(s.const)}`;
-  for (const b of s.allOf ?? []) if (check(b, value, at)) return check(b, value, at);
+  for (const b of s.allOf ?? []) {
+    const problem = check(b, value, at);
+    if (problem) return problem;
+  }
   if (s.anyOf && s.anyOf.every((b) => check(b, value, at))) return `${at} matches none of the allowed shapes`;
   if (s.oneOf && s.oneOf.filter((b) => !check(b, value, at)).length !== 1) return `${at} must match exactly one allowed shape`;
   if (typeof value === "number") {
@@ -109,6 +118,7 @@ const contract = (inputSchema, run) => async (raw, client) => {
   try {
     root = inputSchema;
     depth = 0;
+    steps = 0;
     const problem = TYPES.object(args) ? check(inputSchema, args) : "the input must be an object";
     if (problem) return fail("INVALID_INPUT", problem);
     const out = envelope({ ok: true, data: (await run(args, client)) ?? null });
