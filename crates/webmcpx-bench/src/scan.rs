@@ -201,17 +201,23 @@ impl Scanner {
         if let Some(report) = self.cached(&key) {
             return Ok(report);
         }
-        let cell = Arc::clone(lock(&self.inflight).entry(key.clone()).or_default());
-        let result = cell.get_or_init(|| self.scan_now(url)).await.clone();
-        // The first caller to get here retires the shared scan; later callers find a cached report.
-        let mut inflight = lock(&self.inflight);
-        if inflight.get(&key).is_some_and(|c| Arc::ptr_eq(c, &cell)) {
-            inflight.remove(&key);
-            if let Ok(report) = &result {
-                self.remember(key, report.clone());
-            }
-        }
-        result
+        let caller = Caller::join(&self.inflight, key.clone());
+        caller
+            .cell
+            .get_or_init(|| async {
+                let result = self.scan_now(url).await;
+                if let Ok(report) = &result {
+                    self.remember(key, report.clone());
+                }
+                result
+            })
+            .await
+            .clone()
+    }
+
+    /// URLs being scanned right now (tests).
+    pub fn in_flight(&self) -> usize {
+        lock(&self.inflight).len()
     }
 
     fn cached(&self, key: &str) -> Option<Report> {
@@ -341,6 +347,40 @@ fn endpoint_host(endpoint: &str) -> &str {
     host.strip_prefix('[')
         .and_then(|h| h.strip_suffix(']'))
         .unwrap_or(host)
+}
+
+/// One caller of a shared scan. The last caller to leave, finished or cancelled (a closed tab), removes
+/// the shared entry, so abandoned scans never pile up.
+struct Caller<'a> {
+    inflight: &'a std::sync::Mutex<HashMap<String, SharedScan>>,
+    key: String,
+    cell: SharedScan,
+}
+
+impl<'a> Caller<'a> {
+    fn join(inflight: &'a std::sync::Mutex<HashMap<String, SharedScan>>, key: String) -> Self {
+        let cell = Arc::clone(lock(inflight).entry(key.clone()).or_default());
+        Self {
+            inflight,
+            key,
+            cell,
+        }
+    }
+}
+
+impl Drop for Caller<'_> {
+    fn drop(&mut self) {
+        let mut inflight = lock(self.inflight);
+        // Two references left: the map's and ours. Joining happens under this same lock, so no caller
+        // can pick the entry up in between.
+        if inflight
+            .get(&self.key)
+            .is_some_and(|c| Arc::ptr_eq(c, &self.cell))
+            && Arc::strong_count(&self.cell) == 2
+        {
+            inflight.remove(&self.key);
+        }
+    }
 }
 
 /// Recent reports by URL, within a memory budget (sizes as JSON).

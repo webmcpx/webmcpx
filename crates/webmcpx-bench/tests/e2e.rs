@@ -384,6 +384,7 @@ async fn the_same_site_is_scanned_once_for_everyone() {
     }
     assert!(scanner.scan(&url).await.is_ok());
     assert_eq!(visits.load(std::sync::atomic::Ordering::SeqCst), 1);
+    assert_eq!(scanner.in_flight(), 0);
 }
 
 /// A visitor who gives up while waiting in line (a closed tab) frees their place.
