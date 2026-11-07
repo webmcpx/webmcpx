@@ -71,7 +71,7 @@
 				onclick={() => (value = item.id)}
 				onkeydown={(e) => onkeydown(e, i)}
 				class={[
-					'inline-flex shrink-0 items-center gap-2 rounded-full border-2 font-medium transition',
+					'relative inline-flex shrink-0 items-center gap-2 rounded-full border-2 font-medium transition',
 					tabClass ??
 						'h-9 border-transparent px-4 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper [&_svg]:size-4'
 				]}

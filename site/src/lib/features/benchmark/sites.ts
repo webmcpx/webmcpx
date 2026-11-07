@@ -2,7 +2,7 @@
 // (site or URL, prompt) is read from the run itself (`results.tasks`), never from today's task files.
 
 import { BENCH_SITES } from '#lib/content/benchSites.ts';
-import type { SimpleIcon } from 'simple-icons';
+import type { Logo } from '#lib/content/logos.ts';
 import { rows, type Results, type Row, type TaskInfo } from './bench.ts';
 
 export interface SiteTask extends Row {
@@ -12,7 +12,7 @@ export interface SiteTask extends Row {
 export interface BenchSite {
 	id: string;
 	name: string;
-	icon?: SimpleIcon;
+	logo?: Logo;
 	live: boolean;
 	url?: string;
 	/** Each question keeps its own numbers: sites are never averaged. */
@@ -41,7 +41,7 @@ export function bySite(results: Results): BenchSite[] {
 			site = {
 				id,
 				name: BENCH_SITES[id]?.name ?? id,
-				icon: BENCH_SITES[id]?.icon,
+				logo: BENCH_SITES[id]?.logo,
 				live: !!meta.url,
 				url: meta.url ? new URL(meta.url).origin : undefined,
 				tasks: []

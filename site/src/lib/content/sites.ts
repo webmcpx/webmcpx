@@ -2,14 +2,14 @@
 // (`/api/scan`, or `webmcpx-bench probe`) on the date below; re-check before adding or keeping one.
 // Logos belong to their owners and only state a fact: the site ships WebMCP. No affiliation.
 
-import { siCloudflare, siMintlify, siNotion, siPerplexity, siResend, type SimpleIcon } from 'simple-icons';
+import { siMintlify, siPerplexity, siResend } from 'simple-icons';
+import { ALLBIRDS, CLOUDFLARE, KITH, NOTION, fromSimpleIcon, type Logo } from './logos.ts';
 
 export interface Site {
 	name: string;
 	/** What the scan opens when the logo is clicked. */
 	url: string;
-	/** Brand mark from simple-icons; sites without one show their name as a wordmark. */
-	icon?: SimpleIcon;
+	logo: Logo;
 }
 
 export const VERIFIED_ON = '2026-11-07';
@@ -18,11 +18,11 @@ export const VERIFIED_ON = '2026-11-07';
 export const INDEX = { sites: 541, asOf: '2026-11-04', url: 'https://knowngood.sh' };
 
 export const SITES: Site[] = [
-	{ name: 'Cloudflare', url: 'https://developers.cloudflare.com/', icon: siCloudflare },
-	{ name: 'Notion', url: 'https://developers.notion.com/', icon: siNotion },
-	{ name: 'Perplexity', url: 'https://docs.perplexity.ai/', icon: siPerplexity },
-	{ name: 'Mintlify', url: 'https://mintlify.com/docs', icon: siMintlify },
-	{ name: 'Resend', url: 'https://resend.com/docs', icon: siResend },
-	{ name: 'Allbirds', url: 'https://www.allbirds.com/' },
-	{ name: 'Kith', url: 'https://kith.com/' }
+	{ name: 'Cloudflare', url: 'https://developers.cloudflare.com/', logo: CLOUDFLARE },
+	{ name: 'Notion', url: 'https://developers.notion.com/', logo: NOTION },
+	{ name: 'Perplexity', url: 'https://docs.perplexity.ai/', logo: fromSimpleIcon(siPerplexity) },
+	{ name: 'Mintlify', url: 'https://mintlify.com/docs', logo: fromSimpleIcon(siMintlify) },
+	{ name: 'Resend', url: 'https://resend.com/docs', logo: fromSimpleIcon(siResend) },
+	{ name: 'Allbirds', url: 'https://www.allbirds.com/', logo: ALLBIRDS },
+	{ name: 'Kith', url: 'https://kith.com/', logo: KITH }
 ];

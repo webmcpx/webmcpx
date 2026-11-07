@@ -54,7 +54,7 @@ describe('bySite', () => {
 			['docs', 'Orbit docs', false, 2]
 		]);
 		expect(sites[0].tasks[0].prompt).toBe('qb');
-		expect(sites[0].icon?.title).toBe('Notion');
+		expect(sites[0].logo?.wordmark).toBe(false);
 		// No averaging: each question keeps its own numbers.
 		expect(sites[1].tasks.map((t) => t.baseline?.tokens)).toEqual([10, 30]);
 	});

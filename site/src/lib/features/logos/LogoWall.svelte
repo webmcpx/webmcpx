@@ -1,6 +1,6 @@
 <!-- Sites that already ship WebMCP. Each logo runs a live scan of that site: proof you can click. -->
 <script lang="ts">
-	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
+	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import { INDEX, SITES, VERIFIED_ON } from '#lib/content/sites.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import { scanner } from '#lib/features/scan/scanner.svelte.ts';
@@ -22,8 +22,13 @@
 						onclick={() => scanner.run(site.url)}
 						class="flex items-center gap-2.5 rounded-lg px-2 py-1 text-ink-2 transition hover:text-ink"
 					>
-						{#if site.icon}<BrandIcon icon={site.icon} size={22} />{/if}
-						<span class="font-display text-xl font-bold tracking-tight sm:text-2xl">{site.name}</span>
+						{#if site.logo.wordmark}
+							<SiteLogo logo={site.logo} size={24} />
+							<span class="sr-only">{site.name}</span>
+						{:else}
+							<SiteLogo logo={site.logo} size={22} />
+							<span class="font-display text-xl font-bold tracking-tight sm:text-2xl">{site.name}</span>
+						{/if}
 						<span class="sr-only">: scan this site</span>
 					</button>
 				</li>

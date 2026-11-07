@@ -6,7 +6,7 @@
 <script lang="ts">
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
-	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
+	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
@@ -103,18 +103,16 @@
 			bind:value={siteId}
 			label="Site"
 			listClass="-mx-4 mb-10 gap-2.5 px-4 pt-1 pb-3 sm:mx-0 sm:mb-12 sm:flex-wrap sm:px-0"
-			tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none [&_svg]:size-5"
+			tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none"
 		>
 			{#snippet tab(site)}
-				{#if site.icon}
-					<BrandIcon icon={site.icon} size={20} />
+				{#if site.logo?.wordmark}
+					<SiteLogo logo={site.logo} size={18} />
+					<span class="sr-only">{site.name}</span>
 				{:else}
-					<span
-						class="grid size-6 place-items-center rounded-full border-2 border-current font-display text-xs font-bold"
-						aria-hidden="true">{site.name[0]}</span
-					>
+					{#if site.logo}<SiteLogo logo={site.logo} size={20} />{/if}
+					{site.name}
 				{/if}
-				{site.name}
 				{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70">local</span
 					>{/if}
 			{/snippet}

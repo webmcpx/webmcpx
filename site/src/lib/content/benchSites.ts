@@ -1,21 +1,28 @@
-// How the places benchmark tasks ran on are shown: name and logo. Keys are live hosts (without
-// `www.`) and local fixture directories (`bench/sites/<dir>`). Unknown keys fall back to the key.
+// How the places benchmark tasks ran on are shown: name and logo (see logos.ts). Keys are live hosts
+// (without `www.`) and local fixture directories (`bench/sites/<dir>`). Unknown keys show the key.
 
-import { siCloudflare, siNotion, type SimpleIcon } from 'simple-icons';
+import {
+	ALLBIRDS,
+	CLOUDFLARE,
+	KILN,
+	NOTION,
+	ORBIT,
+	SPECIFICATION_WEBSITE,
+	WOOCOMMERCE,
+	type Logo
+} from './logos.ts';
 
 export interface BenchSiteLook {
 	name: string;
-	/** Brand mark from simple-icons; without one, the name's initial is shown. */
-	icon?: SimpleIcon;
+	logo?: Logo;
 }
 
 export const BENCH_SITES: Record<string, BenchSiteLook> = {
-	'developers.notion.com': { name: 'Notion', icon: siNotion },
-	'developers.cloudflare.com': { name: 'Cloudflare', icon: siCloudflare },
-	'allbirds.com': { name: 'Allbirds' },
-	// simple-icons' WooCommerce mark is a wide wordmark, unreadable at icon size: initial instead.
-	'demo.openforagents.com': { name: 'WooCommerce' },
-	'specification.website': { name: 'specification.website' },
-	docs: { name: 'Orbit docs' },
-	store: { name: 'Kiln & Co' }
+	'developers.notion.com': { name: 'Notion', logo: NOTION },
+	'developers.cloudflare.com': { name: 'Cloudflare', logo: CLOUDFLARE },
+	'allbirds.com': { name: 'Allbirds', logo: ALLBIRDS },
+	'demo.openforagents.com': { name: 'WooCommerce', logo: WOOCOMMERCE },
+	'specification.website': { name: 'specification.website', logo: SPECIFICATION_WEBSITE },
+	docs: { name: 'Orbit docs', logo: ORBIT },
+	store: { name: 'Kiln & Co', logo: KILN }
 };

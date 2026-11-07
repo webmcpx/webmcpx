@@ -45,8 +45,11 @@ tests/                       Playwright e2e against the prerendered build
   `PAIRS` in `tokens.spec.ts` (4.5:1 contrast check). One theme only.
 - Variants live in a `tv()` recipe exported from the component's `<script module>` (see Button). Pass layout
   classes from outside through `class`; don't add a variant for a one-off.
-- Icons: `@lucide/svelte/icons/<name>` (one import per icon); brand logos: `simple-icons` via `BrandIcon`.
-  Decorative icons get `aria-hidden="true"`.
+- Icons: `@lucide/svelte/icons/<name>` (one import per icon). Decorative icons get `aria-hidden="true"`.
+- Site logos live in `lib/content/logos.ts` as path data and render with `SiteLogo` (currentColor; wordmarks
+  keep their aspect ratio). Real brands use their own published artwork (simple-icons or the brand's site),
+  with the source noted; never redraw or AI-generate a real brand's logo. Our fictional test brands (Orbit,
+  Kiln & Co) have original marks. A test keeps logos to drawing data only.
 - Motion: wrap blocks in `<Reveal>` (stagger with `delay`); transitions use `ease-out-expo`. Everything must
   respect `prefers-reduced-motion` (base.css has the global switch) and stay readable without JavaScript.
 - No count-up numbers: figures are prerendered text, so crawlers and agents read them.
