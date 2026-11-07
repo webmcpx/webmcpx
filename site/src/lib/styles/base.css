@@ -81,6 +81,11 @@
 }
 
 /* Tabs (components/ui/Tabs.svelte): inactive panels are in the HTML for readers without JavaScript. */
+/* Controls that need JavaScript to do anything. */
+:root:not([data-js]) .js-only {
+	display: none;
+}
+
 [data-js] [role='tabpanel'][data-inactive] {
 	display: none;
 }

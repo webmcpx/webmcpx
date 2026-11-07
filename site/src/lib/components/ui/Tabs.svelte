@@ -3,6 +3,7 @@
 	tab is in the tab order. The active tab is bindable: `<Tabs {items} bind:value>`.
 	Progressive: every panel is in the HTML. Inactive ones are hidden by base.css only when JavaScript runs
 	(`[data-js]`, set before first paint), so without JavaScript all panels are readable, stacked.
+	`lazy` renders only the active panel instead (for heavy panels); without JavaScript only the first shows.
 -->
 <script lang="ts" generics="T extends { id: string; label: string }">
 	import type { Snippet } from 'svelte';
@@ -19,6 +20,8 @@
 		listClass?: string;
 		/** Replaces the default tab look (size, colors); style the selected tab with `aria-selected:`. */
 		tabClass?: string;
+		/** Render only the active panel; the tab list is hidden without JavaScript, where it could not switch. */
+		lazy?: boolean;
 	}
 
 	let {
@@ -29,7 +32,8 @@
 		panel,
 		class: className,
 		listClass,
-		tabClass
+		tabClass,
+		lazy = false
 	}: Props = $props();
 
 	const uid = $props.id();
@@ -60,7 +64,7 @@
 </script>
 
 <div class={className}>
-	<div role="tablist" aria-label={label} class={['flex gap-1 overflow-x-auto', listClass]}>
+	<div role="tablist" aria-label={label} class={['flex gap-1 overflow-x-auto', lazy && 'js-only', listClass]}>
 		{#each items as item, i (item.id)}
 			{@const selected = item.id === active?.id}
 			<button
@@ -93,7 +97,7 @@
 			data-inactive={on ? undefined : ''}
 			class="outline-none"
 		>
-			{@render panel(item, on)}
+			{#if on || !lazy}{@render panel(item, on)}{/if}
 		</div>
 	{/each}
 </div>

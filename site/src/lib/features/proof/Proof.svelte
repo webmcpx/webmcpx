@@ -143,6 +143,7 @@
 			items={models}
 			bind:value={modelId}
 			label="Model"
+			lazy
 			listClass="-mx-4 mb-8 gap-2 px-4 pt-1 pb-3 sm:mx-0 sm:flex-wrap sm:px-0"
 			tabClass="h-10 border-ink/0 px-3.5 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-card aria-selected:text-ink aria-selected:shadow-hard-sm [&_svg]:size-4"
 		>

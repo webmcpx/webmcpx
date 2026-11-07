@@ -164,23 +164,20 @@ test('the model switcher shows each model on its own run', async ({ page }) => {
 	const models = proof.getByRole('tablist', { name: 'Model' }).getByRole('tab');
 	await expect(models.first()).toHaveAttribute('aria-selected', 'true');
 	await expect(models.first()).toContainText('GPT-6 Luna');
-	const ids = await proof
-		.locator('a[href*="/content/bench/"]')
-		.evaluateAll((links) => links.map((a) => a.getAttribute('href')?.match(/bench\/(.+)\.json$/)?.[1]));
-	expect(ids.length).toBe(await models.count());
-	for (const [i, id] of ids.entries()) {
+	const ids: string[] = [];
+	for (let i = 0; i < (await models.count()); i++) {
 		await models.nth(i).click();
 		await expect(models.nth(i)).toHaveAttribute('aria-selected', 'true');
 		// Only the selected model's run is shown: its results link and its method.
-		await expect(proof.getByRole('link', { name: 'All results' })).toHaveAttribute(
-			'href',
-			new RegExp(`bench/${id}\\.json$`)
-		);
+		const href = await proof.getByRole('link', { name: 'All results' }).getAttribute('href');
+		const id = href?.match(/bench\/(.+)\.json$/)?.[1] ?? '';
+		ids.push(id);
 		await proof.getByRole('tab', { name: 'Method' }).click();
 		await expect(
-			proof.getByText(new RegExp(`^${id}, reasoning medium`)).filter({ visible: true })
+			proof.getByText(new RegExp(`^${id.replaceAll('.', '\\.')}, reasoning medium`)).filter({ visible: true })
 		).toHaveCount(1);
 	}
+	expect(new Set(ids).size).toBe(ids.length);
 });
 
 test('a site with several questions rotates them, and the rotation can be paused', async ({ page }) => {
@@ -256,6 +253,8 @@ test('the page says its benchmark shows selected cases and links to all results'
 	await page.goto('/#proof');
 	const proof = page.locator('#proof');
 	await expect(proof.getByText(/Selected cases: \d+ of \d+ questions/)).toBeVisible();
+	// One model's run at a time: the others render when picked.
+	await expect(proof.getByText(/Selected cases:/)).toHaveCount(1);
 	await expect(proof.getByRole('link', { name: 'All results' })).toHaveAttribute(
 		'href',
 		/bench\/[^/]+\.json$/
