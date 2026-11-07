@@ -116,5 +116,20 @@ tests/                       Playwright e2e against the prerendered build
 - Internal links are English paths through `useI18n().href('/brand/')`, so readers stay in their language.
 - Copy lives in `lib/i18n/dict/en.ts` (typed `Messages`); components read `useI18n().m`. Sentences with markup
   use `Rich` with `{placeholders}`, counts use `i18n.plural()`. Never concatenate translated fragments.
+
+## Languages (i18n)
+
+- 11 languages (`lib/i18n/locales.ts`): the most spoken left-to-right ones plus Japanese. English is at `/`,
+  the rest under `/<code>/`; every page is prerendered in every language, with `<html lang>` and hreflang.
+  No automatic redirect: an English page offers the browser's language once (`LanguageSuggestion`).
+- Every language is a transcreation, written as a local developer-marketing writer would, never a literal
+  translation: same facts and caveats, local idiom, the terms local developers really use, local typography
+  (French thin spaces, German „…“, CJK full-width punctuation). Brand, API, tool and code names stay as is.
+- A copy change lands in `dict/en.ts` and in every `dict/<code>.ts` in the same PR (TypeScript fails on a
+  missing key). Respect the length notes in `en.ts`; check the layout with `tests/i18n.spec.ts` (no
+  overflow at 390 and 1280 px in every language) and look at the screenshots for CJK and Indic scripts.
+- Scripts the brand fonts lack use native system fonts (`base.css`, `:lang()` rules): CJK and Indic get
+  smaller, untracked display type; Chinese headings break only at punctuation and at `\u200b` placed in the
+  copy. The wordmark (`font-brand`) is artwork and never changes font.
 - Must work at 390 px wide without horizontal scroll, and with keyboard only. Anything that moves on its own
   (the question rotator) pauses on hover and focus, has a pause control, and stays still for reduced motion.

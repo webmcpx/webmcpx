@@ -130,12 +130,49 @@
 }
 /* CJK has no word spaces: let headlines break anywhere instead of overflowing, and keep words apart in
    mixed text with a little extra line height. */
-:lang(zh) :is(h1, h2, h3),
 :lang(ja) :is(h1, h2, h3) {
 	word-break: auto-phrase;
 	line-break: strict;
 }
+/* Chinese has no auto-phrase support: headings break only at punctuation and at the zero-width spaces
+   the translation places between words, and anywhere only if a line would otherwise overflow. */
+:lang(zh) :is(h1, h2, h3) {
+	word-break: keep-all;
+	overflow-wrap: anywhere;
+	line-break: strict;
+}
+/* Vowel signs above and below the line need room, and negative tracking breaks Indic conjuncts. */
 :lang(hi),
 :lang(bn) {
+	--text-giant--line-height: 1.12;
+	--text-giant--letter-spacing: 0;
+	--text-display--line-height: 1.15;
+	--text-display--letter-spacing: 0;
+	--text-headline--line-height: 1.2;
+	--text-headline--letter-spacing: 0;
+}
+:lang(hi) :is(p, li, dd, td),
+:lang(bn) :is(p, li, dd, td) {
 	line-height: 1.65;
+}
+/* Full-width CJK characters read larger than Latin at the same size: scale the big type down, untracked. */
+:lang(zh),
+:lang(ja) {
+	--text-giant: clamp(1.85rem, 0.5rem + 5.6vw, 5.5rem);
+	--text-giant--line-height: 1.1;
+	--text-giant--letter-spacing: 0;
+	--text-display--letter-spacing: 0;
+	--text-headline--letter-spacing: 0;
+}
+/* The highlighted key phrase of a headline stays whole in scripts without word spaces. */
+:lang(zh) :is(h1, h2) .marker,
+:lang(ja) :is(h1, h2) .marker,
+:lang(hi) :is(h1, h2) .marker,
+:lang(bn) :is(h1, h2) .marker {
+	white-space: nowrap;
+}
+
+/* The wordmark is artwork: always Bricolage, whatever the page's language (CJK fonts draw Latin wider). */
+.font-brand {
+	font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
 }

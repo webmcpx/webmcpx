@@ -264,7 +264,7 @@ const en = {
 		},
 		/** Names the detail tabs under a site's questions. */
 		details: 'Details for {site}',
-		// Tab labels: max 8 each, one word; six tabs share one row at 390 px.
+		// Tab labels: short, one or two words (the row wraps on phones); the shorter the better.
 		tabs: {
 			tokens: 'Tokens',
 			duration_ms: 'Time',
@@ -482,9 +482,9 @@ const en = {
 		verdicts: { ready: 'Agent-ready', issues: 'Almost', missing: 'Not yet' },
 		failed: "Couldn't scan that.",
 		result: {
-			// {tokens} is the highlighted token count (the text below). Plural by {n}.
+			// {tokens} is the highlighted token count (the text below). Plural by the count; {n} is shown short (12k).
 			missing: 'No WebMCP tools. Agents have to read about {tokens} of this page and guess.',
-			tokens: '{n} tokens',
+			tokens: p({ one: '{n} token', other: '{n} tokens' }),
 			// {tools} is the tool count (toolCount); plural by {n}, the number of lint errors.
 			issues: p({
 				one: '{tools}, but {n} lint error agents will trip on.',

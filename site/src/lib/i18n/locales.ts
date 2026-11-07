@@ -24,7 +24,7 @@ export const LOCALES: Locale[] = [
 	{ code: 'hi', tag: 'hi', name: 'हिन्दी', intl: 'hi-IN' },
 	{ code: 'es', tag: 'es', name: 'Español', intl: 'es' },
 	{ code: 'fr', tag: 'fr', name: 'Français', intl: 'fr-FR' },
-	{ code: 'bn', tag: 'bn', name: 'বাংলা', intl: 'bn-BD' },
+	{ code: 'bn', tag: 'bn', name: 'বাংলা', intl: 'bn-BD-u-nu-latn' },
 	{ code: 'pt-br', tag: 'pt-BR', name: 'Português (Brasil)', intl: 'pt-BR' },
 	{ code: 'ru', tag: 'ru', name: 'Русский', intl: 'ru-RU' },
 	{ code: 'id', tag: 'id', name: 'Bahasa Indonesia', intl: 'id-ID' },

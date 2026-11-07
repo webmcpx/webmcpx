@@ -9,7 +9,7 @@
 </script>
 
 <!-- Size comes from `class` (a text-* utility); text-xl when none is given. -->
-<span class={['inline-flex items-baseline font-display font-bold tracking-tight', className ?? 'text-xl']}>
+<span class={['font-brand inline-flex items-baseline font-bold tracking-tight', className ?? 'text-xl']}>
 	{#if mark}
 		<svg viewBox={JUNCTION.viewBox} class="size-[1em] self-center" fill="currentColor" aria-hidden="true">
 			{#each JUNCTION.paths as p, i (i)}<path d={p.d} />{/each}
