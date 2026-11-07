@@ -86,6 +86,22 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   assert.equal(await stock({ CUP: "free" }), "`CUP` must be of type integer");
   assert.equal(await stock({ PLATE: 2 }), "input matches none of the allowed shapes");
   assert.equal(await stock({ MUG: 3 }), undefined);
+  // oneOf: exactly one; const: by content.
+  tool({
+    name: "pick",
+    description: "Picks by SKU or ID.",
+    inputSchema: {
+      type: "object",
+      properties: { filter: { const: { status: "open", tags: ["a"] } } },
+      oneOf: [{ required: ["sku"] }, { required: ["id"] }],
+    },
+    run: () => "ok",
+  });
+  const pick = async (input) => (await page.call("pick", input)).error?.message;
+  assert.equal(await pick({ sku: "MUG", id: "1" }), "input must match exactly one allowed shape");
+  assert.equal(await pick({}), "input must match exactly one allowed shape");
+  assert.equal(await pick({ sku: "MUG", filter: { tags: ["a"], status: "open" } }), undefined);
+  assert.match(await pick({ sku: "MUG", filter: { status: "closed", tags: ["a"] } }), /must be/);
   // Inherited names are not declared inputs.
   assert.equal(await problem('{"qty":1,"__proto__":{"admin":true}}'), "`__proto__` is not an input of this tool");
   assert.equal(await problem('{"qty":1,"constructor":{"admin":true}}'), "`constructor` is not an input of this tool");

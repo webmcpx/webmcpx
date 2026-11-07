@@ -33,16 +33,22 @@ const TYPES = {
   object: (v) => v !== null && typeof v === "object" && !Array.isArray(v),
 };
 
+// JSON equality, by content.
+const same = (a, b) =>
+  a === b ||
+  (typeof a === "object" && typeof b === "object" && a !== null && b !== null && Array.isArray(a) === Array.isArray(b) &&
+    Object.keys(a).length === Object.keys(b).length && Object.keys(a).every((k) => Object.hasOwn(b, k) && same(a[k], b[k])));
+
 /** The first problem with `value` against JSON Schema `s` (the keywords tool inputs use), or "". */
 function check(s, value, at = "input") {
   if (!s || typeof s !== "object") return "";
   const types = s.type === undefined ? [] : [].concat(s.type);
   if (types.length && !types.some((t) => TYPES[t]?.(value))) return `${at} must be of type ${types.join(" or ")}`;
   if (s.enum && !s.enum.includes(value)) return `${at} must be one of ${s.enum.join(", ")}`;
-  if ("const" in s && value !== s.const) return `${at} must be ${s.const}`;
-  // Combinators: every allOf branch, at least one anyOf / oneOf branch.
+  if ("const" in s && !same(value, s.const)) return `${at} must be ${JSON.stringify(s.const)}`;
   for (const b of s.allOf ?? []) if (check(b, value, at)) return check(b, value, at);
-  for (const k of ["anyOf", "oneOf"]) if (s[k] && s[k].every((b) => check(b, value, at))) return `${at} matches none of the allowed shapes`;
+  if (s.anyOf && s.anyOf.every((b) => check(b, value, at))) return `${at} matches none of the allowed shapes`;
+  if (s.oneOf && s.oneOf.filter((b) => !check(b, value, at)).length !== 1) return `${at} must match exactly one allowed shape`;
   if (typeof value === "number") {
     if (value < s.minimum) return `${at} must be at least ${s.minimum}`;
     if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
@@ -64,7 +70,6 @@ function check(s, value, at = "input") {
     // Own properties only ("__proto__" is not a declared input).
     for (const key of s.required ?? []) if (!Object.hasOwn(value, key) || value[key] === undefined) return `\`${key}\` is required`;
     for (const [key, v] of Object.entries(value)) {
-      // A field not listed follows additionalProperties: false refuses it, a schema checks it.
       const p = s.properties && Object.hasOwn(s.properties, key) ? s.properties[key] : s.additionalProperties;
       if (p === false) return `\`${key}\` is not an input of this tool`;
       const problem = p && v !== undefined ? check(p, v, `\`${key}\``) : "";
