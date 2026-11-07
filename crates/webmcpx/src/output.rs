@@ -134,7 +134,7 @@ fn diagnostic_json(r: &FileResult, d: &Diagnostic) -> Value {
             "message": f.message,
             "edits": f.edits.iter().map(|e| json!({ "start": e.span.start, "end": e.span.end, "replacement": e.replacement })).collect::<Vec<_>>(),
         })),
-        "url": rule_docs(&d.rule),
+        "url": rule_docs(d.rule),
     })
 }
 
