@@ -27,17 +27,26 @@
       if (squash(line)) lines.push(squash(line));
       line = "";
     };
-    const walk = (node) => {
+    // Text directly inside a `display: contents` element has no element of its own to ask
+    // checkVisibility(), and a closed <details> still lays it out (content-visibility: hidden). It is
+    // hidden when an ancestor hides it: a closed <details> (outside its <summary>) or [hidden].
+    const textShown = (text) => {
+      const el = text.parentElement;
+      if (el?.closest("[hidden]")) return false;
+      const closed = el?.closest("details:not([open])");
+      return !closed || Boolean(el.closest("summary")?.parentElement === closed);
+    };
+    const walk = (node, throughContents = false) => {
       for (const child of node.childNodes) {
         if (child.nodeType === Node.TEXT_NODE) {
-          line += ` ${child.textContent}`;
+          if (!throughContents || textShown(child)) line += ` ${child.textContent}`;
           continue;
         }
         if (child.nodeType !== Node.ELEMENT_NODE || SKIP.has(child.tagName)) continue;
         // `display: contents` has no box, so checkVisibility() is false, but its children render: read
         // through it (frameworks such as SvelteKit wrap the whole page in one).
         if (getComputedStyle(child).display === "contents") {
-          walk(child);
+          walk(child, true);
           continue;
         }
         if (!child.checkVisibility()) continue;

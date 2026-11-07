@@ -468,7 +468,7 @@ async fn scan_api_limits_each_visitor() {
     );
 }
 
-/// SvelteKit (and others) wrap the whole page in a `display: contents` element, which has no box: the
+/// `SvelteKit` (and others) wrap the whole page in a `display: contents` element, which has no box: the
 /// snapshot must read through it instead of dropping the page (it once measured webmcpx.dev at 16 tokens).
 #[tokio::test]
 async fn the_snapshot_reads_through_display_contents_wrappers() {
@@ -478,7 +478,9 @@ async fn the_snapshot_reads_through_display_contents_wrappers() {
     }
     let words = "Kettles carry a two-year warranty from the date of purchase. ".repeat(20);
     let page = format!(
-        r#"<title>t</title><div style="display: contents"><main><h1>Care</h1><p>{words}</p></main></div>"#
+        r#"<title>t</title><div style="display: contents"><main><h1>Care</h1><p>{words}</p>
+        <details><summary>Returns</summary><div style="display: contents">SECRET-UNTIL-OPENED<p>NESTED-SECRET</p></div></details>
+        </main></div>"#
     );
     let site = serve_html(axum::Router::new().route(
         "/",
@@ -494,6 +496,28 @@ async fn the_snapshot_reads_through_display_contents_wrappers() {
         report.page_tokens > 200,
         "the wrapped page was dropped: {} tokens",
         report.page_tokens
+    );
+    // What a closed <details> hides stays hidden, wrapper or not.
+    let browser = Browser::launch(None).await.unwrap();
+    let page = browser
+        .page(&webmcpx_bench::arm::INIT_SCRIPTS)
+        .await
+        .unwrap();
+    page.goto(&format!("http://{site}/")).await.unwrap();
+    let snapshot = page.eval("__bench.snapshot()").await.unwrap();
+    let snapshot = snapshot.as_str().unwrap();
+    assert!(snapshot.contains("Kettles carry"), "{snapshot}");
+    assert!(
+        !snapshot.contains("SECRET-UNTIL-OPENED") && !snapshot.contains("NESTED-SECRET"),
+        "{snapshot}"
+    );
+    page.eval("document.querySelector('details').open = true")
+        .await
+        .unwrap();
+    let opened = page.eval("__bench.snapshot()").await.unwrap();
+    assert!(
+        opened.as_str().unwrap().contains("SECRET-UNTIL-OPENED"),
+        "{opened}"
     );
 }
 
