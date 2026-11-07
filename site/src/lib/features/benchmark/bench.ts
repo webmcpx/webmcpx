@@ -115,19 +115,3 @@ export function losses(r: Results, metric: Metric['id']): string[] {
 		})
 		.map((row) => row.task);
 }
-
-/**
- * The task to feature: the largest token saving on a live (public) site, else on any task. It is
- * labelled as the best case on the page; the averages sit next to it.
- */
-export function spotlight(r: Results): (Row & { baseline: ArmSummary; webmcp: ArmSummary }) | null {
-	const both = rows(r).filter(
-		(x): x is Row & { baseline: ArmSummary; webmcp: ArmSummary } => !!x.baseline && !!x.webmcp
-	);
-	const pool = both.some((x) => x.live) ? both.filter((x) => x.live) : both;
-	const gain = (x: (typeof pool)[number]) => x.baseline.tokens / Math.max(1, x.webmcp.tokens);
-	return pool.reduce<(typeof pool)[number] | null>(
-		(best, x) => (!best || gain(x) > gain(best) ? x : best),
-		null
-	);
-}

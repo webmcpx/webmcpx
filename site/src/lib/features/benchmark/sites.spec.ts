@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import bench from '#lib/content/bench.json';
 import { parse, type ArmSummary, type Results, type TaskInfo } from './bench.ts';
-import { bySite, siteKey } from './sites.ts';
+import { bySite, gain, siteKey } from './sites.ts';
 
 const arm = (tokens: number, success_rate: number, cost_usd: number | null = 0.001): ArmSummary => ({
 	runs: 3,
@@ -34,7 +34,7 @@ describe('siteKey', () => {
 });
 
 describe('bySite', () => {
-	it('groups tasks by site, live sites first, with names and prompts', () => {
+	it('groups tasks by site, best case first, with names and prompts', () => {
 		const sites = bySite(
 			results(
 				{
@@ -49,14 +49,17 @@ describe('bySite', () => {
 				}
 			)
 		);
+		// docs' best question saves 10x (30 -> 3), Notion's 5x (20 -> 4): docs comes first.
 		expect(sites.map((s) => [s.id, s.name, s.live, s.tasks.length])).toEqual([
-			['developers.notion.com', 'Notion', true, 1],
-			['docs', 'Orbit docs', false, 2]
+			['docs', 'Orbit docs', false, 2],
+			['developers.notion.com', 'Notion', true, 1]
 		]);
-		expect(sites[0].tasks[0].prompt).toBe('qb');
-		expect(sites[0].logo?.wordmark).toBe(false);
-		// No averaging: each question keeps its own numbers.
-		expect(sites[1].tasks.map((t) => t.baseline?.tokens)).toEqual([10, 30]);
+		// Questions are ordered the same way, and keep their own numbers: no averaging.
+		expect(sites[0].tasks.map((t) => [t.prompt, t.baseline?.tokens])).toEqual([
+			['qc', 30],
+			['qa', 10]
+		]);
+		expect(sites[1].logo?.wordmark).toBe(false);
 	});
 
 	it('fails loudly when the run has no metadata for a task', () => {
@@ -68,6 +71,8 @@ describe('bySite', () => {
 		expect(sites.reduce((n, s) => n + s.tasks.length, 0)).toBe(
 			Object.keys(parse(bench).summary.tasks).length
 		);
-		expect(sites.find((s) => s.id === 'developers.notion.com')?.name).toBe('Notion');
+		expect(sites[0].name).toBe('Notion');
+		const best = sites.map((s) => Math.max(...s.tasks.map(gain)));
+		expect(best).toEqual([...best].sort((a, b) => b - a));
 	});
 });

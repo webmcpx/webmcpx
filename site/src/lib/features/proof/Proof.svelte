@@ -20,7 +20,6 @@
 		perThousand,
 		rows,
 		seconds,
-		spotlight,
 		tokens,
 		type ArmSummary,
 		type Results
@@ -38,16 +37,11 @@
 	let { results, sites, reproduce }: Props = $props();
 
 	const all = $derived(rows(results));
-	const best = $derived(spotlight(results));
-	// Decided from the data, so the prerendered HTML already shows it (no flash on hydration).
-	const featured = () => sites.find((s) => s.tasks.some((t) => t.task === best?.task))?.id ?? sites[0]?.id;
-	// The featured site first, then the others in their order (live before local).
-	const items = $derived(
-		[...sites]
-			.sort((a, b) => Number(b.id === featured()) - Number(a.id === featured()))
-			.map((s) => ({ ...s, label: s.name }))
-	);
-	let siteId = $state(featured());
+	// Sites come best case first (see sites.ts), so the first one is shown by default, already in the
+	// prerendered HTML.
+	const items = $derived(sites.map((s) => ({ ...s, label: s.name })));
+	const first = () => sites[0]?.id;
+	let siteId = $state(first());
 	const repeats = $derived(all[0]?.webmcp?.runs ?? all[0]?.baseline?.runs ?? 0);
 
 	let metricId = $state<string>(METRICS[0].id);
@@ -71,20 +65,21 @@
 
 {#snippet question(site: BenchSite, task: SiteTask)}
 	<div class="mb-8">
-		<div class="mb-3 flex flex-wrap gap-2">
-			<Stamp tone={site.live ? 'good' : 'plain'} size="sm">{site.live ? 'live site' : 'local fixture'}</Stamp>
-			{#if task.task === best?.task}<Stamp tone="marker" size="sm">Best live case</Stamp>{/if}
-		</div>
 		<div class="flex items-baseline justify-between gap-4 sm:gap-8">
 			<p class="max-w-3xl min-w-0 text-lg text-pretty sm:text-xl">“{task.prompt}”</p>
 			{#if site.url}
 				<a
 					href={site.url}
-					class="inline-flex shrink-0 items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
+					class="group inline-flex shrink-0 items-center gap-1 font-mono text-sm font-medium text-ink underline decoration-marker decoration-[3px] underline-offset-[5px] transition hover:decoration-ink"
 				>
 					<span class="hidden sm:inline">{new URL(site.url).hostname}</span>
 					<span class="sm:hidden">Open</span>
-					<ArrowUpRight size={14} aria-hidden="true" />
+					<ArrowUpRight
+						size={15}
+						strokeWidth={2.5}
+						class="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+						aria-hidden="true"
+					/>
 					<span class="sr-only">(opens {site.name})</span>
 				</a>
 			{/if}

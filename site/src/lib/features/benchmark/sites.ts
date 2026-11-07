@@ -25,9 +25,17 @@ export function siteKey(info: TaskInfo): string {
 	return info.site ?? 'unknown';
 }
 
+/** How many times fewer tokens webmcpx used on this question (0 when an arm is missing). */
+export function gain(t: Row): number {
+	return t.baseline && t.webmcp ? t.baseline.tokens / Math.max(1, t.webmcp.tokens) : 0;
+}
+
+/** A site's best case: its largest saving over any of its questions. */
+export const bestGain = (s: BenchSite) => Math.max(0, ...s.tasks.map(gain));
+
 /**
- * One entry per site, live sites first (in task order), then fixtures. Throws when a task has no
- * metadata in the run (a results file the harness did not write).
+ * One entry per site, best cases first: sites by their largest token saving, and each site's questions
+ * the same way. Throws when a task has no metadata in the run (a results file the harness did not write).
  */
 export function bySite(results: Results): BenchSite[] {
 	const info: Record<string, TaskInfo> = results.tasks;
@@ -50,6 +58,9 @@ export function bySite(results: Results): BenchSite[] {
 		}
 		site.tasks.push({ ...row, prompt: meta.prompt });
 	}
-	const sites = [...groups.values()];
-	return [...sites.filter((s) => s.live), ...sites.filter((s) => !s.live)];
+	const sites = [...groups.values()].map((s) => ({
+		...s,
+		tasks: [...s.tasks].sort((a, b) => gain(b) - gain(a))
+	}));
+	return sites.sort((a, b) => bestGain(b) - bestGain(a));
 }

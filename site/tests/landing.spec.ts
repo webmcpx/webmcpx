@@ -66,7 +66,7 @@ test('the benchmark numbers are in the prerendered HTML', async ({ request }) =>
 	const html = await (await request.get('/')).text();
 	expect(html).toMatch(/fewer tokens|more tokens/);
 	// The featured site and its question are named in the HTML, not added by JavaScript.
-	expect(html).toContain('Best live case');
+	// The best case (Notion) is first and already in the HTML, not added by JavaScript.
 	expect(html).toContain('How many requests per minute does the Notion API allow');
 });
 
@@ -74,8 +74,8 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
 	await expect(page.getByRole('heading', { name: 'One line. Agent-ready.' })).toBeVisible();
-	// The featured site is labelled as the best case; every question stays readable in the full table.
-	await expect(page.getByText('Best live case')).toBeVisible();
+	// The best case shows first; every question stays readable in the full table.
+	await expect(page.getByText(/requests per minute does the Notion API/)).toBeVisible();
 	await page.getByText(/Every question on one chart/).click();
 	await expect(page.locator('#proof table')).toContainText('cloudflare-kv-value-size');
 	await page.close();
