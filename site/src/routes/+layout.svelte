@@ -62,7 +62,8 @@
 </a>
 <LanguageSuggestion />
 <Header />
-<main id="main">
+<!-- The header floats over the page: the home hero leaves room for it, every other page gets it here. -->
+<main id="main" class={page.route.id === '/[[lang=lang]]' ? undefined : 'pt-12 sm:pt-14'}>
 	{@render children()}
 </main>
 <Footer />
