@@ -1,11 +1,12 @@
 <!--
-	The evidence, site by site. A filter picks the site (default: the biggest saving on a live site);
-	each shows the question asked there, both arms side by side, and every task it ran. "All sites" is the
-	average over every task. The full chart and the method sit behind a disclosure.
+	The evidence, one site at a time and one question at a time: no averages. Logos pick the site
+	(default: the biggest saving on a live site); sites with several questions let you pick the question.
+	Every number is also in the full table behind the disclosure, which works without JavaScript.
 -->
 <script lang="ts">
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
+	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
@@ -14,10 +15,8 @@
 	import type { Highlighted } from '#lib/content/snippets.ts';
 	import {
 		compare,
-		headline,
 		losses,
 		METRICS,
-		percent,
 		perThousand,
 		rows,
 		seconds,
@@ -37,24 +36,16 @@
 
 	let { results, sites, reproduce }: Props = $props();
 
-	const h = $derived(headline(results));
 	const all = $derived(rows(results));
-	const choices = $derived<(BenchSite & { label: string })[]>([
-		{
-			id: 'all',
-			label: 'All sites',
-			name: 'All sites',
-			live: false,
-			tasks: sites.flatMap((s) => s.tasks),
-			baseline: h?.baseline ?? null,
-			webmcp: h?.webmcp ?? null
-		},
-		...sites.map((s) => ({ ...s, label: s.name }))
-	]);
 	const best = $derived(spotlight(results));
-	// The default is decided from the data, so the prerendered HTML already shows it (no flash).
-	const featured = () => sites.find((s) => s.tasks.some((t) => t.task === best?.task))?.id ?? 'all';
-	const featuredId = $derived(featured());
+	// Decided from the data, so the prerendered HTML already shows it (no flash on hydration).
+	const featured = () => sites.find((s) => s.tasks.some((t) => t.task === best?.task))?.id ?? sites[0]?.id;
+	// The featured site first, then the others in their order (live before local).
+	const items = $derived(
+		[...sites]
+			.sort((a, b) => Number(b.id === featured()) - Number(a.id === featured()))
+			.map((s) => ({ ...s, label: s.name }))
+	);
 	let siteId = $state(featured());
 	const repeats = $derived(all[0]?.webmcp?.runs ?? all[0]?.baseline?.runs ?? 0);
 
@@ -62,7 +53,6 @@
 	const metric = $derived(METRICS.find((m) => m.id === metricId) ?? METRICS[0]);
 	const worse = $derived(losses(results, metric.id));
 	const solved = (s: ArmSummary) => `${Math.round(s.success_rate * s.runs)}/${s.runs}`;
-	const siteOf = (t: SiteTask) => sites.find((s) => s.tasks.includes(t))?.name ?? '';
 </script>
 
 {#snippet side(arm: ArmSummary, label: string, ours: boolean)}
@@ -70,14 +60,35 @@
 	<Card padding="lg" shadow="lg" class="h-full text-center">
 		<Stamp tone={ours ? 'marker' : 'plain'}>{label}</Stamp>
 		<p class="mt-6 font-display text-display font-bold tabular-nums">{tokens(arm.tokens)}</p>
-		<p class="font-mono text-xs tracking-widest text-ink-3 uppercase">tokens per question</p>
+		<p class="font-mono text-xs tracking-widest text-ink-3 uppercase">tokens</p>
 		<p class="mt-4 text-ink-2">
 			{seconds(arm.duration_ms)} · {arm.steps.toFixed(1)} steps · {perThousand(arm.cost_usd)} per 1k
 		</p>
-		<Stamp tone={ok ? 'good' : 'bad'} size="lg" class="mt-5">
-			{percent(arm.success_rate)} solved · {solved(arm)}
-		</Stamp>
+		<Stamp tone={ok ? 'good' : 'bad'} size="lg" class="mt-5">{ok ? 'Solved' : 'Failed'} {solved(arm)}</Stamp>
 	</Card>
+{/snippet}
+
+{#snippet question(task: SiteTask)}
+	{#if task.baseline && task.webmcp}
+		{@const r = compare(task.baseline.tokens, task.webmcp.tokens, 'fewer tokens', 'more tokens')}
+		<div class="grid items-center gap-6 lg:grid-cols-[1fr_auto_1fr] [&>*]:min-w-0">
+			{@render side(task.baseline, 'Without WebMCP', false)}
+			<div class="flex justify-center">
+				<div
+					class={[
+						'grid size-32 place-items-center rounded-full border-2 border-ink text-center shadow-hard sm:size-36',
+						r.label === 'fewer tokens' ? 'bg-marker' : 'bg-card'
+					]}
+				>
+					<p class="font-display leading-none font-bold">
+						<span class="block text-5xl sm:text-6xl">{r.value}</span>
+						<span class="font-mono text-[11px] tracking-wider uppercase">{r.label}</span>
+					</p>
+				</div>
+			</div>
+			{@render side(task.webmcp, 'With webmcpx', true)}
+		</div>
+	{/if}
 {/snippet}
 
 <Section
@@ -86,51 +97,37 @@
 	title="Same agent. Same question."
 	lead="Pick a site. One agent reads the page like a browser agent; the other calls the site's WebMCP tools."
 >
-	{#if h}
-		<!-- The averages stay outside the filter: prerendered, readable without JavaScript, never hidden. -->
-		<dl
-			class="mb-10 grid grid-cols-2 gap-px overflow-hidden rounded-card border-2 border-ink bg-ink lg:grid-cols-4"
-			aria-label="All {all.length} tasks"
+	{#if sites.length}
+		<Tabs
+			{items}
+			bind:value={siteId}
+			label="Site"
+			listClass="-mx-4 mb-10 gap-2.5 px-4 pt-1 pb-3 sm:mx-0 sm:mb-12 sm:flex-wrap sm:px-0"
+			tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none [&_svg]:size-5"
 		>
-			{#each [compare(h.baseline.tokens, h.webmcp.tokens, 'fewer tokens', 'more tokens'), compare(h.baseline.duration_ms, h.webmcp.duration_ms, 'faster', 'slower'), { value: percent(h.webmcp.success_rate), label: `solved, vs ${percent(h.baseline.success_rate)}` }, { value: perThousand(h.webmcp.cost_usd), label: `per 1k questions, vs ${perThousand(h.baseline.cost_usd)}` }] as stat (stat.label)}
-				<div class="flex flex-col bg-card p-4 text-center sm:p-5">
-					<dt class="order-last text-sm text-ink-2">{stat.label}</dt>
-					<dd class="font-display text-3xl font-bold tracking-tight tabular-nums sm:text-4xl">
-						{stat.value}
-					</dd>
-				</div>
-			{/each}
-		</dl>
-		<p class="-mt-7 mb-10 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">
-			Average over all {all.length} questions on {sites.length} sites
-		</p>
-
-		<Tabs items={choices} bind:value={siteId} label="Site" listClass="mb-8 flex-wrap gap-y-2">
 			{#snippet tab(site)}
-				{#if site.live}<span class="size-2 rounded-full bg-good" aria-hidden="true"></span>{/if}
-				{site.label}
+				{#if site.icon}
+					<BrandIcon icon={site.icon} size={20} />
+				{:else}
+					<span
+						class="grid size-6 place-items-center rounded-full border-2 border-current font-display text-xs font-bold"
+						aria-hidden="true">{site.name[0]}</span
+					>
+				{/if}
+				{site.name}
+				{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70">local</span
+					>{/if}
 			{/snippet}
 			{#snippet panel(site)}
-				<div class="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-					<div class="min-w-0">
-						<div class="flex flex-wrap items-center gap-3">
-							<h3 class="font-display text-2xl font-bold tracking-tight sm:text-3xl">{site.name}</h3>
-							{#if site.id !== 'all'}
-								<Stamp tone={site.live ? 'good' : 'plain'} size="sm">
-									{site.live ? 'live site' : 'local fixture'}
-								</Stamp>
-							{/if}
-							{#if site.id === featuredId}
-								<Stamp tone="marker" size="sm">Best live case</Stamp>
-							{/if}
-						</div>
-						<p class="mt-2 max-w-3xl text-lg text-pretty text-ink-2">
-							{#if site.tasks.length === 1}
-								“{site.tasks[0].prompt}”
-							{:else}
-								Average of {site.tasks.length} questions, {repeats} runs each.
-							{/if}
-						</p>
+				<div class="mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+					<div class="flex flex-wrap items-center gap-3">
+						<h3 class="font-display text-2xl font-bold tracking-tight sm:text-3xl">{site.name}</h3>
+						<Stamp tone={site.live ? 'good' : 'plain'} size="sm"
+							>{site.live ? 'live site' : 'local fixture'}</Stamp
+						>
+						{#if site.tasks.some((t) => t.task === best?.task)}
+							<Stamp tone="marker" size="sm">Best live case</Stamp>
+						{/if}
 					</div>
 					{#if site.url}
 						<a
@@ -142,60 +139,35 @@
 					{/if}
 				</div>
 
-				{#if site.baseline && site.webmcp}
-					{@const r = compare(site.baseline.tokens, site.webmcp.tokens, 'fewer tokens', 'more tokens')}
-					<div class="grid items-center gap-6 lg:grid-cols-[1fr_auto_1fr] [&>*]:min-w-0">
-						{@render side(site.baseline, 'Without WebMCP', false)}
-						<div class="flex justify-center">
-							<div
-								class={[
-									'grid size-32 place-items-center rounded-full border-2 border-ink text-center shadow-hard sm:size-36',
-									r.label === 'fewer tokens' ? 'bg-marker' : 'bg-card'
-								]}
-							>
-								<p class="font-display leading-none font-bold">
-									<span class="block text-5xl sm:text-6xl">{r.value}</span>
-									<span class="font-mono text-[11px] tracking-wider uppercase">{r.label}</span>
-								</p>
-							</div>
-						</div>
-						{@render side(site.webmcp, 'With webmcpx', true)}
-					</div>
-				{/if}
-
-				{#if site.tasks.length > 1}
-					<ul
-						class="mt-8 divide-y-2 divide-hairline rounded-card border-2 border-ink bg-card"
-						aria-label="Questions on {site.name}"
+				{#if site.tasks.length === 1}
+					<p class="mb-8 max-w-3xl text-lg text-pretty text-ink-2">“{site.tasks[0].prompt}”</p>
+					{@render question(site.tasks[0])}
+				{:else}
+					<p class="mb-3 font-mono text-xs tracking-wider text-ink-3 uppercase">
+						{site.tasks.length} questions · pick one
+					</p>
+					<Tabs
+						items={site.tasks.map((t) => ({ ...t, id: t.task, label: t.prompt }))}
+						label="Question on {site.name}"
+						listClass="mb-8 flex-col gap-2"
+						tabClass="h-auto min-h-12 justify-start rounded-2xl border-hairline bg-card px-4 py-2.5 text-left text-base text-ink-2 hover:border-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper"
 					>
-						{#each site.tasks as t (t.task)}
-							<li class="grid gap-2 p-4 sm:grid-cols-[1fr_auto] sm:items-center sm:gap-6 sm:px-6">
-								<p class="text-sm text-pretty">
-									{#if site.id === 'all'}<span class="font-semibold">{siteOf(t)}:</span>{/if}
-									“{t.prompt}”
-								</p>
-								<p class="flex flex-wrap gap-x-4 font-mono text-xs text-ink-2 tabular-nums">
-									<span>
-										{t.baseline ? tokens(t.baseline.tokens) : '–'} →
-										<strong class="text-ink">{t.webmcp ? tokens(t.webmcp.tokens) : '–'}</strong> tokens
-									</span>
-									<span>
-										solved {t.baseline ? percent(t.baseline.success_rate) : '–'} →
-										<strong class="text-ink">{t.webmcp ? percent(t.webmcp.success_rate) : '–'}</strong>
-									</span>
-								</p>
-							</li>
-						{/each}
-					</ul>
+						{#snippet tab(t)}
+							<span class="text-pretty">“{t.prompt}”</span>
+						{/snippet}
+						{#snippet panel(t)}
+							{@render question(t)}
+						{/snippet}
+					</Tabs>
 				{/if}
 			{/snippet}
 		</Tabs>
 
-		<details class="group mt-10 rounded-card border-2 border-ink bg-card">
+		<details class="group mt-12 rounded-card border-2 border-ink bg-card">
 			<summary
 				class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold sm:px-7 [&::-webkit-details-marker]:hidden"
 			>
-				All {all.length} tasks on one chart, and how we measured
+				Every question on one chart, and how we measured
 				<ChevronDown class="transition group-open:rotate-180" aria-hidden="true" />
 			</summary>
 			<div class="border-t-2 border-ink p-5 sm:p-7">
@@ -214,7 +186,7 @@
 					<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
 						<li>
 							{results.model}{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
-							headless Chrome. Same prompt and step limit in both arms; {repeats} runs per task and arm.
+							headless Chrome. Same prompt and step limit in both arms; {repeats} runs per question and arm.
 						</li>
 						<li>Without WebMCP: a DOM-snapshot agent that reads, clicks and fills.</li>
 						<li>With webmcpx: only the tools the page registers.</li>

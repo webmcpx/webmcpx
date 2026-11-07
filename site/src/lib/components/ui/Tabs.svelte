@@ -14,6 +14,8 @@
 		panel: Snippet<[T]>;
 		class?: string;
 		listClass?: string;
+		/** Replaces the default tab look (size, colors); style the selected tab with `aria-selected:`. */
+		tabClass?: string;
 	}
 
 	let {
@@ -23,7 +25,8 @@
 		tab,
 		panel,
 		class: className,
-		listClass
+		listClass,
+		tabClass
 	}: Props = $props();
 
 	const uid = $props.id();
@@ -68,10 +71,9 @@
 				onclick={() => (value = item.id)}
 				onkeydown={(e) => onkeydown(e, i)}
 				class={[
-					'inline-flex h-9 shrink-0 items-center gap-2 rounded-full border-2 px-4 text-sm font-medium transition [&_svg]:size-4',
-					selected
-						? 'border-ink bg-ink text-paper'
-						: 'border-transparent text-ink-2 hover:border-ink hover:text-ink'
+					'inline-flex shrink-0 items-center gap-2 rounded-full border-2 font-medium transition',
+					tabClass ??
+						'h-9 border-transparent px-4 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper [&_svg]:size-4'
 				]}
 			>
 				{#if tab}{@render tab(item)}{:else}{item.label}{/if}

@@ -1,12 +1,21 @@
-// Display names for the places benchmark tasks run: live hosts and local fixture sites
-// (`bench/sites/<dir>`). Unknown hosts fall back to the host name.
+// How the places benchmark tasks ran on are shown: name and logo. Keys are live hosts (without
+// `www.`) and local fixture directories (`bench/sites/<dir>`). Unknown keys fall back to the key.
 
-export const BENCH_SITE_NAMES: Record<string, string> = {
-	'developers.notion.com': 'Notion docs',
-	'developers.cloudflare.com': 'Cloudflare docs',
-	'allbirds.com': 'Allbirds store',
-	'demo.openforagents.com': 'WooCommerce demo',
-	'specification.website': 'specification.website',
-	docs: 'Orbit docs',
-	store: 'Kiln & Co store'
+import { siCloudflare, siNotion, type SimpleIcon } from 'simple-icons';
+
+export interface BenchSiteLook {
+	name: string;
+	/** Brand mark from simple-icons; without one, the name's initial is shown. */
+	icon?: SimpleIcon;
+}
+
+export const BENCH_SITES: Record<string, BenchSiteLook> = {
+	'developers.notion.com': { name: 'Notion', icon: siNotion },
+	'developers.cloudflare.com': { name: 'Cloudflare', icon: siCloudflare },
+	'allbirds.com': { name: 'Allbirds' },
+	// simple-icons' WooCommerce mark is a wide wordmark, unreadable at icon size: initial instead.
+	'demo.openforagents.com': { name: 'WooCommerce' },
+	'specification.website': { name: 'specification.website' },
+	docs: { name: 'Orbit docs' },
+	store: { name: 'Kiln & Co' }
 };

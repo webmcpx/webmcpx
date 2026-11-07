@@ -12,8 +12,8 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 
 ## Page narrative (keep this order; cut before adding)
 
-Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → proof (best live case, then
-averages, full table behind a disclosure) → the fix (one line) → what the community asked for → scan again.
+Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → proof (pick a site by logo,
+then a question; best live case first; full table behind a disclosure) → the fix (one line) → what the community asked for → scan again.
 Few words per section; numbers over adjectives.
 
 ## Layout
@@ -58,8 +58,8 @@ tests/                       Playwright e2e against the prerendered build
   and never publish numbers that did not come from a run. Each run records where every task ran and what it
   asked (`tasks`, schema 3); the page groups results per site from that (`features/benchmark/sites.ts`),
   never from today's `bench/tasks`. Display names live in `lib/content/benchSites.ts`. The summary is
-  computed in Rust (`crates/webmcpx-bench/src/report.rs`). The averages over all tasks stay visible next to
-  the featured site, which is labelled as the best case. Losses are shown, not hidden.
+  computed in Rust (`crates/webmcpx-bench/src/report.rs`). Results are shown per site and per question, never averaged (owner's decision); the featured site
+  is labelled as the best case, and every question stays in the full table, which works without JS. Losses are shown, not hidden.
 - `lib/content/issues.ts`: every row must describe what the code does today.
 - `lib/content/sites.ts`: only sites the scanner verified, with the date; re-check before keeping one.
 
