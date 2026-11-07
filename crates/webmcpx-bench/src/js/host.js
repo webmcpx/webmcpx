@@ -35,12 +35,17 @@
     },
     clearContext,
   });
-  // On the prototype, not this document: an iframe's first about:blank document is replaced by its real
-  // one in the same window (and realm), which this script does not see again.
-  try {
-    Object.defineProperty(Document.prototype, "modelContext", { get: () => modelContext, configurable: true });
-  } catch {
+  // The page itself gets its own property, as shipping hosts do (Shopify's storefront code only registers
+  // with that shape). A frame gets it on the prototype instead: its first about:blank document is replaced
+  // by the real one in the same window, which this script does not see again.
+  if (window === window.top) {
     Object.defineProperty(document, "modelContext", { value: modelContext });
+  } else {
+    try {
+      Object.defineProperty(Document.prototype, "modelContext", { get: () => modelContext, configurable: true });
+    } catch {
+      Object.defineProperty(document, "modelContext", { value: modelContext });
+    }
   }
   try {
     Object.defineProperty(Navigator.prototype, "modelContext", { get: () => modelContext, configurable: true });

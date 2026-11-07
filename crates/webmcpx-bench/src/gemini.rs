@@ -51,7 +51,22 @@ pub fn request_body(
 ) -> Value {
     let mut system = Vec::new();
     let mut steps: Vec<Value> = Vec::new();
+    // A function result must name its function (the API rejects an empty name): remember each call's.
+    let mut names: std::collections::HashMap<String, String> = std::collections::HashMap::new();
     for m in messages {
+        if let Message::Assistant {
+            raw, tool_calls, ..
+        } = m
+        {
+            for step in raw.iter().filter(|s| s["type"] == "function_call") {
+                if let (Some(id), Some(name)) = (step["id"].as_str(), step["name"].as_str()) {
+                    names.insert(id.to_owned(), name.to_owned());
+                }
+            }
+            for c in tool_calls {
+                names.insert(c.id.clone(), c.function.name.clone());
+            }
+        }
         match m {
             Message::System { content } => system.push(content.as_str()),
             Message::User { content } => {
@@ -78,7 +93,8 @@ pub fn request_body(
                 tool_call_id,
                 content,
             } => steps.push(json!({
-                "type": "function_result", "call_id": tool_call_id, "result": content
+                "type": "function_result", "call_id": tool_call_id,
+                "name": names.get(tool_call_id).map_or("", String::as_str), "result": content
             })),
         }
     }
@@ -231,6 +247,7 @@ mod tests {
             },
             {
               "call_id": "f1",
+              "name": "search_page",
               "result": "a",
               "type": "function_result"
             },

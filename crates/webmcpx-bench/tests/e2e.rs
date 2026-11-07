@@ -935,6 +935,34 @@ async fn a_frame_tool_named_like_the_pages_is_still_checked() {
 }
 
 #[tokio::test]
+async fn a_page_that_checks_for_its_own_model_context_property_still_registers() {
+    use axum::response::Html;
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::{Scanner, Verdict};
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    // Like Shopify storefronts (which broke when the host moved to Document.prototype): register only
+    // when document has modelContext as its own property.
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        get(|| std::future::ready(Html(
+            r#"<!doctype html><title>Shop</title><script>
+              if (Object.prototype.hasOwnProperty.call(document, "modelContext"))
+                document.modelContext.registerTool({ name: "search_catalog", description: "Search the catalog.", inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true }, execute: () => "" });
+            </script>"#,
+        ))),
+    ))
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    assert_eq!(report.verdict, Verdict::Ready, "{:?}", report.diagnostics);
+}
+
+#[tokio::test]
 async fn a_stalled_or_endless_favicon_never_costs_the_report() {
     use axum::body::Body;
     use axum::response::{Html, Response};
