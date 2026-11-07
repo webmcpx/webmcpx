@@ -12,14 +12,24 @@
 		size?: 'md' | 'lg';
 		/** A line under the input (e.g. suggestions), centered on the input itself, not on input + button. */
 		hint?: Snippet;
+		/** Focus the input on load, so visitors can type their site right away (the hero form). */
+		focusOnLoad?: boolean;
 	}
 
-	let { fromQuery = false, size = 'lg', hint }: Props = $props();
+	let { fromQuery = false, size = 'lg', hint, focusOnLoad = false }: Props = $props();
 	const uid = $props.id();
+	let input: HTMLInputElement | undefined = $state();
 
 	onMount(() => {
 		const shared = fromQuery ? new URLSearchParams(location.search).get('scan') : null;
 		if (shared) scanner.run(shared);
+		// Only at the top of the page, when nothing else has focus, and with a mouse or trackpad: on touch
+		// screens, focusing would pop the keyboard over the page before the visitor asked for it.
+		const atTop = !location.hash && scrollY < 100;
+		const idle = document.activeElement === document.body || document.activeElement === null;
+		if (focusOnLoad && !shared && atTop && idle && matchMedia('(pointer: fine)').matches) {
+			input?.focus({ preventScroll: true });
+		}
 	});
 
 	function onsubmit(e: SubmitEvent) {
@@ -42,6 +52,7 @@
 >
 	<label for="{uid}-url" class="sr-only">Your site's address</label>
 	<input
+		bind:this={input}
 		id="{uid}-url"
 		name="scan"
 		bind:value={scanner.input}

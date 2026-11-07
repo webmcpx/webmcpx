@@ -45,7 +45,7 @@
 				</p>
 			</Reveal>
 			<Reveal delay={180} class="mt-10">
-				<ScanForm fromQuery>
+				<ScanForm fromQuery focusOnLoad>
 					{#snippet hint()}
 						<p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink-3">
 							Try
