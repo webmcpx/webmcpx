@@ -50,7 +50,7 @@
 		"vitest": "5.1.0"
 	},
 	"description": "Landing page for webmcpx and its benchmark.",
-	"license": "MIT OR Apache-2.0",
+	"license": "MIT",
 	"dependencies": {
 		"webmcpx": "file:../packages/webmcpx"
 	}

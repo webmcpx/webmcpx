@@ -14,7 +14,7 @@
 <footer
 	class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-sm text-ink-3"
 >
-	<p>MIT OR Apache-2.0 · an independent community project</p>
+	<p>MIT license · an independent community project</p>
 	<nav aria-label="Footer">
 		<ul class="flex flex-wrap gap-x-5 gap-y-1">
 			{#each LINKS as l (l.href)}

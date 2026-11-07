@@ -338,7 +338,7 @@
 	id="trademark"
 	kicker="08 · Trademarks"
 	title="Use the name freely. Don’t look official."
-	lead="The code is MIT or Apache-2.0; the name and the marks are not covered by that license. The full policy is in TRADEMARK.md."
+	lead="The code is MIT licensed; the name and the marks are not covered by that license. The full policy is in TRADEMARK.md."
 >
 	<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
 		<Card padding="lg">

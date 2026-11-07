@@ -1,6 +1,6 @@
 # webmcpx trademark policy
 
-The webmcpx code is licensed under MIT OR Apache-2.0. Those licenses cover the code only: they grant no
+The webmcpx code is licensed under the MIT License. That license covers the code only: it grants no
 rights to the name **webmcpx** or to its logos (the Junction, the Card and the Page with slot, in
 `site/static/brand-assets/`). This policy says how you can use them. It is short on purpose, and modeled on
 the Rust and Python trademark policies.

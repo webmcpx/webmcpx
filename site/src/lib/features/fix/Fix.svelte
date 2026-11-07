@@ -48,6 +48,6 @@
 		{/each}
 	</ul>
 	<p class="mt-8 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">
-		~2.7 KB on load · Rust + WebAssembly · MIT or Apache-2.0
+		~2.7 KB on load · Rust + WebAssembly · MIT license
 	</p>
 </Section>

@@ -84,4 +84,4 @@ add WebMCP tools to your app and lint them.
 Pre-1.0, tracking the WebMCP Draft Community Group Report of 2026-11-02. Community home:
 [webmcp.zone](https://webmcp.zone). Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Licensed under MIT OR Apache-2.0. The name and logos are covered by [TRADEMARK.md](TRADEMARK.md).
+Licensed under the [MIT License](LICENSE). The name and logos are covered by [TRADEMARK.md](TRADEMARK.md).

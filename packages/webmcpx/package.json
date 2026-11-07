@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Standard WebMCP tools for any website: one script tag, zero config.",
   "type": "module",
-  "license": "MIT OR Apache-2.0",
+  "license": "MIT",
   "homepage": "https://webmcp.zone",
   "repository": { "type": "git", "url": "git+https://github.com/webmcpx/webmcpx.git", "directory": "packages/webmcpx" },
   "keywords": ["webmcp", "mcp", "ai-agents", "model-context", "wasm"],
