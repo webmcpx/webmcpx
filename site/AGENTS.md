@@ -82,7 +82,9 @@ tests/                       Playwright e2e against the prerendered build
 
 - `lib/content/bench/<model>.json` (one per model) is copied from `bench/results/latest.json` by `just bench`;
   a model switcher picks the run (`lib/content/models.ts`: cheap and frontier per provider, provider logos
-  in `logos.ts`), and the site and detail tabs stay put across models. Never edit a results file by hand
+  in `logos.ts`), and the site and detail tabs stay put across models. Only the selected model renders; without
+  JavaScript, each model has its own prerendered page (`routes/benchmark/[model]`), linked from the
+  section. Every published model is shown, even with no showcased question. Never edit a results file by hand
   and never publish numbers that did not come from a run. Each run records where every task ran and what it
   asked (`tasks`, schema 3); the page groups results per site from that (`features/benchmark/sites.ts`),
   never from today's `bench/tasks`. Display names live in `lib/content/benchSites.ts`. The summary is

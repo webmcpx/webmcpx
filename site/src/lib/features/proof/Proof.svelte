@@ -19,6 +19,7 @@
 	import Section from '#lib/components/ui/Section.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import Tabs from '#lib/components/ui/Tabs.svelte';
+	import { resolve } from '$app/paths';
 	import { modelLook } from '#lib/content/models.ts';
 	import { REPO } from '#lib/content/site.ts';
 	import type { Highlighted } from '#lib/content/snippets.ts';
@@ -41,10 +42,13 @@
 	interface Props {
 		/** One run per model, in switcher order. */
 		runs: ModelRun[];
+		/** Every published model, linked to its own page for readers without JavaScript (default: `runs`). */
+		models?: string[];
 		reproduce: Highlighted;
 	}
 
-	let { runs, reproduce }: Props = $props();
+	let { runs, models: published, reproduce }: Props = $props();
+	const pages = $derived((published ?? runs.map((r) => r.results.model)).map(modelLook));
 
 	const models = $derived(
 		runs.map((run) => ({ ...run, ...modelLook(run.results.model), id: run.results.model, label: '' }))
@@ -138,6 +142,23 @@
 	title="Same agent. Same question."
 	lead="One agent reads, clicks and fills using page snapshots; the other calls the site's WebMCP tools. Pick a model; biggest savings first."
 >
+	{#if pages.length > 1}
+		<!-- Without JavaScript the switcher cannot switch: each model has its own prerendered page. -->
+		<nav aria-label="Benchmark by model" class="no-js-only mb-8">
+			<p class="font-mono text-[11px] tracking-widest text-ink-3 uppercase">Models</p>
+			<ul class="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+				{#each pages as p (p.id)}
+					<li>
+						<a
+							href={resolve('/benchmark/[model]', { model: p.id })}
+							class="font-medium underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
+							>{p.name}</a
+						>
+					</li>
+				{/each}
+			</ul>
+		</nav>
+	{/if}
 	{#if models.length}
 		<Tabs
 			items={models}
@@ -178,6 +199,12 @@
 		>
 		are public, or run it yourself with <code class="font-mono text-ink">just bench</code>.
 	</p>
+	{#if !sites.length}
+		<Card padding="lg" shadow="none" class="border-dashed">
+			<p class="font-display font-bold">No question met the bar on {results.model}.</p>
+			<p class="mt-1 text-sm text-ink-2">Every question and both arms are in the full results above.</p>
+		</Card>
+	{/if}
 	<Tabs
 		{items}
 		bind:value={siteId}

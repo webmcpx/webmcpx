@@ -38,7 +38,7 @@ async function mockScan(page: Page, body: object = REPORT, status = 200) {
 test('no axe violations', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await mockScan(page);
-	for (const path of ['/', '/brand']) {
+	for (const path of ['/', '/brand', '/benchmark/gpt-6.1-sol/']) {
 		await page.goto(path);
 		if (path === '/') {
 			// Include the scan result card in the audit.
@@ -82,6 +82,23 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	await expect(tools.getByText('read_skill', { exact: true })).toBeVisible();
 	await expect(tools.getByRole('button')).toHaveCount(0);
 	await expect(page.getByText(/Cloudflare Workers KV/).first()).toBeVisible();
+	await page.close();
+});
+
+test('without JavaScript, every model is a link to its own prerendered benchmark page', async ({
+	browser
+}) => {
+	const page = await browser.newPage({ javaScriptEnabled: false });
+	await page.goto('/');
+	const nav = page.getByRole('navigation', { name: 'Benchmark by model' });
+	await expect(nav.getByRole('link')).toHaveCount(await nav.getByRole('listitem').count());
+	await nav.getByRole('link', { name: 'GPT-6.1 Sol' }).click();
+	await expect(page).toHaveURL(/\/benchmark\/gpt-6\.1-sol\/$/);
+	await expect(page.getByText(/^gpt-6\.1-sol, reasoning medium/).first()).toBeVisible();
+	await expect(page.getByRole('link', { name: 'All results' })).toHaveAttribute(
+		'href',
+		/bench\/gpt-6\.1-sol\.json$/
+	);
 	await page.close();
 });
 
@@ -309,15 +326,15 @@ test('every page carries the trademark notices', async ({ page }) => {
 	await expect(page.getByText(/not affiliated with or endorsed by LF Projects/)).toBeVisible();
 });
 
-test('Why WebMCP ranks seven sourced reasons and states the draft status', async ({ page }) => {
+test('Why WebMCP ranks eight sourced reasons and states the draft status', async ({ page }) => {
 	await page.goto('/#why');
 	const why = page.locator('#why');
-	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(7);
+	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(8);
 	await expect(
 		why.getByText(/up to \d+(\.\d)?× fewer tokens on \S+ in our benchmark \(best case\)/)
 	).toBeVisible();
 	// Every reason names where its claim comes from.
-	await expect(why.getByText('Sources', { exact: true })).toHaveCount(7);
+	await expect(why.getByText('Sources', { exact: true })).toHaveCount(8);
 	await expect(why.getByText(/Community Group draft .* not a W3C standard/)).toBeVisible();
 });
 

@@ -9,7 +9,7 @@ export interface Source {
 }
 
 export interface Reason {
-	id: 'finish' | 'tokens' | 'speed' | 'backend' | 'loop' | 'control' | 'small';
+	id: 'finish' | 'tokens' | 'speed' | 'backend' | 'loop' | 'state' | 'control' | 'small';
 	title: string;
 	pain: string;
 	/** May contain `{best}` and `{bestSite}`, filled from the published benchmark. */
@@ -23,8 +23,8 @@ const MIND2WEB = { label: 'Online-Mind2Web, 2025', href: 'https://arxiv.org/abs/
 const WINDTUNNEL = { label: 'WindTunnel (nekuda)', href: 'https://webmcp.com/benchmark' };
 const OURS = { label: 'Our benchmark', href: '#proof' };
 
-/** The four that carry the section, then three that support it. */
-export const LEAD: Reason[] = [
+/** Strongest evidence first: the first four carry the section, the rest support it. */
+export const REASONS: Reason[] = [
 	{
 		id: 'finish',
 		title: 'Agents that finish the job',
@@ -62,10 +62,7 @@ export const LEAD: Reason[] = [
 			{ label: 'Shopify', href: 'https://shopify.dev/changelog/webmcp-liquid-hydrogen' },
 			{ label: 'Cloudflare', href: 'https://blog.cloudflare.com/webmcp/' }
 		]
-	}
-];
-
-export const SUPPORT: Reason[] = [
+	},
 	{
 		id: 'loop',
 		title: 'The user stays in the loop',
@@ -75,6 +72,13 @@ export const SUPPORT: Reason[] = [
 			SPEC,
 			{ label: 'Shopify checkout', href: 'https://shopify.dev/changelog/webmcp-support-for-checkout' }
 		]
+	},
+	{
+		id: 'state',
+		title: 'Same cart, same form',
+		pain: 'A backend API can’t see the cart, form or selection open in the user’s tab.',
+		gain: 'Tools act on the state the user sees, so the page updates as the agent works.',
+		sources: [{ label: 'Shopify', href: 'https://shopify.dev/changelog/webmcp-liquid-hydrogen' }]
 	},
 	{
 		id: 'control',
