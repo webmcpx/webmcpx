@@ -324,8 +324,8 @@ const de: Messages = {
 	},
 
 	fix: {
-		title: 'Eine Zeile. Agentenfähig.',
-		lead: 'Fügen Sie sie vor {tag} ein. Wo WebMCP fehlt, bewirkt sie nichts.',
+		title: 'Zwei Schritte. Agentenfähig.',
+		lead: 'Schritt 1 bringt Tools auf deine Website. Schritt 2 lässt deinen Agenten sie aufrufen.',
 		alternatives: { npm: 'npm', agent: 'Ihren Coding-Agenten' },
 		gives: {
 			search_page: 'findet die Textstelle',
@@ -333,13 +333,17 @@ const de: Messages = {
 			get_page_context: 'weiß, wo es ist'
 		},
 		facts: '~3,2 KB geladen · Rust + WebAssembly · MIT-Lizenz',
-		see: {
-			title: 'In jedem Agenten sehen, schon heute',
-			lead: 'Gib deinem Coding-Agenten die WebMCP-Tools jeder Seite, die er öffnet. Kein Browser-Flag nötig: Sein Browser bekommt das W3C-Polyfill, bevor die Seite lädt, also laufen auch die Tools deiner Website.',
-			check: 'Prüf deine eigene Website, auch auf localhost:',
-			native: 'Eingebaut: Der Browser der ChatGPT-Desktop-App und Codex rufen WebMCP-Tools auf ({docs}).',
-			docs: 'OpenAI-Doku'
-		}
+		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		steps: {
+			site: { title: 'Auf deiner Website', lead: 'Vor {tag} einfügen. Wo WebMCP fehlt, tut es nichts.' },
+			agent: {
+				title: 'In deinem Agenten',
+				lead: 'Dein Agent bekommt die WebMCP-Tools jeder Seite, die er öffnet, in jedem Chromium und ohne Browser-Flag: Das W3C-Polyfill lädt vor der Seite.',
+				skip: 'Du nutzt die ChatGPT-Desktop-App oder die Codex-App? Überspring diesen Schritt: Sie rufen WebMCP-Tools nativ auf ({docs}).'
+			}
+		},
+		check: 'Sieh dir die Tools deiner Website an, auch auf localhost:',
+		docs: 'OpenAI-Doku'
 	},
 
 	own: {

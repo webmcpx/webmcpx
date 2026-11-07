@@ -314,8 +314,8 @@ const id: Messages = {
 	},
 
 	fix: {
-		title: 'Satu baris. Siap agent.',
-		lead: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, baris ini tidak melakukan apa-apa.',
+		title: 'Dua langkah. Siap agent.',
+		lead: 'Langkah 1 memasang tool di situs Anda. Langkah 2 membuat agen Anda bisa memanggilnya.',
 		alternatives: { npm: 'npm', agent: 'coding agent Anda' },
 		gives: {
 			search_page: 'menemukan bagian teks',
@@ -323,13 +323,20 @@ const id: Messages = {
 			get_page_context: 'mengenali posisinya'
 		},
 		facts: '~3,2 KB dimuat · Rust + WebAssembly · lisensi MIT',
-		see: {
-			title: 'Lihat hasilnya di agen mana pun, sekarang',
-			lead: 'Beri agen coding Anda tool WebMCP dari setiap halaman yang dibukanya. Tanpa flag browser: browsernya mendapat polyfill W3C sebelum halaman dimuat, jadi tool milik situs Anda juga jalan.',
-			check: 'Cek situs Anda sendiri, termasuk localhost:',
-			native: 'Bawaan: browser di aplikasi desktop ChatGPT dan Codex memanggil tool WebMCP ({docs}).',
-			docs: 'dokumentasi OpenAI'
-		}
+		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		steps: {
+			site: {
+				title: 'Di situs Anda',
+				lead: 'Tempel sebelum {tag}. Di tempat tanpa WebMCP, ia tidak melakukan apa-apa.'
+			},
+			agent: {
+				title: 'Di agen Anda',
+				lead: 'Agen Anda mendapat tool WebMCP dari setiap halaman yang dibukanya, di Chromium mana pun dan tanpa flag browser: polyfill W3C dimuat sebelum halaman.',
+				skip: 'Pakai aplikasi desktop ChatGPT atau aplikasi Codex? Lewati langkah ini: keduanya memanggil tool WebMCP secara native ({docs}).'
+			}
+		},
+		check: 'Lihat tool situs Anda, termasuk di localhost:',
+		docs: 'dokumentasi OpenAI'
 	},
 
 	own: {

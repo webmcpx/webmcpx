@@ -325,8 +325,8 @@ const fr: Messages = {
 	},
 
 	fix: {
-		title: 'Une ligne. Prêt pour les agents.',
-		lead: 'Collez-la avant {tag}. Là où WebMCP est absent, elle ne fait rien.',
+		title: 'Deux étapes. Prêt pour les agents.',
+		lead: 'L’étape 1 met des outils sur votre site. L’étape 2 permet à votre agent de les appeler.',
 		alternatives: { npm: 'npm', agent: 'votre agent de code' },
 		gives: {
 			search_page: 'trouve le passage',
@@ -334,14 +334,17 @@ const fr: Messages = {
 			get_page_context: 'sait où il se trouve'
 		},
 		facts: '~3,2 Ko chargés · Rust + WebAssembly · licence MIT',
-		see: {
-			title: 'Voyez-le marcher dans n’importe quel agent, dès aujourd’hui',
-			lead: 'Donnez à votre agent de code les outils WebMCP de chaque page qu’il ouvre. Aucun flag à activer : son navigateur reçoit le polyfill du W3C avant le chargement de la page, donc les outils de votre site marchent aussi.',
-			check: 'Vérifiez votre propre site, localhost compris :',
-			native:
-				'En natif : le navigateur de l’app de bureau ChatGPT et Codex appellent les outils WebMCP ({docs}).',
-			docs: 'docs d’OpenAI'
-		}
+		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		steps: {
+			site: { title: 'Sur votre site', lead: 'Collez-le avant {tag}. Là où WebMCP manque, il ne fait rien.' },
+			agent: {
+				title: 'Dans votre agent',
+				lead: 'Votre agent reçoit les outils WebMCP de chaque page qu’il ouvre, dans n’importe quel Chromium et sans flag : le polyfill du W3C se charge avant la page.',
+				skip: 'Vous utilisez l’app de bureau ChatGPT ou l’app Codex ? Sautez cette étape : elles appellent les outils WebMCP nativement ({docs}).'
+			}
+		},
+		check: 'Voyez les outils de votre site, localhost compris :',
+		docs: 'docs d’OpenAI'
 	},
 
 	own: {

@@ -312,8 +312,8 @@ const zh: Messages = {
 	},
 
 	fix: {
-		title: '一行代码，智能体就绪。',
-		lead: '粘贴到 {tag} 之前。浏览器不支持 WebMCP 时，它什么也不做。',
+		title: '两步，智能体就绪。',
+		lead: '第 1 步在你的网站上提供工具，第 2 步让你的智能体调用它们。',
 		alternatives: { npm: 'npm', agent: 'AI 编程智能体' },
 		gives: {
 			search_page: '找到相关段落',
@@ -321,13 +321,17 @@ const zh: Messages = {
 			get_page_context: '知道自己在哪'
 		},
 		facts: '加载约 3.2 KB · Rust + WebAssembly · MIT 许可证',
-		see: {
-			title: '在任何智能体里都能用，就在今天',
-			lead: '让你的编程智能体拿到它打开的每个页面的 WebMCP 工具。无需开启浏览器 flag：页面加载前，它的浏览器就会注入 W3C polyfill，所以你网站自己的工具也能用。',
-			check: '检查你自己的网站，localhost 也行：',
-			native: '原生支持：ChatGPT 桌面应用的浏览器和 Codex 会调用 WebMCP 工具（{docs}）。',
-			docs: 'OpenAI 文档'
-		}
+		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		steps: {
+			site: { title: '在你的网站上', lead: '粘贴到 {tag} 之前。没有 WebMCP 的地方，它什么也不做。' },
+			agent: {
+				title: '在你的智能体里',
+				lead: '你的智能体能拿到它打开的每个页面的 WebMCP 工具，任何 Chromium 都行，无需浏览器 flag：W3C polyfill 会先于页面加载。',
+				skip: '用的是 ChatGPT 桌面应用或 Codex 应用？跳过这一步：它们原生调用 WebMCP 工具（{docs}）。'
+			}
+		},
+		check: '查看你网站的工具，localhost 也行：',
+		docs: 'OpenAI 文档'
 	},
 
 	own: {

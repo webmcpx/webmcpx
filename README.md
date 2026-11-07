@@ -5,8 +5,8 @@
   <img src="site/static/brand-assets/lockup/lockup-ink.svg" width="360" alt="webmcpx">
 </picture>
 
-**Make your site agent-ready.** One script tag gives AI agents real tools on your pages,
-instead of making them read and click their way through.
+**Make your site agent-ready.** One script tag on your site, one line in your agent: AI agents call
+real tools on your pages instead of reading and clicking their way through.
 
 [![npm](https://img.shields.io/npm/v/webmcpx.svg?label=npm&color=121210)](https://www.npmjs.com/package/webmcpx)
 [![crates.io](https://img.shields.io/crates/v/webmcpx.svg?color=121210)](https://crates.io/crates/webmcpx)
@@ -17,16 +17,19 @@ instead of making them read and click their way through.
 
 </div>
 
+**Step 1, on your site.** Paste this before `</body>`:
+
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
 ```
 
-That's it. Your page now registers `search_page`, `fetch_as_markdown` and `get_page_context` with
+Your page now registers `search_page`, `fetch_as_markdown` and `get_page_context` with
 [WebMCP](https://webmachinelearning.github.io/webmcp/) (`document.modelContext.registerTool()`), so an agent
 in the browser calls a function instead of guessing at buttons. Where WebMCP is missing, the script does
 nothing.
 
-**See it work in any agent, today.** Give your coding agent the WebMCP tools of every page it opens:
+**Step 2, in your agent.** Give your agent the WebMCP tools of every page it opens (the ChatGPT desktop
+app and the Codex app skip this step: they call WebMCP tools natively):
 
 ```sh
 claude mcp add webmcpx -- npx -y webmcpx mcp     # Codex: codex mcp add webmcpx -- npx -y webmcpx mcp
@@ -61,10 +64,10 @@ the script tag adds where the browser doesn't have it yet. With `toolautosubmit`
 `event.agentInvoked` and can answer with `event.respondWith(...)`.
 
 ```html
-<form toolname="search_flights" tooldescription="Search flights by route and date." action="/search">
-  <input name="from" required toolparamdescription="Departure airport, e.g. GRU">
-  <input name="to" required toolparamdescription="Arrival airport, e.g. LIS">
-  <input name="date" type="date" required>
+<form toolname="add_to_cart" tooldescription="Add a product to the cart by SKU." action="/cart" method="post" toolautosubmit>
+  <input name="sku" required toolparamdescription="Product SKU, e.g. MUG-01">
+  <input name="qty" type="number" min="1" toolparamdescription="How many (default 1)">
+  <button>Add to cart</button>
 </form>
 ```
 

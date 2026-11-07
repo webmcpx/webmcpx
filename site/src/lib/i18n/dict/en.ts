@@ -418,10 +418,9 @@ const en = {
 	},
 
 	fix: {
-		// "One line. Agent-ready.": two short beats; reuse your word for "agent-ready" (see hero.title).
-		title: 'One line. Agent-ready.',
-		// {tag} is `</body>` (code): keep it.
-		lead: 'Paste it before {tag}. Where WebMCP is missing, it does nothing.',
+		// Two short beats; reuse your word for "agent-ready" (see hero.title).
+		title: 'Two steps. Agent-ready.',
+		lead: 'Step 1 puts tools on your site. Step 2 lets your agent call them.',
 		alternatives: { npm: 'npm', agent: 'your coding agent' },
 		// What each standard tool does, under its name: max 24, verb first.
 		gives: {
@@ -431,15 +430,20 @@ const en = {
 		},
 		// Small capitals, max 50.
 		facts: '~3.2 KB on load · Rust + WebAssembly · MIT license',
-		// "See it work": where to watch the tools being called. {docs}, {flag} and {meta} are links or code;
-		// ChatGPT, Codex, Chrome, DevTools, Application and WebMCP are product and panel names: keep them.
-		see: {
-			title: 'See it work in any agent, today',
-			lead: 'Give your coding agent the WebMCP tools of every page it opens. No browser flag: its browser gets the W3C polyfill before the page loads, so your site’s own tools work too.',
-			check: 'Check your own site, localhost included:',
-			native: 'Built in: the ChatGPT desktop app’s browser and Codex call WebMCP tools ({docs}).',
-			docs: 'OpenAI docs'
-		}
+		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		steps: {
+			site: {
+				title: 'On your site',
+				lead: 'Paste it before {tag}. Where WebMCP is missing, it does nothing.'
+			},
+			agent: {
+				title: 'In your agent',
+				lead: 'Your agent gets the WebMCP tools of every page it opens, in any Chromium and with no browser flag: the W3C polyfill loads before the page.',
+				skip: 'Using the ChatGPT desktop app or the Codex app? Skip this step: they call WebMCP tools natively ({docs}).'
+			}
+		},
+		check: 'See your site’s tools, localhost included:',
+		docs: 'OpenAI docs'
 	},
 
 	own: {

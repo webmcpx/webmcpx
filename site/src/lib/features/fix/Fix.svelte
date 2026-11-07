@@ -1,6 +1,7 @@
 <!--
-	The fix: how to add it (tabs: script tag, npm, coding agent), how to see it work in an agent (tabs,
-	one per client), and what it gives agents. Tabs list the most used first; the first one opens.
+	The fix, in two steps: 1. on your site (tabs: script tag, npm, coding agent; then see your tools),
+	2. in your agent (skipped by agents with WebMCP built in; tabs, one per client). Then what it gives
+	agents. Tabs list the most used first; the first one opens.
 -->
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
@@ -40,7 +41,7 @@
 		{ id: 'vscode', label: 'VS Code', icon: siGithubcopilot, snippet: code.mcpVscode, title: 'terminal' },
 		{ id: 'cursor', label: 'Cursor', icon: siCursor, snippet: code.mcpCursor, title: '.cursor/mcp.json' },
 		{ id: 'claude', label: 'Claude Code', icon: siClaude, snippet: code.agentMcp, title: 'terminal' },
-		{ id: 'codex', label: 'Codex', icon: SquareTerminal, snippet: code.mcpCodex, title: 'terminal' },
+		{ id: 'codex', label: 'Codex CLI', icon: SquareTerminal, snippet: code.mcpCodex, title: 'terminal' },
 		{
 			id: 'windsurf',
 			label: 'Windsurf',
@@ -51,25 +52,41 @@
 	]);
 </script>
 
-<Section id="fix" title={m.title} lead={fmt(m.lead, { tag: '</body>' })} center>
-	<Reveal class="mx-auto max-w-3xl text-left">
-		<CodeTabs label={m.title} tabs={install} />
-		<div class="mt-10 rounded-card border-2 border-dashed border-ink/40 p-5 text-sm text-ink-2 sm:p-6">
-			<p class="font-display text-base font-bold text-ink">{m.see.title}</p>
-			<p class="mt-1.5 mb-4 text-pretty">{m.see.lead}</p>
-			<CodeTabs label={m.see.title} tabs={agents} />
-			<p class="mt-6 font-medium">{m.see.check}</p>
-			<CodeBlock snippet={code.checkTools} title="terminal" class="mt-2" />
-			<p class="mt-4 text-pretty">
-				<Rich text={m.see.native}
-					>{#snippet docs()}<a
-							class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4"
-							href={OPENAI_DOCS}>{m.see.docs}</a
-						>{/snippet}</Rich
-				>
-			</p>
-		</div>
-	</Reveal>
+<Section id="fix" title={m.title} lead={m.lead} center>
+	<ol class="mx-auto grid max-w-3xl gap-6 text-left">
+		{#each [{ n: 1, step: m.steps.site }, { n: 2, step: m.steps.agent }] as { n, step } (n)}
+			<li>
+				<Reveal delay={(n - 1) * 90} class="rounded-card border-2 border-ink bg-card p-5 shadow-hard sm:p-6">
+					<div class="flex items-center gap-3">
+						<span
+							class="grid size-9 shrink-0 place-items-center rounded-full border-2 border-ink bg-marker font-display text-lg font-bold"
+							aria-hidden="true">{n}</span
+						>
+						<h3 class="font-display text-xl font-bold">{step.title}</h3>
+					</div>
+					{#if n === 1}
+						<p class="mt-2 mb-4 text-sm text-pretty text-ink-2">
+							{fmt(m.steps.site.lead, { tag: '</body>' })}
+						</p>
+						<CodeTabs label={step.title} tabs={install} />
+						<p class="mt-5 text-sm font-medium text-ink-2">{m.check}</p>
+						<CodeBlock snippet={code.checkTools} title="terminal" class="mt-2" />
+					{:else}
+						<p class="mt-2 text-sm text-pretty text-ink-2">{m.steps.agent.lead}</p>
+						<p class="mt-3 mb-4 rounded-xl bg-paper-2 px-3.5 py-2.5 text-sm text-pretty text-ink">
+							<Rich text={m.steps.agent.skip}
+								>{#snippet docs()}<a
+										class="font-medium underline decoration-marker decoration-2 underline-offset-4"
+										href={OPENAI_DOCS}>{m.docs}</a
+									>{/snippet}</Rich
+							>
+						</p>
+						<CodeTabs label={step.title} tabs={agents} />
+					{/if}
+				</Reveal>
+			</li>
+		{/each}
+	</ol>
 	<ul class="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
 		{#each GIVES as tool, i (tool)}
 			<li>

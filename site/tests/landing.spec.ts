@@ -74,7 +74,7 @@ test('the benchmark numbers are in the prerendered HTML', async ({ request }) =>
 test('content is visible without JavaScript', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'One line. Agent-ready.' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Two steps. Agent-ready.' })).toBeVisible();
 	// Every tab panel is in the HTML: the best case first, then every other site, tools included.
 	await expect(page.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	const tools = page.getByRole('region', { name: 'WebMCP tools on Notion' });
@@ -516,7 +516,7 @@ test('your own tools: one tool, written five ways, most used first, as keyboard-
 	await tabs.first().focus();
 	await page.keyboard.press('ArrowLeft');
 	await expect(tabs.last()).toHaveAttribute('aria-selected', 'true');
-	await expect(own.getByRole('tabpanel')).toContainText('toolname="search_flights"');
+	await expect(own.getByRole('tabpanel')).toContainText('toolname="add_to_cart"');
 	// The check command has its own copy button.
 	const terminal = own.getByRole('figure').filter({ hasText: 'npx webmcpx tools localhost:3000' });
 	await expect(terminal.getByRole('button', { name: /Copy/ })).toBeVisible();
@@ -534,14 +534,14 @@ test('install and agent setup are tabs with logos, the most used open, each with
 }) => {
 	await page.goto('/#fix');
 	const fix = page.locator('#fix');
-	const install = fix.getByRole('tablist', { name: 'One line. Agent-ready.' }).getByRole('tab');
+	const install = fix.getByRole('tablist', { name: 'On your site' }).getByRole('tab');
 	await expect(install).toHaveText(['HTML', 'npm', 'Your coding agent']);
 	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
 	await install.nth(2).click();
 	await expect(fix.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
 
-	const agents = fix.getByRole('tablist', { name: 'See it work in any agent, today' }).getByRole('tab');
-	await expect(agents).toHaveText(['VS Code', 'Cursor', 'Claude Code', 'Codex', 'Windsurf']);
+	const agents = fix.getByRole('tablist', { name: 'In your agent' }).getByRole('tab');
+	await expect(agents).toHaveText(['VS Code', 'Cursor', 'Claude Code', 'Codex CLI', 'Windsurf']);
 	await expect(agents.locator('svg')).toHaveCount(5);
 	await agents.nth(2).click();
 	const panel = fix.locator('[role=tabpanel]:not([data-inactive])').nth(1);

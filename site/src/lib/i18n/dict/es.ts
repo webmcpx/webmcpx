@@ -322,8 +322,8 @@ const es: Messages = {
 	},
 
 	fix: {
-		title: 'Una línea. Listo para agentes.',
-		lead: 'Pégala antes de {tag}. Donde no hay WebMCP, no hace nada.',
+		title: 'Dos pasos. Listo para agentes.',
+		lead: 'El paso 1 pone herramientas en tu sitio. El paso 2 deja que tu agente las llame.',
 		alternatives: { npm: 'npm', agent: 'tu agente de código' },
 		gives: {
 			search_page: 'encuentra el pasaje',
@@ -331,14 +331,17 @@ const es: Messages = {
 			get_page_context: 'sabe dónde está'
 		},
 		facts: '~3,2 KB al cargar · Rust + WebAssembly · MIT',
-		see: {
-			title: 'Míralo funcionar en cualquier agente, ya',
-			lead: 'Dale a tu agente de código las herramientas WebMCP de cada página que abra. Sin flags en el navegador: recibe el polyfill del W3C antes de que cargue la página, así que las herramientas de tu sitio también funcionan.',
-			check: 'Revisa tu propio sitio, también en localhost:',
-			native:
-				'De serie: el navegador de la app de escritorio de ChatGPT y Codex llaman a herramientas WebMCP ({docs}).',
-			docs: 'docs de OpenAI'
-		}
+		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		steps: {
+			site: { title: 'En tu sitio', lead: 'Pégalo antes de {tag}. Donde no hay WebMCP, no hace nada.' },
+			agent: {
+				title: 'En tu agente',
+				lead: 'Tu agente recibe las herramientas WebMCP de cada página que abre, en cualquier Chromium y sin flags en el navegador: el polyfill del W3C carga antes que la página.',
+				skip: '¿Usas la app de escritorio de ChatGPT o la app de Codex? Sáltate este paso: llaman a herramientas WebMCP de forma nativa ({docs}).'
+			}
+		},
+		check: 'Mira las herramientas de tu sitio, también en localhost:',
+		docs: 'docs de OpenAI'
 	},
 
 	own: {

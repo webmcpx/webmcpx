@@ -112,11 +112,10 @@ tool(${DEFINITION});`
 	},
 	form: {
 		lang: 'html',
-		code: `<form toolname="search_flights" tooldescription="Search flights by route and date." action="/search">
-  <input name="from" required toolparamdescription="Departure airport, e.g. GRU">
-  <input name="to" required toolparamdescription="Arrival airport, e.g. LIS">
-  <input name="date" type="date" required>
-  <button>Search</button>
+		code: `<form toolname="add_to_cart" tooldescription="Add a product to the cart by SKU." action="/cart" method="post" toolautosubmit>
+  <input name="sku" required toolparamdescription="Product SKU, e.g. MUG-01">
+  <input name="qty" type="number" min="1" toolparamdescription="How many (default 1)">
+  <button>Add to cart</button>
 </form>`
 	}
 } satisfies Record<string, CodeSample>;

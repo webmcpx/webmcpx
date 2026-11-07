@@ -1,14 +1,17 @@
 # webmcpx
 
-**Make your site agent-ready with one script tag.** webmcpx registers standard
+**Make your site agent-ready in two steps.** webmcpx registers standard
 [WebMCP](https://webmachinelearning.github.io/webmcp/) tools on any page, so AI agents in the browser
 call a function instead of reading and clicking through the page.
+
+**Step 1, on your site.** Paste this before `</body>`:
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
 ```
 
-**See it work in any agent, today.** Give your coding agent the WebMCP tools of every page it opens:
+**Step 2, in your agent.** Give your agent the WebMCP tools of every page it opens (the ChatGPT desktop
+app and the Codex app skip this step: they call WebMCP tools natively):
 
 ```sh
 claude mcp add webmcpx -- npx -y webmcpx mcp     # Codex: codex mcp add webmcpx -- npx -y webmcpx mcp
@@ -49,10 +52,10 @@ the script tag adds where the browser doesn't have it yet. With `toolautosubmit`
 `event.agentInvoked` and can answer with `event.respondWith(...)`.
 
 ```html
-<form toolname="search_flights" tooldescription="Search flights by route and date." action="/search">
-  <input name="from" required toolparamdescription="Departure airport, e.g. GRU">
-  <input name="to" required toolparamdescription="Arrival airport, e.g. LIS">
-  <input name="date" type="date" required>
+<form toolname="add_to_cart" tooldescription="Add a product to the cart by SKU." action="/cart" method="post" toolautosubmit>
+  <input name="sku" required toolparamdescription="Product SKU, e.g. MUG-01">
+  <input name="qty" type="number" min="1" toolparamdescription="How many (default 1)">
+  <button>Add to cart</button>
 </form>
 ```
 
