@@ -15,7 +15,7 @@
 - `crates/webmcpx-lint` — rules, one file each in `src/rules/`. `crates/webmcpx` — the CLI.
 - `packages/webmcpx` — npm loader: the public browser API. Owns the DOM and `registerTool()`.
 - `crates/webmcpx-bench` + `bench/` — benchmark: same agent and pages, with vs without WebMCP. See `bench/AGENTS.md`.
-  Run: `OPENAI_API_KEY=... just bench`.
+  Run: `OPENAI_API_KEY=... just bench`. Also the local server (`just serve`) and the scan API (`src/scan.rs`).
 - `site/` — landing (SvelteKit 3, Svelte 5 runes, Tailwind 4, static). Shows `site/src/lib/content/bench.json`. See `site/AGENTS.md`.
 
 ## Rules the tooling does not catch

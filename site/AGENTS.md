@@ -4,34 +4,45 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 
 ## Commands
 
-- `just site-dev`: dev server with hot reload. `just site-fmt`: format.
-- `just site`: everything CI runs: svelte-check, Prettier + ESLint, Vitest, build, then Playwright (axe in both
-  themes, 390 px layout, keyboard tabs, no-JS content, the playground) against the build.
-- `just serve`: the build plus the benchmark sites on http://127.0.0.1:4173. The style guide is at `/design`.
+- `just site-dev`: dev server with hot reload; `/api` is proxied to `just serve`. `just site-fmt`: format.
+- `just site`: everything CI runs: svelte-check, Prettier + ESLint, Vitest, build, then Playwright (axe,
+  390 px layout, no-JS content, the scan flow with a mocked API, the benchmark tabs) against the build.
+- `just serve`: the build, the benchmark sites and the scan API (`/api/scan?url=`, Rust) on
+  http://127.0.0.1:4173. The style guide is at `/design`.
+
+## Page narrative (keep this order; cut before adding)
+
+Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → proof (best live case, then
+averages, full table behind a disclosure) → the fix (one line) → what the community asked for → scan again.
+Few words per section; numbers over adjectives.
 
 ## Layout
 
 ```
 src/
-  app.css, app.html          Tailwind entry; theme + `data-js` set before first paint
+  app.css, app.html          Tailwind entry; `data-js` set before first paint (enables reveals)
   lib/styles/                tokens.css (design tokens), base.css, code.css; tokens.ts lists the colors
-  lib/components/ui/         primitives: Button, Badge, Card, CodeBlock, CopyButton, IconTile, Tabs, Section
-  lib/components/layout/     Header, Footer, Logo, ThemeToggle
-  lib/features/<section>/    one folder per page section; its logic in .ts with a *.spec.ts next to it
-  lib/content/               copy, links, code samples, issues, bench.json (data, no markup)
+  lib/components/ui/         primitives: Button, Stamp, Card, CodeBlock, CopyButton, Tabs, Section, BrandIcon
+  lib/components/layout/     Header, Footer, Logo
+  lib/features/<section>/    one folder per page section; logic in .ts with a *.spec.ts next to it
+                             (scan/ holds the API client and the shared scanner state)
+  lib/content/               copy, links, code samples, issues, verified sites, bench.json (data only)
   lib/motion/                Reveal (scroll-in) and its attachment
   lib/server/                build-time only (shiki); never imported by components
-  routes/                    +page.server.ts highlights code at build time; design/ is the style guide
+  routes/                    +page.server.ts highlights code and trims bench.json at build time;
+                             design/ is the style guide
 tests/                       Playwright e2e against the prerendered build
 ```
 
 ## Design system rules
 
-- Colors come only from the semantic tokens in `lib/styles/tokens.css` (`bg-surface`, `text-muted`,
-  `border-border`, `bg-accent`, ...). Tailwind's default palette is removed, so `bg-zinc-900` does not exist.
-  A new color: add the variable to both themes, map it in `@theme inline`, list it in `tokens.ts`; the token
-  test then checks it exists and, if it is text, add its pairs to `PAIRS` for the 4.5:1 contrast check.
-- Dark is the default theme; light must look as finished. Use `dark:` only when a token cannot express it.
+- Style: "paper and ink". Off-white paper, near-black ink, 2px outlines, short hard offset shadows, pill
+  buttons, one highlighter yellow (`marker`) used sparingly. Serious and editorial: sentence-case headlines in
+  Bricolage Grotesque, Geist for text, Geist Mono for small uppercase labels. No mascots or jokes.
+- Colors come only from the tokens in `lib/styles/tokens.css` (`bg-paper`, `text-ink-2`, `border-ink`,
+  `bg-marker`, ...). Tailwind's default palette is removed, so `bg-zinc-900` does not exist. A new color: add
+  the variable, map it in `@theme inline`, list it in `tokens.ts`, and add its text/background pairs to
+  `PAIRS` in `tokens.spec.ts` (4.5:1 contrast check). One theme only.
 - Variants live in a `tv()` recipe exported from the component's `<script module>` (see Button). Pass layout
   classes from outside through `class`; don't add a variant for a one-off.
 - Icons: `@lucide/svelte/icons/<name>` (one import per icon); brand logos: `simple-icons` via `BrandIcon`.
@@ -39,8 +50,7 @@ tests/                       Playwright e2e against the prerendered build
 - Motion: wrap blocks in `<Reveal>` (stagger with `delay`); transitions use `ease-out-expo`. Everything must
   respect `prefers-reduced-motion` (base.css has the global switch) and stay readable without JavaScript.
 - No count-up numbers: figures are prerendered text, so crawlers and agents read them.
-- Code samples live in `content/snippets.ts` and are highlighted at build time. Outputs shown on the page
-  (lint diagnostics, tool envelopes) must be copied from real runs.
+- Code samples live in `content/snippets.ts` and are highlighted at build time.
 
 ## Data and copy
 
@@ -48,6 +58,7 @@ tests/                       Playwright e2e against the prerendered build
   and never publish numbers that did not come from a run. Formatting lives in `features/benchmark/bench.ts`
   (the summary itself is computed in Rust, `crates/webmcpx-bench/src/report.rs`). Losses are shown, not hidden.
 - `lib/content/issues.ts`: every row must describe what the code does today.
+- `lib/content/sites.ts`: only sites the scanner verified, with the date; re-check before keeping one.
 
 ## Conventions
 
@@ -55,4 +66,4 @@ tests/                       Playwright e2e against the prerendered build
 - Components: PascalCase `.svelte`, typed `$props()` with an `interface Props`, snippets (not slots).
   Rune modules end in `.svelte.ts`.
 - Internal links go through `resolve()` (`content/site.ts`).
-- Must work at 390 px wide without horizontal scroll, in both themes, with keyboard only.
+- Must work at 390 px wide without horizontal scroll, and with keyboard only.
