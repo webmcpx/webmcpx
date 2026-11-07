@@ -12,7 +12,7 @@ WebMCP lets a page expose tools to AI agents via `document.modelContext.register
 If the site has none yet, add the drop-in. It registers `get_page_context`, `search_page` and `fetch_as_markdown`:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
 ```
 
 In a bundled app use `npm install webmcpx`, then call `register()` once on startup:

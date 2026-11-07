@@ -7,6 +7,9 @@
 **Make your site agent-ready.** Standard WebMCP tools in one script tag, a linter for your own tools,
 and a public benchmark that shows what changes.
 
+[![npm](https://img.shields.io/npm/v/webmcpx.svg?label=npm&color=121210)](https://www.npmjs.com/package/webmcpx)
+[![crates.io](https://img.shields.io/crates/v/webmcpx.svg?color=121210)](https://crates.io/crates/webmcpx)
+[![docs.rs](https://img.shields.io/docsrs/webmcpx-lint?label=docs.rs)](https://docs.rs/webmcpx-lint)
 [![CI](https://github.com/webmcpx/webmcpx/actions/workflows/ci.yml/badge.svg)](https://github.com/webmcpx/webmcpx/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-121210.svg)](LICENSE)
 [![WebMCP draft](https://img.shields.io/badge/WebMCP-draft%202026--11--02-fcd948.svg)](https://webmachinelearning.github.io/webmcp/)
@@ -20,7 +23,7 @@ and a public benchmark that shows what changes.
 
 [WebMCP](https://webmachinelearning.github.io/webmcp/) lets a web page hand AI agents typed tools with
 `document.modelContext.registerTool()`, so agents call a function instead of reading and clicking through
-the page. Hundreds of sites already register tools, and each one reinvents the same few, with its own
+the page. Thousands of sites already register tools, and each one reinvents the same few, with its own
 truncation, errors and safety hints. **webmcpx gives them one contract, checks it, and measures it.**
 
 > [!NOTE]
@@ -31,18 +34,20 @@ truncation, errors and safety hints. **webmcpx gives them one contract, checks i
 
 | | |
 |---|---|
-| **[Loader](packages/webmcpx)** | One `<script>` tag registers standard tools on any page: page context, search, Markdown, site search. |
-| **[Linter](crates/webmcpx)** | `webmcpx lint` checks your own `registerTool()` calls: names, descriptions, hidden text, schemas, annotations. |
+| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | One `<script>` tag registers standard tools on any page: page context, search, Markdown, site search. |
+| **[Linter](crates/webmcpx)** · [crates.io](https://crates.io/crates/webmcpx) | `webmcpx lint` checks your own `registerTool()` calls: names, descriptions, hidden text, schemas, annotations. |
 | **[Benchmark](bench)** | The same agent and question, with and without WebMCP, on live and local sites. Deterministic grading. |
 | **[Scanner](https://webmcpx.dev)** | Paste a URL and see which tools a site registers, what the linter thinks and what an agent would read. |
 
 ## Add standard tools to a page
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
 ```
 
-Or from npm:
+The `@0.1` keeps you on compatible updates; webmcpx is pre-1.0, so a minor release may change things.
+
+Or from npm, `npm i webmcpx`:
 
 ```js
 import { register } from "webmcpx";
@@ -69,7 +74,7 @@ With nothing to configure:
 - **Invisible-character stripping** in page text (webmcp#360).
 - **Works on today's browsers.** `document.modelContext` with a `navigator.modelContext` fallback, and a
   no-op where WebMCP is missing.
-- **About 2.7 KB brotli on page load.** The ~12 KB WebAssembly engine loads on the first tool call.
+- **About 2.8 KB brotli on page load.** The ~12 KB WebAssembly engine loads on the first tool call.
 
 ## Lint your tools
 
@@ -80,6 +85,10 @@ webmcpx lint --fix             # removes invisible characters
 webmcpx lint --format json     # stable schema for agents and CI; also sarif, github, concise
 webmcpx rules                  # every rule; `webmcpx rule <name>` explains one
 ```
+
+Prefer a library? The rules are in [`webmcpx-lint`](https://crates.io/crates/webmcpx-lint)
+([docs](https://docs.rs/webmcpx-lint)); the shared contract is [`webmcpx-core`](https://crates.io/crates/webmcpx-core)
+and the standard tools are [`webmcpx-std`](https://crates.io/crates/webmcpx-std).
 
 It finds `registerTool()` calls in JS/TS (and `*webmcp*.json` manifests), then checks:
 names (spec rules, length, duplicates), descriptions (missing, empty, too long), hidden text (zero-width,
@@ -106,17 +115,16 @@ See [bench/AGENTS.md](bench/AGENTS.md) for the rules every question follows.
 
 ## Repository
 
-```
-crates/webmcpx-core    the contract: name rules, limits, result envelope, error codes (no_std)
-crates/webmcpx-std     the standard tools, as pure functions (no_std)
-crates/webmcpx-wasm    those functions for the browser
-crates/webmcpx-lint    lint rules, one file each
-crates/webmcpx         the CLI
-crates/webmcpx-bench   benchmark harness, local server and the scan API
-packages/webmcpx       the npm loader: the public browser API
-site/                  webmcpx.dev (SvelteKit, prerendered)
-deploy/                production images and compose stack
-```
+| Path | What | Published as |
+|---|---|---|
+| `crates/webmcpx-core` | The contract: name rules, limits, result envelope, error codes (`no_std`) | [crates.io](https://crates.io/crates/webmcpx-core) |
+| `crates/webmcpx-std` | The standard tools, as pure functions (`no_std`) | [crates.io](https://crates.io/crates/webmcpx-std) |
+| `crates/webmcpx-lint` | Lint rules, one file each | [crates.io](https://crates.io/crates/webmcpx-lint) |
+| `crates/webmcpx` | The CLI | [crates.io](https://crates.io/crates/webmcpx) |
+| `crates/webmcpx-wasm` | The standard tools for the browser | inside the npm package |
+| `packages/webmcpx` | The npm loader: the public browser API | [npm](https://www.npmjs.com/package/webmcpx) |
+| `crates/webmcpx-bench` | Benchmark harness, local server and the scan API | not published |
+| `site/` | [webmcpx.dev](https://webmcpx.dev) (SvelteKit, prerendered) | [deploy/](deploy) |
 
 Everything is checked by one command, the same one CI runs: `just check`.
 
@@ -144,7 +152,7 @@ add WebMCP tools to your app and lint them.
   of scope (tools, conventions, rules) are welcome here as proposals.
 - **Security:** please report vulnerabilities privately, as described in [SECURITY.md](SECURITY.md).
 - **Conduct:** everyone taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md).
-- **Community home:** [webmcp.zone](https://webmcp.zone).
+- **Bugs and ideas:** [open an issue](https://github.com/webmcpx/webmcpx/issues/new/choose).
 
 ## License
 

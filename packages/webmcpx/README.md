@@ -5,7 +5,7 @@
 call a function instead of reading and clicking through the page.
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></script>
 ```
 
 Or from npm (`npm i webmcpx`):

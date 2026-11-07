@@ -13,7 +13,7 @@ export interface Highlighted extends CodeSample {
 }
 
 const SCRIPT_TAG =
-	'<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx/src/auto.js"></' + 'script>';
+	'<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.1/src/auto.js"></' + 'script>';
 
 export const SNIPPETS = {
 	scriptTag: { lang: 'html', code: SCRIPT_TAG },
