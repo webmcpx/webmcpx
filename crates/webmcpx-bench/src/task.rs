@@ -342,4 +342,22 @@ mod tests {
         assert!(check.answer_passes("Files up to 20 MB."));
         assert!(!check.answer_passes("Files up to 5 GiB."));
     }
+
+    #[test]
+    fn woo_stock_check_allows_the_price() {
+        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
+        let check = &tasks
+            .iter()
+            .find(|t| t.id == "live-woo-notebook-stock")
+            .unwrap()
+            .check;
+        // The notebook costs $24: naming the price is right, not the mug's stock of 24.
+        assert!(check.answer_passes(
+            "There are **3 Agent Notebooks left in stock**, priced at **$24 each**."
+        ));
+        assert!(check.answer_passes("3 left."));
+        for wrong in ["There are 24 left in stock.", "Only 15 in stock.", "24 units remain."] {
+            assert!(!check.answer_passes(wrong), "{wrong}");
+        }
+    }
 }

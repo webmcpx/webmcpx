@@ -1411,7 +1411,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0018518000000000002,
+      "cost_usd": 0.0018518,
       "tools": [
         {
           "name": "ask_business",
@@ -1487,7 +1487,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0018218000000000002,
+      "cost_usd": 0.0018218,
       "tools": [
         {
           "name": "ask_business",
@@ -1971,7 +1971,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0022354000000000002,
+      "cost_usd": 0.0022354,
       "answer": "Your refund goes **back to your original payment method, not store credit**, according to Allbirds’ refund policy.\n\nEligible returns must be made within **30 days of delivery**, with shoes unworn and unwashed and original tags attached. Final Sale items aren’t returnable, and paid shipping fees aren’t refunded.",
       "stop": "answered",
       "steps": 4,
@@ -2159,7 +2159,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0015193000000000001,
+      "cost_usd": 0.0015193,
       "tools": [
         {
           "name": "ask_business",
@@ -3085,7 +3085,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.013872200000000001,
+      "cost_usd": 0.0138722,
       "tools": [
         {
           "name": "list-directories",
@@ -3208,7 +3208,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.018552799999999998,
+      "cost_usd": 0.0185528,
       "answer": "Cloudflare Workers KV keys can be at most **512 bytes**, on both Free and Paid plans. The limit is in bytes, not characters.\n\nSource: [Cloudflare Workers KV limits](https://developers.cloudflare.com/kv/platform/limits/).",
       "stop": "answered",
       "steps": 6,
@@ -3848,7 +3848,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.014239700000000001,
+      "cost_usd": 0.0142397,
       "tools": [
         {
           "name": "list-directories",
@@ -4150,7 +4150,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0029971999999999998,
+      "cost_usd": 0.0029972,
       "tools": [
         {
           "name": "list-directories",
@@ -4232,7 +4232,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.013330700000000001,
+      "cost_usd": 0.0133307,
       "answer": "The maximum is **`page_size=100`**—up to 100 items per call on Notion’s list endpoints.\n\nA response may contain fewer items even if more remain. Check `has_more`, then pass `next_cursor` as the next request’s `start_cursor`.\n\nSource: [Notion pagination docs](https://developers.notion.com/reference/pagination).",
       "stop": "answered",
       "steps": 6,
@@ -4652,7 +4652,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.009367700000000001,
+      "cost_usd": 0.0093677,
       "tools": [
         {
           "name": "get_site_overview",
@@ -5463,7 +5463,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.009903299999999999,
+      "cost_usd": 0.0099033,
       "tools": [
         {
           "name": "get_site_overview",
@@ -5683,7 +5683,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0030803000000000002,
+      "cost_usd": 0.0030803,
       "answer": "The spec requires a minimum contrast ratio of **4.5:1** for normal-size body text against its background, following WCAG 2.2 Level AA.\n\nSource: [Colour contrast](https://specification.website/spec/accessibility/color-contrast/).",
       "stop": "answered",
       "steps": 6,
@@ -6231,7 +6231,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.013079299999999999,
+      "cost_usd": 0.0130793,
       "answer": "The spec targets **INP ≤ 200 milliseconds** for good responsiveness, measured at the **75th percentile of real-user page loads** across mobile and desktop.",
       "stop": "answered",
       "steps": 6,
@@ -7218,7 +7218,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0038783000000000003,
+      "cost_usd": 0.0038783,
       "answer": "The store has **3 products** in its **Apparel** category:\n\n- Agent Field Jacket\n- Context Tote\n- Discovery Tee",
       "stop": "answered",
       "steps": 4,
@@ -7254,7 +7254,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0038783000000000003,
+      "cost_usd": 0.0038783,
       "answer": "The store has **3 products** in its **Apparel** category:\n\n- Agent Field Jacket\n- Context Tote\n- Discovery Tee",
       "stop": "answered",
       "steps": 4,
@@ -7620,7 +7620,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0037665999999999997,
+      "cost_usd": 0.0037666,
       "answer": "The cheapest in-stock product is **Workflow Cards**, priced at **$16.00**.",
       "stop": "answered",
       "steps": 4,
@@ -7882,7 +7882,7 @@
       "task": "live-woo-notebook-stock",
       "arm": "baseline",
       "attempt": 1,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.0038105,
       "answer": "There are **3 Agent Notebooks left in stock**, priced at **$24 each**.",
@@ -7918,7 +7918,7 @@
       "task": "live-woo-notebook-stock",
       "arm": "baseline",
       "attempt": 2,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.0073415,
       "answer": "There are **3 Agent Notebooks left in stock**, priced at **$24 each**.",
@@ -7954,7 +7954,7 @@
       "task": "live-woo-notebook-stock",
       "arm": "baseline",
       "attempt": 3,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.0074225,
       "answer": "There are **3 Agent Notebooks left in stock**, priced at **$24 each**.",
@@ -7990,7 +7990,7 @@
       "task": "live-woo-notebook-stock",
       "arm": "webmcp",
       "attempt": 1,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.001597,
       "tools": [
@@ -8066,7 +8066,7 @@
       "task": "live-woo-notebook-stock",
       "arm": "webmcp",
       "attempt": 2,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.000781,
       "tools": [
@@ -8142,7 +8142,7 @@
       "task": "live-woo-notebook-stock",
       "arm": "webmcp",
       "attempt": 3,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.000781,
       "tools": [
@@ -8292,7 +8292,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0039021999999999998,
+      "cost_usd": 0.0039022,
       "answer": "Yes—the **Signal Mug** is on sale for **$18.00**, down from **$22.00** (a $4 savings). It’s in stock.",
       "stop": "answered",
       "steps": 4,
@@ -8938,7 +8938,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0055358000000000004,
+      "cost_usd": 0.0055358,
       "answer": "Added one Stoneware Teapot and one Speckled Bowl to your cart. Your cart total is **$106.00**.",
       "stop": "answered",
       "steps": 6,
@@ -9968,7 +9968,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0009371000000000001,
+      "cost_usd": 0.0009371,
       "answer": "The Ash Glaze Vase will be back in stock on **3 January**.",
       "stop": "answered",
       "steps": 2,
@@ -10151,7 +10151,7 @@
     "arms": {
       "baseline": {
         "runs": 105,
-        "success_rate": 0.9238095238095239,
+        "success_rate": 0.9523809523809523,
         "tokens": 11606.638095238095,
         "input_tokens": 11487.657142857142,
         "output_tokens": 118.98095238095237,
@@ -10162,7 +10162,7 @@
       },
       "webmcp": {
         "runs": 105,
-        "success_rate": 0.9714285714285714,
+        "success_rate": 1.0,
         "tokens": 3780.2761904761905,
         "input_tokens": 3687.2190476190476,
         "output_tokens": 93.05714285714286,
@@ -10434,7 +10434,7 @@
           "steps": 3.0,
           "tool_calls": 2.0,
           "duration_ms": 5982.333333333333,
-          "cost_usd": 0.006173133333333334
+          "cost_usd": 0.006173133333333333
         }
       },
       "live-cloudflare-kv-key-size": {
@@ -10447,7 +10447,7 @@
           "steps": 6.0,
           "tool_calls": 5.0,
           "duration_ms": 8147.666666666667,
-          "cost_usd": 0.008735466666666665
+          "cost_usd": 0.008735466666666667
         },
         "webmcp": {
           "runs": 3,
@@ -10506,7 +10506,7 @@
           "steps": 3.0,
           "tool_calls": 2.0,
           "duration_ms": 6142.666666666667,
-          "cost_usd": 0.006655366666666668
+          "cost_usd": 0.0066553666666666665
         }
       },
       "live-cloudflare-workers-free-requests": {
@@ -10543,7 +10543,7 @@
           "steps": 6.0,
           "tool_calls": 5.0,
           "duration_ms": 9498.666666666666,
-          "cost_usd": 0.006685366666666667
+          "cost_usd": 0.006685366666666665
         },
         "webmcp": {
           "runs": 3,
@@ -10711,7 +10711,7 @@
           "steps": 6.0,
           "tool_calls": 5.0,
           "duration_ms": 7659.666666666667,
-          "cost_usd": 0.006274366666666665
+          "cost_usd": 0.006274366666666666
         },
         "webmcp": {
           "runs": 3,
@@ -10783,7 +10783,7 @@
           "steps": 4.0,
           "tool_calls": 3.0,
           "duration_ms": 5416.0,
-          "cost_usd": 0.0050807000000000005
+          "cost_usd": 0.0050807
         },
         "webmcp": {
           "runs": 3,
@@ -10824,7 +10824,7 @@
       "live-woo-notebook-stock": {
         "baseline": {
           "runs": 3,
-          "success_rate": 0.0,
+          "success_rate": 1.0,
           "tokens": 3051.0,
           "input_tokens": 2983.0,
           "output_tokens": 68.0,
@@ -10835,7 +10835,7 @@
         },
         "webmcp": {
           "runs": 3,
-          "success_rate": 0.0,
+          "success_rate": 1.0,
           "tokens": 3241.0,
           "input_tokens": 3196.0,
           "output_tokens": 45.0,

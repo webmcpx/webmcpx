@@ -5,4 +5,5 @@ prompt = "I want to buy a few Agent Notebooks for my team. How many are left in 
 
 [check]
 answer_contains = ["3"]
-answer_excludes = ["24", "15"]
+# The other products' stock counts, as stock: the notebook's own price is $24, so a bare "24" is not wrong.
+answer_excludes = ["24 left", "24 in stock", "24 units", "15 left", "15 in stock", "15 units"]
