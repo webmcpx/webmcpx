@@ -9,10 +9,11 @@ export default defineConfig({
 		sveltekit({
 			compilerOptions: {
 				// Force runes mode for the project, except for libraries. Can be removed in svelte 6.
-				runes: ({ filename }) =>
-					filename.split(/[/\\]/).includes('node_modules') ? undefined : true
+				runes: ({ filename }) => (filename.split(/[/\\]/).includes('node_modules') ? undefined : true)
 			},
-			adapter: adapter()
+			adapter: adapter(),
+			// Inline the stylesheet (~8 KB gzip) into the prerendered HTML: no render-blocking request.
+			inlineStyleThreshold: 48_000
 		})
 	],
 	test: {

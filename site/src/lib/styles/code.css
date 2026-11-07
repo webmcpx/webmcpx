@@ -1,0 +1,17 @@
+/* Shiki output (highlighted at build time, see `server/highlight.ts`): pick the token colors of the theme. */
+.shiki,
+.shiki span {
+	color: var(--shiki-dark);
+	background: transparent !important;
+}
+
+[data-theme='light'] .shiki,
+[data-theme='light'] .shiki span {
+	color: var(--shiki-light);
+}
+
+.shiki code {
+	display: block;
+	width: max-content;
+	min-width: 100%;
+}

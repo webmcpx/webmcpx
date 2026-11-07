@@ -1,13 +1,4 @@
 @import 'tailwindcss';
-
-@theme {
-	--font-sans: ui-sans-serif, system-ui, sans-serif;
-	--font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-	--color-accent: oklch(0.72 0.17 160);
-	--color-accent-ink: oklch(0.45 0.13 160);
-}
-
-html {
-	color-scheme: light dark;
-	scroll-behavior: smooth;
-}
+@import './lib/styles/tokens.css';
+@import './lib/styles/base.css';
+@import './lib/styles/code.css';

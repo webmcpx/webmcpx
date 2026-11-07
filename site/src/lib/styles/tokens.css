@@ -1,0 +1,91 @@
+/*
+ * Design tokens. Two layers:
+ *   1. Semantic CSS variables (--bg, --fg, --accent, ...), redefined per theme below.
+ *   2. Tailwind utilities generated from them (`bg-surface`, `text-muted`, `border-border`, ...).
+ * Tailwind's default palette is removed on purpose: components may only use these roles, so a theme
+ * change is one edit here. The list in `tokens.ts` must match (a test checks it).
+ */
+
+/* Dark first: dark is the default and what the page renders without JavaScript. */
+:root,
+[data-theme='dark'] {
+	color-scheme: dark;
+	--bg: oklch(0.145 0.006 265);
+	--surface: oklch(0.18 0.007 265);
+	--surface-2: oklch(0.22 0.009 265);
+	--fg: oklch(0.965 0.003 265);
+	--muted: oklch(0.74 0.012 265);
+	--subtle: oklch(0.64 0.012 265);
+	--border: oklch(0.27 0.009 265);
+	--border-strong: oklch(0.36 0.012 265);
+	--accent: oklch(0.8 0.17 158);
+	--on-accent: oklch(0.2 0.04 158);
+	--accent-ink: oklch(0.82 0.15 158);
+	--accent-soft: oklch(0.8 0.17 158 / 0.13);
+	--baseline: oklch(0.52 0.02 265);
+	--danger: oklch(0.72 0.16 25);
+	--warn: oklch(0.83 0.14 80);
+	--code: oklch(0.165 0.007 265);
+}
+
+[data-theme='light'] {
+	color-scheme: light;
+	--bg: oklch(0.99 0.002 265);
+	--surface: oklch(0.973 0.004 265);
+	--surface-2: oklch(0.95 0.006 265);
+	--fg: oklch(0.2 0.012 265);
+	--muted: oklch(0.44 0.014 265);
+	--subtle: oklch(0.52 0.014 265);
+	--border: oklch(0.905 0.006 265);
+	--border-strong: oklch(0.83 0.009 265);
+	--accent: oklch(0.74 0.17 158);
+	--on-accent: oklch(0.2 0.04 158);
+	--accent-ink: oklch(0.46 0.12 158);
+	--accent-soft: oklch(0.74 0.17 158 / 0.14);
+	--baseline: oklch(0.76 0.015 265);
+	--danger: oklch(0.52 0.19 25);
+	--warn: oklch(0.52 0.12 65);
+	--code: oklch(1 0 0);
+}
+
+@theme {
+	--color-*: initial;
+	--font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+	--font-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+	/* Fluid marketing sizes; everything else uses Tailwind's default scale. */
+	--text-display: clamp(2.75rem, 1.4rem + 5.6vw, 5.25rem);
+	--text-display--line-height: 1.02;
+	--text-display--letter-spacing: -0.045em;
+	--text-headline: clamp(2rem, 1.45rem + 2.3vw, 3.25rem);
+	--text-headline--line-height: 1.08;
+	--text-headline--letter-spacing: -0.035em;
+
+	--ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+	--color-transparent: transparent;
+	--color-current: currentColor;
+	--color-bg: var(--bg);
+	--color-surface: var(--surface);
+	--color-surface-2: var(--surface-2);
+	--color-fg: var(--fg);
+	--color-muted: var(--muted);
+	--color-subtle: var(--subtle);
+	--color-border: var(--border);
+	--color-border-strong: var(--border-strong);
+	--color-accent: var(--accent);
+	--color-on-accent: var(--on-accent);
+	--color-accent-ink: var(--accent-ink);
+	--color-accent-soft: var(--accent-soft);
+	--color-baseline: var(--baseline);
+	--color-danger: var(--danger);
+	--color-warn: var(--warn);
+	--color-code: var(--code);
+
+	--shadow-glow: 0 0 0 1px var(--accent-soft), 0 24px 80px -24px var(--accent-soft);
+}
+
+/* `dark:` follows the theme attribute (set before first paint by app.html), not only the OS. */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
