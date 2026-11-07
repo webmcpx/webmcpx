@@ -74,7 +74,7 @@ With nothing to configure:
 ## Lint your tools
 
 ```sh
-cargo install --path crates/webmcpx   # prebuilt binaries come with the first release
+cargo install webmcpx
 webmcpx lint src/
 webmcpx lint --fix             # removes invisible characters
 webmcpx lint --format json     # stable schema for agents and CI; also sarif, github, concise
