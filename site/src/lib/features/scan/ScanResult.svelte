@@ -171,7 +171,7 @@
 			{#if r.tools.length}
 				<div class="border-t-2 border-ink bg-paper-2 px-5 py-4 sm:px-7">
 					<ul class="flex flex-wrap gap-2" aria-label={m.result.tools}>
-						{#each r.tools.slice(0, 10) as t (t.name)}
+						{#each r.tools.slice(0, 10) as t, i (i)}
 							<li>
 								<!-- Hover, focus or tap shows the description; screen readers get it as part of the name. -->
 								<button

@@ -102,6 +102,24 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   assert.equal(await pick({}), "input must match exactly one allowed shape");
   assert.equal(await pick({ sku: "MUG", filter: { tags: ["a"], status: "open" } }), undefined);
   assert.match(await pick({ sku: "MUG", filter: { status: "closed", tags: ["a"] } }), /must be/);
+  // Local $refs are followed; a remote or missing one refuses rather than skipping the check.
+  tool({
+    name: "pay",
+    description: "Pays an amount.",
+    inputSchema: {
+      type: "object",
+      properties: { amount: { $ref: "#/$defs/amount" }, note: { $ref: "https://example.com/s.json" } },
+      required: ["amount"],
+      $defs: { amount: { type: "integer", minimum: 1 } },
+    },
+    run: () => "paid",
+  });
+  assert.equal((await page.call("pay", { amount: -5 })).error.message, "`amount` must be at least 1");
+  assert.equal((await page.call("pay", { amount: 5 })).ok, true);
+  assert.match((await page.call("pay", { amount: 5, note: "x" })).error.message, /can't check \$ref/);
+  // A schema that refers to itself forever stops instead of hanging.
+  tool({ name: "loop", description: "Loops.", inputSchema: { type: "object", properties: { a: { $ref: "#/properties/a" } } }, run: () => 1 });
+  assert.match((await page.call("loop", { a: 1 })).error.message, /can't check \$ref/);
   // Boolean schemas: false refuses, true accepts.
   tool({ name: "bools", description: "Boolean branches.", inputSchema: { type: "object", oneOf: [false, { required: ["sku"] }] }, run: () => "ok" });
   assert.equal((await page.call("bools", { sku: "MUG" })).ok, true);

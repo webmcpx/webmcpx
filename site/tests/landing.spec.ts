@@ -564,3 +564,16 @@ test('the closing form scans and brings the result into view', async ({ page }) 
 	await closing.getByRole('button', { name: 'Scan it' }).click();
 	await expect(page.locator('#scan').getByText('docs.example.com', { exact: true }).first()).toBeInViewport();
 });
+
+test('a scan with same-named tools in two frames shows both', async ({ page }) => {
+	const errors: string[] = [];
+	page.on('pageerror', (e) => errors.push(e.message));
+	await mockScan(page, { ...REPORT, tools: [...REPORT.tools, ...REPORT.tools] });
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await expect(
+		page.locator('#scan').getByRole('list', { name: 'Tools found' }).getByRole('listitem')
+	).toHaveCount(REPORT.tools.length * 2);
+	expect(errors).toEqual([]);
+});

@@ -39,10 +39,27 @@ const same = (a, b) =>
   (typeof a === "object" && typeof b === "object" && a !== null && b !== null && Array.isArray(a) === Array.isArray(b) &&
     Object.keys(a).length === Object.keys(b).length && Object.keys(a).every((k) => Object.hasOwn(b, k) && same(a[k], b[k])));
 
+// The schema being checked, for local $refs ("#/$defs/x"); checks are synchronous, one at a time.
+let root;
+let depth = 0;
+const resolve = (ref) =>
+  ref.startsWith("#")
+    ? ref.slice(1).split("/").filter(Boolean).reduce((o, k) => o?.[k.replaceAll("~1", "/").replaceAll("~0", "~")], root)
+    : undefined;
+
 /** The first problem with `value` against JSON Schema `s` (the keywords tool inputs use), or "". */
 function check(s, value, at = "input") {
   if (s === false) return `${at} is not allowed`;
   if (!s || typeof s !== "object") return "";
+  if (s.$ref) {
+    // Unknown or remote refs and runaway recursion refuse the input rather than skip the check.
+    const target = depth < 32 ? resolve(s.$ref) : undefined;
+    if (target === undefined) return `${at}: can't check $ref ${s.$ref}`;
+    depth++;
+    const problem = check(target, value, at);
+    depth--;
+    if (problem) return problem;
+  }
   const types = s.type === undefined ? [] : [].concat(s.type);
   if (types.length && !types.some((t) => TYPES[t]?.(value))) return `${at} must be of type ${types.join(" or ")}`;
   if (s.enum && !s.enum.includes(value)) return `${at} must be one of ${s.enum.join(", ")}`;
@@ -90,6 +107,8 @@ const contract = (inputSchema, run) => async (raw, client) => {
     return fail("INVALID_INPUT", "the input is not JSON");
   }
   try {
+    root = inputSchema;
+    depth = 0;
     const problem = TYPES.object(args) ? check(inputSchema, args) : "the input must be an object";
     if (problem) return fail("INVALID_INPUT", problem);
     const out = envelope({ ok: true, data: (await run(args, client)) ?? null });
