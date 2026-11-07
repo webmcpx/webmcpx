@@ -386,6 +386,41 @@ async fn the_same_site_is_scanned_once_for_everyone() {
     assert_eq!(visits.load(std::sync::atomic::Ordering::SeqCst), 1);
 }
 
+/// A visitor who gives up while waiting in line (a closed tab) frees their place.
+#[tokio::test]
+async fn a_cancelled_scan_frees_its_place_in_line() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/{page}",
+        axum::routing::get(|| async {
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            axum::response::Html("<title>slow</title>")
+        }),
+    ))
+    .await;
+    // One scan at a time, one more in line.
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true).capacity(1, 1));
+    let scan = |page: &str| {
+        let (scanner, url) = (Arc::clone(&scanner), format!("http://{site}/{page}"));
+        tokio::spawn(async move { scanner.scan(&url).await.map(|r| r.verdict) })
+    };
+    let running = scan("a");
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+    let gave_up = scan("b");
+    tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+    gave_up.abort();
+    let _ = gave_up.await;
+    let next = scan("c");
+    assert!(running.await.unwrap().is_ok());
+    assert!(
+        next.await.unwrap().is_ok(),
+        "the place the cancelled scan held was not freed"
+    );
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

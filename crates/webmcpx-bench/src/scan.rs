@@ -11,7 +11,6 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::time::{Duration, Instant};
 
 use anyhow::Result;
@@ -31,9 +30,11 @@ const QUEUE_WAIT: Duration = Duration::from_secs(30);
 const MAX_WAITING: usize = 100;
 /// A site's report is reused for this long: many people scanning the same site (a shared link, a
 /// popular page) cost one browser visit.
-const CACHE_FOR: Duration = Duration::from_secs(10 * 60);
-/// Most reports kept; past that, expired ones go first, then all.
-const CACHE_SIZE: usize = 5_000;
+const CACHE_FOR: Duration = Duration::from_mins(10);
+/// Memory the cache may hold (reports as JSON); the oldest go first. Pages control their reports' size
+/// (tool descriptions), so a report bigger than `CACHE_ENTRY_MAX` is never kept.
+const CACHE_BYTES: usize = 64 * 1024 * 1024;
+const CACHE_ENTRY_MAX: usize = 256 * 1024;
 /// Whole scan, navigation included.
 const DEADLINE: Duration = Duration::from_secs(45);
 /// Closing a context after a scan; longer means the browser is stuck and gets replaced.
@@ -105,6 +106,9 @@ pub struct Remote {
     pub proxy: std::net::SocketAddr,
 }
 
+/// One scan's result, awaited by everyone who asked for that URL meanwhile.
+type SharedScan = Arc<OnceCell<Result<Report, ScanError>>>;
+
 /// Shares one headless Chrome (behind the egress proxy) between scans.
 pub struct Scanner {
     chrome: Option<PathBuf>,
@@ -116,12 +120,13 @@ pub struct Scanner {
     deadline: Duration,
     browser: Mutex<Option<Arc<Session>>>,
     slots: Semaphore,
-    /// Scans waiting for a slot right now.
-    waiting: AtomicUsize,
-    /// Recent reports by URL, with when they were made.
-    cache: std::sync::Mutex<HashMap<String, (Instant, Report)>>,
+    /// Places in the building: a slot or a place in line. Held for the whole scan and released on drop,
+    /// so a caller who gives up (a closed tab) frees its place too.
+    places: Semaphore,
+    /// Recent reports by URL.
+    cache: std::sync::Mutex<Cache>,
     /// Scans in flight by URL: callers asking for the same URL meanwhile share the one result.
-    inflight: std::sync::Mutex<HashMap<String, Arc<OnceCell<Result<Report, ScanError>>>>>,
+    inflight: std::sync::Mutex<HashMap<String, SharedScan>>,
 }
 
 /// A browser and the proxy it is locked to; both stop when the last scan using them ends (a remote
@@ -153,7 +158,7 @@ impl Scanner {
             deadline: DEADLINE,
             browser: Mutex::new(None),
             slots: Semaphore::new(PARALLEL),
-            waiting: AtomicUsize::new(0),
+            places: Semaphore::new(PARALLEL + MAX_WAITING),
             cache: std::sync::Mutex::default(),
             inflight: std::sync::Mutex::default(),
         }
@@ -161,8 +166,15 @@ impl Scanner {
 
     /// Runs up to `n` scans at once (default 2).
     #[must_use]
-    pub fn parallel(mut self, n: usize) -> Self {
-        self.slots = Semaphore::new(n.max(1));
+    pub fn parallel(self, n: usize) -> Self {
+        self.capacity(n, MAX_WAITING)
+    }
+
+    /// Runs up to `parallel` scans at once, with up to `waiting` more in line.
+    #[must_use]
+    pub fn capacity(mut self, parallel: usize, waiting: usize) -> Self {
+        self.slots = Semaphore::new(parallel.max(1));
+        self.places = Semaphore::new(parallel.max(1) + waiting);
         self
     }
 
@@ -203,31 +215,18 @@ impl Scanner {
     }
 
     fn cached(&self, key: &str) -> Option<Report> {
-        let cache = lock(&self.cache);
-        let (at, report) = cache.get(key)?;
-        (at.elapsed() < CACHE_FOR).then(|| report.clone())
+        lock(&self.cache).get(key)
     }
 
     fn remember(&self, key: String, report: Report) {
-        let mut cache = lock(&self.cache);
-        if cache.len() >= CACHE_SIZE {
-            cache.retain(|_, (at, _)| at.elapsed() < CACHE_FOR);
-            if cache.len() >= CACHE_SIZE {
-                cache.clear();
-            }
-        }
-        cache.insert(key, (Instant::now(), report));
+        lock(&self.cache).put(key, report, CACHE_BYTES);
     }
 
     /// One browser visit, after waiting in line for a slot.
     async fn scan_now(&self, url: Url) -> Result<Report, ScanError> {
-        if self.waiting.fetch_add(1, Ordering::SeqCst) >= MAX_WAITING {
-            self.waiting.fetch_sub(1, Ordering::SeqCst);
-            return Err(ScanError::Busy);
-        }
-        let slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire()).await;
-        self.waiting.fetch_sub(1, Ordering::SeqCst);
-        let _slot = slot
+        let _place = self.places.try_acquire().map_err(|_| ScanError::Busy)?;
+        let _slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire())
+            .await
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let started = Instant::now();
@@ -342,6 +341,49 @@ fn endpoint_host(endpoint: &str) -> &str {
     host.strip_prefix('[')
         .and_then(|h| h.strip_suffix(']'))
         .unwrap_or(host)
+}
+
+/// Recent reports by URL, within a memory budget (sizes as JSON).
+#[derive(Default)]
+struct Cache {
+    entries: HashMap<String, (Instant, usize, Report)>,
+    bytes: usize,
+}
+
+impl Cache {
+    fn get(&self, key: &str) -> Option<Report> {
+        let (at, _, report) = self.entries.get(key)?;
+        (at.elapsed() < CACHE_FOR).then(|| report.clone())
+    }
+
+    /// Keeps `report` unless it is too big; drops expired entries, then the oldest, to stay in `budget`.
+    fn put(&mut self, key: String, report: Report, budget: usize) {
+        let size = serde_json::to_vec(&report).map_or(usize::MAX, |v| v.len() + key.len());
+        if size > CACHE_ENTRY_MAX.min(budget) {
+            return;
+        }
+        if let Some((_, old, _)) = self.entries.remove(&key) {
+            self.bytes -= old;
+        }
+        self.entries
+            .retain(|_, (at, _, _)| at.elapsed() < CACHE_FOR);
+        self.bytes = self.entries.values().map(|(_, n, _)| n).sum();
+        while self.bytes + size > budget {
+            let Some(oldest) = self
+                .entries
+                .iter()
+                .min_by_key(|(_, (at, _, _))| *at)
+                .map(|(k, _)| k.clone())
+            else {
+                break;
+            };
+            if let Some((_, n, _)) = self.entries.remove(&oldest) {
+                self.bytes -= n;
+            }
+        }
+        self.bytes += size;
+        self.entries.insert(key, (Instant::now(), size, report));
+    }
 }
 
 fn lock<T>(m: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
@@ -592,6 +634,41 @@ mod tests {
             "data:image/png;base64,{}",
             "A".repeat(MAX_ICON_URI)
         )));
+    }
+
+    fn sized_report(url: &str, description_len: usize) -> Report {
+        let tools = vec![tool(
+            "t",
+            &"x".repeat(description_len),
+            &json!({ "readOnlyHint": true }),
+        )];
+        report(url, url.to_owned(), "", &tools, "")
+    }
+
+    #[test]
+    fn the_cache_skips_huge_reports_and_stays_in_budget() {
+        let mut cache = Cache::default();
+        cache.put(
+            "big".into(),
+            sized_report("https://a.example/", CACHE_ENTRY_MAX),
+            CACHE_BYTES,
+        );
+        assert!(
+            cache.get("big").is_none(),
+            "a page-sized report must not be kept"
+        );
+
+        let budget = 64 * 1024;
+        for i in 0..20 {
+            cache.put(
+                format!("k{i}"),
+                sized_report("https://a.example/", 10_000),
+                budget,
+            );
+            assert!(cache.bytes <= budget, "{} > {budget}", cache.bytes);
+        }
+        assert!(cache.get("k19").is_some(), "the newest stays");
+        assert!(cache.get("k0").is_none(), "the oldest went first");
     }
 
     #[test]
