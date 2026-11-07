@@ -184,13 +184,15 @@ test("the default content root is the first visible one", async () => {
 
 test("a content root without visible text falls through to the next", async () => {
   const page = host();
-  document.body.innerHTML = '<main class="invisible"><p>Hidden</p></main><article><p>Visible price</p></article>';
+  document.body.innerHTML = '<main class="invisible"><h2 id="gone">Hidden</h2><table><tr><td>a</td><td>b</td></tr></table></main><article><p>Visible price</p></article>';
   globalThis.getComputedStyle = (el) => ({ visibility: el.closest(".invisible") ? "hidden" : "visible" });
   try {
     await register({ wasm: WASM });
     const md = (await page.call("fetch_as_markdown", {})).data.markdown;
     assert.match(md, /Visible price/);
-    assert.doesNotMatch(md, /Hidden/);
+    assert.doesNotMatch(md, /Hidden|\|/);
+    const hit = await page.call("search_page", { query: "visible price" });
+    assert.doesNotMatch(JSON.stringify(hit.data), /#gone/, "no anchor from a root that was not read");
   } finally {
     delete globalThis.getComputedStyle;
   }

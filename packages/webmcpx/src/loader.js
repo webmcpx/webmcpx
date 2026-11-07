@@ -62,7 +62,7 @@ export function readPage(what, root) {
       if (child.nodeType !== 1 || skipped(child)) continue;
       if (child.id) anchor = `${base}#${child.id}`;
       // A table row is one block ("Monday | Closed"), so search keeps a value next to its label.
-      const row = child.tagName === "TR" && [...child.children].filter((c) => !skipped(c)).map((c) => text(textOf(c))).join(" | ");
+      const row = child.tagName === "TR" && [...child.children].filter((c) => !skipped(c)).map((c) => text(textOf(c))).filter(Boolean).join(" | ");
       const kind = row ? "p" : KINDS[child.tagName] ?? (!child.querySelector(BLOCKS) && "p");
       if (kind) add(kind, row || textOf(child));
       else visit(child);
@@ -70,6 +70,7 @@ export function readPage(what, root) {
   };
   const shown = (el) => !el || !skipped(el) && shown(el.parentElement);
   for (const el of root ? [root] : [...document.querySelectorAll("main, [role=main], article"), document.body]) {
+    anchor = "";
     if (shown(el) && (visit(el), out)) break;
   }
   return out;
