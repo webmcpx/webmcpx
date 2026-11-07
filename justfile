@@ -74,6 +74,11 @@ bench *args: wasm
     cargo run -q --release -p webmcpx-bench -- run {{args}}
     cp bench/results/latest.json site/src/lib/content/bench.json
 
+# Re-grade the latest run with today's answer checks (after fixing a check), then publish it.
+bench-regrade:
+    cargo run -q --release -p webmcpx-bench -- regrade
+    cp bench/results/latest.json site/src/lib/content/bench.json
+
 # Snapshot today's tool names and descriptions per task for the landing (runs older than schema 4 lack them).
 bench-tools: wasm
     cargo run -q --release -p webmcpx-bench -- tools > site/src/lib/content/tools.json

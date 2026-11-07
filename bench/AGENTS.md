@@ -20,3 +20,6 @@ Rules:
    the page itself, and note the date and source in a comment. Read-only questions only: never add to a
    real cart, check out, book, or send messages. Live facts drift; a failing live task is re-verified
    before anyone blames an arm.
+6. A check found wrong after a run (it rejected a correct answer, or passed a wrong one) is fixed in the task
+   file and applied with `just bench-regrade`: it re-grades the stored answers of both arms and never
+   re-runs anything. Say which runs changed and why in the commit.

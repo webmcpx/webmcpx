@@ -70,6 +70,8 @@ enum Command {
     },
     /// List tasks (tab-separated).
     Tasks,
+    /// Re-grade bench/results/latest.json with today's answer checks (answers are not re-run).
+    Regrade,
     /// Call one WebMCP tool on a live page and print what the agent would get (for writing tasks).
     Call {
         url: String,
@@ -113,6 +115,18 @@ fn parse_price(s: &str) -> Result<Price, String> {
 async fn main() -> Result<()> {
     let root = repo_root();
     match Cli::parse().command {
+        Command::Regrade => {
+            let path = root.join("bench/results/latest.json");
+            let mut results: Results = serde_json::from_str(
+                &std::fs::read_to_string(&path)
+                    .with_context(|| format!("reading {}", path.display()))?,
+            )?;
+            let tasks = task::load_dir(&root.join("bench/tasks"))?;
+            let changed = webmcpx_bench::regrade(&mut results, &tasks);
+            std::fs::write(&path, serde_json::to_string_pretty(&results)?)?;
+            eprintln!("re-graded {}: {changed} run(s) changed", path.display());
+            writeln!(std::io::stdout().lock(), "{}", markdown(&results))?;
+        }
         Command::Tasks => {
             let mut out = std::io::stdout().lock();
             for t in task::load_dir(&root.join("bench/tasks"))? {

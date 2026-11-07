@@ -137,3 +137,92 @@ async fn attempt(
     page.close().await?;
     result
 }
+
+/// Re-applies today's answer checks to the answers a run recorded, for tasks graded on the answer alone
+/// (a `state` check needs the live page, so those runs keep their grade). Answers never change; only
+/// the grading does, identically for both arms. Returns how many runs changed grade.
+pub fn regrade(results: &mut report::Results, tasks: &[Task]) -> usize {
+    let mut changed = 0;
+    for run in &mut results.runs {
+        let Some(task) = tasks.iter().find(|t| t.id == run.task) else {
+            continue;
+        };
+        if task.check.state.is_some() || run.harness_error.is_some() {
+            continue;
+        }
+        let answer_ok = !task.check.has_answer_check()
+            || run
+                .outcome
+                .answer
+                .as_deref()
+                .is_some_and(|a| task.check.answer_passes(a));
+        let success = run.outcome.stop == agent::Stop::Answered && answer_ok;
+        if success != run.success {
+            run.success = success;
+            changed += 1;
+        }
+    }
+    results.summary = report::Summary::of(&results.runs);
+    changed
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::report::{Results, Run};
+
+    fn task(id: &str, check: &str) -> Task {
+        let mut t: Task = toml::from_str(&format!(
+            "site = \"docs\"\nprompt = \"q\"\n[check]\n{check}\n"
+        ))
+        .unwrap();
+        t.id = id.into();
+        t
+    }
+
+    fn run(task: &str, success: bool, answer: &str) -> Run {
+        Run {
+            task: task.into(),
+            arm: Arm::Webmcp,
+            attempt: 1,
+            success,
+            harness_error: None,
+            cost_usd: None,
+            tools: Vec::new(),
+            outcome: agent::Outcome {
+                answer: Some(answer.into()),
+                stop: agent::Stop::Answered,
+                ..agent::Outcome::default()
+            },
+        }
+    }
+
+    #[test]
+    fn regrade_applies_fixed_answer_checks_and_leaves_state_checks_alone() {
+        let tasks = [
+            task("unit", r#"answer_any = ["MB", "MiB"]"#),
+            task("cart", r#"state = "true""#),
+        ];
+        let mut results = Results {
+            schema_version: report::SCHEMA_VERSION,
+            model: "m".into(),
+            reasoning_effort: None,
+            price_per_mtok: None,
+            started_at: 0,
+            tasks: std::collections::BTreeMap::new(),
+            runs: vec![
+                run("unit", false, "20 MiB"),
+                run("unit", false, "20 GB"),
+                run("cart", false, "done"),
+            ],
+            summary: report::Summary::default(),
+        };
+        assert_eq!(regrade(&mut results, &tasks), 1);
+        let grades: Vec<bool> = results.runs.iter().map(|r| r.success).collect();
+        assert_eq!(grades, [true, false, false]);
+        assert_eq!(
+            results.summary.tasks["unit"][&Arm::Webmcp].success_rate,
+            0.5
+        );
+    }
+}

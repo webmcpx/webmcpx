@@ -1,8 +1,9 @@
 # Live site. Verified 2026-11-07: developers.notion.com/guides/data-apis/uploading-small-files says
-# "This guide only supports files up to 20 MB. Larger files require a multi-part upload."
+# "This guide only supports files up to 20 MB. Larger files require a multi-part upload." Other Notion
+# pages say "20 MiB", so both units are accepted.
 url = "https://developers.notion.com/guides/get-started/overview"
 prompt = "What's the biggest file I can send to the Notion API in a single-part upload before I have to switch to a multi-part upload?"
 
 [check]
 answer_contains = ["20"]
-answer_any = ["MB", "20MB", "megabytes"]
+answer_any = ["MB", "20MB", "megabytes", "MiB", "20MiB", "mebibytes"]
