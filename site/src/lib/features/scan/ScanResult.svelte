@@ -86,7 +86,10 @@
 		if (scanner.runs === 0) return;
 		tick().then(() => {
 			const r = box?.getBoundingClientRect();
-			if (r && (r.top < 0 || r.bottom > innerHeight)) box?.scrollIntoView({ block: 'center' });
+			// Centered when it fits; otherwise its top (the verdict) comes first.
+			if (r && (r.top < 0 || r.bottom > innerHeight)) {
+				box?.scrollIntoView({ block: r.height > innerHeight ? 'start' : 'center' });
+			}
 		});
 	});
 

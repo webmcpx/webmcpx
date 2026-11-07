@@ -11,6 +11,6 @@
 
 <Section id="scan-now" title={m.title} lead={m.lead} center>
 	<Reveal>
-		<ScanForm size="md" reveal />
+		<ScanForm size="md" />
 	</Reveal>
 </Section>

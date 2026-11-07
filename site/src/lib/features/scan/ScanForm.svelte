@@ -14,11 +14,9 @@
 		hint?: Snippet;
 		/** Focus the input on load, so visitors can type their site right away (the hero form). */
 		focusOnLoad?: boolean;
-		/** Scroll to the result (#scan) after submitting: for forms far from it, like the closing one. */
-		reveal?: boolean;
 	}
 
-	let { fromQuery = false, size = 'lg', hint, focusOnLoad = false, reveal = false }: Props = $props();
+	let { fromQuery = false, size = 'lg', hint, focusOnLoad = false }: Props = $props();
 	const i18n = useI18n();
 	const m = $derived(i18n.m.scan);
 	const uid = $props.id();
@@ -38,11 +36,7 @@
 
 	function onsubmit(e: SubmitEvent) {
 		e.preventDefault();
-		scanner.run();
-		if (reveal) {
-			const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-			document.getElementById('scan')?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
-		}
+		scanner.run(); // ScanResult brings the result into view when it lands, wherever the form was.
 	}
 </script>
 
