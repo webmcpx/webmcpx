@@ -1,0 +1,8 @@
+# Live WooCommerce demo store. Verified 2026-11-07 (woo_get_product_api slug=ofa-demo-notebook, Store API,
+# /assistant-store/ listing "3 left"): Agent Notebook has 3 units in stock; Signal Mug has 24, Context Tote 15.
+url = "https://demo.openforagents.com/"
+prompt = "I want to buy a few Agent Notebooks for my team. How many are left in stock?"
+
+[check]
+answer_contains = ["3"]
+answer_excludes = ["24", "15"]

@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-07: developers.notion.com/reference/request-limits says "Requests that
+# exceed a limit return a `"rate_limited"` error code and an HTTP 429 response."
+url = "https://developers.notion.com/guides/get-started/overview"
+prompt = "When my Notion integration sends too many requests, what error code string does the API put in the error response body?"
+
+[check]
+answer_contains = ["rate_limited"]

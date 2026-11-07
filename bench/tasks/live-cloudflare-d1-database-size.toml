@@ -1,0 +1,6 @@
+# Live site. Verified 2026-11-07: developers.cloudflare.com/d1/platform/limits/ says "Maximum database size 10 GB (Workers Paid) / 500 MB (Free)".
+url = "https://developers.cloudflare.com/"
+prompt = "I'm on the Workers Paid plan. What's the maximum size a single Cloudflare D1 database can grow to?"
+
+[check]
+answer_any = ["10 GB", "10GB", "10 gigabytes"]

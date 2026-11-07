@@ -1,0 +1,7 @@
+# Live Shopify store. Verified 2026-11-07 via ask_business and /pages/returns-exchanges:
+# "Returns/exchanges can only be done in the country of purchase."
+url = "https://www.allbirds.com/"
+prompt = "I bought my Allbirds in the US but I'm moving to London next month. Can I exchange them for another size over there?"
+
+[check]
+answer_any = ["country of purchase", "country where you bought", "country where you purchased", "country you bought", "country you purchased", "same country"]

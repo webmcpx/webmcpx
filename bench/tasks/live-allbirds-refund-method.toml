@@ -1,0 +1,7 @@
+# Live Shopify store. Verified 2026-11-07 via ask_business and /policies/refund-policy:
+# "Refunds will only be applied to the original form of payment."
+url = "https://www.allbirds.com/"
+prompt = "If I return a pair of Allbirds, do I get my refund as store credit or back on how I paid?"
+
+[check]
+answer_any = ["original", "same card", "same payment", "how you paid", "way you paid", "payment method you used"]

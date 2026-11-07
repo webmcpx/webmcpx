@@ -1,0 +1,8 @@
+# Fixture: bench/sites/store. Green products: Moss Mug ($22, out of stock), Fern Espresso Cup ($15,
+# 20 in stock), Moss Serving Bowl ($58), Moss Tall Vase ($69). Only the Fern Espresso Cup is green,
+# under $30 and in stock; the Moss Mug is the distractor.
+site = "store"
+prompt = "I need a green gift under $30 that I can buy right now. What do you have?"
+
+[check]
+answer_contains = ["Fern Espresso Cup"]

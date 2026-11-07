@@ -1,0 +1,6 @@
+# Fixture: bench/sites/store. Teapots: Stoneware Teapot ($74) and Cobalt Teapot ($82, 1 in stock).
+site = "store"
+prompt = "Put the most expensive teapot you sell in my cart."
+
+[check]
+state = "store.cart.length === 1 && store.cart[0].sku === 'TPT-02' && store.cart[0].qty === 1"

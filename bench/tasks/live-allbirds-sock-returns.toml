@@ -1,0 +1,7 @@
+# Live Shopify store. Verified 2026-11-07 via ask_business and /pages/returns-exchanges:
+# "For socks, undies, and accessories packaging must be unopened."
+url = "https://www.allbirds.com/"
+prompt = "I ordered some Allbirds socks and want to send them back. What condition do they need to be in for a return?"
+
+[check]
+answer_contains = ["unopened"]

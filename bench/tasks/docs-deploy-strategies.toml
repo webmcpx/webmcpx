@@ -1,0 +1,6 @@
+# Fixture: bench/sites/docs. `orbit deploy --strategy`: "rolling, blue-green or canary".
+site = "docs"
+prompt = "Which rollout strategies can I pick when I run orbit deploy?"
+
+[check]
+answer_contains = ["rolling", "blue-green", "canary"]

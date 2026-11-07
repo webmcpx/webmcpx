@@ -1,319 +1,935 @@
 {
-	"captured_on": "2026-11-07",
-	"tasks": {
-		"docs-config-path": [
-			{
-				"description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
-				"name": "fetch_as_markdown"
-			},
-			{
-				"description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
-				"name": "get_page_context"
-			},
-			{
-				"description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
-				"name": "search_page"
-			}
-		],
-		"docs-deploy-timeout": [
-			{
-				"description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
-				"name": "fetch_as_markdown"
-			},
-			{
-				"description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
-				"name": "get_page_context"
-			},
-			{
-				"description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
-				"name": "search_page"
-			}
-		],
-		"docs-exit-code": [
-			{
-				"description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
-				"name": "fetch_as_markdown"
-			},
-			{
-				"description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
-				"name": "get_page_context"
-			},
-			{
-				"description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
-				"name": "search_page"
-			}
-		],
-		"docs-retained-releases": [
-			{
-				"description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
-				"name": "fetch_as_markdown"
-			},
-			{
-				"description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
-				"name": "get_page_context"
-			},
-			{
-				"description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
-				"name": "search_page"
-			}
-		],
-		"live-allbirds-return-window": [
-			{
-				"description": "Ask the store a question about its policies and services: returns, refunds and exchanges, shipping and delivery, privacy, terms, subscriptions, contact details and opening hours, or FAQ topics such as gift wrapping. The store answers it: from its own knowledge base when the store offers Ask, otherwise from its published policies, FAQ pages and articles. Put the shopper's question in ask.query in their own words, one question per call; name the topic when the shopper only implies it (e.g. a question about sending back a gift is a returns question). Read-only: it does not change the cart, place orders, or start returns. For products, prices and availability, use search_catalog or get_product.\nExamples of questions:\n  - What is your return policy?\n  - How long does shipping to Canada take?\n  - What is your phone number?\n  - What are your hours of operation?\n  - Do you offer gift wrapping?\n",
-				"name": "ask_business"
-			},
-			{
-				"description": "Browse OR navigate to store collections. Set navigate=true whenever the user wants to be taken to a collection page in the browser (triggers: \"browse to\", \"go to\", \"show me\", \"open\", \"take me to\", \"navigate to\" a collection or category). With navigate=false (default), returns collection or product data without changing the page — use this only when the user is asking a question about the catalog, not asking to view it. Without a collection handle, lists all collections. With a handle, returns products from that collection; use \"all\" to browse everything. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Prefer this over search_catalog when the user names a category, collection, or wants to explore. With navigate=true this MOVES the browser to the collection page; the tool result confirms the destination, and no further navigation is needed to show it.",
-				"name": "browse_store"
-			},
-			{
-				"description": "Remove all items from the cart in one step. Use when the user wants to empty their cart or start over.",
-				"name": "cancel_cart"
-			},
-			{
-				"description": "Create the shopper's cart with the given items, for a shopper whose cart has no items yet. It is the tool for a shopper asking to add or buy something when the cart is empty, and that request is all the authorization it needs. Each line item names a ProductVariant GID in item.id (variant_id from search_catalog or browse_store, or variants[].id from get_product for specific options) and a quantity; every item from one request fits in one call. When the cart already has items, nothing is created or changed: the result is that existing cart with an error message, and update_cart can extend it with its current lines plus the new ones. Returns the whole resulting cart, including its id and line ids. Repeating a call with the same items leaves the cart as it is.",
-				"name": "create_cart"
-			},
-			{
-				"description": "Get the shopper's current cart: its id, every line (line id, product and variant titles, variant id, handle, URL, image, unit price, quantity, line price) and the totals. Everything needed to describe the cart to the user in natural language, without a follow-up get_product call per line. It is also where a change to an existing cart starts from: update_cart takes the cart's id and the complete set of lines the cart should hold, and create_cart applies only to a cart with no items. Works from any page.",
-				"name": "get_cart"
-			},
-			{
-				"description": "Get product details, OR navigate the browser to the product page. Set catalog.navigate=true whenever the user wants to see/view the product in the browser (triggers: \"show me\", \"open\", \"view\", \"go to\", \"take me to\", \"navigate to\" a product). Set catalog.navigate=false (default) only when you need data (description, options, variants, prices, availability) to answer a question or to prepare a cart change — the browser stays on the current page. Defaults to the current page's product if no catalog.id is provided. Does NOT add anything to the cart; use create_cart or update_cart for that. To view a specific variant (color/size/etc.) in the browser, use show_variant instead — it accepts partial option selections like \"purple\" without needing every option. To add a specific variant to the cart, call get_product with catalog.selected_options to get its variant id. With catalog.navigate=true this MOVES the browser to the product page; the tool result confirms the destination, and no further navigation is needed to show it.",
-				"name": "get_product"
-			},
-			{
-				"description": "Get this store's Universal Commerce Protocol (UCP) profile, as served at /.well-known/ucp: the UCP version, the services the store offers with their endpoints (e.g. the store's UCP MCP server), its capabilities, and its payment handlers. Use it to discover how to continue a purchase with this store over UCP, or to check which platform operates the store. Read-only; works from any page.",
-				"name": "get_ucp_profile"
-			},
-			{
-				"description": "Navigate to the customer's order history page. Use when the user asks about past orders, order status, tracking, or returns. The user will be prompted to log in if not already authenticated. This MOVES the browser to the order history page; the tool result confirms the destination, and no further navigation is needed to show it.",
-				"name": "manage_orders"
-			},
-			{
-				"description": "Proceed to checkout. Verifies the cart is not empty, then MOVES the browser to the checkout page. The tool result confirms the destination, and no further navigation is needed to show it.",
-				"name": "proceed_to_checkout"
-			},
-			{
-				"description": "Search the store catalog for products, collections, articles, and pages. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Each product carries variant_id, its selected or first available variant. If the user asks for a specific product variant, call get_product after search_catalog to get that variant's id, or use show_variant to display it.",
-				"name": "search_catalog"
-			},
-			{
-				"description": "Navigate the browser to a product page, with a specific variant OR a partial option filter selected. Use for view intents: \"show me\", \"open\", \"view\", \"go to\", \"take me to\" a specific product configuration. Accepts EITHER variant_id (fully specified variant) OR selected_options (partial, e.g. only Color=Purple) — with partial options the first matching available variant is picked automatically, so DO NOT ask the user for missing options when their intent is to view. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. For cart operations you still need a full variant_id — call get_product with the full option combination first. This MOVES the browser to the exact variant page with the variant pre-selected; the tool result confirms the destination, and no further navigation is needed to show it.",
-				"name": "show_variant"
-			},
-			{
-				"description": "Set the shopper's cart to exactly the given line items. This is a full replacement, not a patch: afterwards the cart holds these lines and only these.\n- A listed line with its line_items[].id keeps its place and is set to the given quantity, which is absolute (2 means 2, not 2 more).\n- A listed item without a line id is added, or, when that variant is already on one line of the cart, sets that line's quantity.\n- A line in the cart that is not listed is removed.\nIt takes the cart's lines as most recently returned by get_cart, create_cart or update_cart. When the cart has changed since then (for example, the shopper edited it on the page, or a new cart replaced it), or an id is given that is not the shopper's current cart, nothing changes and the result is the current cart with an error message. Since the outcome depends only on the lines sent, repeating a call leaves the cart as it is. An empty line_items list empties the cart; leaving line_items out leaves the lines as they are. Returns the whole resulting cart, including its line ids, and messages about the call.",
-				"name": "update_cart"
-			}
-		],
-		"live-cloudflare-kv-value-size": [
-			{
-				"description": "Returns a list of all Cloudflare products available in the developer documentation, including each product's name, docs URL, short description, and category group. Use this to discover what products exist before searching or navigating.",
-				"name": "list-directories"
-			},
-			{
-				"description": "Full-text search across Cloudflare developer documentation. Returns matching pages with titles, URLs, and content snippets. Use this to find documentation on any Cloudflare product or feature.",
-				"name": "search"
-			}
-		],
-		"live-notion-request-limit": [
-			{
-				"description": "Get an outline of the Notion Docs documentation, grouped by section, with a short description of each page. May be truncated for large sites; use search_docs to find pages not listed.",
-				"name": "get_site_overview"
-			},
-			{
-				"description": "Navigate the current browser tab to a Notion Docs documentation page.",
-				"name": "navigate_page"
-			},
-			{
-				"description": "Read the full content of a Notion Docs documentation page as markdown.",
-				"name": "read_page"
-			},
-			{
-				"description": "Read a Notion Docs agent skill document by name.",
-				"name": "read_skill"
-			},
-			{
-				"description": "Search the Notion Docs documentation for relevant pages and content.",
-				"name": "search_docs"
-			}
-		],
-		"live-spec-contrast": [
-			{
-				"description": "Fetch the Markdown for one spec page by its slug, returned as lines you can page through. Use this after search_spec or list_topics to read the canonical guidance.",
-				"name": "get_topic"
-			},
-			{
-				"description": "List spec topics, optionally filtered by category and/or status. Returns title, status, category, summary, and URL per topic. Use this when the user wants the canonical list (e.g. \"all required SEO topics\"). Results are paged — follow page/page_size to walk the whole list.",
-				"name": "list_topics"
-			},
-			{
-				"description": "Navigate the user to the full spec checklist page. Optionally jumps to a category section via URL hash. UI action — does not return data.",
-				"name": "open_checklist"
-			},
-			{
-				"description": "Open the on-page ⌘K search overlay so the user can search the spec interactively. Optionally pre-fills a query. UI action — does not return results; use search_spec for that.",
-				"name": "open_search"
-			},
-			{
-				"description": "Search The Website Specification for matching topics. Returns ranked results with title, status, category, canonical URL, and a one-line summary. Use this when the user asks about a topic by keyword (e.g. \"CSP\", \"alt text\", \"llms.txt\").",
-				"name": "search_spec"
-			}
-		],
-		"live-woo-cheapest-in-stock": [
-			{
-				"description": "Browse products.",
-				"name": "browse_products_api"
-			},
-			{
-				"description": "Get navigation. Returns registered menus when available, with a top-level page fallback for sites that do not use classic menus.",
-				"name": "get_navigation_api"
-			},
-			{
-				"description": "Get post. Returns a normalized content payload for a single public post, page, or public custom post type.",
-				"name": "get_post_api"
-			},
-			{
-				"description": "Get site info. Built-in standard WordPress capability. No site scan required. Returns public site metadata, front page references, and feature flags.",
-				"name": "get_site_info_api"
-			},
-			{
-				"description": "Get terms. Use this instead of category-only tools so agents can work on custom-taxonomy sites too.",
-				"name": "get_terms_api"
-			},
-			{
-				"description": "List post types. Lists public post types an agent can browse without scanning.",
-				"name": "list_post_types_api"
-			},
-			{
-				"description": "List posts. Browse recent content without needing a keyword first.",
-				"name": "list_posts_api"
-			},
-			{
-				"description": "Search posts. Searches public content across public post types with a stable schema managed by this plugin.",
-				"name": "search_posts_api"
-			},
-			{
-				"description": "Return one public product with current price, availability, and category details. Managed-stock products include exact physical units remaining in stock_quantity and availability.quantity.",
-				"name": "woo_get_product_api"
-			},
-			{
-				"description": "Get product categories. WooCommerce add-on capability for category discovery and browsing.",
-				"name": "woo_get_product_categories_api"
-			},
-			{
-				"description": "Inspect the current visitor cart once. On success, report the top-level plain-language summary to the visitor and do not repeat this tool in the same turn. The structured result also includes item quantities, coupons, and totals.",
-				"name": "woo_inspect_cart"
-			},
-			{
-				"description": "Use this tool whenever a visitor asks about current products, prices, availability, recommendations, or exact inventory quantities. For cheapest available use orderby=price, order=ASC, availability=available. Follow next with unchanged filters; use Get product for full details. Managed-stock results include exact physical units remaining in stock_quantity and availability.quantity.",
-				"name": "woo_search_products_api"
-			}
-		],
-		"live-woo-out-of-stock": [
-			{
-				"description": "Browse products.",
-				"name": "browse_products_api"
-			},
-			{
-				"description": "Get navigation. Returns registered menus when available, with a top-level page fallback for sites that do not use classic menus.",
-				"name": "get_navigation_api"
-			},
-			{
-				"description": "Get post. Returns a normalized content payload for a single public post, page, or public custom post type.",
-				"name": "get_post_api"
-			},
-			{
-				"description": "Get site info. Built-in standard WordPress capability. No site scan required. Returns public site metadata, front page references, and feature flags.",
-				"name": "get_site_info_api"
-			},
-			{
-				"description": "Get terms. Use this instead of category-only tools so agents can work on custom-taxonomy sites too.",
-				"name": "get_terms_api"
-			},
-			{
-				"description": "List post types. Lists public post types an agent can browse without scanning.",
-				"name": "list_post_types_api"
-			},
-			{
-				"description": "List posts. Browse recent content without needing a keyword first.",
-				"name": "list_posts_api"
-			},
-			{
-				"description": "Search posts. Searches public content across public post types with a stable schema managed by this plugin.",
-				"name": "search_posts_api"
-			},
-			{
-				"description": "Return one public product with current price, availability, and category details. Managed-stock products include exact physical units remaining in stock_quantity and availability.quantity.",
-				"name": "woo_get_product_api"
-			},
-			{
-				"description": "Get product categories. WooCommerce add-on capability for category discovery and browsing.",
-				"name": "woo_get_product_categories_api"
-			},
-			{
-				"description": "Inspect the current visitor cart once. On success, report the top-level plain-language summary to the visitor and do not repeat this tool in the same turn. The structured result also includes item quantities, coupons, and totals.",
-				"name": "woo_inspect_cart"
-			},
-			{
-				"description": "Use this tool whenever a visitor asks about current products, prices, availability, recommendations, or exact inventory quantities. For cheapest available use orderby=price, order=ASC, availability=available. Follow next with unchanged filters; use Get product for full details. Managed-stock results include exact physical units remaining in stock_quantity and availability.quantity.",
-				"name": "woo_search_products_api"
-			}
-		],
-		"store-cart-total": [
-			{
-				"description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
-				"name": "add_to_cart"
-			},
-			{
-				"description": "Return the cart: items with quantity and the total in USD.",
-				"name": "get_cart"
-			},
-			{
-				"description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
-				"name": "get_page_context"
-			},
-			{
-				"description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
-				"name": "search_products"
-			}
-		],
-		"store-cheapest-blue-mug": [
-			{
-				"description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
-				"name": "add_to_cart"
-			},
-			{
-				"description": "Return the cart: items with quantity and the total in USD.",
-				"name": "get_cart"
-			},
-			{
-				"description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
-				"name": "get_page_context"
-			},
-			{
-				"description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
-				"name": "search_products"
-			}
-		],
-		"store-restock-date": [
-			{
-				"description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
-				"name": "add_to_cart"
-			},
-			{
-				"description": "Return the cart: items with quantity and the total in USD.",
-				"name": "get_cart"
-			},
-			{
-				"description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
-				"name": "get_page_context"
-			},
-			{
-				"description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
-				"name": "search_products"
-			}
-		]
-	}
+  "captured_on": "2026-11-07",
+  "tasks": {
+    "docs-config-path": [
+      {
+        "description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
+        "name": "fetch_as_markdown"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
+        "name": "search_page"
+      }
+    ],
+    "docs-deploy-strategies": [
+      {
+        "description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
+        "name": "fetch_as_markdown"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
+        "name": "search_page"
+      }
+    ],
+    "docs-deploy-timeout": [
+      {
+        "description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
+        "name": "fetch_as_markdown"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
+        "name": "search_page"
+      }
+    ],
+    "docs-exit-code": [
+      {
+        "description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
+        "name": "fetch_as_markdown"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
+        "name": "search_page"
+      }
+    ],
+    "docs-retained-releases": [
+      {
+        "description": "Return the main content of the current page as Markdown. Long pages come in parts: when `truncated` is true, call again with `cursor` set to `next_cursor`.",
+        "name": "fetch_as_markdown"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Find passages on the current page that match a query. Returns up to `limit` passages ranked by relevance, each with its section heading and a link to it. Prefer it to reading the whole page when looking for something specific.",
+        "name": "search_page"
+      }
+    ],
+    "live-allbirds-exchange-country": [
+      {
+        "description": "Ask the store a question about its policies and services: returns, refunds and exchanges, shipping and delivery, privacy, terms, subscriptions, contact details and opening hours, or FAQ topics such as gift wrapping. The store answers it: from its own knowledge base when the store offers Ask, otherwise from its published policies, FAQ pages and articles. Put the shopper's question in ask.query in their own words, one question per call; name the topic when the shopper only implies it (e.g. a question about sending back a gift is a returns question). Read-only: it does not change the cart, place orders, or start returns. For products, prices and availability, use search_catalog or get_product.\nExamples of questions:\n  - What is your return policy?\n  - How long does shipping to Canada take?\n  - What is your phone number?\n  - What are your hours of operation?\n  - Do you offer gift wrapping?\n",
+        "name": "ask_business"
+      },
+      {
+        "description": "Browse OR navigate to store collections. Set navigate=true whenever the user wants to be taken to a collection page in the browser (triggers: \"browse to\", \"go to\", \"show me\", \"open\", \"take me to\", \"navigate to\" a collection or category). With navigate=false (default), returns collection or product data without changing the page — use this only when the user is asking a question about the catalog, not asking to view it. Without a collection handle, lists all collections. With a handle, returns products from that collection; use \"all\" to browse everything. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Prefer this over search_catalog when the user names a category, collection, or wants to explore. With navigate=true this MOVES the browser to the collection page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "browse_store"
+      },
+      {
+        "description": "Remove all items from the cart in one step. Use when the user wants to empty their cart or start over.",
+        "name": "cancel_cart"
+      },
+      {
+        "description": "Create the shopper's cart with the given items, for a shopper whose cart has no items yet. It is the tool for a shopper asking to add or buy something when the cart is empty, and that request is all the authorization it needs. Each line item names a ProductVariant GID in item.id (variant_id from search_catalog or browse_store, or variants[].id from get_product for specific options) and a quantity; every item from one request fits in one call. When the cart already has items, nothing is created or changed: the result is that existing cart with an error message, and update_cart can extend it with its current lines plus the new ones. Returns the whole resulting cart, including its id and line ids. Repeating a call with the same items leaves the cart as it is.",
+        "name": "create_cart"
+      },
+      {
+        "description": "Get the shopper's current cart: its id, every line (line id, product and variant titles, variant id, handle, URL, image, unit price, quantity, line price) and the totals. Everything needed to describe the cart to the user in natural language, without a follow-up get_product call per line. It is also where a change to an existing cart starts from: update_cart takes the cart's id and the complete set of lines the cart should hold, and create_cart applies only to a cart with no items. Works from any page.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Get product details, OR navigate the browser to the product page. Set catalog.navigate=true whenever the user wants to see/view the product in the browser (triggers: \"show me\", \"open\", \"view\", \"go to\", \"take me to\", \"navigate to\" a product). Set catalog.navigate=false (default) only when you need data (description, options, variants, prices, availability) to answer a question or to prepare a cart change — the browser stays on the current page. Defaults to the current page's product if no catalog.id is provided. Does NOT add anything to the cart; use create_cart or update_cart for that. To view a specific variant (color/size/etc.) in the browser, use show_variant instead — it accepts partial option selections like \"purple\" without needing every option. To add a specific variant to the cart, call get_product with catalog.selected_options to get its variant id. With catalog.navigate=true this MOVES the browser to the product page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "get_product"
+      },
+      {
+        "description": "Get this store's Universal Commerce Protocol (UCP) profile, as served at /.well-known/ucp: the UCP version, the services the store offers with their endpoints (e.g. the store's UCP MCP server), its capabilities, and its payment handlers. Use it to discover how to continue a purchase with this store over UCP, or to check which platform operates the store. Read-only; works from any page.",
+        "name": "get_ucp_profile"
+      },
+      {
+        "description": "Navigate to the customer's order history page. Use when the user asks about past orders, order status, tracking, or returns. The user will be prompted to log in if not already authenticated. This MOVES the browser to the order history page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "manage_orders"
+      },
+      {
+        "description": "Proceed to checkout. Verifies the cart is not empty, then MOVES the browser to the checkout page. The tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "proceed_to_checkout"
+      },
+      {
+        "description": "Search the store catalog for products, collections, articles, and pages. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Each product carries variant_id, its selected or first available variant. If the user asks for a specific product variant, call get_product after search_catalog to get that variant's id, or use show_variant to display it.",
+        "name": "search_catalog"
+      },
+      {
+        "description": "Navigate the browser to a product page, with a specific variant OR a partial option filter selected. Use for view intents: \"show me\", \"open\", \"view\", \"go to\", \"take me to\" a specific product configuration. Accepts EITHER variant_id (fully specified variant) OR selected_options (partial, e.g. only Color=Purple) — with partial options the first matching available variant is picked automatically, so DO NOT ask the user for missing options when their intent is to view. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. For cart operations you still need a full variant_id — call get_product with the full option combination first. This MOVES the browser to the exact variant page with the variant pre-selected; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "show_variant"
+      },
+      {
+        "description": "Set the shopper's cart to exactly the given line items. This is a full replacement, not a patch: afterwards the cart holds these lines and only these.\n- A listed line with its line_items[].id keeps its place and is set to the given quantity, which is absolute (2 means 2, not 2 more).\n- A listed item without a line id is added, or, when that variant is already on one line of the cart, sets that line's quantity.\n- A line in the cart that is not listed is removed.\nIt takes the cart's lines as most recently returned by get_cart, create_cart or update_cart. When the cart has changed since then (for example, the shopper edited it on the page, or a new cart replaced it), or an id is given that is not the shopper's current cart, nothing changes and the result is the current cart with an error message. Since the outcome depends only on the lines sent, repeating a call leaves the cart as it is. An empty line_items list empties the cart; leaving line_items out leaves the lines as they are. Returns the whole resulting cart, including its line ids, and messages about the call.",
+        "name": "update_cart"
+      }
+    ],
+    "live-allbirds-order-processing": [
+      {
+        "description": "Ask the store a question about its policies and services: returns, refunds and exchanges, shipping and delivery, privacy, terms, subscriptions, contact details and opening hours, or FAQ topics such as gift wrapping. The store answers it: from its own knowledge base when the store offers Ask, otherwise from its published policies, FAQ pages and articles. Put the shopper's question in ask.query in their own words, one question per call; name the topic when the shopper only implies it (e.g. a question about sending back a gift is a returns question). Read-only: it does not change the cart, place orders, or start returns. For products, prices and availability, use search_catalog or get_product.\nExamples of questions:\n  - What is your return policy?\n  - How long does shipping to Canada take?\n  - What is your phone number?\n  - What are your hours of operation?\n  - Do you offer gift wrapping?\n",
+        "name": "ask_business"
+      },
+      {
+        "description": "Browse OR navigate to store collections. Set navigate=true whenever the user wants to be taken to a collection page in the browser (triggers: \"browse to\", \"go to\", \"show me\", \"open\", \"take me to\", \"navigate to\" a collection or category). With navigate=false (default), returns collection or product data without changing the page — use this only when the user is asking a question about the catalog, not asking to view it. Without a collection handle, lists all collections. With a handle, returns products from that collection; use \"all\" to browse everything. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Prefer this over search_catalog when the user names a category, collection, or wants to explore. With navigate=true this MOVES the browser to the collection page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "browse_store"
+      },
+      {
+        "description": "Remove all items from the cart in one step. Use when the user wants to empty their cart or start over.",
+        "name": "cancel_cart"
+      },
+      {
+        "description": "Create the shopper's cart with the given items, for a shopper whose cart has no items yet. It is the tool for a shopper asking to add or buy something when the cart is empty, and that request is all the authorization it needs. Each line item names a ProductVariant GID in item.id (variant_id from search_catalog or browse_store, or variants[].id from get_product for specific options) and a quantity; every item from one request fits in one call. When the cart already has items, nothing is created or changed: the result is that existing cart with an error message, and update_cart can extend it with its current lines plus the new ones. Returns the whole resulting cart, including its id and line ids. Repeating a call with the same items leaves the cart as it is.",
+        "name": "create_cart"
+      },
+      {
+        "description": "Get the shopper's current cart: its id, every line (line id, product and variant titles, variant id, handle, URL, image, unit price, quantity, line price) and the totals. Everything needed to describe the cart to the user in natural language, without a follow-up get_product call per line. It is also where a change to an existing cart starts from: update_cart takes the cart's id and the complete set of lines the cart should hold, and create_cart applies only to a cart with no items. Works from any page.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Get product details, OR navigate the browser to the product page. Set catalog.navigate=true whenever the user wants to see/view the product in the browser (triggers: \"show me\", \"open\", \"view\", \"go to\", \"take me to\", \"navigate to\" a product). Set catalog.navigate=false (default) only when you need data (description, options, variants, prices, availability) to answer a question or to prepare a cart change — the browser stays on the current page. Defaults to the current page's product if no catalog.id is provided. Does NOT add anything to the cart; use create_cart or update_cart for that. To view a specific variant (color/size/etc.) in the browser, use show_variant instead — it accepts partial option selections like \"purple\" without needing every option. To add a specific variant to the cart, call get_product with catalog.selected_options to get its variant id. With catalog.navigate=true this MOVES the browser to the product page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "get_product"
+      },
+      {
+        "description": "Get this store's Universal Commerce Protocol (UCP) profile, as served at /.well-known/ucp: the UCP version, the services the store offers with their endpoints (e.g. the store's UCP MCP server), its capabilities, and its payment handlers. Use it to discover how to continue a purchase with this store over UCP, or to check which platform operates the store. Read-only; works from any page.",
+        "name": "get_ucp_profile"
+      },
+      {
+        "description": "Navigate to the customer's order history page. Use when the user asks about past orders, order status, tracking, or returns. The user will be prompted to log in if not already authenticated. This MOVES the browser to the order history page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "manage_orders"
+      },
+      {
+        "description": "Proceed to checkout. Verifies the cart is not empty, then MOVES the browser to the checkout page. The tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "proceed_to_checkout"
+      },
+      {
+        "description": "Search the store catalog for products, collections, articles, and pages. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Each product carries variant_id, its selected or first available variant. If the user asks for a specific product variant, call get_product after search_catalog to get that variant's id, or use show_variant to display it.",
+        "name": "search_catalog"
+      },
+      {
+        "description": "Navigate the browser to a product page, with a specific variant OR a partial option filter selected. Use for view intents: \"show me\", \"open\", \"view\", \"go to\", \"take me to\" a specific product configuration. Accepts EITHER variant_id (fully specified variant) OR selected_options (partial, e.g. only Color=Purple) — with partial options the first matching available variant is picked automatically, so DO NOT ask the user for missing options when their intent is to view. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. For cart operations you still need a full variant_id — call get_product with the full option combination first. This MOVES the browser to the exact variant page with the variant pre-selected; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "show_variant"
+      },
+      {
+        "description": "Set the shopper's cart to exactly the given line items. This is a full replacement, not a patch: afterwards the cart holds these lines and only these.\n- A listed line with its line_items[].id keeps its place and is set to the given quantity, which is absolute (2 means 2, not 2 more).\n- A listed item without a line id is added, or, when that variant is already on one line of the cart, sets that line's quantity.\n- A line in the cart that is not listed is removed.\nIt takes the cart's lines as most recently returned by get_cart, create_cart or update_cart. When the cart has changed since then (for example, the shopper edited it on the page, or a new cart replaced it), or an id is given that is not the shopper's current cart, nothing changes and the result is the current cart with an error message. Since the outcome depends only on the lines sent, repeating a call leaves the cart as it is. An empty line_items list empties the cart; leaving line_items out leaves the lines as they are. Returns the whole resulting cart, including its line ids, and messages about the call.",
+        "name": "update_cart"
+      }
+    ],
+    "live-allbirds-refund-method": [
+      {
+        "description": "Ask the store a question about its policies and services: returns, refunds and exchanges, shipping and delivery, privacy, terms, subscriptions, contact details and opening hours, or FAQ topics such as gift wrapping. The store answers it: from its own knowledge base when the store offers Ask, otherwise from its published policies, FAQ pages and articles. Put the shopper's question in ask.query in their own words, one question per call; name the topic when the shopper only implies it (e.g. a question about sending back a gift is a returns question). Read-only: it does not change the cart, place orders, or start returns. For products, prices and availability, use search_catalog or get_product.\nExamples of questions:\n  - What is your return policy?\n  - How long does shipping to Canada take?\n  - What is your phone number?\n  - What are your hours of operation?\n  - Do you offer gift wrapping?\n",
+        "name": "ask_business"
+      },
+      {
+        "description": "Browse OR navigate to store collections. Set navigate=true whenever the user wants to be taken to a collection page in the browser (triggers: \"browse to\", \"go to\", \"show me\", \"open\", \"take me to\", \"navigate to\" a collection or category). With navigate=false (default), returns collection or product data without changing the page — use this only when the user is asking a question about the catalog, not asking to view it. Without a collection handle, lists all collections. With a handle, returns products from that collection; use \"all\" to browse everything. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Prefer this over search_catalog when the user names a category, collection, or wants to explore. With navigate=true this MOVES the browser to the collection page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "browse_store"
+      },
+      {
+        "description": "Remove all items from the cart in one step. Use when the user wants to empty their cart or start over.",
+        "name": "cancel_cart"
+      },
+      {
+        "description": "Create the shopper's cart with the given items, for a shopper whose cart has no items yet. It is the tool for a shopper asking to add or buy something when the cart is empty, and that request is all the authorization it needs. Each line item names a ProductVariant GID in item.id (variant_id from search_catalog or browse_store, or variants[].id from get_product for specific options) and a quantity; every item from one request fits in one call. When the cart already has items, nothing is created or changed: the result is that existing cart with an error message, and update_cart can extend it with its current lines plus the new ones. Returns the whole resulting cart, including its id and line ids. Repeating a call with the same items leaves the cart as it is.",
+        "name": "create_cart"
+      },
+      {
+        "description": "Get the shopper's current cart: its id, every line (line id, product and variant titles, variant id, handle, URL, image, unit price, quantity, line price) and the totals. Everything needed to describe the cart to the user in natural language, without a follow-up get_product call per line. It is also where a change to an existing cart starts from: update_cart takes the cart's id and the complete set of lines the cart should hold, and create_cart applies only to a cart with no items. Works from any page.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Get product details, OR navigate the browser to the product page. Set catalog.navigate=true whenever the user wants to see/view the product in the browser (triggers: \"show me\", \"open\", \"view\", \"go to\", \"take me to\", \"navigate to\" a product). Set catalog.navigate=false (default) only when you need data (description, options, variants, prices, availability) to answer a question or to prepare a cart change — the browser stays on the current page. Defaults to the current page's product if no catalog.id is provided. Does NOT add anything to the cart; use create_cart or update_cart for that. To view a specific variant (color/size/etc.) in the browser, use show_variant instead — it accepts partial option selections like \"purple\" without needing every option. To add a specific variant to the cart, call get_product with catalog.selected_options to get its variant id. With catalog.navigate=true this MOVES the browser to the product page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "get_product"
+      },
+      {
+        "description": "Get this store's Universal Commerce Protocol (UCP) profile, as served at /.well-known/ucp: the UCP version, the services the store offers with their endpoints (e.g. the store's UCP MCP server), its capabilities, and its payment handlers. Use it to discover how to continue a purchase with this store over UCP, or to check which platform operates the store. Read-only; works from any page.",
+        "name": "get_ucp_profile"
+      },
+      {
+        "description": "Navigate to the customer's order history page. Use when the user asks about past orders, order status, tracking, or returns. The user will be prompted to log in if not already authenticated. This MOVES the browser to the order history page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "manage_orders"
+      },
+      {
+        "description": "Proceed to checkout. Verifies the cart is not empty, then MOVES the browser to the checkout page. The tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "proceed_to_checkout"
+      },
+      {
+        "description": "Search the store catalog for products, collections, articles, and pages. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Each product carries variant_id, its selected or first available variant. If the user asks for a specific product variant, call get_product after search_catalog to get that variant's id, or use show_variant to display it.",
+        "name": "search_catalog"
+      },
+      {
+        "description": "Navigate the browser to a product page, with a specific variant OR a partial option filter selected. Use for view intents: \"show me\", \"open\", \"view\", \"go to\", \"take me to\" a specific product configuration. Accepts EITHER variant_id (fully specified variant) OR selected_options (partial, e.g. only Color=Purple) — with partial options the first matching available variant is picked automatically, so DO NOT ask the user for missing options when their intent is to view. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. For cart operations you still need a full variant_id — call get_product with the full option combination first. This MOVES the browser to the exact variant page with the variant pre-selected; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "show_variant"
+      },
+      {
+        "description": "Set the shopper's cart to exactly the given line items. This is a full replacement, not a patch: afterwards the cart holds these lines and only these.\n- A listed line with its line_items[].id keeps its place and is set to the given quantity, which is absolute (2 means 2, not 2 more).\n- A listed item without a line id is added, or, when that variant is already on one line of the cart, sets that line's quantity.\n- A line in the cart that is not listed is removed.\nIt takes the cart's lines as most recently returned by get_cart, create_cart or update_cart. When the cart has changed since then (for example, the shopper edited it on the page, or a new cart replaced it), or an id is given that is not the shopper's current cart, nothing changes and the result is the current cart with an error message. Since the outcome depends only on the lines sent, repeating a call leaves the cart as it is. An empty line_items list empties the cart; leaving line_items out leaves the lines as they are. Returns the whole resulting cart, including its line ids, and messages about the call.",
+        "name": "update_cart"
+      }
+    ],
+    "live-allbirds-return-window": [
+      {
+        "description": "Ask the store a question about its policies and services: returns, refunds and exchanges, shipping and delivery, privacy, terms, subscriptions, contact details and opening hours, or FAQ topics such as gift wrapping. The store answers it: from its own knowledge base when the store offers Ask, otherwise from its published policies, FAQ pages and articles. Put the shopper's question in ask.query in their own words, one question per call; name the topic when the shopper only implies it (e.g. a question about sending back a gift is a returns question). Read-only: it does not change the cart, place orders, or start returns. For products, prices and availability, use search_catalog or get_product.\nExamples of questions:\n  - What is your return policy?\n  - How long does shipping to Canada take?\n  - What is your phone number?\n  - What are your hours of operation?\n  - Do you offer gift wrapping?\n",
+        "name": "ask_business"
+      },
+      {
+        "description": "Browse OR navigate to store collections. Set navigate=true whenever the user wants to be taken to a collection page in the browser (triggers: \"browse to\", \"go to\", \"show me\", \"open\", \"take me to\", \"navigate to\" a collection or category). With navigate=false (default), returns collection or product data without changing the page — use this only when the user is asking a question about the catalog, not asking to view it. Without a collection handle, lists all collections. With a handle, returns products from that collection; use \"all\" to browse everything. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Prefer this over search_catalog when the user names a category, collection, or wants to explore. With navigate=true this MOVES the browser to the collection page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "browse_store"
+      },
+      {
+        "description": "Remove all items from the cart in one step. Use when the user wants to empty their cart or start over.",
+        "name": "cancel_cart"
+      },
+      {
+        "description": "Create the shopper's cart with the given items, for a shopper whose cart has no items yet. It is the tool for a shopper asking to add or buy something when the cart is empty, and that request is all the authorization it needs. Each line item names a ProductVariant GID in item.id (variant_id from search_catalog or browse_store, or variants[].id from get_product for specific options) and a quantity; every item from one request fits in one call. When the cart already has items, nothing is created or changed: the result is that existing cart with an error message, and update_cart can extend it with its current lines plus the new ones. Returns the whole resulting cart, including its id and line ids. Repeating a call with the same items leaves the cart as it is.",
+        "name": "create_cart"
+      },
+      {
+        "description": "Get the shopper's current cart: its id, every line (line id, product and variant titles, variant id, handle, URL, image, unit price, quantity, line price) and the totals. Everything needed to describe the cart to the user in natural language, without a follow-up get_product call per line. It is also where a change to an existing cart starts from: update_cart takes the cart's id and the complete set of lines the cart should hold, and create_cart applies only to a cart with no items. Works from any page.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Get product details, OR navigate the browser to the product page. Set catalog.navigate=true whenever the user wants to see/view the product in the browser (triggers: \"show me\", \"open\", \"view\", \"go to\", \"take me to\", \"navigate to\" a product). Set catalog.navigate=false (default) only when you need data (description, options, variants, prices, availability) to answer a question or to prepare a cart change — the browser stays on the current page. Defaults to the current page's product if no catalog.id is provided. Does NOT add anything to the cart; use create_cart or update_cart for that. To view a specific variant (color/size/etc.) in the browser, use show_variant instead — it accepts partial option selections like \"purple\" without needing every option. To add a specific variant to the cart, call get_product with catalog.selected_options to get its variant id. With catalog.navigate=true this MOVES the browser to the product page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "get_product"
+      },
+      {
+        "description": "Get this store's Universal Commerce Protocol (UCP) profile, as served at /.well-known/ucp: the UCP version, the services the store offers with their endpoints (e.g. the store's UCP MCP server), its capabilities, and its payment handlers. Use it to discover how to continue a purchase with this store over UCP, or to check which platform operates the store. Read-only; works from any page.",
+        "name": "get_ucp_profile"
+      },
+      {
+        "description": "Navigate to the customer's order history page. Use when the user asks about past orders, order status, tracking, or returns. The user will be prompted to log in if not already authenticated. This MOVES the browser to the order history page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "manage_orders"
+      },
+      {
+        "description": "Proceed to checkout. Verifies the cart is not empty, then MOVES the browser to the checkout page. The tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "proceed_to_checkout"
+      },
+      {
+        "description": "Search the store catalog for products, collections, articles, and pages. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Each product carries variant_id, its selected or first available variant. If the user asks for a specific product variant, call get_product after search_catalog to get that variant's id, or use show_variant to display it.",
+        "name": "search_catalog"
+      },
+      {
+        "description": "Navigate the browser to a product page, with a specific variant OR a partial option filter selected. Use for view intents: \"show me\", \"open\", \"view\", \"go to\", \"take me to\" a specific product configuration. Accepts EITHER variant_id (fully specified variant) OR selected_options (partial, e.g. only Color=Purple) — with partial options the first matching available variant is picked automatically, so DO NOT ask the user for missing options when their intent is to view. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. For cart operations you still need a full variant_id — call get_product with the full option combination first. This MOVES the browser to the exact variant page with the variant pre-selected; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "show_variant"
+      },
+      {
+        "description": "Set the shopper's cart to exactly the given line items. This is a full replacement, not a patch: afterwards the cart holds these lines and only these.\n- A listed line with its line_items[].id keeps its place and is set to the given quantity, which is absolute (2 means 2, not 2 more).\n- A listed item without a line id is added, or, when that variant is already on one line of the cart, sets that line's quantity.\n- A line in the cart that is not listed is removed.\nIt takes the cart's lines as most recently returned by get_cart, create_cart or update_cart. When the cart has changed since then (for example, the shopper edited it on the page, or a new cart replaced it), or an id is given that is not the shopper's current cart, nothing changes and the result is the current cart with an error message. Since the outcome depends only on the lines sent, repeating a call leaves the cart as it is. An empty line_items list empties the cart; leaving line_items out leaves the lines as they are. Returns the whole resulting cart, including its line ids, and messages about the call.",
+        "name": "update_cart"
+      }
+    ],
+    "live-allbirds-sock-returns": [
+      {
+        "description": "Ask the store a question about its policies and services: returns, refunds and exchanges, shipping and delivery, privacy, terms, subscriptions, contact details and opening hours, or FAQ topics such as gift wrapping. The store answers it: from its own knowledge base when the store offers Ask, otherwise from its published policies, FAQ pages and articles. Put the shopper's question in ask.query in their own words, one question per call; name the topic when the shopper only implies it (e.g. a question about sending back a gift is a returns question). Read-only: it does not change the cart, place orders, or start returns. For products, prices and availability, use search_catalog or get_product.\nExamples of questions:\n  - What is your return policy?\n  - How long does shipping to Canada take?\n  - What is your phone number?\n  - What are your hours of operation?\n  - Do you offer gift wrapping?\n",
+        "name": "ask_business"
+      },
+      {
+        "description": "Browse OR navigate to store collections. Set navigate=true whenever the user wants to be taken to a collection page in the browser (triggers: \"browse to\", \"go to\", \"show me\", \"open\", \"take me to\", \"navigate to\" a collection or category). With navigate=false (default), returns collection or product data without changing the page — use this only when the user is asking a question about the catalog, not asking to view it. Without a collection handle, lists all collections. With a handle, returns products from that collection; use \"all\" to browse everything. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Prefer this over search_catalog when the user names a category, collection, or wants to explore. With navigate=true this MOVES the browser to the collection page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "browse_store"
+      },
+      {
+        "description": "Remove all items from the cart in one step. Use when the user wants to empty their cart or start over.",
+        "name": "cancel_cart"
+      },
+      {
+        "description": "Create the shopper's cart with the given items, for a shopper whose cart has no items yet. It is the tool for a shopper asking to add or buy something when the cart is empty, and that request is all the authorization it needs. Each line item names a ProductVariant GID in item.id (variant_id from search_catalog or browse_store, or variants[].id from get_product for specific options) and a quantity; every item from one request fits in one call. When the cart already has items, nothing is created or changed: the result is that existing cart with an error message, and update_cart can extend it with its current lines plus the new ones. Returns the whole resulting cart, including its id and line ids. Repeating a call with the same items leaves the cart as it is.",
+        "name": "create_cart"
+      },
+      {
+        "description": "Get the shopper's current cart: its id, every line (line id, product and variant titles, variant id, handle, URL, image, unit price, quantity, line price) and the totals. Everything needed to describe the cart to the user in natural language, without a follow-up get_product call per line. It is also where a change to an existing cart starts from: update_cart takes the cart's id and the complete set of lines the cart should hold, and create_cart applies only to a cart with no items. Works from any page.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Get product details, OR navigate the browser to the product page. Set catalog.navigate=true whenever the user wants to see/view the product in the browser (triggers: \"show me\", \"open\", \"view\", \"go to\", \"take me to\", \"navigate to\" a product). Set catalog.navigate=false (default) only when you need data (description, options, variants, prices, availability) to answer a question or to prepare a cart change — the browser stays on the current page. Defaults to the current page's product if no catalog.id is provided. Does NOT add anything to the cart; use create_cart or update_cart for that. To view a specific variant (color/size/etc.) in the browser, use show_variant instead — it accepts partial option selections like \"purple\" without needing every option. To add a specific variant to the cart, call get_product with catalog.selected_options to get its variant id. With catalog.navigate=true this MOVES the browser to the product page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "get_product"
+      },
+      {
+        "description": "Get this store's Universal Commerce Protocol (UCP) profile, as served at /.well-known/ucp: the UCP version, the services the store offers with their endpoints (e.g. the store's UCP MCP server), its capabilities, and its payment handlers. Use it to discover how to continue a purchase with this store over UCP, or to check which platform operates the store. Read-only; works from any page.",
+        "name": "get_ucp_profile"
+      },
+      {
+        "description": "Navigate to the customer's order history page. Use when the user asks about past orders, order status, tracking, or returns. The user will be prompted to log in if not already authenticated. This MOVES the browser to the order history page; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "manage_orders"
+      },
+      {
+        "description": "Proceed to checkout. Verifies the cart is not empty, then MOVES the browser to the checkout page. The tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "proceed_to_checkout"
+      },
+      {
+        "description": "Search the store catalog for products, collections, articles, and pages. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. Each product carries variant_id, its selected or first available variant. If the user asks for a specific product variant, call get_product after search_catalog to get that variant's id, or use show_variant to display it.",
+        "name": "search_catalog"
+      },
+      {
+        "description": "Navigate the browser to a product page, with a specific variant OR a partial option filter selected. Use for view intents: \"show me\", \"open\", \"view\", \"go to\", \"take me to\" a specific product configuration. Accepts EITHER variant_id (fully specified variant) OR selected_options (partial, e.g. only Color=Purple) — with partial options the first matching available variant is picked automatically, so DO NOT ask the user for missing options when their intent is to view. Does NOT add anything to the cart; use create_cart or update_cart for cart changes. For cart operations you still need a full variant_id — call get_product with the full option combination first. This MOVES the browser to the exact variant page with the variant pre-selected; the tool result confirms the destination, and no further navigation is needed to show it.",
+        "name": "show_variant"
+      },
+      {
+        "description": "Set the shopper's cart to exactly the given line items. This is a full replacement, not a patch: afterwards the cart holds these lines and only these.\n- A listed line with its line_items[].id keeps its place and is set to the given quantity, which is absolute (2 means 2, not 2 more).\n- A listed item without a line id is added, or, when that variant is already on one line of the cart, sets that line's quantity.\n- A line in the cart that is not listed is removed.\nIt takes the cart's lines as most recently returned by get_cart, create_cart or update_cart. When the cart has changed since then (for example, the shopper edited it on the page, or a new cart replaced it), or an id is given that is not the shopper's current cart, nothing changes and the result is the current cart with an error message. Since the outcome depends only on the lines sent, repeating a call leaves the cart as it is. An empty line_items list empties the cart; leaving line_items out leaves the lines as they are. Returns the whole resulting cart, including its line ids, and messages about the call.",
+        "name": "update_cart"
+      }
+    ],
+    "live-cloudflare-d1-database-size": [
+      {
+        "description": "Returns a list of all Cloudflare products available in the developer documentation, including each product's name, docs URL, short description, and category group. Use this to discover what products exist before searching or navigating.",
+        "name": "list-directories"
+      },
+      {
+        "description": "Full-text search across Cloudflare developer documentation. Returns matching pages with titles, URLs, and content snippets. Use this to find documentation on any Cloudflare product or feature.",
+        "name": "search"
+      }
+    ],
+    "live-cloudflare-kv-key-size": [
+      {
+        "description": "Returns a list of all Cloudflare products available in the developer documentation, including each product's name, docs URL, short description, and category group. Use this to discover what products exist before searching or navigating.",
+        "name": "list-directories"
+      },
+      {
+        "description": "Full-text search across Cloudflare developer documentation. Returns matching pages with titles, URLs, and content snippets. Use this to find documentation on any Cloudflare product or feature.",
+        "name": "search"
+      }
+    ],
+    "live-cloudflare-kv-value-size": [
+      {
+        "description": "Returns a list of all Cloudflare products available in the developer documentation, including each product's name, docs URL, short description, and category group. Use this to discover what products exist before searching or navigating.",
+        "name": "list-directories"
+      },
+      {
+        "description": "Full-text search across Cloudflare developer documentation. Returns matching pages with titles, URLs, and content snippets. Use this to find documentation on any Cloudflare product or feature.",
+        "name": "search"
+      }
+    ],
+    "live-cloudflare-queues-message-size": [
+      {
+        "description": "Returns a list of all Cloudflare products available in the developer documentation, including each product's name, docs URL, short description, and category group. Use this to discover what products exist before searching or navigating.",
+        "name": "list-directories"
+      },
+      {
+        "description": "Full-text search across Cloudflare developer documentation. Returns matching pages with titles, URLs, and content snippets. Use this to find documentation on any Cloudflare product or feature.",
+        "name": "search"
+      }
+    ],
+    "live-cloudflare-workers-free-requests": [
+      {
+        "description": "Returns a list of all Cloudflare products available in the developer documentation, including each product's name, docs URL, short description, and category group. Use this to discover what products exist before searching or navigating.",
+        "name": "list-directories"
+      },
+      {
+        "description": "Full-text search across Cloudflare developer documentation. Returns matching pages with titles, URLs, and content snippets. Use this to find documentation on any Cloudflare product or feature.",
+        "name": "search"
+      }
+    ],
+    "live-notion-page-size": [
+      {
+        "description": "Get an outline of the Notion Docs documentation, grouped by section, with a short description of each page. May be truncated for large sites; use search_docs to find pages not listed.",
+        "name": "get_site_overview"
+      },
+      {
+        "description": "Navigate the current browser tab to a Notion Docs documentation page.",
+        "name": "navigate_page"
+      },
+      {
+        "description": "Read the full content of a Notion Docs documentation page as markdown.",
+        "name": "read_page"
+      },
+      {
+        "description": "Read a Notion Docs agent skill document by name.",
+        "name": "read_skill"
+      },
+      {
+        "description": "Search the Notion Docs documentation for relevant pages and content.",
+        "name": "search_docs"
+      }
+    ],
+    "live-notion-rate-limit-code": [
+      {
+        "description": "Get an outline of the Notion Docs documentation, grouped by section, with a short description of each page. May be truncated for large sites; use search_docs to find pages not listed.",
+        "name": "get_site_overview"
+      },
+      {
+        "description": "Navigate the current browser tab to a Notion Docs documentation page.",
+        "name": "navigate_page"
+      },
+      {
+        "description": "Read the full content of a Notion Docs documentation page as markdown.",
+        "name": "read_page"
+      },
+      {
+        "description": "Read a Notion Docs agent skill document by name.",
+        "name": "read_skill"
+      },
+      {
+        "description": "Search the Notion Docs documentation for relevant pages and content.",
+        "name": "search_docs"
+      }
+    ],
+    "live-notion-request-limit": [
+      {
+        "description": "Get an outline of the Notion Docs documentation, grouped by section, with a short description of each page. May be truncated for large sites; use search_docs to find pages not listed.",
+        "name": "get_site_overview"
+      },
+      {
+        "description": "Navigate the current browser tab to a Notion Docs documentation page.",
+        "name": "navigate_page"
+      },
+      {
+        "description": "Read the full content of a Notion Docs documentation page as markdown.",
+        "name": "read_page"
+      },
+      {
+        "description": "Read a Notion Docs agent skill document by name.",
+        "name": "read_skill"
+      },
+      {
+        "description": "Search the Notion Docs documentation for relevant pages and content.",
+        "name": "search_docs"
+      }
+    ],
+    "live-notion-rich-text-limit": [
+      {
+        "description": "Get an outline of the Notion Docs documentation, grouped by section, with a short description of each page. May be truncated for large sites; use search_docs to find pages not listed.",
+        "name": "get_site_overview"
+      },
+      {
+        "description": "Navigate the current browser tab to a Notion Docs documentation page.",
+        "name": "navigate_page"
+      },
+      {
+        "description": "Read the full content of a Notion Docs documentation page as markdown.",
+        "name": "read_page"
+      },
+      {
+        "description": "Read a Notion Docs agent skill document by name.",
+        "name": "read_skill"
+      },
+      {
+        "description": "Search the Notion Docs documentation for relevant pages and content.",
+        "name": "search_docs"
+      }
+    ],
+    "live-notion-upload-size": [
+      {
+        "description": "Get an outline of the Notion Docs documentation, grouped by section, with a short description of each page. May be truncated for large sites; use search_docs to find pages not listed.",
+        "name": "get_site_overview"
+      },
+      {
+        "description": "Navigate the current browser tab to a Notion Docs documentation page.",
+        "name": "navigate_page"
+      },
+      {
+        "description": "Read the full content of a Notion Docs documentation page as markdown.",
+        "name": "read_page"
+      },
+      {
+        "description": "Read a Notion Docs agent skill document by name.",
+        "name": "read_skill"
+      },
+      {
+        "description": "Search the Notion Docs documentation for relevant pages and content.",
+        "name": "search_docs"
+      }
+    ],
+    "live-spec-contrast": [
+      {
+        "description": "Fetch the Markdown for one spec page by its slug, returned as lines you can page through. Use this after search_spec or list_topics to read the canonical guidance.",
+        "name": "get_topic"
+      },
+      {
+        "description": "List spec topics, optionally filtered by category and/or status. Returns title, status, category, summary, and URL per topic. Use this when the user wants the canonical list (e.g. \"all required SEO topics\"). Results are paged — follow page/page_size to walk the whole list.",
+        "name": "list_topics"
+      },
+      {
+        "description": "Navigate the user to the full spec checklist page. Optionally jumps to a category section via URL hash. UI action — does not return data.",
+        "name": "open_checklist"
+      },
+      {
+        "description": "Open the on-page ⌘K search overlay so the user can search the spec interactively. Optionally pre-fills a query. UI action — does not return results; use search_spec for that.",
+        "name": "open_search"
+      },
+      {
+        "description": "Search The Website Specification for matching topics. Returns ranked results with title, status, category, canonical URL, and a one-line summary. Use this when the user asks about a topic by keyword (e.g. \"CSP\", \"alt text\", \"llms.txt\").",
+        "name": "search_spec"
+      }
+    ],
+    "live-spec-hsts": [
+      {
+        "description": "Fetch the Markdown for one spec page by its slug, returned as lines you can page through. Use this after search_spec or list_topics to read the canonical guidance.",
+        "name": "get_topic"
+      },
+      {
+        "description": "List spec topics, optionally filtered by category and/or status. Returns title, status, category, summary, and URL per topic. Use this when the user wants the canonical list (e.g. \"all required SEO topics\"). Results are paged — follow page/page_size to walk the whole list.",
+        "name": "list_topics"
+      },
+      {
+        "description": "Navigate the user to the full spec checklist page. Optionally jumps to a category section via URL hash. UI action — does not return data.",
+        "name": "open_checklist"
+      },
+      {
+        "description": "Open the on-page ⌘K search overlay so the user can search the spec interactively. Optionally pre-fills a query. UI action — does not return results; use search_spec for that.",
+        "name": "open_search"
+      },
+      {
+        "description": "Search The Website Specification for matching topics. Returns ranked results with title, status, category, canonical URL, and a one-line summary. Use this when the user asks about a topic by keyword (e.g. \"CSP\", \"alt text\", \"llms.txt\").",
+        "name": "search_spec"
+      }
+    ],
+    "live-spec-inp": [
+      {
+        "description": "Fetch the Markdown for one spec page by its slug, returned as lines you can page through. Use this after search_spec or list_topics to read the canonical guidance.",
+        "name": "get_topic"
+      },
+      {
+        "description": "List spec topics, optionally filtered by category and/or status. Returns title, status, category, summary, and URL per topic. Use this when the user wants the canonical list (e.g. \"all required SEO topics\"). Results are paged — follow page/page_size to walk the whole list.",
+        "name": "list_topics"
+      },
+      {
+        "description": "Navigate the user to the full spec checklist page. Optionally jumps to a category section via URL hash. UI action — does not return data.",
+        "name": "open_checklist"
+      },
+      {
+        "description": "Open the on-page ⌘K search overlay so the user can search the spec interactively. Optionally pre-fills a query. UI action — does not return results; use search_spec for that.",
+        "name": "open_search"
+      },
+      {
+        "description": "Search The Website Specification for matching topics. Returns ranked results with title, status, category, canonical URL, and a one-line summary. Use this when the user asks about a topic by keyword (e.g. \"CSP\", \"alt text\", \"llms.txt\").",
+        "name": "search_spec"
+      }
+    ],
+    "live-spec-meta-description": [
+      {
+        "description": "Fetch the Markdown for one spec page by its slug, returned as lines you can page through. Use this after search_spec or list_topics to read the canonical guidance.",
+        "name": "get_topic"
+      },
+      {
+        "description": "List spec topics, optionally filtered by category and/or status. Returns title, status, category, summary, and URL per topic. Use this when the user wants the canonical list (e.g. \"all required SEO topics\"). Results are paged — follow page/page_size to walk the whole list.",
+        "name": "list_topics"
+      },
+      {
+        "description": "Navigate the user to the full spec checklist page. Optionally jumps to a category section via URL hash. UI action — does not return data.",
+        "name": "open_checklist"
+      },
+      {
+        "description": "Open the on-page ⌘K search overlay so the user can search the spec interactively. Optionally pre-fills a query. UI action — does not return results; use search_spec for that.",
+        "name": "open_search"
+      },
+      {
+        "description": "Search The Website Specification for matching topics. Returns ranked results with title, status, category, canonical URL, and a one-line summary. Use this when the user asks about a topic by keyword (e.g. \"CSP\", \"alt text\", \"llms.txt\").",
+        "name": "search_spec"
+      }
+    ],
+    "live-spec-touch-target": [
+      {
+        "description": "Fetch the Markdown for one spec page by its slug, returned as lines you can page through. Use this after search_spec or list_topics to read the canonical guidance.",
+        "name": "get_topic"
+      },
+      {
+        "description": "List spec topics, optionally filtered by category and/or status. Returns title, status, category, summary, and URL per topic. Use this when the user wants the canonical list (e.g. \"all required SEO topics\"). Results are paged — follow page/page_size to walk the whole list.",
+        "name": "list_topics"
+      },
+      {
+        "description": "Navigate the user to the full spec checklist page. Optionally jumps to a category section via URL hash. UI action — does not return data.",
+        "name": "open_checklist"
+      },
+      {
+        "description": "Open the on-page ⌘K search overlay so the user can search the spec interactively. Optionally pre-fills a query. UI action — does not return results; use search_spec for that.",
+        "name": "open_search"
+      },
+      {
+        "description": "Search The Website Specification for matching topics. Returns ranked results with title, status, category, canonical URL, and a one-line summary. Use this when the user asks about a topic by keyword (e.g. \"CSP\", \"alt text\", \"llms.txt\").",
+        "name": "search_spec"
+      }
+    ],
+    "live-woo-apparel-count": [
+      {
+        "description": "Browse products.",
+        "name": "browse_products_api"
+      },
+      {
+        "description": "Get navigation. Returns registered menus when available, with a top-level page fallback for sites that do not use classic menus.",
+        "name": "get_navigation_api"
+      },
+      {
+        "description": "Get post. Returns a normalized content payload for a single public post, page, or public custom post type.",
+        "name": "get_post_api"
+      },
+      {
+        "description": "Get site info. Built-in standard WordPress capability. No site scan required. Returns public site metadata, front page references, and feature flags.",
+        "name": "get_site_info_api"
+      },
+      {
+        "description": "Get terms. Use this instead of category-only tools so agents can work on custom-taxonomy sites too.",
+        "name": "get_terms_api"
+      },
+      {
+        "description": "List post types. Lists public post types an agent can browse without scanning.",
+        "name": "list_post_types_api"
+      },
+      {
+        "description": "List posts. Browse recent content without needing a keyword first.",
+        "name": "list_posts_api"
+      },
+      {
+        "description": "Search posts. Searches public content across public post types with a stable schema managed by this plugin.",
+        "name": "search_posts_api"
+      },
+      {
+        "description": "Return one public product with current price, availability, and category details. Managed-stock products include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_get_product_api"
+      },
+      {
+        "description": "Get product categories. WooCommerce add-on capability for category discovery and browsing.",
+        "name": "woo_get_product_categories_api"
+      },
+      {
+        "description": "Inspect the current visitor cart once. On success, report the top-level plain-language summary to the visitor and do not repeat this tool in the same turn. The structured result also includes item quantities, coupons, and totals.",
+        "name": "woo_inspect_cart"
+      },
+      {
+        "description": "Use this tool whenever a visitor asks about current products, prices, availability, recommendations, or exact inventory quantities. For cheapest available use orderby=price, order=ASC, availability=available. Follow next with unchanged filters; use Get product for full details. Managed-stock results include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_search_products_api"
+      }
+    ],
+    "live-woo-cheapest-in-stock": [
+      {
+        "description": "Browse products.",
+        "name": "browse_products_api"
+      },
+      {
+        "description": "Get navigation. Returns registered menus when available, with a top-level page fallback for sites that do not use classic menus.",
+        "name": "get_navigation_api"
+      },
+      {
+        "description": "Get post. Returns a normalized content payload for a single public post, page, or public custom post type.",
+        "name": "get_post_api"
+      },
+      {
+        "description": "Get site info. Built-in standard WordPress capability. No site scan required. Returns public site metadata, front page references, and feature flags.",
+        "name": "get_site_info_api"
+      },
+      {
+        "description": "Get terms. Use this instead of category-only tools so agents can work on custom-taxonomy sites too.",
+        "name": "get_terms_api"
+      },
+      {
+        "description": "List post types. Lists public post types an agent can browse without scanning.",
+        "name": "list_post_types_api"
+      },
+      {
+        "description": "List posts. Browse recent content without needing a keyword first.",
+        "name": "list_posts_api"
+      },
+      {
+        "description": "Search posts. Searches public content across public post types with a stable schema managed by this plugin.",
+        "name": "search_posts_api"
+      },
+      {
+        "description": "Return one public product with current price, availability, and category details. Managed-stock products include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_get_product_api"
+      },
+      {
+        "description": "Get product categories. WooCommerce add-on capability for category discovery and browsing.",
+        "name": "woo_get_product_categories_api"
+      },
+      {
+        "description": "Inspect the current visitor cart once. On success, report the top-level plain-language summary to the visitor and do not repeat this tool in the same turn. The structured result also includes item quantities, coupons, and totals.",
+        "name": "woo_inspect_cart"
+      },
+      {
+        "description": "Use this tool whenever a visitor asks about current products, prices, availability, recommendations, or exact inventory quantities. For cheapest available use orderby=price, order=ASC, availability=available. Follow next with unchanged filters; use Get product for full details. Managed-stock results include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_search_products_api"
+      }
+    ],
+    "live-woo-notebook-stock": [
+      {
+        "description": "Browse products.",
+        "name": "browse_products_api"
+      },
+      {
+        "description": "Get navigation. Returns registered menus when available, with a top-level page fallback for sites that do not use classic menus.",
+        "name": "get_navigation_api"
+      },
+      {
+        "description": "Get post. Returns a normalized content payload for a single public post, page, or public custom post type.",
+        "name": "get_post_api"
+      },
+      {
+        "description": "Get site info. Built-in standard WordPress capability. No site scan required. Returns public site metadata, front page references, and feature flags.",
+        "name": "get_site_info_api"
+      },
+      {
+        "description": "Get terms. Use this instead of category-only tools so agents can work on custom-taxonomy sites too.",
+        "name": "get_terms_api"
+      },
+      {
+        "description": "List post types. Lists public post types an agent can browse without scanning.",
+        "name": "list_post_types_api"
+      },
+      {
+        "description": "List posts. Browse recent content without needing a keyword first.",
+        "name": "list_posts_api"
+      },
+      {
+        "description": "Search posts. Searches public content across public post types with a stable schema managed by this plugin.",
+        "name": "search_posts_api"
+      },
+      {
+        "description": "Return one public product with current price, availability, and category details. Managed-stock products include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_get_product_api"
+      },
+      {
+        "description": "Get product categories. WooCommerce add-on capability for category discovery and browsing.",
+        "name": "woo_get_product_categories_api"
+      },
+      {
+        "description": "Inspect the current visitor cart once. On success, report the top-level plain-language summary to the visitor and do not repeat this tool in the same turn. The structured result also includes item quantities, coupons, and totals.",
+        "name": "woo_inspect_cart"
+      },
+      {
+        "description": "Use this tool whenever a visitor asks about current products, prices, availability, recommendations, or exact inventory quantities. For cheapest available use orderby=price, order=ASC, availability=available. Follow next with unchanged filters; use Get product for full details. Managed-stock results include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_search_products_api"
+      }
+    ],
+    "live-woo-on-sale": [
+      {
+        "description": "Browse products.",
+        "name": "browse_products_api"
+      },
+      {
+        "description": "Get navigation. Returns registered menus when available, with a top-level page fallback for sites that do not use classic menus.",
+        "name": "get_navigation_api"
+      },
+      {
+        "description": "Get post. Returns a normalized content payload for a single public post, page, or public custom post type.",
+        "name": "get_post_api"
+      },
+      {
+        "description": "Get site info. Built-in standard WordPress capability. No site scan required. Returns public site metadata, front page references, and feature flags.",
+        "name": "get_site_info_api"
+      },
+      {
+        "description": "Get terms. Use this instead of category-only tools so agents can work on custom-taxonomy sites too.",
+        "name": "get_terms_api"
+      },
+      {
+        "description": "List post types. Lists public post types an agent can browse without scanning.",
+        "name": "list_post_types_api"
+      },
+      {
+        "description": "List posts. Browse recent content without needing a keyword first.",
+        "name": "list_posts_api"
+      },
+      {
+        "description": "Search posts. Searches public content across public post types with a stable schema managed by this plugin.",
+        "name": "search_posts_api"
+      },
+      {
+        "description": "Return one public product with current price, availability, and category details. Managed-stock products include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_get_product_api"
+      },
+      {
+        "description": "Get product categories. WooCommerce add-on capability for category discovery and browsing.",
+        "name": "woo_get_product_categories_api"
+      },
+      {
+        "description": "Inspect the current visitor cart once. On success, report the top-level plain-language summary to the visitor and do not repeat this tool in the same turn. The structured result also includes item quantities, coupons, and totals.",
+        "name": "woo_inspect_cart"
+      },
+      {
+        "description": "Use this tool whenever a visitor asks about current products, prices, availability, recommendations, or exact inventory quantities. For cheapest available use orderby=price, order=ASC, availability=available. Follow next with unchanged filters; use Get product for full details. Managed-stock results include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_search_products_api"
+      }
+    ],
+    "live-woo-out-of-stock": [
+      {
+        "description": "Browse products.",
+        "name": "browse_products_api"
+      },
+      {
+        "description": "Get navigation. Returns registered menus when available, with a top-level page fallback for sites that do not use classic menus.",
+        "name": "get_navigation_api"
+      },
+      {
+        "description": "Get post. Returns a normalized content payload for a single public post, page, or public custom post type.",
+        "name": "get_post_api"
+      },
+      {
+        "description": "Get site info. Built-in standard WordPress capability. No site scan required. Returns public site metadata, front page references, and feature flags.",
+        "name": "get_site_info_api"
+      },
+      {
+        "description": "Get terms. Use this instead of category-only tools so agents can work on custom-taxonomy sites too.",
+        "name": "get_terms_api"
+      },
+      {
+        "description": "List post types. Lists public post types an agent can browse without scanning.",
+        "name": "list_post_types_api"
+      },
+      {
+        "description": "List posts. Browse recent content without needing a keyword first.",
+        "name": "list_posts_api"
+      },
+      {
+        "description": "Search posts. Searches public content across public post types with a stable schema managed by this plugin.",
+        "name": "search_posts_api"
+      },
+      {
+        "description": "Return one public product with current price, availability, and category details. Managed-stock products include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_get_product_api"
+      },
+      {
+        "description": "Get product categories. WooCommerce add-on capability for category discovery and browsing.",
+        "name": "woo_get_product_categories_api"
+      },
+      {
+        "description": "Inspect the current visitor cart once. On success, report the top-level plain-language summary to the visitor and do not repeat this tool in the same turn. The structured result also includes item quantities, coupons, and totals.",
+        "name": "woo_inspect_cart"
+      },
+      {
+        "description": "Use this tool whenever a visitor asks about current products, prices, availability, recommendations, or exact inventory quantities. For cheapest available use orderby=price, order=ASC, availability=available. Follow next with unchanged filters; use Get product for full details. Managed-stock results include exact physical units remaining in stock_quantity and availability.quantity.",
+        "name": "woo_search_products_api"
+      }
+    ],
+    "store-cart-total": [
+      {
+        "description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
+        "name": "add_to_cart"
+      },
+      {
+        "description": "Return the cart: items with quantity and the total in USD.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
+        "name": "search_products"
+      }
+    ],
+    "store-cheapest-blue-mug": [
+      {
+        "description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
+        "name": "add_to_cart"
+      },
+      {
+        "description": "Return the cart: items with quantity and the total in USD.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
+        "name": "search_products"
+      }
+    ],
+    "store-green-gift": [
+      {
+        "description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
+        "name": "add_to_cart"
+      },
+      {
+        "description": "Return the cart: items with quantity and the total in USD.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
+        "name": "search_products"
+      }
+    ],
+    "store-priciest-teapot": [
+      {
+        "description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
+        "name": "add_to_cart"
+      },
+      {
+        "description": "Return the cart: items with quantity and the total in USD.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
+        "name": "search_products"
+      }
+    ],
+    "store-restock-date": [
+      {
+        "description": "Add a product to the cart by sku. Adding a sku already in the cart increases its quantity.",
+        "name": "add_to_cart"
+      },
+      {
+        "description": "Return the cart: items with quantity and the total in USD.",
+        "name": "get_cart"
+      },
+      {
+        "description": "Describe the page the user is on: title, URL, language, meta description, heading outline and the text the user has selected. Use it for the page's structure or the user's selection; to find a fact on the page, call search_page instead.",
+        "name": "get_page_context"
+      },
+      {
+        "description": "Search the catalog. Every filter is optional; with none, returns every product. Prices are USD.",
+        "name": "search_products"
+      }
+    ]
+  }
 }

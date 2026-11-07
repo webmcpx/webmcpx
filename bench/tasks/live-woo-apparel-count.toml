@@ -1,0 +1,9 @@
+# Live WooCommerce demo store. Verified 2026-11-07 (woo_get_product_categories_api, Store API,
+# /assistant-store/ listing): Apparel has 3 products, Agent Field Jacket, Context Tote and Discovery Tee;
+# Desk and Tools have 2 each.
+url = "https://demo.openforagents.com/"
+prompt = "How many products does this store have in its Apparel category, and which ones are they?"
+
+[check]
+answer_contains = ["Agent Field Jacket", "Context Tote", "Discovery Tee"]
+answer_any = ["3", "three"]

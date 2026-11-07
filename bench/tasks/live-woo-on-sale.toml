@@ -1,0 +1,7 @@
+# Live WooCommerce demo store. Verified 2026-11-07 (woo_search_products_api on_sale=true, Store API,
+# /assistant-store/ listing): only Signal Mug is on sale, $18.00 down from $22.00.
+url = "https://demo.openforagents.com/"
+prompt = "Is anything in this store on sale right now? What's the sale price?"
+
+[check]
+answer_contains = ["Signal Mug", "18"]

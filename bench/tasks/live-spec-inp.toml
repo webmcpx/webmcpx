@@ -1,0 +1,6 @@
+# Live site. Verified 2026-11-07: https://specification.website/spec/performance/core-web-vitals/ says "Hit LCP ≤ 2.5s, INP ≤ 200ms, and CLS ≤ 0.1 at the 75th percentile of real users."
+url = "https://specification.website/"
+prompt = "What INP value does this spec set as the target for good responsiveness?"
+
+[check]
+answer_any = ["200", "0.2"]

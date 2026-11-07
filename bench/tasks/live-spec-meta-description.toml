@@ -1,0 +1,6 @@
+# Live site. Verified 2026-11-07: https://specification.website/spec/foundations/meta-description/ says "120–160 characters is the sweet spot."
+url = "https://specification.website/"
+prompt = "How long should a page's meta description be, according to this spec?"
+
+[check]
+answer_contains = ["120", "160"]

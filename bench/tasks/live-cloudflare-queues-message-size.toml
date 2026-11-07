@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-07: developers.cloudflare.com/queues/platform/limits/ says "Message size 128 KB" (footnote: "1 KB is measured as 1000 bytes"; the sendBatch total on the same page is "256KB").
+url = "https://developers.cloudflare.com/"
+prompt = "What is the largest message I can send to a Cloudflare Queue? I need the per-message size limit."
+
+[check]
+answer_contains = ["128"]
+answer_any = ["KB", "kilobytes"]

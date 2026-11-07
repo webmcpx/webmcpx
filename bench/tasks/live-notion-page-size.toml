@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-07: developers.notion.com/reference/pagination says "Most list endpoints
+# default to 100 and accept values from 1 to 100".
+url = "https://developers.notion.com/guides/get-started/overview"
+prompt = "I'm paginating through results from the Notion API. What's the largest page_size I can request per call on the list endpoints?"
+
+[check]
+answer_contains = ["100"]

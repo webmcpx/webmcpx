@@ -1,0 +1,6 @@
+# Live site. Verified 2026-11-07: https://specification.website/spec/accessibility/touch-target-size/ says "WCAG 2.2 sets a 24×24 CSS px minimum, with 44×44 CSS px as the enhanced target."
+url = "https://specification.website/"
+prompt = "What's the minimum tap target size this spec requires for buttons and other interactive controls?"
+
+[check]
+answer_contains = ["24"]

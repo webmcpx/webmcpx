@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-07: developers.cloudflare.com/kv/platform/limits/ says "Key size 512 bytes 512 bytes" (Free / Paid; the KV Instant beta table on the same page says "Key size 300 bytes").
+url = "https://developers.cloudflare.com/"
+prompt = "How long can a key be in Cloudflare Workers KV? I want to know the maximum key size."
+
+[check]
+answer_contains = ["512"]
+answer_any = ["bytes", "byte", "B"]

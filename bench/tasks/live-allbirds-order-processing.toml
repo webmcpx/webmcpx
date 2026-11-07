@@ -1,0 +1,8 @@
+# Live Shopify store. Verified 2026-11-07 via ask_business and /policies/shipping-policy:
+# "ALL ORDERS ARE PROCESSED WITHIN 1-6 BUSINESS DAYS."
+url = "https://www.allbirds.com/"
+prompt = "How many business days at most does Allbirds take to process an order before it ships?"
+
+[check]
+answer_contains = ["6"]
+answer_excludes = ["30 business days"]

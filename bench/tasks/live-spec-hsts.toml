@@ -1,0 +1,6 @@
+# Live site. Verified 2026-11-07: https://specification.website/spec/security/hsts/ says "then raise to two years (63072000)" and gives the "Recommended production header: Strict-Transport-Security: max-age=63072000; includeSubDomains".
+url = "https://specification.website/"
+prompt = "What max-age should I put in my HSTS header for production, per this spec?"
+
+[check]
+answer_any = ["63072000", "two years", "2 years"]

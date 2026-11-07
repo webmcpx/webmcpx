@@ -1,0 +1,6 @@
+# Live site. Verified 2026-11-07: developers.cloudflare.com/workers/platform/limits/ says "Accounts on the Workers Free plan have a daily request limit of 100,000 requests, resetting at midnight UTC."
+url = "https://developers.cloudflare.com/"
+prompt = "How many requests per day can my Workers handle on the Cloudflare Workers Free plan before hitting the limit?"
+
+[check]
+answer_any = ["100000", "100k", "100 thousand"]

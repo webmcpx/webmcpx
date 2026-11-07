@@ -1,0 +1,7 @@
+# Live site. Verified 2026-11-07: developers.notion.com/reference/request-limits says "Rich text object |
+# text.content | 2000 characters" (distractor: equation.expression is 1000 characters).
+url = "https://developers.notion.com/guides/get-started/overview"
+prompt = "I'm writing long paragraphs into a Notion page through the API. What's the maximum number of characters a single rich text object's text content can have in a request?"
+
+[check]
+answer_contains = ["2000"]
