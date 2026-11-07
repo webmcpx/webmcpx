@@ -73,7 +73,8 @@ review-reply reply:
 bench *args: wasm
     cargo run -q --release -p webmcpx-bench -- run {{args}}
     cp bench/results/latest.json "site/src/lib/content/bench/$(jq -r .model bench/results/latest.json).json"
-    cargo run -q --release -p webmcpx-bench -- card --bench bench/results/latest.json "site/static/og/benchmark-$(jq -r .model bench/results/latest.json).png"
+    # The run's preview card; a run without both arms has no comparison: drop any stale card instead.
+    card="site/static/og/benchmark-$(jq -r .model bench/results/latest.json).png"; cargo run -q --release -p webmcpx-bench -- card --bench bench/results/latest.json "$card" || rm -f "$card"
 
 # Re-grade every published run (one per model) with today's answer checks, after fixing a check.
 bench-regrade:
