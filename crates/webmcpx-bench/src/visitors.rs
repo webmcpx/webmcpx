@@ -8,14 +8,21 @@ use std::net::{IpAddr, Ipv6Addr};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-/// Past this many tracked visitors, those idle for a full period are forgotten.
+/// Past this many tracked visitors, those idle for a full period are forgotten, at most once a period
+/// (entries are small: a burst of distinct visitors costs memory for one period, not CPU per request).
 const PRUNE_AT: usize = 10_000;
 
 pub struct Visitors {
     every: Duration,
     /// Read the visitor from `X-Forwarded-For` (set by our own proxy), not from the TCP peer.
     behind_proxy: bool,
-    seen: Mutex<HashMap<IpAddr, Seen>>,
+    seen: Mutex<Table>,
+}
+
+#[derive(Default)]
+struct Table {
+    visitors: HashMap<IpAddr, Seen>,
+    pruned: Option<Instant>,
 }
 
 struct Seen {
@@ -40,7 +47,7 @@ pub struct Scanning {
 
 impl Drop for Scanning {
     fn drop(&mut self) {
-        if let Some(seen) = lock(&self.visitors.seen).get_mut(&self.key) {
+        if let Some(seen) = lock(&self.visitors.seen).visitors.get_mut(&self.key) {
             seen.scanning = false;
         }
     }
@@ -70,11 +77,9 @@ impl Visitors {
     /// Starts a scan for `ip`, or says why not.
     pub fn start(self: &Arc<Self>, ip: IpAddr) -> Result<Scanning, Refused> {
         let key = visitor(ip);
-        let mut seen = lock(&self.seen);
-        if seen.len() >= PRUNE_AT {
-            seen.retain(|_, s| s.scanning || s.started.elapsed() < self.every);
-        }
-        if let Some(s) = seen.get(&key) {
+        let mut table = lock(&self.seen);
+        // Refusals are a single lookup: hammering the scanner never makes it do more work.
+        if let Some(s) = table.visitors.get(&key) {
             if s.scanning {
                 return Err(Refused::Busy);
             }
@@ -83,7 +88,16 @@ impl Visitors {
                 return Err(Refused::TooSoon(self.every.saturating_sub(since)));
             }
         }
-        seen.insert(
+        if table.visitors.len() >= PRUNE_AT
+            && table.pruned.is_none_or(|at| at.elapsed() >= self.every)
+        {
+            let every = self.every;
+            table
+                .visitors
+                .retain(|_, s| s.scanning || s.started.elapsed() < every);
+            table.pruned = Some(Instant::now());
+        }
+        table.visitors.insert(
             key,
             Seen {
                 started: Instant::now(),
@@ -157,6 +171,28 @@ mod tests {
         assert!(matches!(v.start(me), Err(Refused::TooSoon(_))));
         std::thread::sleep(Duration::from_millis(250));
         assert!(v.start(me).is_ok());
+    }
+
+    #[test]
+    fn a_crowd_of_visitors_is_swept_at_most_once_a_period() {
+        let v = Arc::new(Visitors::new(Duration::from_millis(100), false));
+        let n = u32::try_from(PRUNE_AT).unwrap();
+        let addr = |i: u32| IpAddr::V4(std::net::Ipv4Addr::from(0x0a00_0000 + i));
+        for i in 0..n {
+            drop(v.start(addr(i)).unwrap());
+        }
+        // Over the threshold within one period: entries stay (nothing expired yet), and refusals of a
+        // known visitor do not sweep.
+        drop(v.start(addr(n)).unwrap());
+        let swept = lock(&v.seen).pruned;
+        assert!(v.start(addr(0)).is_err());
+        assert_eq!(lock(&v.seen).pruned, swept, "a refusal swept the table");
+        std::thread::sleep(Duration::from_millis(150));
+        drop(v.start(addr(n + 1)).unwrap());
+        assert!(
+            lock(&v.seen).visitors.len() < 10,
+            "expired visitors were not forgotten"
+        );
     }
 
     #[test]
