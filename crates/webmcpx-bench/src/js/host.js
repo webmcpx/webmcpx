@@ -35,7 +35,13 @@
     },
     clearContext,
   });
-  Object.defineProperty(document, "modelContext", { value: modelContext });
+  // On the prototype, not this document: an iframe's first about:blank document is replaced by its real
+  // one in the same window (and realm), which this script does not see again.
+  try {
+    Object.defineProperty(Document.prototype, "modelContext", { get: () => modelContext, configurable: true });
+  } catch {
+    Object.defineProperty(document, "modelContext", { value: modelContext });
+  }
   try {
     Object.defineProperty(Navigator.prototype, "modelContext", { get: () => modelContext, configurable: true });
   } catch {
@@ -43,17 +49,31 @@
   }
 
   const schema = (s) => (typeof s === "string" ? JSON.parse(s) : s ?? { type: "object", properties: {} });
+  // This window's tools, then those of same-origin frames inside it (a name the page already has is
+  // left out, so a frame never shadows the page). Cross-origin frames can't be read and stay out.
+  const all = () => {
+    const found = new Map(tools);
+    for (let i = 0; i < window.length; i++) {
+      try {
+        for (const [name, tool] of window[i].__webmcpHost?.tools() ?? []) if (!found.has(name)) found.set(name, tool);
+      } catch {
+        // cross-origin
+      }
+    }
+    return found;
+  };
   Object.defineProperty(window, "__webmcpHost", {
     value: Object.freeze({
+      tools: all,
       list: () =>
-        [...tools.values()].map((t) => ({
+        [...all().values()].map((t) => ({
           name: t.name,
           description: t.description ?? "",
           inputSchema: schema(t.inputSchema),
           annotations: t.annotations ?? {},
         })),
       async call(name, input) {
-        const tool = tools.get(name);
+        const tool = all().get(name);
         if (!tool) return `Error: no tool named ${name}`;
         try {
           const out = await tool.execute(input, { signal: new AbortController().signal });

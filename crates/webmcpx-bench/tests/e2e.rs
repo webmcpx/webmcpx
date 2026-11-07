@@ -778,6 +778,66 @@ async fn timed_out_scans_leave_no_page_running() {
 }
 
 #[tokio::test]
+async fn a_cancelled_scan_leaves_no_page_running() {
+    use axum::response::Html;
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::Scanner;
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        get(|| std::future::ready(Html("<!doctype html><script>while (true) {}</script>"))),
+    ))
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    // The visitor goes away mid-scan: the scan future is dropped while the page runs.
+    let gone = tokio::time::timeout(
+        std::time::Duration::from_millis(1500),
+        scanner.scan(&format!("http://{site}/")),
+    )
+    .await;
+    assert!(gone.is_err(), "the scan should still be running");
+    for _ in 0..50 {
+        if scanner.open_contexts().await.unwrap() == 0 {
+            return;
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    }
+    panic!("the cancelled scan left its page running");
+}
+
+#[tokio::test]
+async fn tools_registered_in_a_same_origin_frame_count() {
+    use axum::response::Html;
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::{Scanner, Verdict};
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(
+        axum::Router::new()
+            .route("/", get(|| std::future::ready(Html(
+                r#"<!doctype html><title>Top</title><main><p>Shop.</p></main><iframe src="/frame"></iframe>"#,
+            ))))
+            .route("/frame", get(|| std::future::ready(Html(
+                r#"<!doctype html><script>document.modelContext.registerTool({ name: "checkout", description: "Pay for the cart.", inputSchema: { type: "object", properties: {} }, annotations: { consequentialHint: true }, execute: () => "ok" })</script>"#,
+            )))),
+    )
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    assert_eq!(report.verdict, Verdict::Ready, "{:?}", report.diagnostics);
+    assert_eq!(report.tools.len(), 1);
+}
+
+#[tokio::test]
 async fn a_stalled_or_endless_favicon_never_costs_the_report() {
     use axum::body::Body;
     use axum::response::{Html, Response};

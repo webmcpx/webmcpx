@@ -225,12 +225,17 @@ impl Browser {
             .as_str()
             .context("no browserContextId")?
             .to_owned();
+        // From here on, a cancelled or failed setup still disposes the context.
+        let context = ContextGuard {
+            conn: self.conn.clone(),
+            id: Some(context),
+        };
         let target = self
             .conn
             .call(
                 None,
                 "Target.createTarget",
-                json!({ "url": "about:blank", "browserContextId": context }),
+                json!({ "url": "about:blank", "browserContextId": context.id }),
             )
             .await?["targetId"]
             .as_str()
@@ -267,7 +272,50 @@ impl Browser {
 pub struct Page {
     conn: Conn,
     session: String,
-    context: String,
+    context: ContextGuard,
+}
+
+/// An isolated browser context that is disposed when dropped, so a scan cancelled at any point (say, the
+/// visitor closed the tab) never leaves a page running after its slot is released.
+struct ContextGuard {
+    conn: Conn,
+    /// None once disposed explicitly.
+    id: Option<String>,
+}
+
+impl ContextGuard {
+    async fn dispose(&mut self) -> Result<()> {
+        let Some(id) = self.id.take() else {
+            return Ok(());
+        };
+        self.conn
+            .call(
+                None,
+                "Target.disposeBrowserContext",
+                json!({ "browserContextId": id }),
+            )
+            .await
+            .map(drop)
+    }
+}
+
+impl Drop for ContextGuard {
+    fn drop(&mut self) {
+        let Some(id) = self.id.take() else { return };
+        let conn = self.conn.clone();
+        if let Ok(runtime) = tokio::runtime::Handle::try_current() {
+            runtime.spawn(async move {
+                // Best effort: the connection may be gone, and with it the context (disposeOnDetach).
+                let _ = conn
+                    .call(
+                        None,
+                        "Target.disposeBrowserContext",
+                        json!({ "browserContextId": id }),
+                    )
+                    .await;
+            });
+        }
+    }
 }
 
 impl Page {
@@ -340,15 +388,8 @@ impl Page {
     }
 
     /// Closes the page and its browser context.
-    pub async fn close(self) -> Result<()> {
-        self.conn
-            .call(
-                None,
-                "Target.disposeBrowserContext",
-                json!({ "browserContextId": self.context }),
-            )
-            .await
-            .map(drop)
+    pub async fn close(mut self) -> Result<()> {
+        self.context.dispose().await
     }
 }
 
