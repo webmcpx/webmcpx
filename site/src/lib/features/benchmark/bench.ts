@@ -1,5 +1,5 @@
 // Types and view helpers for the benchmark results file written by `crates/webmcpx-bench`
-// (`report.rs`, schema_version 3). The summary is computed in Rust; this module only formats it.
+// (`report.rs`, schema_version 3 or 4; 4 adds the tools each run was given). The summary is computed in Rust; this module only formats it.
 
 export type Arm = 'baseline' | 'webmcp';
 
@@ -24,14 +24,24 @@ export interface TaskInfo {
 	url?: string;
 }
 
+/** One attempt, as far as the page reads it. */
+export interface RunInfo {
+	task: string;
+	arm: Arm;
+	success: boolean;
+	/** Schema 4: the tools (name, description) the agent was given. */
+	tools?: { name: string; description: string }[];
+	tool_calls: { name: string; arguments: string }[];
+}
+
 export interface Results {
-	schema_version: 3;
+	schema_version: 3 | 4;
 	model: string;
 	reasoning_effort: string | null;
 	price_per_mtok: { input: number; cached_input: number; output: number } | null;
 	started_at: number;
 	tasks: Record<string, TaskInfo>;
-	runs: unknown[];
+	runs: RunInfo[];
 	summary: {
 		arms: Partial<Record<Arm, ArmSummary>>;
 		tasks: Record<string, Partial<Record<Arm, ArmSummary>>>;
@@ -67,7 +77,8 @@ export const perThousand = (usd: number | null) => (usd == null ? 'n/a' : `$${(u
 /** Accepts the JSON written by the harness; fails the build on an unknown schema. */
 export function parse(data: unknown): Results {
 	const version = (data as { schema_version?: unknown } | null)?.schema_version;
-	if (version !== 3) throw new Error(`bench.json: unsupported schema_version ${String(version)}`);
+	if (version !== 3 && version !== 4)
+		throw new Error(`bench.json: unsupported schema_version ${String(version)}`);
 	return data as Results;
 }
 

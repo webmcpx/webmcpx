@@ -26,15 +26,19 @@
 	} from '#lib/features/benchmark/bench.ts';
 	import type { BenchSite, SiteTask } from '#lib/features/benchmark/sites.ts';
 	import TaskChart from '#lib/features/benchmark/TaskChart.svelte';
+	import type { QuestionTools } from '#lib/features/benchmark/tools.ts';
 	import Rotator from './Rotator.svelte';
+	import ToolList from './ToolList.svelte';
 
 	interface Props {
 		results: Results;
 		sites: BenchSite[];
+		/** Per question: the site's WebMCP tools and the calls the agent made. */
+		tools: Record<string, QuestionTools>;
 		reproduce: Highlighted;
 	}
 
-	let { results, sites, reproduce }: Props = $props();
+	let { results, sites, tools, reproduce }: Props = $props();
 
 	const all = $derived(rows(results));
 	// Sites come best case first (see sites.ts), so the first one is shown by default, already in the
@@ -108,6 +112,9 @@
 			</div>
 			{@render side(task.webmcp, 'With webmcpx', true)}
 		</div>
+	{/if}
+	{#if tools[task.task]?.tools.length}
+		<ToolList tools={tools[task.task]} siteName={site.name} />
 	{/if}
 {/snippet}
 

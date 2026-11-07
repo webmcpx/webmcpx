@@ -5,3 +5,4 @@ package-lock.json
 src/lib/content/bench.json
 test-results/
 playwright-report/
+src/lib/content/tools.json

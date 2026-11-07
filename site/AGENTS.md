@@ -63,6 +63,9 @@ tests/                       Playwright e2e against the prerendered build
   never from today's `bench/tasks`. Display names live in `lib/content/benchSites.ts`. The summary is
   computed in Rust (`crates/webmcpx-bench/src/report.rs`). Results are shown per site and per question, never averaged (owner's decision); sites (and their questions) are
   sorted by biggest saving and the section says so, so the first one shown is disclosed as the best case; and every question stays in the full table, which works without JS. Losses are shown, not hidden.
+- Each question shows the site's WebMCP tools (name and description, the text the agent reads) and the
+  calls the agent made. Schema 4 runs record the tools the agent was given; for older runs the page uses
+  `lib/content/tools.json` (`just bench-tools`, a dated snapshot) and says it was captured after the run.
 - `lib/content/issues.ts`: every row must describe what the code does today.
 - Words follow the WebMCP draft (Draft Community Group Report, 2 November 2026): tool, `name`/`title`/
   `description`, `inputSchema`, annotations (`readOnlyHint`, `untrustedContentHint`, `consequentialHint`),

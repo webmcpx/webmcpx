@@ -208,3 +208,17 @@ test('the page says the first site is the best case', async ({ request }) => {
 	const html = await (await request.get('/')).text();
 	expect(html).toContain('sorted by their biggest saving');
 });
+
+test('each question shows the site tools with their descriptions and what the agent called', async ({
+	page
+}) => {
+	await page.goto('/#proof');
+	const tools = page.locator('#proof').getByRole('region', { name: 'WebMCP tools on Notion' });
+	await expect(tools.getByRole('heading', { name: /WebMCP tools Notion registers/ })).toBeVisible();
+	await expect(tools.getByText('search_docs', { exact: true })).toBeVisible();
+	await expect(tools.getByText(/Search the Notion Docs documentation/)).toBeVisible();
+	await expect(tools.getByText('Called').first()).toBeVisible();
+	await expect(tools.getByText(/benchmark ran 2026-11-06/)).toBeVisible();
+	await tools.getByRole('button', { name: /Show/ }).click();
+	await expect(tools.getByRole('button', { name: 'Show less' })).toHaveAttribute('aria-expanded', 'true');
+});
