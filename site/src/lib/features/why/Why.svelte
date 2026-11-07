@@ -52,14 +52,9 @@
 			<li class="min-w-0">
 				<Reveal delay={(i % 4) * 60} class="h-full">
 					<div class="flex h-full flex-col rounded-card border-2 border-ink bg-card p-5 shadow-hard">
-						<span
-							class="grid size-10 place-items-center rounded-xl border-2 border-ink bg-marker"
-							aria-hidden="true"
-						>
-							<Icon size={20} strokeWidth={2} />
-						</span>
-						<h3 class="mt-4 font-display text-xl leading-tight font-bold tracking-tight text-balance">
-							{r.title}
+						<h3 class="flex items-start gap-2.5 font-display text-xl leading-tight font-bold tracking-tight">
+							<Icon size={22} strokeWidth={2.25} class="mt-px shrink-0" aria-hidden="true" />
+							<span class="text-balance">{r.title}</span>
 						</h3>
 						<p class="mt-4 font-mono text-[10px] tracking-widest text-ink-3 uppercase">Today</p>
 						<p class="mt-1 text-[15px] text-pretty text-ink-2">{r.pain}</p>
