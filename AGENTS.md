@@ -16,7 +16,7 @@
 - `packages/webmcpx` — npm loader: the public browser API. Owns the DOM and `registerTool()`.
 - `crates/webmcpx-bench` + `bench/` — benchmark: same agent and pages, with vs without WebMCP. See `bench/AGENTS.md`.
   Run: `OPENAI_API_KEY=... just bench`.
-- `site/` — landing (SvelteKit 3, Svelte 5 runes, Tailwind 4, static). Shows `site/src/lib/bench.json`. See `site/AGENTS.md`.
+- `site/` — landing (SvelteKit 3, Svelte 5 runes, Tailwind 4, static). Shows `site/src/lib/content/bench.json`. See `site/AGENTS.md`.
 
 ## Rules the tooling does not catch
 1. A contract changes in one place (`webmcpx-std/src/tools.rs` or `webmcpx-core`). Then run `just gen`;
