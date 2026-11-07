@@ -610,6 +610,50 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
     assert!(unknown.contains(">scan</text>"));
 }
 
+/// A burst of requests for one unrendered card renders it once; nobody waits forever.
+#[tokio::test]
+async fn a_burst_of_card_requests_renders_once() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(|| async { axum::response::Html("<title>t</title><p>Hi</p>") }),
+    ))
+    .await;
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    let tasks: Vec<_> = (0..20)
+        .map(|_| {
+            let (scanner, report) = (Arc::clone(&scanner), report.clone());
+            tokio::spawn(async move { scanner.card(&report).await })
+        })
+        .collect();
+    let mut cards = Vec::new();
+    for t in tasks {
+        if let Ok(png) = t.await.unwrap() {
+            cards.push(png);
+        }
+    }
+    assert!(!cards.is_empty() && cards.len() <= 20);
+    // Every card served is the one rendering.
+    assert!(cards.iter().all(|c| Arc::ptr_eq(c, &cards[0])));
+}
+
+/// The generic preview image every page and cold share link falls back to ships with the site.
+#[test]
+fn the_generic_preview_image_ships_with_the_site() {
+    let png = std::fs::read(repo_root().join("site/static/og.png")).unwrap();
+    assert!(png.starts_with(b"\x89PNG\r\n\x1a\n"));
+    // IHDR: width and height, big-endian, at bytes 16..24.
+    let (w, h) = (
+        u32::from_be_bytes(png[16..20].try_into().unwrap()),
+        u32::from_be_bytes(png[20..24].try_into().unwrap()),
+    );
+    assert_eq!((w, h), (1200, 630));
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

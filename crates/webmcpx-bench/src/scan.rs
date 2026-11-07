@@ -37,8 +37,9 @@ const CACHE_BYTES: usize = 64 * 1024 * 1024;
 /// A site's latest verdict feeds its README badge for this long (a few bytes per site).
 const VERDICT_FOR: Duration = Duration::from_hours(24 * 7);
 const VERDICTS_MAX: usize = 50_000;
-/// Share cards kept rendered (about 50 KB each).
+/// Share cards kept rendered (about 50 KB each), and requests that may wait for one.
 const CARDS_MAX: usize = 200;
+const CARD_WAITERS: usize = 8;
 const CACHE_ENTRY_MAX: usize = 256 * 1024;
 /// Whole scan, navigation included.
 const DEADLINE: Duration = Duration::from_secs(45);
@@ -138,6 +139,9 @@ pub struct Scanner {
     verdicts: std::sync::Mutex<HashMap<String, (Verdict, Instant)>>,
     /// Rendered share cards, by what they show.
     cards: std::sync::Mutex<HashMap<String, Arc<Vec<u8>>>>,
+    /// Cards render one at a time; a few more requests may wait (the rest get the generic image).
+    card_turn: Mutex<()>,
+    card_waiting: Semaphore,
 }
 
 /// A browser and the proxy it is locked to; both stop when the last scan using them ends (a remote
@@ -174,6 +178,8 @@ impl Scanner {
             inflight: std::sync::Mutex::default(),
             verdicts: std::sync::Mutex::default(),
             cards: std::sync::Mutex::default(),
+            card_turn: Mutex::new(()),
+            card_waiting: Semaphore::new(CARD_WAITERS),
         }
     }
 
@@ -277,25 +283,42 @@ impl Scanner {
         if let Some(png) = lock(&self.cards).get(&key) {
             return Ok(Arc::clone(png));
         }
+        // Bounded: a burst of requests for an unrendered card waits in a short line, renders once.
+        let _waiting = self
+            .card_waiting
+            .try_acquire()
+            .map_err(|_| ScanError::Busy)?;
+        let _turn = tokio::time::timeout(QUEUE_WAIT, self.card_turn.lock())
+            .await
+            .map_err(|_| ScanError::Busy)?;
+        if let Some(png) = lock(&self.cards).get(&key) {
+            return Ok(Arc::clone(png));
+        }
+        self.render(&key, &crate::card::html(summary)).await
+    }
+
+    /// Renders `html` as a 1200×630 PNG with the scan browser, kept under `key`.
+    async fn render(&self, key: &str, html: &str) -> Result<Arc<Vec<u8>>, ScanError> {
         let _slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire())
             .await
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let browser = self.browser().await.map_err(failed)?;
         let page = browser.browser.page(&[]).await.map_err(failed)?;
-        let png = tokio::time::timeout(
-            CLOSE_WAIT,
-            page.render_png(&crate::card::html(summary), 1200, 630),
-        )
-        .await;
+        let png = tokio::time::timeout(CLOSE_WAIT, page.render_png(html, 1200, 630)).await;
         let _ = tokio::time::timeout(CLOSE_WAIT, page.close()).await;
         let png = Arc::new(png.map_err(|_| ScanError::TimedOut)?.map_err(failed)?);
         let mut cards = lock(&self.cards);
         if cards.len() >= CARDS_MAX {
             cards.clear();
         }
-        cards.insert(key, Arc::clone(&png));
+        cards.insert(key.to_owned(), Arc::clone(&png));
         Ok(png)
+    }
+
+    /// The site's generic preview image (see [`crate::card::generic_html`]).
+    pub async fn generic_card(&self) -> Result<Arc<Vec<u8>>, ScanError> {
+        self.render("generic", &crate::card::generic_html()).await
     }
 
     /// One browser visit, after waiting in line for a slot.

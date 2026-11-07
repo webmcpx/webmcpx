@@ -92,6 +92,12 @@ enum Command {
         #[arg(long, requires = "scan_every")]
         behind_proxy: bool,
     },
+    /// Render the site's generic preview image (1200×630 PNG), e.g. into `site/static/og.png`.
+    Card {
+        out: PathBuf,
+        #[arg(long)]
+        chrome: Option<PathBuf>,
+    },
     /// List tasks (tab-separated).
     Tasks,
     /// Re-grade results files with today's answer checks (answers are not re-run).
@@ -162,6 +168,15 @@ async fn main() -> Result<()> {
                 }
                 writeln!(std::io::stdout().lock(), "{}", markdown(&results))?;
             }
+        }
+        Command::Card { out, chrome } => {
+            let scanner = Scanner::new(chrome, false);
+            let png = scanner
+                .generic_card()
+                .await
+                .map_err(|e| anyhow::anyhow!("rendering the card: {e:?}"))?;
+            std::fs::write(&out, png.as_ref()).with_context(|| out.display().to_string())?;
+            eprintln!("wrote {} ({} bytes)", out.display(), png.len());
         }
         Command::Tasks => {
             let mut out = std::io::stdout().lock();

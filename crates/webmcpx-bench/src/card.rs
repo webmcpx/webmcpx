@@ -47,9 +47,11 @@ fn escape(s: &str) -> String {
 
 /// 12k / 1.2k / 237, as the site shows token counts.
 fn short(n: usize) -> String {
+    // Round the whole value first, so 1,950 is 2.0k and 9,950 is 10k (not 1.0k, 9.0k).
+    let tenths = (n + 50) / 100;
     match n {
-        10_000.. => format!("{}k", (n + 500) / 1000),
-        1000.. => format!("{}.{}k", n / 1000, (n % 1000 + 50) / 100 % 10),
+        _ if tenths >= 100 => format!("{}k", (n + 500) / 1000),
+        1000.. => format!("{}.{}k", tenths / 10, tenths % 10),
         _ => n.to_string(),
     }
 }
@@ -84,8 +86,6 @@ pub fn line(s: Summary<'_>) -> String {
 
 /// The card as a standalone HTML page, 1200×630.
 pub fn html(s: Summary<'_>) -> String {
-    let (label, fill) = stamp(s.verdict);
-    let host = escape(s.host);
     // Long hosts shrink rather than wrap or overflow.
     let size = match s.host.chars().count() {
         0..=18 => 104,
@@ -93,6 +93,13 @@ pub fn html(s: Summary<'_>) -> String {
         27..=36 => 60,
         _ => 46,
     };
+    html_with(s.host, size, &line(s), Some(stamp(s.verdict)))
+}
+
+fn html_with(title: &str, size: u32, line: &str, stamp: Option<(&str, &str)>) -> String {
+    let (label, fill) = stamp.unwrap_or(("", "transparent"));
+    let stamp_display = if stamp.is_some() { "block" } else { "none" };
+    let host = escape(title);
     format!(
         r#"<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face{{font-family:B;src:url(data:font/woff2;base64,{font}) format("woff2");font-weight:200 800}}
@@ -102,7 +109,7 @@ html,body{{width:1200px;height:630px;background:oklch(0.958 0.006 95);font-famil
 background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.86 0.006 95) 1px,transparent 1px);background-size:64px 64px}}
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .lockup svg{{height:44px;width:auto}}
-.stamp{{border:4px solid currentColor;border-radius:999px;padding:10px 28px;font-size:34px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};box-shadow:5px 5px 0 currentColor}}
+.stamp{{display:{stamp_display};border:4px solid currentColor;border-radius:999px;padding:10px 28px;font-size:34px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};box-shadow:5px 5px 0 currentColor}}
 .host{{margin-top:auto;font-size:{size}px;font-weight:800;letter-spacing:-.04em;line-height:1;overflow-wrap:anywhere}}
 .line{{margin-top:22px;font-size:36px;font-weight:500;color:oklch(0.38 0.006 95);max-width:1000px}}
 .foot{{margin-top:40px;font-size:28px;font-weight:700}}
@@ -114,7 +121,17 @@ background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1
 </div></body></html>"#,
         font = base64(FONT),
         lockup = LOCKUP,
-        line = escape(&line(s)),
+        line = escape(line),
+    )
+}
+
+/// The site's own preview image (`/og.png`): what webmcpx is, for links without a scan.
+pub fn generic_html() -> String {
+    html_with(
+        "Make your site agent-ready.",
+        104,
+        "Scan any site for WebMCP tools. One line makes it agent\u{2011}ready.",
+        None,
     )
 }
 
@@ -192,6 +209,12 @@ mod tests {
         assert_eq!(line(s), "1 WebMCP tool agents can call directly.");
         assert_eq!(short(2485), "2.5k");
         assert_eq!(short(237), "237");
+        assert_eq!(short(999), "999");
+        assert_eq!(short(1000), "1.0k");
+        assert_eq!(short(1950), "2.0k");
+        assert_eq!(short(9949), "9.9k");
+        assert_eq!(short(9950), "10k");
+        assert_eq!(short(12_345), "12k");
     }
 
     #[test]
