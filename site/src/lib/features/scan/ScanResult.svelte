@@ -16,7 +16,7 @@
 	import type { Highlighted } from '#lib/content/snippets.ts';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import { tokens } from '#lib/features/benchmark/bench.ts';
-	import { BADGE, badgeEmbed, errors, host, shareLink } from './scan.ts';
+	import { BADGE_SVG, badgeEmbed, errors, host, shareLink } from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
 
 	const STEPS = [
@@ -170,14 +170,13 @@
 				{@const embed = badgeEmbed(location.origin, r.url)}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="font-medium">Show it. Paste this badge on your site:</p>
-					<p class="mt-1 text-sm text-ink-3">It links to a live scan of your site, so anyone can check it.</p>
-					<img
-						src="/badge/agent-ready.svg"
-						alt="Agent-ready: WebMCP tools checked with webmcpx"
-						width={BADGE.width}
-						height={BADGE.height}
-						class="mt-4"
-					/>
+					<p class="mt-1 text-sm text-ink-3">
+						The SVG is in the code, so nothing loads from us. It links to a live scan of your site, so anyone
+						can check it.
+					</p>
+					<!-- Our own artwork (content/badge.svg), the same markup the embed code carries. -->
+					<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+					<div class="mt-4 w-fit">{@html BADGE_SVG}</div>
 					<CodeBlock snippet={plain(embed)} title="badge.html" class="mt-4 shadow-none" />
 				</div>
 			{/if}

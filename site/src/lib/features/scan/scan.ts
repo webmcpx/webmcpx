@@ -1,3 +1,5 @@
+import badgeSvg from '#lib/content/badge.svg?raw';
+
 // Client for `GET /api/scan?url=` (crates/webmcpx-bench/src/scan.rs). Types mirror the Rust `Report`.
 
 export type Verdict = 'ready' | 'issues' | 'missing';
@@ -77,17 +79,16 @@ export const warnings = (r: Report) => r.diagnostics.filter((d) => d.severity ==
 /** The link that re-runs this scan when opened: `/?scan=<url>`. */
 export const shareLink = (origin: string, url: string) => `${origin}/?scan=${encodeURIComponent(url)}`;
 
-/** Size of `static/badge/agent-ready.svg`. */
-export const BADGE = { width: 176, height: 40 };
+/** The badge artwork, inlined into the embed code: sites never load an image from our server. */
+export const BADGE_SVG = badgeSvg.trim();
 
 const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 
 /**
- * The HTML a site pastes to show it is agent-ready. The badge links back to a live scan of that site, so
- * anyone can check the claim instead of trusting the picture.
+ * The HTML a site pastes to show it is agent-ready: the badge SVG itself, inside a link back to a live
+ * scan of that site. Nothing is fetched from us; the link lets anyone check the claim (and credits us).
  */
 export function badgeEmbed(origin: string, url: string): string {
 	const href = attr(`${shareLink(origin, url)}#scan`);
-	const src = attr(`${origin}/badge/agent-ready.svg`);
-	return `<a href="${href}"><img src="${src}" alt="Agent-ready: WebMCP tools checked with webmcpx" width="${BADGE.width}" height="${BADGE.height}"></a>`;
+	return `<a href="${href}" title="Agent-ready: check it live with webmcpx">${BADGE_SVG}</a>`;
 }

@@ -326,7 +326,7 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	await expect(result.getByRole('img', { name: /Agent-ready: WebMCP tools checked/ })).toBeVisible();
 	const embed = result.getByRole('figure').filter({ hasText: 'badge.html' });
 	await expect(embed).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');
-	await expect(embed).toContainText('/badge/agent-ready.svg');
-	const badge = await page.request.get('/badge/agent-ready.svg');
-	expect(badge.status()).toBe(200);
+	// The badge SVG is inlined: the embed loads nothing from our server.
+	await expect(embed).toContainText('<svg');
+	await expect(embed).not.toContainText('<img');
 });
