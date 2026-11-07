@@ -1,7 +1,7 @@
 {
   "name": "webmcpx",
   "version": "0.1.0",
-  "description": "Standard WebMCP tools for any website: one script tag, zero config.",
+  "description": "Standard WebMCP tools for any website, and an MCP server that gives any agent the WebMCP tools of the pages it opens.",
   "type": "module",
   "license": "MIT",
   "homepage": "https://webmcpx.dev",
@@ -15,7 +15,10 @@
     "mcp",
     "ai-agents",
     "model-context",
-    "wasm"
+    "wasm",
+    "mcp-server",
+    "agent",
+    "polyfill"
   ],
   "exports": {
     ".": {
@@ -25,8 +28,13 @@
     "./auto": "./src/auto.js"
   },
   "types": "./src/index.d.ts",
+  "bin": {
+    "webmcpx": "bin/webmcpx.js"
+  },
   "files": [
     "src",
+    "agent",
+    "bin",
     "wasm/webmcpx_wasm.js",
     "wasm/webmcpx_wasm_bg.wasm",
     "README.md",
@@ -37,6 +45,12 @@
   ],
   "scripts": {
     "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@w3c/webmcp-polyfill": "0.1.0"
   },
   "devDependencies": {
     "linkedom": "0.18.15"
