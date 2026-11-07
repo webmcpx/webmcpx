@@ -103,6 +103,14 @@ pub struct Browser {
     _profile: Option<tempfile::TempDir>,
 }
 
+impl Drop for Browser {
+    fn drop(&mut self) {
+        // Close the DevTools connection: a remote Chrome then disposes every context we opened. (A Chrome
+        // we started is killed with its process anyway.)
+        let _ = self.conn.tx.send(Ws::Close(None));
+    }
+}
+
 impl Browser {
     pub async fn launch(executable: Option<&Path>) -> Result<Self> {
         Self::launch_with(executable, &[]).await
@@ -206,7 +214,13 @@ impl Browser {
     pub async fn page(&self, init_scripts: &[&str]) -> Result<Page> {
         let context = self
             .conn
-            .call(None, "Target.createBrowserContext", json!({}))
+            // Disposed if our connection drops (a restarted server, a replaced session), so a remote Chrome
+            // never keeps an abandoned page running.
+            .call(
+                None,
+                "Target.createBrowserContext",
+                json!({ "disposeOnDetach": true }),
+            )
             .await?["browserContextId"]
             .as_str()
             .context("no browserContextId")?

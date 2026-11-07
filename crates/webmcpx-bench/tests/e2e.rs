@@ -327,6 +327,32 @@ async fn scans_with_a_remote_chrome_through_the_shared_proxy() {
     assert_eq!(report["verdict"], "ready", "{report}");
 }
 
+/// A remote Chrome outlives our connection to it: the pages we opened must not.
+#[tokio::test]
+async fn a_dropped_connection_closes_its_pages_in_a_remote_chrome() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let devtools = free_port();
+    let _chrome = Browser::launch_with(None, &[format!("--remote-debugging-port={devtools}")])
+        .await
+        .unwrap();
+    let endpoint = format!("127.0.0.1:{devtools}");
+    let first = Browser::connect(&endpoint).await.unwrap();
+    let _page = first.page(&[]).await.unwrap();
+    let observer = Browser::connect(&endpoint).await.unwrap();
+    assert_eq!(observer.open_contexts().await.unwrap(), 1);
+    drop(first); // As a restarted server or a replaced session would.
+    for _ in 0..50 {
+        if observer.open_contexts().await.unwrap() == 0 {
+            return;
+        }
+        tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    }
+    panic!("the abandoned page is still open");
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

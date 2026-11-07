@@ -271,6 +271,14 @@ impl Scanner {
     }
 }
 
+/// The host of a `host:port` endpoint, without the brackets of an IPv6 address (`[::1]:9222` → `::1`).
+fn endpoint_host(endpoint: &str) -> &str {
+    let host = endpoint.rsplit_once(':').map_or(endpoint, |(h, _)| h);
+    host.strip_prefix('[')
+        .and_then(|h| h.strip_suffix(']'))
+        .unwrap_or(host)
+}
+
 #[expect(clippy::needless_pass_by_value, reason = "used as `map_err(failed)`")]
 fn failed(e: anyhow::Error) -> ScanError {
     ScanError::Failed(format!("{e:#}"))
@@ -514,6 +522,14 @@ mod tests {
             "data:image/png;base64,{}",
             "A".repeat(MAX_ICON_URI)
         )));
+    }
+
+    #[test]
+    fn endpoint_hosts() {
+        assert_eq!(endpoint_host("chrome:9222"), "chrome");
+        assert_eq!(endpoint_host("127.0.0.1:9222"), "127.0.0.1");
+        assert_eq!(endpoint_host("[::1]:9222"), "::1");
+        assert_eq!(endpoint_host("chrome"), "chrome");
     }
 
     #[test]
