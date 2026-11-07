@@ -26,7 +26,7 @@ exit_code: 1
         "message": "`navigator.modelContext` is deprecated; use `document.modelContext`",
         "rule": "legacy-api",
         "severity": "warning",
-        "url": "https://webmcp.zone/rules/legacy-api"
+        "url": "https://github.com/webmcpx/webmcpx/blob/main/crates/webmcpx-lint/src/rules/legacy_api.rs"
       },
       {
         "column": 9,
@@ -38,7 +38,7 @@ exit_code: 1
         "message": "tool name contains ' '; only A-Z, a-z, 0-9, '_', '.' and '-' are allowed",
         "rule": "invalid-name",
         "severity": "error",
-        "url": "https://webmcp.zone/rules/invalid-name"
+        "url": "https://github.com/webmcpx/webmcpx/blob/main/crates/webmcpx-lint/src/rules/invalid_name.rs"
       },
       {
         "column": 16,
@@ -59,7 +59,7 @@ exit_code: 1
         "message": "1 invisible character(s), first U+200B",
         "rule": "invisible-unicode",
         "severity": "error",
-        "url": "https://webmcp.zone/rules/invisible-unicode"
+        "url": "https://github.com/webmcpx/webmcpx/blob/main/crates/webmcpx-lint/src/rules/invisible_unicode.rs"
       },
       {
         "column": 48,
@@ -71,7 +71,7 @@ exit_code: 1
         "message": "parameter `q` of `search products` has no description",
         "rule": "missing-param-description",
         "severity": "warning",
-        "url": "https://webmcp.zone/rules/missing-param-description"
+        "url": "https://github.com/webmcpx/webmcpx/blob/main/crates/webmcpx-lint/src/rules/missing_param_description.rs"
       },
       {
         "column": 18,
@@ -83,7 +83,7 @@ exit_code: 1
         "message": "`destructiveHint` is an MCP annotation; WebMCP ignores it (use consequentialHint or readOnlyHint)",
         "rule": "unknown-annotation",
         "severity": "warning",
-        "url": "https://webmcp.zone/rules/unknown-annotation"
+        "url": "https://github.com/webmcpx/webmcpx/blob/main/crates/webmcpx-lint/src/rules/unknown_annotation.rs"
       }
     ],
     "summary": {

@@ -11,7 +11,13 @@ use crate::files::FileResult;
 use crate::{Failure, Format};
 
 const SCHEMA_VERSION: u32 = 1;
-const RULE_DOCS: &str = "https://webmcp.zone/rules/";
+/// Where a rule is documented: its source file, which states what it checks and why.
+fn rule_docs(name: &str) -> String {
+    format!(
+        "https://github.com/webmcpx/webmcpx/blob/main/crates/webmcpx-lint/src/rules/{}.rs",
+        name.replace('-', "_")
+    )
+}
 
 fn envelope(ok: bool, data: &Value) -> Value {
     json!({ "schema_version": SCHEMA_VERSION, "ok": ok, "data": data })
@@ -128,7 +134,7 @@ fn diagnostic_json(r: &FileResult, d: &Diagnostic) -> Value {
             "message": f.message,
             "edits": f.edits.iter().map(|e| json!({ "start": e.span.start, "end": e.span.end, "replacement": e.replacement })).collect::<Vec<_>>(),
         })),
-        "url": format!("{RULE_DOCS}{}", d.rule),
+        "url": rule_docs(&d.rule),
     })
 }
 
@@ -237,7 +243,7 @@ fn rule_json(rule: &Rule) -> Value {
         "fixable": rule.fixable,
         "summary": rule.summary,
         "why": rule.why,
-        "url": format!("{RULE_DOCS}{}", rule.name),
+        "url": rule_docs(rule.name),
     })
 }
 
@@ -271,13 +277,13 @@ pub(crate) fn rule(out: &mut impl Write, format: Format, rule: &Rule) -> Result<
     }
     writeln!(
         out,
-        "{} ({}{})\n\n{}\n\n{}\n\n{RULE_DOCS}{}",
+        "{} ({}{})\n\n{}\n\n{}\n\n{}",
         rule.name,
         rule.severity.as_str(),
         if rule.preview { ", preview" } else { "" },
         rule.summary,
         rule.why,
-        rule.name
+        rule_docs(rule.name)
     )
 }
 
@@ -310,7 +316,7 @@ fn sarif(results: &[FileResult]) -> Value {
                 "id": r.name,
                 "shortDescription": { "text": r.summary },
                 "fullDescription": { "text": r.why },
-                "helpUri": format!("{RULE_DOCS}{}", r.name),
+                "helpUri": rule_docs(r.name),
                 "defaultConfiguration": { "level": sarif_level(r.severity) },
             });
             if matches!(r.name, "invisible-unicode" | "sensitive-param") {
@@ -344,7 +350,7 @@ fn sarif(results: &[FileResult]) -> Value {
             "tool": { "driver": {
                 "name": "webmcpx",
                 "version": env!("CARGO_PKG_VERSION"),
-                "informationUri": "https://webmcp.zone",
+                "informationUri": "https://webmcpx.dev",
                 "rules": rules,
             }},
             "results": findings,
@@ -367,4 +373,22 @@ fn fingerprint(parts: &[&str]) -> String {
         hash = hash.wrapping_mul(0x0100_0000_01b3);
     }
     format!("{hash:016x}")
+}
+
+#[cfg(test)]
+mod docs_tests {
+    use super::rule_docs;
+
+    /// Every rule's docs link is a file in this repository.
+    #[test]
+    fn every_rule_links_to_its_source() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../..");
+        for rule in webmcpx_lint::rules::RULES {
+            let url = rule_docs(rule.name);
+            let path = url
+                .strip_prefix("https://github.com/webmcpx/webmcpx/blob/main/")
+                .unwrap();
+            assert!(root.join(path).is_file(), "{} -> {url}", rule.name);
+        }
+    }
 }

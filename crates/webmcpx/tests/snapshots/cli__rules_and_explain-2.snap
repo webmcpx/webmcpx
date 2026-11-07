@@ -17,6 +17,6 @@ No invisible characters (zero-width, bidi controls, tags) in tool text.
 
 Reviewers cannot see them but models read them, so they can smuggle instructions (webmcp#360, Trojan Source). `--fix` deletes the ones written literally in the source.
 
-https://webmcp.zone/rules/invisible-unicode
+https://github.com/webmcpx/webmcpx/blob/main/crates/webmcpx-lint/src/rules/invisible_unicode.rs
 
 ----- stderr -----
