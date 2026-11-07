@@ -62,7 +62,10 @@
 </script>
 
 <footer class="mt-8 px-3 pb-3 sm:px-5 sm:pb-5">
-	<div class="overflow-hidden rounded-frame border-2 border-ink bg-ink text-paper">
+	<!-- On ink, the focus ring is paper (the global ring is ink and would vanish here). -->
+	<div
+		class="overflow-hidden rounded-frame border-2 border-ink bg-ink text-paper [&_:focus-visible]:outline-paper"
+	>
 		<div class="grid gap-12 px-6 pt-14 sm:px-10 md:grid-cols-[1.3fr_repeat(3,1fr)] md:gap-8">
 			<div class="max-w-xs">
 				<p class="font-display text-2xl leading-tight font-bold">

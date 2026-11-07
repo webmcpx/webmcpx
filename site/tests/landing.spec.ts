@@ -292,3 +292,17 @@ test('a scan submitted before JavaScript is ready still runs', async ({ browser 
 	await expect(page).toHaveURL(/\?scan=notion\.com#scan$/);
 	await page.close();
 });
+
+test('keyboard focus is visible on the ink footer', async ({ page }) => {
+	await page.goto('/');
+	const link = page.locator('footer').getByRole('link', { name: 'GitHub' });
+	await link.focus();
+	await page.keyboard.press('Shift+Tab');
+	await page.keyboard.press('Tab');
+	const [outline, panel] = await link.evaluate((a) => [
+		getComputedStyle(a).outlineColor,
+		getComputedStyle(a.closest('footer > div')!).backgroundColor
+	]);
+	expect(outline).not.toBe(panel);
+	expect(await link.evaluate((a) => getComputedStyle(a).outlineStyle)).toBe('solid');
+});
