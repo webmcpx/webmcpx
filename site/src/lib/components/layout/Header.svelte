@@ -24,7 +24,7 @@
 	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
-	import { REPO } from '#lib/content/site.ts';
+	import { REPO, VERSION } from '#lib/content/site.ts';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import { LOCALES, localized, unlocalized } from '#lib/i18n/locales.ts';
 	import Logo from './Logo.svelte';
@@ -106,7 +106,7 @@
 	<nav aria-label={m.nav} class="mx-auto flex h-16 items-center justify-between gap-4 px-5 sm:h-20 sm:px-8">
 		<div class="flex items-center gap-3">
 			<a href={home} class="rounded-lg"><Logo /><span class="sr-only">{m.home}</span></a>
-			<Stamp size="sm" class="hidden sm:inline-flex">v0.1</Stamp>
+			<Stamp size="sm" class="hidden sm:inline-flex">v{VERSION}</Stamp>
 		</div>
 
 		<ul

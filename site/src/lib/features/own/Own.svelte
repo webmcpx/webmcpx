@@ -44,7 +44,7 @@
 
 <Section id="own" title={m.title} lead={m.lead} center>
 	<Reveal class="mx-auto max-w-3xl text-left">
-		<CodeTabs id="own" label={m.title} {tabs} />
+		<CodeTabs label={m.title} {tabs} />
 		<p class="mt-8 text-sm font-medium text-ink-2">{m.check}</p>
 		<CodeBlock snippet={check} title="terminal" class="mt-2" />
 	</Reveal>

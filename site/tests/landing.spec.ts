@@ -544,9 +544,34 @@ test('install and agent setup are tabs with logos, the most used open, each with
 	await expect(agents).toHaveText(['VS Code', 'Cursor', 'Claude Code', 'Codex', 'Windsurf']);
 	await expect(agents.locator('svg')).toHaveCount(5);
 	await agents.nth(2).click();
-	const panel = fix.locator('[role=tabpanel]:not([hidden])').nth(1);
+	const panel = fix.locator('[role=tabpanel]:not([data-inactive])').nth(1);
 	await expect(panel).toContainText('claude mcp add webmcpx -- npx -y webmcpx mcp');
 	await expect(panel.getByRole('button', { name: /Copy/ })).toBeVisible();
 	const check = fix.getByRole('figure').filter({ hasText: 'npx webmcpx tools localhost:3000' });
 	await expect(check.getByRole('button', { name: /Copy/ })).toBeVisible();
+});
+
+test('the verdicts page explains each stamp and is linked from every scan result and the footer', async ({
+	page
+}) => {
+	await page.goto('/');
+	await page.locator('footer').getByRole('link', { name: 'How verdicts work' }).click();
+	await expect(page).toHaveURL(/\/verdicts\/$/);
+	await expect(page.getByRole('heading', { level: 1 })).toHaveText('How the scanner decides');
+	for (const name of ['Agent-ready', 'Almost', 'Not yet'])
+		await expect(page.getByText(name, { exact: true })).toBeVisible();
+	await expect(page.getByText('invalid-input-schema')).toBeVisible();
+	await expect(page.getByRole('link', { name: 'Open an issue with the scan link.' })).toHaveAttribute(
+		'href',
+		/template=verdict\.yml/
+	);
+});
+
+test('the closing form scans and brings the result into view', async ({ page }) => {
+	await mockScan(page);
+	await page.goto('/#scan-now');
+	const closing = page.locator('#scan-now');
+	await closing.getByLabel("Your site's address").fill('docs.example.com');
+	await closing.getByRole('button', { name: 'Scan it' }).click();
+	await expect(page.locator('#scan').getByText('docs.example.com', { exact: true }).first()).toBeInViewport();
 });

@@ -9,3 +9,6 @@ export const SPEC_ISSUES = 'https://github.com/webmachinelearning/webmcp/issues'
 export const COMMUNITY = 'https://webmcp.zone';
 /** The public site, for absolute links (hreflang, canonical). */
 export const ORIGIN = 'https://webmcpx.dev';
+
+/** The npm package's minor line, shown in the header (a test keeps it equal to packages/webmcpx). */
+export const VERSION = '0.2';

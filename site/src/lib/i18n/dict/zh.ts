@@ -16,6 +16,10 @@ const zh: Messages = {
 	},
 
 	meta: {
+		verdicts: {
+			title: '扫描判定是怎么来的 · webmcpx',
+			description: '每种扫描判定的含义、扫描如何进行，以及判定有误时去哪里反馈。'
+		},
 		home: {
 			title: 'webmcpx：你的网站智能体就绪了吗？',
 			description:
@@ -53,6 +57,7 @@ const zh: Messages = {
 		columns: { product: '产品', project: '项目', webmcp: 'WebMCP' },
 		links: {
 			scan: '扫描你的网站',
+			verdicts: '判定规则',
 			proof: '基准测试',
 			install: '安装',
 			issues: '解决了哪些问题',
@@ -334,6 +339,35 @@ const zh: Messages = {
 			hook: '组件挂载期间注册，卸载时自动移除。'
 		},
 		check: '然后查看效果，无需浏览器 flag：'
+	},
+
+	closing: {
+		title: '现在就扫描你正开着的网站。',
+		lead: '判定结果、它的工具，以及没有工具时智能体要读的内容，附带可分享的卡片。'
+	},
+
+	verdicts: {
+		title: '扫描器如何判定',
+		lead: '三种判定，规则公开。觉得哪个不对就告诉我们：正是这种反馈让它变得更好。',
+		// {rules} is a list of lint rule names (code).
+		items: {
+			ready: '页面至少注册了一个 WebMCP 工具，且 linter 没有发现错误。名称过长、缺少注解之类的警告不影响。',
+			issues: '页面注册了工具，但至少有一个存在 linter 错误：{rules}，或者大小超过硬性上限。',
+			missing: '页面没有注册任何 WebMCP 工具。我们会显示智能体改为阅读页面要花多少 token。'
+		},
+		how: {
+			title: '扫描如何进行',
+			steps: [
+				'我们在自己的服务器上用无头 Chrome 打开页面，不带 Cookie，也不登录。',
+				'在页面脚本运行之前，我们加入一个 WebMCP 宿主，让页面像在智能体的浏览器里一样注册工具。它也接受旧的 navigator.modelContext 和 provideContext，基于它们构建的网站也能显示工具。',
+				'页面加载完成、工具稳定后，我们读取每个工具的名称、描述、输入 schema 和注解，并用 linter 检查。',
+				'token 数根据页面文本估算：字符数除以 4。',
+				'结果会复用 10 分钟；每位访客每分钟可以发起一次新的扫描。'
+			]
+		},
+		rules: '全部 linter 规则及其理由',
+		disagree: '觉得判定有误？{link}',
+		disagreeLink: '附上扫描链接提交 issue。'
 	},
 
 	issues: {

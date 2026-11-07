@@ -14,6 +14,11 @@ const ptBr: Messages = {
 	},
 
 	meta: {
+		verdicts: {
+			title: 'Como funcionam os vereditos do scan · webmcpx',
+			description:
+				'O que cada veredito do scan significa, como um scan roda e onde dizer que um veredito está errado.'
+		},
 		home: {
 			title: 'webmcpx: seu site está pronto para agentes?',
 			description:
@@ -52,6 +57,7 @@ const ptBr: Messages = {
 		columns: { product: 'Produto', project: 'Projeto', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Escaneie seu site',
+			verdicts: 'Como funcionam os vereditos',
 			proof: 'Benchmark',
 			install: 'Instalar',
 			issues: 'Issues resolvidas',
@@ -343,6 +349,38 @@ const ptBr: Messages = {
 			hook: 'Registrada enquanto o componente está montado, removida quando ele sai.'
 		},
 		check: 'Depois confira, sem flag no navegador:'
+	},
+
+	closing: {
+		title: 'Escaneie agora o site que você tem aberto.',
+		lead: 'O veredito, as ferramentas e o que um agente leria no lugar delas, com um card para compartilhar.'
+	},
+
+	verdicts: {
+		title: 'Como o scanner decide',
+		lead: 'Três vereditos, regras abertas. Se algum parecer errado, avise: é esse o feedback que melhora o scanner.',
+		// {rules} is a list of lint rule names (code).
+		items: {
+			ready:
+				'A página registra ao menos uma ferramenta WebMCP e o linter não acha erros nelas. Avisos, como um nome longo ou anotações faltando, não impedem.',
+			issues:
+				'A página registra ferramentas, mas ao menos uma tem um erro do linter: {rules}, ou um tamanho acima do limite rígido.',
+			missing:
+				'A página não registra nenhuma ferramenta WebMCP. Mostramos quantos tokens um agente gastaria lendo a página no lugar delas.'
+		},
+		how: {
+			title: 'Como um scan roda',
+			steps: [
+				'Abrimos a página num Chrome headless no nosso servidor, sem cookies e sem login.',
+				'Antes de os scripts da página rodarem, adicionamos um host WebMCP, para que a página registre as ferramentas como faria no navegador de um agente. Ele também aceita os antigos navigator.modelContext e provideContext, para que sites feitos com eles ainda mostrem suas ferramentas.',
+				'Depois que a página carrega e as ferramentas se estabilizam, lemos nome, descrição, schema de entrada e anotações de cada uma e passamos o linter.',
+				'Os tokens são estimados a partir do texto da página: os caracteres divididos por quatro.',
+				'Um resultado vale por 10 minutos; cada visitante pode iniciar um scan novo por minuto.'
+			]
+		},
+		rules: 'Todas as regras do linter, com os motivos',
+		disagree: 'Acha que um veredito está errado? {link}',
+		disagreeLink: 'Abra uma issue com o link do scan.'
 	},
 
 	issues: {

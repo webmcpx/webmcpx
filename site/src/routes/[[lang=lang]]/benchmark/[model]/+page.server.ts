@@ -1,5 +1,6 @@
 // One prerendered page per model: the benchmark for readers without JavaScript, where the landing's model
 // switcher cannot switch (the landing links here).
+import { existsSync } from 'node:fs';
 import { error } from '@sveltejs/kit';
 import { DEFAULT_LOCALE, LOCALE_CODES } from '#lib/i18n/locales.ts';
 import { SNIPPETS } from '#lib/content/snippets.ts';
@@ -17,5 +18,14 @@ export const load: PageServerLoad = async ({ params }) => {
 	const runs = loadRuns();
 	const run = runs.find((r) => r.results.model === params.model);
 	if (!run) error(404, `No published run for ${params.model}`);
-	return { run, models: runs.map((r) => r.results.model), reproduce: await highlight(SNIPPETS.reproduce) };
+	// The run's preview image (its best case), made by `just bench`; the generic one until then.
+	const og = `/og/benchmark-${params.model}.png`;
+	return {
+		run,
+		models: runs.map((r) => r.results.model),
+		reproduce: await highlight(SNIPPETS.reproduce),
+		og: existsSync(`static${og}`) ? og : undefined,
+		// Its Markdown twin, for agents (`benchmark/[model]/index.md`).
+		markdown: `/benchmark/${params.model}/index.md`
+	};
 };

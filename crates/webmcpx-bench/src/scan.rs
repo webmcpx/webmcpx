@@ -321,6 +321,11 @@ impl Scanner {
         self.render("generic", &crate::card::generic_html()).await
     }
 
+    /// Renders any card HTML (the build-time benchmark cards), cached under its own text.
+    pub async fn render_html(&self, html: &str) -> Result<Arc<Vec<u8>>, ScanError> {
+        self.render(html, html).await
+    }
+
     /// One browser visit, after waiting in line for a slot.
     async fn scan_now(&self, url: Url) -> Result<Report, ScanError> {
         let _place = self.places.try_acquire().map_err(|_| ScanError::Busy)?;

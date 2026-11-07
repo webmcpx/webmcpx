@@ -14,6 +14,11 @@ const id: Messages = {
 	},
 
 	meta: {
+		verdicts: {
+			title: 'Cara kerja verdik pemindaian · webmcpx',
+			description:
+				'Arti tiap verdik pemindaian, cara pemindaian berjalan, dan tempat melapor jika verdik salah.'
+		},
 		home: {
 			title: 'webmcpx: apakah situs Anda sudah siap agent?',
 			description:
@@ -52,6 +57,7 @@ const id: Messages = {
 		columns: { product: 'Produk', project: 'Proyek', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Scan situs Anda',
+			verdicts: 'Cara kerja verdik',
 			proof: 'Benchmark',
 			install: 'Pasang',
 			issues: 'Masalah yang diatasi',
@@ -335,6 +341,38 @@ const id: Messages = {
 			hook: 'Terdaftar selama komponen terpasang, hilang saat dilepas.'
 		},
 		check: 'Lalu cek, tanpa flag browser:'
+	},
+
+	closing: {
+		title: 'Pindai situs yang sedang Anda buka sekarang.',
+		lead: 'Verdiknya, tool-nya, dan apa yang akan dibaca agen sebagai gantinya, lengkap dengan kartu untuk dibagikan.'
+	},
+
+	verdicts: {
+		title: 'Cara pemindai memutuskan',
+		lead: 'Tiga verdik, aturan terbuka. Kalau ada yang terasa salah, beri tahu kami: masukan itulah yang membuatnya lebih baik.',
+		// {rules} is a list of lint rule names (code).
+		items: {
+			ready:
+				'Halaman mendaftarkan setidaknya satu tool WebMCP dan linter tidak menemukan error di dalamnya. Peringatan, seperti nama panjang atau anotasi yang kurang, tidak menghalangi.',
+			issues:
+				'Halaman mendaftarkan tool, tetapi setidaknya satu punya error linter: {rules}, atau ukuran di atas batas kerasnya.',
+			missing:
+				'Halaman tidak mendaftarkan tool WebMCP. Kami tampilkan berapa token yang akan dihabiskan agen untuk membaca halaman sebagai gantinya.'
+		},
+		how: {
+			title: 'Cara pemindaian berjalan',
+			steps: [
+				'Kami membuka halaman di Chrome headless di server kami, tanpa cookie dan tanpa login.',
+				'Sebelum skrip halaman berjalan, kami menambahkan host WebMCP, agar halaman mendaftarkan tool-nya seperti di browser agen. Host ini juga menerima navigator.modelContext dan provideContext versi lama, agar situs yang memakainya tetap menampilkan tool-nya.',
+				'Setelah halaman dimuat dan tool-nya stabil, kami membaca nama, deskripsi, skema input, dan anotasi tiap tool, lalu memeriksanya dengan linter.',
+				'Token diperkirakan dari teks halaman: jumlah karakternya dibagi empat.',
+				'Hasil dipakai ulang selama 10 menit; setiap pengunjung bisa memulai satu pemindaian baru per menit.'
+			]
+		},
+		rules: 'Semua aturan linter, beserta alasannya',
+		disagree: 'Menurut Anda verdiknya salah? {link}',
+		disagreeLink: 'Buka issue dengan tautan pemindaian.'
 	},
 
 	issues: {

@@ -138,6 +138,11 @@
 					<div class="flex flex-wrap items-center gap-3">
 						<p class="truncate font-display text-2xl font-bold tracking-tight">{host(r.final_url)}</p>
 						<Stamp tone={v.tone} size="lg">{m.verdicts[r.verdict]}</Stamp>
+						<a
+							href={i18n.href('/verdicts/')}
+							class="text-sm text-ink-3 underline decoration-ink/30 underline-offset-4 hover:text-ink"
+							>{i18n.m.footer.links.verdicts}</a
+						>
 					</div>
 					<p class="mt-2 text-ink-2">
 						{#if r.verdict === 'missing'}

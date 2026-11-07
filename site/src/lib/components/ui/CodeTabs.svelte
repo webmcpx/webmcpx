@@ -1,6 +1,6 @@
 <!--
-	Code samples as tabs with logos (WAI-ARIA tabs: arrow keys, Home/End). The first tab opens: list the
-	most used first. Without JavaScript every panel shows, one after another, each with its copy button.
+	Code samples as `Tabs` with logos: one code block (with its copy button) per tab, and an optional note.
+	The first tab opens, so list the most used first. Without JavaScript every panel shows, stacked.
 -->
 <script lang="ts" module>
 	import type { Component } from 'svelte';
@@ -20,72 +20,33 @@
 </script>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import BrandIcon from './BrandIcon.svelte';
 	import CodeBlock from './CodeBlock.svelte';
+	import Tabs from './Tabs.svelte';
 
-	let { tabs, label, id: prefix }: { tabs: CodeTab[]; label: string; id: string } = $props();
+	let { tabs, label }: { tabs: CodeTab[]; label: string } = $props();
 
-	let active = $state(0);
-	let hydrated = $state(false);
-	onMount(() => (hydrated = true));
-	const buttons: HTMLButtonElement[] = [];
-
-	function key(event: KeyboardEvent, i: number) {
-		const last = tabs.length - 1;
-		const next =
-			event.key === 'ArrowRight'
-				? (i + 1) % tabs.length
-				: event.key === 'ArrowLeft'
-					? (i - 1 + tabs.length) % tabs.length
-					: event.key === 'Home'
-						? 0
-						: event.key === 'End'
-							? last
-							: -1;
-		if (next < 0) return;
-		event.preventDefault();
-		active = next;
-		buttons[next]?.focus();
-	}
 	const brand = (icon: CodeTab['icon']): icon is SimpleIcon => typeof icon === 'object' && 'path' in icon;
 </script>
 
-<div role="tablist" aria-label={label} class="flex flex-wrap gap-2">
-	{#each tabs as tab, i (tab.id)}
-		<button
-			bind:this={buttons[i]}
-			id="{prefix}-tab-{tab.id}"
-			role="tab"
-			type="button"
-			aria-selected={active === i}
-			aria-controls="{prefix}-panel-{tab.id}"
-			tabindex={active === i ? 0 : -1}
-			onclick={() => (active = i)}
-			onkeydown={(e) => key(e, i)}
-			class={[
-				'inline-flex items-center gap-2 rounded-full border-2 border-ink px-3.5 py-1.5 font-mono text-sm font-medium transition',
-				active === i ? 'bg-ink text-paper' : 'bg-card text-ink hover:bg-paper-2'
-			]}
-		>
-			{#if brand(tab.icon)}
-				<BrandIcon icon={tab.icon} size={15} class="shrink-0" />
-			{:else}
-				<tab.icon size={15} strokeWidth={2.25} aria-hidden="true" />
-			{/if}
-			{tab.label}
-		</button>
-	{/each}
-</div>
-{#each tabs as tab, i (tab.id)}
-	<div
-		id="{prefix}-panel-{tab.id}"
-		role="tabpanel"
-		aria-labelledby="{prefix}-tab-{tab.id}"
-		hidden={hydrated && active !== i}
-		class="mt-4"
-	>
-		<CodeBlock snippet={tab.snippet} title={tab.title} class="code-wrap" />
-		{#if tab.note}<p class="mt-3 text-left text-sm text-pretty text-ink-2">{tab.note}</p>{/if}
-	</div>
-{/each}
+<Tabs
+	items={tabs}
+	{label}
+	listClass="flex-wrap gap-2"
+	tabClass="h-9 border-ink bg-card px-3.5 font-mono text-sm text-ink hover:bg-paper-2 aria-selected:bg-ink aria-selected:text-paper"
+>
+	{#snippet tab(item)}
+		{#if brand(item.icon)}
+			<BrandIcon icon={item.icon} size={15} class="shrink-0" />
+		{:else}
+			<item.icon size={15} strokeWidth={2.25} aria-hidden="true" />
+		{/if}
+		{item.label}
+	{/snippet}
+	{#snippet panel(item)}
+		<div class="mt-4">
+			<CodeBlock snippet={item.snippet} title={item.title} class="code-wrap" />
+			{#if item.note}<p class="mt-3 text-left text-sm text-pretty text-ink-2">{item.note}</p>{/if}
+		</div>
+	{/snippet}
+</Tabs>

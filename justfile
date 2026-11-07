@@ -73,6 +73,7 @@ review-reply reply:
 bench *args: wasm
     cargo run -q --release -p webmcpx-bench -- run {{args}}
     cp bench/results/latest.json "site/src/lib/content/bench/$(jq -r .model bench/results/latest.json).json"
+    cargo run -q --release -p webmcpx-bench -- card --bench bench/results/latest.json "site/static/og/benchmark-$(jq -r .model bench/results/latest.json).png"
 
 # Re-grade every published run (one per model) with today's answer checks, after fixing a check.
 bench-regrade:

@@ -13,6 +13,11 @@ const de: Messages = {
 	},
 
 	meta: {
+		verdicts: {
+			title: 'So entstehen die Scan-Urteile · webmcpx',
+			description:
+				'Was jedes Scan-Urteil bedeutet, wie ein Scan abläuft und wo du ein falsches Urteil meldest.'
+		},
 		home: {
 			title: 'webmcpx: Ist Ihre Website agentenfähig?',
 			description:
@@ -51,6 +56,7 @@ const de: Messages = {
 		columns: { product: 'Produkt', project: 'Projekt', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Website scannen',
+			verdicts: 'So entstehen die Urteile',
 			proof: 'Benchmark',
 			install: 'Installation',
 			issues: 'Gelöste Issues',
@@ -345,6 +351,38 @@ const de: Messages = {
 			hook: 'Registriert, solange die Komponente gemountet ist, und wieder weg, wenn sie verschwindet.'
 		},
 		check: 'Dann prüfen, ohne Browser-Flag:'
+	},
+
+	closing: {
+		title: 'Scanne jetzt die Website, die du gerade offen hast.',
+		lead: 'Das Urteil, ihre Tools und was ein Agent stattdessen lesen würde, mit einer Karte zum Teilen.'
+	},
+
+	verdicts: {
+		title: 'So entscheidet der Scanner',
+		lead: 'Drei Urteile, offene Regeln. Wirkt eins falsch, sag Bescheid: Genau dieses Feedback macht ihn besser.',
+		// {rules} is a list of lint rule names (code).
+		items: {
+			ready:
+				'Die Seite registriert mindestens ein WebMCP-Tool, und der Linter findet darin keine Fehler. Warnungen, etwa ein langer Name oder fehlende Annotationen, stehen dem nicht im Weg.',
+			issues:
+				'Die Seite registriert Tools, aber mindestens eins hat einen Linter-Fehler: {rules}, oder eine Größe über dem harten Limit.',
+			missing:
+				'Die Seite registriert kein WebMCP-Tool. Wir zeigen, wie viele Tokens ein Agent stattdessen fürs Lesen der Seite verbrauchen würde.'
+		},
+		how: {
+			title: 'So läuft ein Scan ab',
+			steps: [
+				'Wir öffnen die Seite in einem Headless-Chrome auf unserem Server, ohne Cookies und ohne Login.',
+				'Bevor die Skripte der Seite laufen, fügen wir einen WebMCP-Host hinzu, damit die Seite ihre Tools registriert wie im Browser eines Agenten. Er nimmt auch die älteren navigator.modelContext und provideContext an, damit darauf gebaute Seiten ihre Tools trotzdem zeigen.',
+				'Sobald die Seite geladen ist und ihre Tools stehen, lesen wir Name, Beschreibung, Eingabeschema und Annotationen jedes Tools und prüfen sie mit dem Linter.',
+				'Tokens werden aus dem Text-Snapshot der Seite geschätzt: Zeichenzahl geteilt durch vier.',
+				'Ein Ergebnis gilt 10 Minuten; jeder Besucher kann einen neuen Scan pro Minute starten.'
+			]
+		},
+		rules: 'Alle Linter-Regeln mit Begründung',
+		disagree: 'Hältst du ein Urteil für falsch? {link}',
+		disagreeLink: 'Öffne ein Issue mit dem Scan-Link.'
 	},
 
 	issues: {

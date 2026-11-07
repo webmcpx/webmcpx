@@ -10,6 +10,7 @@
 	import Download from '@lucide/svelte/icons/download';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import Globe from '@lucide/svelte/icons/globe';
+	import ListChecks from '@lucide/svelte/icons/list-checks';
 	import Package from '@lucide/svelte/icons/package';
 	import Palette from '@lucide/svelte/icons/palette';
 	import Scale from '@lucide/svelte/icons/scale';
@@ -39,6 +40,7 @@
 			title: m.columns.product,
 			links: [
 				{ label: m.links.scan, href: `${home}#scan`, icon: { lucide: ScanSearch } },
+				{ label: m.links.verdicts, href: i18n.href('/verdicts/'), icon: { lucide: ListChecks } },
 				{ label: m.links.proof, href: `${home}#proof`, icon: { lucide: ChartColumn } },
 				{ label: m.links.install, href: `${home}#fix`, icon: { lucide: Download } },
 				{ label: m.links.issues, href: `${home}#issues`, icon: { lucide: Bug } }

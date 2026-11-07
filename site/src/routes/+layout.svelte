@@ -31,6 +31,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 	<link rel="preload" href={displayLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 	<link rel="preload" href={textLatin} as="font" type="font/woff2" crossorigin="anonymous" />
 	{#each LOCALES as l (l.code)}
@@ -39,16 +40,16 @@
 	<link rel="alternate" hreflang="x-default" href="{ORIGIN}{english}" />
 	<link rel="canonical" href="{ORIGIN}{page.url.pathname}" />
 	<!-- The same content as Markdown, for agents (llms.txt lists it too). -->
-	<link rel="alternate" type="text/markdown" href="{ORIGIN}/index.md" />
+	<link rel="alternate" type="text/markdown" href="{ORIGIN}{page.data.markdown ?? '/index.md'}" />
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="webmcpx" />
 	<meta property="og:url" content="{ORIGIN}{page.url.pathname}" />
 	<meta property="og:locale" content={locale(i18n.code).tag.replace('-', '_')} />
-	<meta property="og:image" content="{ORIGIN}/og.png" />
+	<meta property="og:image" content="{ORIGIN}{page.data.og ?? '/og.png'}" />
 	<meta property="og:image:width" content="1200" />
 	<meta property="og:image:height" content="630" />
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:image" content="{ORIGIN}/og.png" />
+	<meta name="twitter:image" content="{ORIGIN}{page.data.og ?? '/og.png'}" />
 	<!-- We run what we ship: the site registers the standard WebMCP tools with the loader everyone pastes. -->
 	<script type="module" src={LOADER_URL}></script>
 </svelte:head>

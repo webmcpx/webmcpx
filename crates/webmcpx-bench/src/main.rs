@@ -92,11 +92,14 @@ enum Command {
         #[arg(long, requires = "scan_every")]
         behind_proxy: bool,
     },
-    /// Render the site's generic preview image (1200×630 PNG), e.g. into `site/static/og.png`.
+    /// Render a preview image (1200×630 PNG): the site's generic one (e.g. `site/static/og.png`), or with
+    /// `--bench <results.json>` that run's best case (e.g. `site/static/og/benchmark-<model>.png`).
     Card {
         out: PathBuf,
         #[arg(long)]
         chrome: Option<PathBuf>,
+        #[arg(long)]
+        bench: Option<PathBuf>,
     },
     /// List tasks (tab-separated).
     Tasks,
@@ -169,12 +172,21 @@ async fn main() -> Result<()> {
                 writeln!(std::io::stdout().lock(), "{}", markdown(&results))?;
             }
         }
-        Command::Card { out, chrome } => {
+        Command::Card { out, chrome, bench } => {
             let scanner = Scanner::new(chrome, false);
-            let png = scanner
-                .generic_card()
-                .await
-                .map_err(|e| anyhow::anyhow!("rendering the card: {e:?}"))?;
+            let png = match bench {
+                None => scanner.generic_card().await,
+                Some(path) => {
+                    let text = std::fs::read_to_string(&path)
+                        .with_context(|| path.display().to_string())?;
+                    let results: serde_json::Value = serde_json::from_str(&text)?;
+                    let html = webmcpx_bench::card::bench_html(&results).with_context(|| {
+                        format!("{} has no question run in both arms", path.display())
+                    })?;
+                    scanner.render_html(&html).await
+                }
+            }
+            .map_err(|e| anyhow::anyhow!("rendering the card: {e:?}"))?;
             std::fs::write(&out, png.as_ref()).with_context(|| out.display().to_string())?;
             eprintln!("wrote {} ({} bytes)", out.display(), png.len());
         }

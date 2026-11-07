@@ -53,11 +53,11 @@
 
 <Section id="fix" title={m.title} lead={fmt(m.lead, { tag: '</body>' })} center>
 	<Reveal class="mx-auto max-w-3xl text-left">
-		<CodeTabs id="install" label={m.title} tabs={install} />
+		<CodeTabs label={m.title} tabs={install} />
 		<div class="mt-10 rounded-card border-2 border-dashed border-ink/40 p-5 text-sm text-ink-2 sm:p-6">
 			<p class="font-display text-base font-bold text-ink">{m.see.title}</p>
 			<p class="mt-1.5 mb-4 text-pretty">{m.see.lead}</p>
-			<CodeTabs id="agents" label={m.see.title} tabs={agents} />
+			<CodeTabs label={m.see.title} tabs={agents} />
 			<p class="mt-6 font-medium">{m.see.check}</p>
 			<CodeBlock snippet={code.checkTools} title="terminal" class="mt-2" />
 			<p class="mt-4 text-pretty">

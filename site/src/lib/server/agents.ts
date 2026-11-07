@@ -22,24 +22,26 @@ const read = (path: string) => readFile(resolve(process.cwd(), '..', path), 'utf
  * Per model, per site, per question: both arms' tokens and solve rate, from the run itself. Never averaged
  * across questions or sites (site/AGENTS.md).
  */
-function benchmarkLines(): string[] {
+function benchmarkLines(model?: string): string[] {
 	const pct = (x: number) => `${Math.round(x * 100)}%`;
 	const tok = (x: number) => `${(x / 1000).toFixed(1)}k`;
 	const arm = (a: ArmSummary | undefined) =>
 		a ? `${tok(a.tokens)} tokens, ${pct(a.success_rate)} solved` : 'not run';
-	return loadRuns().flatMap(({ results }) => [
-		`### ${results.model} (reasoning ${results.reasoning_effort ?? 'default'})`,
-		'',
-		...bySite(results).flatMap((site) => [
-			`- ${site.name}`,
-			...site.tasks.map(
-				(t) => `  - "${t.prompt}": without WebMCP ${arm(t.baseline)}; with WebMCP ${arm(t.webmcp)}`
-			)
-		]),
-		'',
-		`Details: ${ORIGIN}/benchmark/${results.model}/`,
-		''
-	]);
+	return loadRuns()
+		.filter(({ results }) => !model || results.model === model)
+		.flatMap(({ results }) => [
+			`### ${results.model} (reasoning ${results.reasoning_effort ?? 'default'})`,
+			'',
+			...bySite(results).flatMap((site) => [
+				`- ${site.name}`,
+				...site.tasks.map(
+					(t) => `  - "${t.prompt}": without WebMCP ${arm(t.baseline)}; with WebMCP ${arm(t.webmcp)}`
+				)
+			]),
+			'',
+			`Details: ${ORIGIN}/benchmark/${results.model}/`,
+			''
+		]);
 }
 
 const SEE_IT_WORK = `- Any agent, today: \`claude mcp add webmcpx -- npx -y webmcpx mcp\` (Codex, Cursor or any MCP client: \`npx -y webmcpx mcp\`). It opens pages in a local Chromium with the W3C WebMCP polyfill injected before page scripts (no browser flag), and gives the agent each page's WebMCP tools as MCP tools: the site's own plus search_page, fetch_as_markdown and get_page_context.
@@ -163,11 +165,22 @@ ${m.versus.verdict}
 
 /** Every prerendered page, in every language. */
 export function sitemapXml(): string {
-	const pages = ['/', '/brand/', ...loadRuns().map((r) => `/benchmark/${r.results.model}/`)];
+	const pages = ['/', '/brand/', '/verdicts/', ...loadRuns().map((r) => `/benchmark/${r.results.model}/`)];
 	const urls = pages.flatMap((path) => LOCALES.map((l) => `${ORIGIN}${localized(path, l.code)}`));
 	return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}
 </urlset>
+`;
+}
+
+/** /benchmark/<model>/index.md: one run, per site and per question, for agents. */
+export function benchmarkMarkdown(model: string): string {
+	return `# webmcpx benchmark: ${model}
+
+Same model, prompt and step limit; one arm reads the page through DOM snapshots, the other only calls the WebMCP tools the page registers. Graded by facts in the answer and page state, never by an LLM. Results per site and per question, never averaged.
+
+${benchmarkLines(model).join('\n')}
+Page: ${ORIGIN}/benchmark/${model}/ · Raw results: ${REPO}/tree/main/site/src/lib/content/bench
 `;
 }

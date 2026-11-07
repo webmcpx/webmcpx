@@ -29,6 +29,10 @@ const en = {
 	},
 
 	meta: {
+		verdicts: {
+			title: 'How scan verdicts work · webmcpx',
+			description: 'What each scan verdict means, how a scan runs, and where to say a verdict is wrong.'
+		},
 		home: {
 			// max 60: search results cut longer titles.
 			title: 'webmcpx: is your site agent-ready?',
@@ -81,6 +85,7 @@ const en = {
 		// Link labels: max 24, one line in a narrow column.
 		links: {
 			scan: 'Scan your site',
+			verdicts: 'How verdicts work',
 			proof: 'Benchmark',
 			install: 'Install',
 			issues: 'Issues it solves',
@@ -446,6 +451,38 @@ const en = {
 			hook: 'Registered while the component is mounted, gone when it unmounts.'
 		},
 		check: 'Then see it, no browser flag:'
+	},
+
+	closing: {
+		title: 'Scan the site you have open right now.',
+		lead: 'The verdict, its tools and what an agent would read instead, with a card to share.'
+	},
+
+	verdicts: {
+		title: 'How the scanner decides',
+		lead: 'Three verdicts, open rules. If one looks wrong, tell us: that is the feedback that makes it better.',
+		// {rules} is a list of lint rule names (code).
+		items: {
+			ready:
+				'The page registers at least one WebMCP tool and the linter finds no errors in them. Warnings, like a long name or missing annotations, don’t block it.',
+			issues:
+				'The page registers tools, but at least one has a linter error: {rules}, or a size past its hard limit.',
+			missing:
+				'The page registers no WebMCP tool. We show how many tokens an agent reading the page would spend instead.'
+		},
+		how: {
+			title: 'How a scan runs',
+			steps: [
+				'We open the page in headless Chrome on our server, with no cookies and no login.',
+				'Before the page’s scripts run, we add a WebMCP host, so the page registers its tools as it would in an agent’s browser. It also takes the older navigator.modelContext and provideContext, so sites built on them still show their tools.',
+				'Once the page has loaded and its tools settle, we read each tool’s name, description, input schema and annotations, and lint them.',
+				'Tokens are estimated from the page’s text snapshot: its characters divided by four.',
+				'A result is reused for 10 minutes; each visitor can start one new scan a minute.'
+			]
+		},
+		rules: 'Every lint rule, with its reasons',
+		disagree: 'Think a verdict is wrong? {link}',
+		disagreeLink: 'Open an issue with the scan link.'
 	},
 
 	issues: {

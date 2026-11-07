@@ -12,6 +12,11 @@ const es: Messages = {
 	},
 
 	meta: {
+		verdicts: {
+			title: 'Cómo funcionan los veredictos del escaneo · webmcpx',
+			description:
+				'Qué significa cada veredicto del escaneo, cómo se hace un escaneo y dónde avisar si un veredicto está mal.'
+		},
 		home: {
 			title: 'webmcpx: ¿tu sitio está listo para agentes?',
 			description:
@@ -50,6 +55,7 @@ const es: Messages = {
 		columns: { product: 'Producto', project: 'Proyecto', webmcp: 'WebMCP' },
 		links: {
 			scan: 'Escanea tu sitio',
+			verdicts: 'Cómo funcionan los veredictos',
 			proof: 'Benchmark',
 			install: 'Instalar',
 			issues: 'Problemas que resuelve',
@@ -344,6 +350,38 @@ const es: Messages = {
 			hook: 'Registrada mientras el componente está montado; desaparece al desmontarlo.'
 		},
 		check: 'Luego compruébalo, sin flags en el navegador:'
+	},
+
+	closing: {
+		title: 'Escanea ahora el sitio que tienes abierto.',
+		lead: 'El veredicto, sus herramientas y lo que un agente leería en su lugar, con una tarjeta para compartir.'
+	},
+
+	verdicts: {
+		title: 'Cómo decide el escáner',
+		lead: 'Tres veredictos, reglas abiertas. Si alguno te parece mal, avísanos: ese feedback es el que lo mejora.',
+		// {rules} is a list of lint rule names (code).
+		items: {
+			ready:
+				'La página registra al menos una herramienta WebMCP y el linter no encuentra errores en ellas. Los avisos, como un nombre largo o anotaciones que faltan, no lo impiden.',
+			issues:
+				'La página registra herramientas, pero al menos una tiene un error del linter: {rules}, o un tamaño por encima de su límite duro.',
+			missing:
+				'La página no registra ninguna herramienta WebMCP. Mostramos cuántos tokens gastaría un agente leyendo la página en su lugar.'
+		},
+		how: {
+			title: 'Cómo se hace un escaneo',
+			steps: [
+				'Abrimos la página en un Chrome headless en nuestro servidor, sin cookies ni inicio de sesión.',
+				'Antes de que corran los scripts de la página, añadimos un host WebMCP, para que registre sus herramientas como lo haría en el navegador de un agente. También acepta los antiguos navigator.modelContext y provideContext, para que los sitios hechos con ellos sigan mostrando sus herramientas.',
+				'Cuando la página ha cargado y sus herramientas se estabilizan, leemos el nombre, la descripción, el esquema de entrada y las anotaciones de cada una, y pasamos el linter.',
+				'Los tokens se estiman a partir del texto de la página: sus caracteres divididos entre cuatro.',
+				'Un resultado se reutiliza durante 10 minutos; cada visitante puede lanzar un escaneo nuevo por minuto.'
+			]
+		},
+		rules: 'Todas las reglas del linter, con sus motivos',
+		disagree: '¿Crees que un veredicto está mal? {link}',
+		disagreeLink: 'Abre una issue con el enlace del escaneo.'
 	},
 
 	issues: {

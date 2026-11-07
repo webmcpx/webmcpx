@@ -12,10 +12,12 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 
 ## Page narrative (keep this order; cut before adding)
 
-Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → why WebMCP (four pains it
-removes, each backed by the draft or the benchmark; the saving is computed) → proof (pick a site by logo;
-a site's questions rotate on their own; biggest savings first) → the fix (one line) → what the community
-asked for → the footer (giant lockup, every link with its icon, notices).
+Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → the fix (install tabs:
+HTML, npm, coding agent; "see it work" with the MCP setup per client) → your own tools (`tool()`, forms,
+React/Vue/Svelte as tabs) → why WebMCP (four pains it removes, each backed by the draft or the benchmark;
+the saving is computed) → proof (pick a site by logo; biggest savings first) → WebMCP vs MCP → what the
+community asked for → closing scan call → the footer (giant lockup, every link with its icon, notices).
+Tabs list the most used option first, and it opens by default (`CodeTabs`, built on `Tabs`).
 Few words per section; numbers over adjectives.
 
 ## Layout
@@ -24,7 +26,7 @@ Few words per section; numbers over adjectives.
 src/
   app.css, app.html          Tailwind entry; `data-js` set before first paint (enables reveals)
   lib/styles/                tokens.css (design tokens), base.css, code.css; tokens.ts lists the colors
-  lib/components/ui/         primitives: Button, Stamp, Card, CodeBlock, CopyButton, Tabs, Section, BrandIcon
+  lib/components/ui/         primitives: Button, Stamp, Card, CodeBlock, CodeTabs, CopyButton, Tabs, Section, BrandIcon
   lib/components/layout/     Header, Footer, Logo
   lib/features/<section>/    one folder per page section; logic in .ts with a *.spec.ts next to it
                              (scan/ holds the API client and the shared scanner state)
@@ -47,10 +49,11 @@ tests/                       Playwright e2e against the prerendered build
   (`lockup-ink`, `lockup-paper`, `lockup` in currentColor), made by `scripts/lockup.py` from the font itself.
   Real brands' logos are never redrawn; new marks of our own go through a brief, Codex and the four checks
   (16px, one color, inverse, circle crop).
-- The agent-ready badge comes in three styles (`lib/content/badges/`: Card for light pages, Flat for READMEs
-  and footers, Dark for dark pages) and is offered only after a scan says ready. Its embed code
-  (`badgeEmbed()` in `features/scan/scan.ts`) inlines the SVG, so sites load nothing from us, inside a link
-  to a live re-scan of that site: a claim anyone can check, never a static seal.
+- The agent-ready badge comes in four styles (`lib/content/badges/`: Card for light pages, Flat for footers,
+  Dark for dark pages, README: a Markdown image of the site's latest verdict served at `/badge/<host>.svg`)
+  and is offered only after a scan says ready. The first three inline the SVG (`badgeEmbed()` in
+  `features/scan/scan.ts`), so sites load nothing from us; every style links to a live re-scan of that
+  site: a claim anyone can check, never a static seal.
 - Every page carries the trademark notices (`NOTICES`) in the footer. Never call webmcpx official, a W3C
   standard or MCP certified.
 

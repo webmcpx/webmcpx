@@ -135,6 +135,38 @@ pub fn generic_html() -> String {
     )
 }
 
+/// A published run's preview image (`/og/benchmark-<model>.png`): its best case, the question with the
+/// largest token saving, named as a best case (results are never averaged). None without a comparison.
+pub fn bench_html(results: &serde_json::Value) -> Option<String> {
+    let tasks = results["summary"]["tasks"].as_object()?;
+    let (task, ratio) = tasks
+        .iter()
+        .filter_map(|(id, arms)| {
+            let base = arms["baseline"]["tokens"].as_f64()?;
+            let with = arms["webmcp"]["tokens"].as_f64()?;
+            (with > 0.0).then_some((id, base / with))
+        })
+        .max_by(|a, b| a.1.total_cmp(&b.1))?;
+    let place = results["tasks"][task.as_str()]["url"].as_str().map_or_else(
+        || "a local test site".to_owned(),
+        |u| host_of(u).trim_start_matches("www.").to_owned(),
+    );
+    let saving = if ratio >= 10.0 {
+        format!("{ratio:.0}")
+    } else {
+        format!("{ratio:.1}")
+    };
+    let model = results["model"].as_str().unwrap_or("one model");
+    Some(html_with(
+        &format!("{saving}\u{d7} fewer tokens"),
+        104,
+        &format!(
+            "{model}, same question with and without WebMCP: best case, on {place}. Every question is published."
+        ),
+        None,
+    ))
+}
+
 /// The README badge for a site: `webmcp | agent-ready` (or almost, not yet, unknown).
 pub fn badge(verdict: Option<Verdict>) -> String {
     let (label, fill) = match verdict {
@@ -176,6 +208,23 @@ fn base64(bytes: &[u8]) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn bench_card_names_the_best_case_and_its_site() {
+        let run = serde_json::json!({
+            "model": "m-1",
+            "summary": { "tasks": {
+                "a": { "baseline": { "tokens": 1000.0 }, "webmcp": { "tokens": 500.0 } },
+                "b": { "baseline": { "tokens": 9000.0 }, "webmcp": { "tokens": 100.0 } },
+                "c": { "baseline": { "tokens": 10.0 } }
+            }},
+            "tasks": { "b": { "url": "https://www.example.com/docs" } }
+        });
+        let html = bench_html(&run).unwrap();
+        assert!(html.contains("90\u{d7} fewer tokens"), "{html}");
+        assert!(html.contains("best case, on example.com"), "{html}");
+        assert!(bench_html(&serde_json::json!({ "summary": { "tasks": {} } })).is_none());
+    }
+
     use super::*;
 
     #[test]
