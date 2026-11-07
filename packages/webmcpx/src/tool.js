@@ -52,8 +52,8 @@ const decimals = (x) => {
 const multiple = (value, of) => {
   const f = 10 ** Math.max(decimals(value), decimals(of));
   const [a, b] = [Math.round(value * f), Math.round(of * f)];
-  // Not exactly checkable (beyond safe integers once scaled): refuse rather than trust float division.
-  return Number.isSafeInteger(a) && Number.isSafeInteger(b) && a % b === 0;
+  // undefined: not exactly checkable (beyond safe integers once scaled), which check() makes fatal.
+  return Number.isSafeInteger(a) && Number.isSafeInteger(b) ? a % b === 0 : undefined;
 };
 
 // JSON equality, by content.
@@ -108,7 +108,9 @@ function check(s, value, at = "input") {
     if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
     if (value <= s.exclusiveMinimum) return `${at} must be more than ${s.exclusiveMinimum}`;
     if (value >= s.exclusiveMaximum) return `${at} must be less than ${s.exclusiveMaximum}`;
-    if (s.multipleOf && !multiple(value, s.multipleOf)) return `${at} must be a multiple of ${s.multipleOf}`;
+    const divisible = s.multipleOf ? multiple(value, s.multipleOf) : true;
+    if (divisible === undefined) return (fatal = `${at}: can't check multipleOf exactly`);
+    if (!divisible) return `${at} must be a multiple of ${s.multipleOf}`;
   }
   if (typeof value === "string") {
     if (value.length < s.minLength) return `${at} must have at least ${s.minLength} chars`;

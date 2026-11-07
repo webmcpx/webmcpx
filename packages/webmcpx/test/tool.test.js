@@ -194,6 +194,11 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   assert.equal((await page.call("price", { amount: 10000000.01 })).ok, true);
   // Not exactly checkable: refused, never waved through by float division.
   assert.equal((await page.call("price", { amount: 0.35000000000000003 })).ok, false);
+  // ...even under not or oneOf, where a plain mismatch would flip into acceptance.
+  let notRuns = 0;
+  tool({ name: "notmul", description: "Not a multiple.", input: { value: { not: { multipleOf: 1 } } }, run: () => ++notRuns });
+  assert.equal((await page.call("notmul", { value: 1e16 })).ok, false);
+  assert.equal(notRuns, 0);
   // A uniqueItems array too big for the step budget is refused at once, before any work.
   const startedHuge = Date.now();
   assert.equal(await nums({ tags: Array.from({ length: 1_000_000 }, (_, i) => i) }), "the input is too complex to check");
