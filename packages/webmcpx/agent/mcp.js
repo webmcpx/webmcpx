@@ -51,15 +51,18 @@ const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t
  * 128, and two frames can register the same name. Clashes get "_2", "_3"...
  * `previous` (key -> names, in list order) carries names over when as many tools share that key as
  * before. When that count changes, same-named tools in different frames can't be told apart, so their old
- * names are retired. `reserved` (name -> key, every name handed out this session; updated here) lets a
+ * names are retired for the session (`retired`, updated here). `reserved` (name -> key, every name handed out this session; updated here) lets a
  * name come back only to the same key: a name a client already has never runs a different tool.
  * @returns {{name: string, id: string, tool: import("./session.js").Tool}[]}
  */
-export function named(tools, previous = new Map(), reserved = new Map()) {
+export function named(tools, previous = new Map(), reserved = new Map(), retired = new Set()) {
   const ids = tools.map(keyOf);
   const count = (id) => ids.filter((x) => x === id).length;
-  const retired = new Set();
-  for (const [id, names] of previous) if (names.length !== count(id)) for (const n of names) retired.add(n);
+  // Same-named tools whose number changed can't be matched to their old names: retire those names for
+  // good. A lone tool that leaves and comes back is the same tool (same origin and name): it keeps its name.
+  for (const [id, names] of previous) {
+    if (names.length !== count(id) && Math.max(names.length, count(id)) > 1) for (const n of names) retired.add(n);
+  }
   const used = new Set([OPEN.name, CALL.name]);
   const free = (name, id) => !used.has(name) && !retired.has(name) && (reserved.get(name) ?? id) === id;
   const rank = new Map();
@@ -146,12 +149,13 @@ export function describe({ url, title, tools }, entries = tools && named(tools))
 export async function serve(options = {}, { input = process.stdin, output = process.stdout } = {}) {
   let entries = [];
   const reserved = new Map();
+  const retired = new Set();
   let initialized = false;
   const write = (msg) => output.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
   // Replaces the tool list and tells the client when what it would see changed.
   const update = (tools) => {
     const before = JSON.stringify(entries.map(asMcp));
-    entries = named(tools, carry(entries), reserved);
+    entries = named(tools, carry(entries), reserved, retired);
     if (initialized && JSON.stringify(entries.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
   };
   const session = new Session({

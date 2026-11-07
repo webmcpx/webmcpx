@@ -176,10 +176,15 @@ function fill(form, args) {
   for (const [name, value] of Object.entries(args)) {
     const field = form.elements.namedItem(name);
     for (const el of (field instanceof Element ? [field] : [...(field ?? [])]).filter(fillable)) {
-      if (el.type === "checkbox") el.checked = Array.isArray(value) ? value.includes(el.value) : Boolean(value);
-      else if (el.type === "radio") el.checked = el.value === String(value);
-      else if (el.multiple) for (const o of el.options) o.selected = [].concat(value).includes(o.value);
-      else el.value = String(value);
+      // A click and the native setter, as a user would: React and others track the value themselves and
+      // ignore a plain property write.
+      const on = el.type === "checkbox" ? ([].concat(value).includes(el.value) || value === true) : el.value === String(value);
+      if (el.type === "checkbox" || el.type === "radio") {
+        if (el.checked !== on) el.click();
+        continue;
+      }
+      if (el.multiple) for (const o of el.options) o.selected = [].concat(value).includes(o.value);
+      else Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
       // Frameworks listen for these, not for property writes.
       el.dispatchEvent(new Event("input", { bubbles: true }));
       el.dispatchEvent(new Event("change", { bubbles: true }));

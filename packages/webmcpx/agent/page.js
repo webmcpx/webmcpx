@@ -89,6 +89,8 @@ function cancel(call) {
 const GROUP = "webmcpx-tools";
 const LOAD_TIMEOUT = 30_000;
 const CALL_TIMEOUT = 60_000;
+/** How long a cancellation may take before the tab counts as frozen. */
+const CANCEL_WAIT = 2_000;
 const SETTLE = { min: 400, max: 3_000, every: 200 };
 // Unref'd: a pending timeout must never keep the CLI alive after its work is done.
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms).unref());
@@ -109,6 +111,8 @@ export class Page {
   #unsubscribe;
   #onChange;
   #calls = 0;
+  /** Set when the page stopped answering: the session must not use this tab again. */
+  broken = false;
   #callTimeout = CALL_TIMEOUT;
   #loads = new Set();
   #handles = [];
@@ -261,11 +265,18 @@ export class Page {
         throw new Error(`the page navigated while "${tool.name}" ran: it may have done its work, so check before calling it again`);
       }
       if (!/took longer than/.test(e?.message)) throw e;
-      await this.#send("Runtime.callFunctionOn", {
+      // Ask the tool to stop. A page whose script is stuck can't even take that: then the tab is broken,
+      // and the session replaces it (see Session.call).
+      const cancelled = this.#send("Runtime.callFunctionOn", {
         objectId: tool.list,
         functionDeclaration: cancel.toString(),
         arguments: [{ value: call }],
-      }).catch(() => {});
+      });
+      const answered = await Promise.race([cancelled.then(() => true, () => true), wait(CANCEL_WAIT).then(() => false)]);
+      if (!answered) {
+        this.broken = true;
+        throw new Error(`"${tool.name}" took longer than ${this.#callTimeout / 1000} s and froze the page; it may have partly run`);
+      }
       throw new Error(`"${tool.name}" took longer than ${this.#callTimeout / 1000} s and was cancelled; it may have partly run`);
     }
     const { result, exceptionDetails } = reply;

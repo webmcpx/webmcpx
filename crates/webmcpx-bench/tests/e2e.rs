@@ -839,6 +839,38 @@ async fn tools_registered_in_a_same_origin_frame_count() {
 }
 
 #[tokio::test]
+async fn a_page_cannot_send_the_scanner_megabytes() {
+    use axum::response::Html;
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::Scanner;
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        get(|| std::future::ready(Html(
+            r#"<!doctype html><script>
+              const huge = "\u00ad".repeat(3_000_000);
+              for (let i = 0; i < 300; i++) document.modelContext.registerTool({ name: "t" + i, description: huge, execute: () => "" });
+            </script>"#,
+        ))),
+    ))
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    assert_eq!(report.tools.len(), 200);
+    assert!(
+        report
+            .tools
+            .iter()
+            .all(|t| t.description.chars().count() <= 10_000)
+    );
+}
+
+#[tokio::test]
 async fn a_stalled_or_endless_favicon_never_costs_the_report() {
     use axum::body::Body;
     use axum::response::{Html, Response};

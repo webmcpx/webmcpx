@@ -65,13 +65,22 @@
   Object.defineProperty(window, "__webmcpHost", {
     value: Object.freeze({
       tools: all,
+      // Bounded before it leaves the page: a page must not be able to send the scanner megabytes. The
+      // caps sit far above every lint limit, so the linter still sees what is too long or too many.
       list: () =>
-        [...all().values()].map((t) => ({
-          name: t.name,
-          description: t.description ?? "",
-          inputSchema: schema(t.inputSchema),
-          annotations: t.annotations ?? {},
-        })),
+        [...all().values()].slice(0, 200).map((t) => {
+          const cap = (v, n) => String(v ?? "").slice(0, n);
+          let inputSchema;
+          try {
+            inputSchema = schema(t.inputSchema);
+            if (JSON.stringify(inputSchema).length > 50_000) inputSchema = { type: "object", description: "(schema over 50,000 chars)" };
+          } catch {
+            inputSchema = { type: "object", description: "(schema could not be read)" };
+          }
+          const annotations = {};
+          for (const [k, v] of Object.entries(t.annotations ?? {}).slice(0, 20)) annotations[cap(k, 64)] = v === true;
+          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations };
+        }),
       async call(name, input) {
         const tool = all().get(name);
         if (!tool) return `Error: no tool named ${name}`;

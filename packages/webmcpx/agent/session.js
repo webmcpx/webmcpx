@@ -70,6 +70,9 @@ export class Session {
       try {
         return await page.call(tool, input);
       } catch (e) {
+        // A frozen page can't be used again: drop the browser (or, attached, our tab); the next page
+        // starts fresh instead of waiting on it forever.
+        if (page.broken) await this.#reset();
         if (!stale(e)) throw e;
         // The document the tool was listed in is gone: run the same tool in the new one only when no
         // other tool shares its name and origin there or then; otherwise refuse rather than guess.
@@ -79,6 +82,14 @@ export class Session {
         return page.call(again, input);
       }
     });
+  }
+
+  async #reset() {
+    const [browser, ready] = [this.#browser, this.#ready];
+    [this.#browser, this.#ready, this.#page] = [];
+    const page = await ready?.catch(() => undefined);
+    await Promise.race([page?.close(), new Promise((resolve) => setTimeout(resolve, 2_000).unref())]);
+    browser?.close();
   }
 
   /** Closes our tab and the browser (or only our tab's connection, in a browser we attached to). */

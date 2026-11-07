@@ -75,6 +75,14 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <button>Book</button>
 </form>
 <script>
+  // Like React: the field's value is tracked by an own property, and onChange only fires when the
+  // native value differs from the tracked one. A plain \`el.value = x\` would update the tracker too.
+  const sku = document.querySelector('[name=name]');
+  let tracked = sku.value;
+  window.state = { name: "" };
+  const native = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value");
+  Object.defineProperty(sku, "value", { get() { return native.get.call(this); }, set(v) { tracked = v; native.set.call(this, v); } });
+  sku.addEventListener("input", () => { if (sku.value !== tracked) { tracked = sku.value; window.state.name = sku.value; } });
   // A field added later (as apps do) must reach the tool's schema.
   setTimeout(() => document.querySelector("form[method=get]").insertAdjacentHTML("beforeend",
     '<input name="kiln" required toolparamdescription="Which kiln.">'), 1500);
@@ -82,7 +90,7 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
     event.preventDefault();
     if (event.agentInvoked) {
       const data = Object.fromEntries(new FormData(event.target));
-      event.respondWith(Promise.resolve({ booked: data.name, day: data.day, wheel: data.wheel === "on", price: data.price,
+      event.respondWith(Promise.resolve({ booked: window.state.name, day: data.day, wheel: data.wheel === "on", price: data.price,
         glazes: new FormData(event.target).getAll("glazes") }));
     }
   });
@@ -94,6 +102,8 @@ const SLOW = `<!doctype html><html><head><title>Slow</title></head><body><main><
     execute: (_, client) => new Promise(() => {}) });
   document.modelContext.registerTool({ name: "wait_for_abort", description: "Answers only when cancelled.",
     execute: () => new Promise(() => {}) });
+  document.modelContext.registerTool({ name: "freeze", description: "Blocks the page for good.",
+    execute: () => { while (true) {} } });
   document.modelContext.registerTool({ name: "pay", description: "Pays, then leaves the page.",
     execute: () => { sessionStorage.paid = String(Number(sessionStorage.paid || 0) + 1); location.href = "/plain"; return new Promise(() => {}); } });
 </script></body></html>`;
@@ -286,6 +296,10 @@ test("a call past the time limit is cancelled, and a tool that navigates is neve
     // Exactly one payment, on the page it navigated to.
     const paid = await session.call((await session.tools()).find((t) => t.name === "get_page_context"), {});
     assert.match(paid, /"title":"Plain"/);
+    // A tool that freezes the page: the call ends, and the next page opens in a fresh browser.
+    const again = await session.goto(`${origin}/slow`);
+    await assert.rejects(session.call(again.tools.find((t) => t.name === "freeze"), {}), /froze the page/);
+    assert.equal((await session.goto(`${origin}/plain`)).title, "Plain");
   } finally {
     await session.close();
   }
@@ -378,8 +392,14 @@ test("a refresh never hands a client's tool name to another tool", async () => {
   const frames = named(two, new Map(), reserved);
   // An unchanged list keeps its names...
   assert.deepEqual(named(two, carry(frames), reserved).map((e) => e.name), frames.map((e) => e.name));
-  const after = named([{ name: "checkout", origin: "s" }], carry(frames), reserved);
+  const retired = new Set();
+  const one = [{ name: "checkout", origin: "s" }];
+  const after = named(one, carry(frames), reserved, retired);
   assert.ok(!frames.map((e) => e.name).includes(after[0].name), after[0].name);
+  // [A, B] -> [B] -> [] -> [B]: the names A and B had are never handed out again.
+  const empty = named([], carry(after), reserved, retired);
+  const back = named(one, carry(empty), reserved, retired);
+  assert.ok(!frames.map((e) => e.name).includes(back[0].name), back[0].name);
 });
 
 test("stopping the MCP server with a signal stops its browser", { skip, timeout: 60_000 }, async () => {

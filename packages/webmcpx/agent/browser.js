@@ -187,7 +187,11 @@ export async function launch({ headed = false, executable = findBrowser() } = {}
     });
   }).catch(fail);
   const cdp = await Cdp.connect(endpoint).catch(fail);
-  cdp.onClose(() => process.removeListener("exit", kill));
+  // The connection dropped but Chrome may still run: it is ours, so it goes too.
+  cdp.onClose(() => {
+    process.removeListener("exit", kill);
+    kill();
+  });
   return {
     cdp,
     close() {
