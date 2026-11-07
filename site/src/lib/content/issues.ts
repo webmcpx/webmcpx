@@ -1,5 +1,7 @@
 // Pain points reported in the WebMCP spec tracker and how webmcpx handles them.
-// Keep in sync with what the code does; every row must be true today.
+// Keep in sync with what the code does; every row must be true today. Wording follows the WebMCP draft
+// (Draft Community Group Report, 2 November 2026): webmcpx conventions and lint policy are named as ours,
+// never as spec requirements.
 
 import type { Component } from 'svelte';
 import Blocks from '@lucide/svelte/icons/blocks';
@@ -21,30 +23,30 @@ export interface Issue {
 export const ISSUES: Issue[] = [
 	{
 		number: 319,
-		title: 'Standard tools',
+		title: 'Shared tools',
 		pain: 'Hundreds of sites hand-roll the same tools: search_site and fetch_as_markdown top the list.',
-		fix: 'Standard search_page, fetch_as_markdown, get_page_context and search_site, one script tag.',
+		fix: 'One script tag registers webmcpx’s search_page, fetch_as_markdown and get_page_context; search_site when you pass your search.',
 		icon: Blocks
 	},
 	{
 		number: 282,
 		title: 'Errors agents can act on',
-		pain: 'A rejected tool call reaches the agent as a bare UnknownError.',
-		fix: 'Tools never reject: every result is an envelope with a stable error code, retryable flag and hint.',
+		pain: 'When execute() rejects, the agent gets a generic OperationError with no reason it can act on.',
+		fix: 'webmcpx tools return expected failures as a result: a stable error code, a retryable flag and a hint.',
 		icon: ShieldCheck
 	},
 	{
 		number: 292,
-		title: 'Typed, paged results',
-		pain: 'Results are untyped and cannot say they were truncated.',
-		fix: 'Output budgets, truncated + next_cursor paging, the same shape for every tool.',
+		title: 'Paged results',
+		pain: 'outputSchema is optional and the draft defines no way to say a result was truncated.',
+		fix: 'Every webmcpx tool uses one result shape, with output budgets and truncated + next_cursor paging.',
 		icon: Layers
 	},
 	{
 		number: 293,
-		title: 'Frozen hosts',
-		pain: 'Some agent browsers expose a frozen modelContext; polyfills silently fail.',
-		fix: 'Only registerTool() is called, never an assignment. Tested against a frozen host.',
+		title: 'Frozen modelContext',
+		pain: 'Some browsers expose a frozen modelContext object, so polyfills that assign to it silently fail.',
+		fix: 'webmcpx only calls registerTool(), never assigns. Tested against a frozen modelContext.',
 		icon: Snowflake
 	},
 	{
@@ -57,15 +59,15 @@ export const ISSUES: Issue[] = [
 	{
 		number: 359,
 		title: 'Length limits',
-		pain: 'No agreed limits for names and descriptions; hosts may cut them.',
-		fix: 'webmcpx lint warns at Chrome’s guidance and errors at the proposed host floors.',
+		pain: 'Names are capped at 128 characters; descriptions have no limit yet, and browsers may cut them.',
+		fix: 'webmcpx lint checks the name rules and flags descriptions past Chrome’s guidance.',
 		icon: Ruler
 	},
 	{
 		number: 255,
 		title: 'Tool budget',
 		pain: 'A page with 126 tools got WebMCP disabled.',
-		fix: 'The tool-budget rule warns above 20 tools per page and errors above 100.',
+		fix: 'webmcpx lint warns above 20 tools per page and errors above 100 (our policy, not the draft’s).',
 		icon: Gauge
 	}
 ];

@@ -1,21 +1,29 @@
 <!--
-	Per-task comparison for one metric, drawn twice on purpose:
-	- a visual chart (aria-hidden) that reflows from one line per task on desktop to two on phones;
+	Per-question comparison for one metric (a "question" is one benchmark request: what the agent was asked
+	on one site; not a WebMCP concept). Drawn twice on purpose:
+	- a visual chart (aria-hidden) that reflows from one line per question on desktop to two on phones;
 	- a real <table> for screen readers and agents (visually hidden), with the same numbers.
 	Bars grow once when scrolled into view and resize when the metric changes.
 -->
 <script lang="ts">
-	import Stamp from '#lib/components/ui/Stamp.svelte';
+	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import { ARMS } from './arms.ts';
 	import { metricValue, percent, type Metric, type Row } from './bench.ts';
+	import type { BenchSite, SiteTask } from './sites.ts';
 
-	let { rows, metric }: { rows: Row[]; metric: Metric } = $props();
+	interface Props {
+		/** Every question with its site, in display order. */
+		questions: { task: SiteTask; site: BenchSite }[];
+		metric: Metric;
+	}
+
+	let { questions, metric }: Props = $props();
+	const rows = $derived(questions.map((q) => q.task));
 
 	const max = $derived(
 		Math.max(Number.MIN_VALUE, ...rows.flatMap((r) => ARMS.map((a) => metricValue(r[a.arm], metric.id) ?? 0)))
 	);
-	const name = (task: string) => task.replace(/^live-/, '');
 	const value = (row: Row, arm: (typeof ARMS)[number]['arm']) => {
 		const v = metricValue(row[arm], metric.id);
 		return v == null ? '–' : metric.format(v);
@@ -25,16 +33,19 @@
 <Reveal>
 	<div aria-hidden="true">
 		<div class="hidden grid-cols-[30%_1fr_4.5rem] gap-4 pb-3 text-xs text-ink-3 sm:grid">
-			<span>Task</span><span>{metric.label} · {metric.unit}</span><span class="text-right">Solved</span>
+			<span>Question</span><span>{metric.label} · {metric.unit}</span><span class="text-right">Solved</span>
 		</div>
 		<ul>
-			{#each rows as row (row.task)}
+			{#each questions as { task: row, site } (row.task)}
 				<li
 					class="grid grid-cols-[1fr_auto] gap-x-4 gap-y-2 border-t border-hairline py-3 [grid-template-areas:'name_solved''bars_bars'] sm:grid-cols-[30%_1fr_4.5rem] sm:items-center sm:[grid-template-areas:'name_bars_solved']"
 				>
-					<div class="flex min-w-0 flex-wrap items-center gap-1.5 [grid-area:name]">
-						<span class="font-mono text-xs break-words">{name(row.task)}</span>
-						{#if row.live}<Stamp tone="marker" size="sm">live</Stamp>{/if}
+					<div class="min-w-0 [grid-area:name]">
+						<p class="flex items-center gap-1.5 font-mono text-[11px] tracking-wider text-ink-3 uppercase">
+							{#if site.logo && !site.logo.wordmark}<SiteLogo logo={site.logo} size={12} />{/if}
+							{site.name}{#if !site.live}<span>· local</span>{/if}
+						</p>
+						<p class="mt-0.5 line-clamp-2 text-sm text-pretty" title={row.prompt}>{row.prompt}</p>
 					</div>
 					<div class="min-w-0 [grid-area:bars]">
 						{#each ARMS as a (a.arm)}
@@ -64,18 +75,18 @@
 <!-- Tables ignore width/overflow, so the visually hidden box is a wrapper. -->
 <div class="sr-only">
 	<table>
-		<caption>{metric.label} per task, {metric.unit}; lower is better. Success rate per arm.</caption>
+		<caption>{metric.label} per question, {metric.unit}; lower is better. Success rate per arm.</caption>
 		<thead>
 			<tr>
-				<th scope="col">Task</th>
+				<th scope="col">Question</th>
 				{#each ARMS as a (a.arm)}<th scope="col">{a.label}: {metric.label.toLowerCase()}</th>{/each}
 				{#each ARMS as a (a.arm)}<th scope="col">{a.label}: solved</th>{/each}
 			</tr>
 		</thead>
 		<tbody>
-			{#each rows as row (row.task)}
+			{#each questions as { task: row, site } (row.task)}
 				<tr>
-					<th scope="row">{name(row.task)}{row.live ? ' (live site)' : ''}</th>
+					<th scope="row">{site.name}{site.live ? '' : ' (local test site)'}: {row.prompt}</th>
 					{#each ARMS as a (a.arm)}<td>{value(row, a.arm)}</td>{/each}
 					{#each ARMS as a (a.arm)}<td>{row[a.arm] ? percent(row[a.arm]!.success_rate) : '–'}</td>{/each}
 				</tr>

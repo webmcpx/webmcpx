@@ -42,17 +42,20 @@
 				</p>
 			</Reveal>
 			<Reveal delay={180} class="mt-10">
-				<ScanForm fromQuery />
-				<p class="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink-3">
-					Try
-					{#each TRY as s (s.url)}
-						<button
-							type="button"
-							class="font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
-							onclick={() => scanner.run(s.url)}>{s.name}</button
-						>
-					{/each}
-				</p>
+				<ScanForm fromQuery>
+					{#snippet hint()}
+						<p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink-3">
+							Try
+							{#each TRY as s (s.url)}
+								<button
+									type="button"
+									class="font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
+									onclick={() => scanner.run(s.url)}>{s.name}</button
+								>
+							{/each}
+						</p>
+					{/snippet}
+				</ScanForm>
 			</Reveal>
 			<div class="mt-10">
 				<ScanResult />

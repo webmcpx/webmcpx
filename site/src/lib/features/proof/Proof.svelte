@@ -40,13 +40,17 @@
 	// Sites come best case first (see sites.ts), so the first one is shown by default, already in the
 	// prerendered HTML.
 	const items = $derived(sites.map((s) => ({ ...s, label: s.name })));
+	const questions = $derived(sites.flatMap((site) => site.tasks.map((task) => ({ task, site }))));
 	const first = () => sites[0]?.id;
 	let siteId = $state(first());
 	const repeats = $derived(all[0]?.webmcp?.runs ?? all[0]?.baseline?.runs ?? 0);
 
 	let metricId = $state<string>(METRICS[0].id);
 	const metric = $derived(METRICS.find((m) => m.id === metricId) ?? METRICS[0]);
-	const worse = $derived(losses(results, metric.id));
+	const worse = $derived.by(() => {
+		const lost = new Set(losses(results, metric.id));
+		return [...new Set(questions.filter((q) => lost.has(q.task.task)).map((q) => q.site.name))];
+	});
 	const solved = (s: ArmSummary) => `${Math.round(s.success_rate * s.runs)}/${s.runs}`;
 </script>
 
@@ -111,7 +115,7 @@
 	id="proof"
 	kicker="Benchmark · {results.model}"
 	title="Same agent. Same question."
-	lead="Sites are sorted by their biggest saving, so the best case comes first. One agent reads the page like a browser agent; the other calls the site's WebMCP tools."
+	lead="Sites are sorted by their biggest saving, so the best case comes first. One agent reads, clicks and fills using page snapshots; the other calls the site's WebMCP tools."
 >
 	{#if sites.length}
 		<Tabs
@@ -160,11 +164,11 @@
 			<div class="border-t-2 border-ink p-5 sm:p-7">
 				<Tabs items={METRICS} bind:value={metricId} label="Metric" listClass="mb-6 flex-wrap">
 					{#snippet panel()}
-						<TaskChart rows={all} {metric} />
+						<TaskChart {questions} {metric} />
 						{#if worse.length}
 							<p class="mt-5 text-sm text-ink-2">
-								<strong class="text-ink">webmcpx loses on {metric.label.toLowerCase()} in:</strong>
-								{worse.map((t) => t.replace(/^live-/, '')).join(', ')}. Published as measured.
+								<strong class="text-ink">webmcpx loses on {metric.label.toLowerCase()} on:</strong>
+								{worse.join(', ')}. Published as measured.
 							</p>
 						{/if}
 					{/snippet}

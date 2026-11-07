@@ -64,6 +64,11 @@ tests/                       Playwright e2e against the prerendered build
   computed in Rust (`crates/webmcpx-bench/src/report.rs`). Results are shown per site and per question, never averaged (owner's decision); sites (and their questions) are
   sorted by biggest saving and the section says so, so the first one shown is disclosed as the best case; and every question stays in the full table, which works without JS. Losses are shown, not hidden.
 - `lib/content/issues.ts`: every row must describe what the code does today.
+- Words follow the WebMCP draft (Draft Community Group Report, 2 November 2026): tool, `name`/`title`/
+  `description`, `inputSchema`, annotations (`readOnlyHint`, `untrustedContentHint`, `consequentialHint`),
+  `document.modelContext.registerTool()`. webmcpx conventions (result envelope, paging, lint thresholds) are
+  named as ours, never as spec rules. A benchmark item is a "question" (what the agent is asked on a site),
+  never a "task", which the draft uses for event-loop tasks; "browser agent" means the browser's own agent.
 - `lib/content/sites.ts`: only sites the scanner verified, with the date; re-check before keeping one.
 
 ## Conventions

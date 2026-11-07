@@ -75,9 +75,11 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	await page.goto('/');
 	await expect(page.getByRole('heading', { name: 'One line. Agent-ready.' })).toBeVisible();
 	// The best case shows first; every question stays readable in the full table.
-	await expect(page.getByText(/requests per minute does the Notion API/)).toBeVisible();
+	await expect(page.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	await page.getByText(/Every question on one chart/).click();
-	await expect(page.locator('#proof table')).toContainText('cloudflare-kv-value-size');
+	await expect(page.locator('#proof table')).toContainText(
+		'Cloudflare: What is the maximum size of a single value stored in Cloudflare Workers KV?'
+	);
 	await page.close();
 });
 
@@ -131,11 +133,11 @@ test('the site filter shows each site and each question on its own, never averag
 	const proof = page.locator('#proof');
 	const sites = proof.getByRole('tablist', { name: 'Site' });
 	await expect(sites.getByRole('tab', { name: /Notion/ })).toHaveAttribute('aria-selected', 'true');
-	await expect(proof.getByText(/requests per minute does the Notion API/)).toBeVisible();
+	await expect(proof.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	await expect(proof.getByRole('link', { name: /developers\.notion\.com/ })).toBeVisible();
 
 	await sites.getByRole('tab', { name: /Cloudflare/ }).click();
-	await expect(proof.getByText(/Workers KV/)).toBeVisible();
+	await expect(proof.getByText(/Workers KV/).first()).toBeVisible();
 	await expect(proof.getByText(/average/i)).toHaveCount(0);
 });
 
