@@ -8,11 +8,13 @@
 
 use std::net::{IpAddr, SocketAddr};
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::{Context as _, Result, bail};
 use reqwest::Url;
 use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
 use tokio::net::{TcpListener, TcpStream};
+use tokio::task::JoinSet;
 
 use crate::scan::is_public;
 
@@ -60,21 +62,44 @@ fn canonical(ip: IpAddr) -> IpAddr {
     }
 }
 
-/// Starts the proxy on a free loopback port. It runs until the process exits.
-pub async fn spawn(egress: Egress) -> Result<SocketAddr> {
+/// Longest a proxied connection may live, whatever the peers do.
+const MAX_CONNECTION: Duration = Duration::from_secs(60);
+
+/// A running proxy. Dropping it stops the listener and cancels every open connection.
+pub struct Proxy {
+    pub addr: SocketAddr,
+    task: tokio::task::JoinHandle<()>,
+}
+
+impl Drop for Proxy {
+    fn drop(&mut self) {
+        self.task.abort();
+    }
+}
+
+/// Starts the proxy on a free loopback port.
+pub async fn spawn(egress: Egress) -> Result<Proxy> {
     let listener = TcpListener::bind(("127.0.0.1", 0)).await?;
     let addr = listener.local_addr()?;
     let egress = Arc::new(egress);
-    tokio::spawn(async move {
-        while let Ok((client, _)) = listener.accept().await {
-            let egress = Arc::clone(&egress);
-            tokio::spawn(async move {
-                // A failed or refused connection only affects that request.
-                let _ = handle(client, &egress).await;
-            });
+    let task = tokio::spawn(async move {
+        // Connections live in this set: aborting the accept loop drops it, which aborts them all.
+        let mut connections = JoinSet::new();
+        loop {
+            tokio::select! {
+                accepted = listener.accept() => {
+                    let Ok((client, _)) = accepted else { break };
+                    let egress = Arc::clone(&egress);
+                    connections.spawn(async move {
+                        // A failed or refused connection only affects that request.
+                        let _ = tokio::time::timeout(MAX_CONNECTION, handle(client, &egress)).await;
+                    });
+                }
+                Some(_) = connections.join_next(), if !connections.is_empty() => {}
+            }
         }
     });
-    Ok(addr)
+    Ok(Proxy { addr, task })
 }
 
 const MAX_HEAD: usize = 32 * 1024;
@@ -111,8 +136,19 @@ async fn handle(mut client: TcpStream, egress: &Egress) -> Result<()> {
             upstream.write_all(&rest).await?;
         }
     }
-    let _ = tokio::io::copy_bidirectional(&mut client, &mut upstream).await;
+    relay(client, upstream).await;
     Ok(())
+}
+
+/// Copies both ways until either side is done, then closes both: a silent peer cannot keep the other
+/// side (or this task) alive.
+async fn relay(client: TcpStream, upstream: TcpStream) {
+    let (mut client_rx, mut client_tx) = client.into_split();
+    let (mut upstream_rx, mut upstream_tx) = upstream.into_split();
+    tokio::select! {
+        _ = tokio::io::copy(&mut client_rx, &mut upstream_tx) => {}
+        _ = tokio::io::copy(&mut upstream_rx, &mut client_tx) => {}
+    }
 }
 
 /// Reads up to the end of the request head; returns it and any bytes read past it.
@@ -248,7 +284,7 @@ mod tests {
                 trap_addr.port()
             ),
         ] {
-            let mut c = TcpStream::connect(proxy).await.unwrap();
+            let mut c = TcpStream::connect(proxy.addr).await.unwrap();
             c.write_all(request.as_bytes()).await.unwrap();
             let mut reply = String::new();
             c.read_to_string(&mut reply).await.unwrap();
@@ -256,5 +292,47 @@ mod tests {
         }
         let hit = tokio::time::timeout(std::time::Duration::from_millis(200), trap.accept()).await;
         assert!(hit.is_err(), "the trap got a connection");
+    }
+
+    /// Chrome hangs up (scan timed out) while the upstream server stays silent: the upstream connection
+    /// must close too, not linger in a detached task.
+    #[tokio::test]
+    async fn a_client_hanging_up_closes_the_upstream() {
+        let silent = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let silent_addr = silent.local_addr().unwrap();
+        let proxy = spawn(Egress::Only(vec![silent_addr])).await.unwrap();
+        let mut c = TcpStream::connect(proxy.addr).await.unwrap();
+        c.write_all(format!("GET http://{silent_addr}/ HTTP/1.1\r\nHost: x\r\n\r\n").as_bytes())
+            .await
+            .unwrap();
+        let (mut upstream, _) = silent.accept().await.unwrap();
+        let mut head = [0u8; 64];
+        let _ = upstream.read(&mut head).await.unwrap();
+        drop(c);
+        // The proxy closes its side: the silent server sees EOF instead of an open socket.
+        let mut rest = Vec::new();
+        let closed =
+            tokio::time::timeout(Duration::from_secs(2), upstream.read_to_end(&mut rest)).await;
+        assert!(
+            closed.is_ok(),
+            "upstream connection still open after the client left"
+        );
+    }
+
+    #[tokio::test]
+    async fn dropping_the_proxy_cancels_its_connections() {
+        let silent = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let silent_addr = silent.local_addr().unwrap();
+        let proxy = spawn(Egress::Only(vec![silent_addr])).await.unwrap();
+        let mut c = TcpStream::connect(proxy.addr).await.unwrap();
+        c.write_all(format!("CONNECT {silent_addr} HTTP/1.1\r\n\r\n").as_bytes())
+            .await
+            .unwrap();
+        let (mut upstream, _) = silent.accept().await.unwrap();
+        drop(proxy);
+        let mut rest = Vec::new();
+        let closed =
+            tokio::time::timeout(Duration::from_secs(2), upstream.read_to_end(&mut rest)).await;
+        assert!(closed.is_ok(), "connection survived the proxy");
     }
 }

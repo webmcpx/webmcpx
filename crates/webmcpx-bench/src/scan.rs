@@ -89,8 +89,14 @@ pub struct Scanner {
     chrome: Option<PathBuf>,
     egress: Egress,
     deadline: Duration,
-    browser: Mutex<Option<Arc<Browser>>>,
+    browser: Mutex<Option<Arc<Session>>>,
     slots: Semaphore,
+}
+
+/// A browser and the proxy it is locked to; both stop when the last scan using them ends.
+struct Session {
+    browser: Browser,
+    _proxy: proxy::Proxy,
 }
 
 impl Scanner {
@@ -132,7 +138,7 @@ impl Scanner {
             .map_err(|_| ScanError::Busy)?;
         let started = Instant::now();
         let browser = self.browser().await.map_err(failed)?;
-        let page = match browser.page(&INIT_SCRIPTS).await {
+        let page = match browser.browser.page(&INIT_SCRIPTS).await {
             Ok(page) => page,
             Err(e) => {
                 // The browser is unusable (crashed, killed): start a fresh one next time.
@@ -158,7 +164,7 @@ impl Scanner {
     pub async fn open_contexts(&self) -> Result<usize> {
         let browser = self.browser.lock().await.clone();
         match browser {
-            Some(b) => b.open_contexts().await,
+            Some(s) => s.browser.open_contexts().await,
             None => Ok(0),
         }
     }
@@ -173,22 +179,26 @@ impl Scanner {
             .map_err(|e| ScanError::BadUrl(format!("{e:#}")))
     }
 
-    async fn browser(&self) -> Result<Arc<Browser>> {
+    async fn browser(&self) -> Result<Arc<Session>> {
         let mut slot = self.browser.lock().await;
         if let Some(b) = slot.as_ref() {
             return Ok(Arc::clone(b));
         }
         let proxy = proxy::spawn(self.egress.clone()).await?;
         let args = [
-            format!("--proxy-server=http://{proxy}"),
+            format!("--proxy-server=http://{}", proxy.addr),
             // Send loopback through the proxy too (Chrome bypasses it by default).
             "--proxy-bypass-list=<-loopback>".to_owned(),
             "--force-webrtc-ip-handling-policy=disable_non_proxied_udp".to_owned(),
             "--disable-quic".to_owned(),
         ];
-        let b = Arc::new(Browser::launch_with(self.chrome.as_deref(), &args).await?);
-        *slot = Some(Arc::clone(&b));
-        Ok(b)
+        let browser = Browser::launch_with(self.chrome.as_deref(), &args).await?;
+        let session = Arc::new(Session {
+            browser,
+            _proxy: proxy,
+        });
+        *slot = Some(Arc::clone(&session));
+        Ok(session)
     }
 
     async fn inspect(&self, page: &Page, url: &Url) -> Result<Report, ScanError> {
