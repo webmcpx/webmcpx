@@ -375,3 +375,66 @@ async fn timed_out_scans_leave_no_page_running() {
         assert_eq!(scanner.open_contexts().await.unwrap(), 0);
     }
 }
+
+#[tokio::test]
+async fn a_stalled_or_endless_favicon_never_costs_the_report() {
+    use axum::body::Body;
+    use axum::response::{Html, Response};
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::Scanner;
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let endless = || async {
+        let chunk = bytes_of(64 * 1024);
+        let stream =
+            futures_util::stream::repeat_with(move || Ok::<_, std::io::Error>(chunk.clone()));
+        Response::builder()
+            .header("content-type", "image/png")
+            .body(Body::from_stream(stream))
+            .unwrap()
+    };
+    let site = serve_html(
+        axum::Router::new()
+            .route(
+                "/slow/",
+                get(|| {
+                    std::future::ready(Html(
+                        r#"<!doctype html><title>s</title><link rel="icon" href="/never.png">"#,
+                    ))
+                }),
+            )
+            .route("/never.png", get(std::future::pending::<&'static str>))
+            .route(
+                "/huge/",
+                get(|| {
+                    std::future::ready(Html(
+                        r#"<!doctype html><title>h</title><link rel="icon" href="/endless.png">"#,
+                    ))
+                }),
+            )
+            .route("/endless.png", get(endless)),
+    )
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    for path in ["slow", "huge"] {
+        let started = std::time::Instant::now();
+        let report = scanner
+            .scan(&format!("http://{site}/{path}/"))
+            .await
+            .unwrap();
+        assert!(report.favicon.is_none(), "{path}");
+        assert!(
+            started.elapsed() < std::time::Duration::from_secs(20),
+            "{path} took {:?}",
+            started.elapsed()
+        );
+    }
+}
+
+fn bytes_of(n: usize) -> axum::body::Bytes {
+    axum::body::Bytes::from(vec![0u8; n])
+}

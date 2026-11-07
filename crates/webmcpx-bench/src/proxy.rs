@@ -64,6 +64,9 @@ fn canonical(ip: IpAddr) -> IpAddr {
 
 /// Longest a proxied connection may live, whatever the peers do.
 const MAX_CONNECTION: Duration = Duration::from_secs(60);
+/// Most bytes one connection may download: an endless response (a hostile favicon, a stream) is cut here
+/// instead of tying up the scan browser until the deadline.
+const MAX_DOWNLOAD: u64 = 16 * 1024 * 1024;
 
 /// A running proxy. Dropping it stops the listener and cancels every open connection.
 pub struct Proxy {
@@ -144,10 +147,11 @@ async fn handle(mut client: TcpStream, egress: &Egress) -> Result<()> {
 /// side (or this task) alive.
 async fn relay(client: TcpStream, upstream: TcpStream) {
     let (mut client_rx, mut client_tx) = client.into_split();
-    let (mut upstream_rx, mut upstream_tx) = upstream.into_split();
+    let (upstream_rx, mut upstream_tx) = upstream.into_split();
+    let mut capped = upstream_rx.take(MAX_DOWNLOAD);
     tokio::select! {
         _ = tokio::io::copy(&mut client_rx, &mut upstream_tx) => {}
-        _ = tokio::io::copy(&mut upstream_rx, &mut client_tx) => {}
+        _ = tokio::io::copy(&mut capped, &mut client_tx) => {}
     }
 }
 
@@ -334,5 +338,26 @@ mod tests {
         let closed =
             tokio::time::timeout(Duration::from_secs(2), upstream.read_to_end(&mut rest)).await;
         assert!(closed.is_ok(), "connection survived the proxy");
+    }
+
+    #[tokio::test]
+    async fn an_endless_download_is_cut() {
+        let source = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let source_addr = source.local_addr().unwrap();
+        tokio::spawn(async move {
+            let (mut s, _) = source.accept().await.unwrap();
+            let chunk = vec![0u8; 64 * 1024];
+            while s.write_all(&chunk).await.is_ok() {}
+        });
+        let proxy = spawn(Egress::Only(vec![source_addr])).await.unwrap();
+        let mut c = TcpStream::connect(proxy.addr).await.unwrap();
+        c.write_all(format!("CONNECT {source_addr} HTTP/1.1\r\n\r\n").as_bytes())
+            .await
+            .unwrap();
+        let mut got = Vec::new();
+        let read = tokio::time::timeout(Duration::from_secs(10), c.read_to_end(&mut got)).await;
+        assert!(read.is_ok(), "the download was not cut");
+        let header = b"HTTP/1.1 200 Connection Established\r\n\r\n".len() as u64;
+        assert_eq!(got.len() as u64, header + MAX_DOWNLOAD);
     }
 }

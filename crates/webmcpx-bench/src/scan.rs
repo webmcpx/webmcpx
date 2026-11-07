@@ -221,10 +221,10 @@ impl Scanner {
             snapshot.as_str().unwrap_or_default(),
         );
         // Best effort: a site without a readable icon still gets its report.
-        report.favicon = page
-            .eval(FAVICON_JS)
+        report.favicon = tokio::time::timeout(FAVICON_WAIT, page.eval(FAVICON_JS))
             .await
             .ok()
+            .and_then(Result::ok)
             .and_then(|v| v.as_str().map(str::to_owned))
             .filter(|uri| is_icon_data_uri(uri));
         Ok(report)
@@ -236,25 +236,48 @@ fn failed(e: anyhow::Error) -> ScanError {
     ScanError::Failed(format!("{e:#}"))
 }
 
-/// Reads the page's declared icon (else `/favicon.ico`) as a data URI, if it is a small image.
+/// Reads the page's declared icon (else `/favicon.ico`) as a data URI. Bounded on both ends: the request is
+/// aborted after `FAVICON_WAIT` in the page, and the body is read in chunks and dropped (with the request
+/// aborted) as soon as it passes 64 KiB, so a slow or endless icon never costs more than that.
 const FAVICON_JS: &str = r#"(async () => {
   const link = document.querySelector('link[rel~="icon" i], link[rel="apple-touch-icon" i]');
   const href = link?.href || new URL('/favicon.ico', location.origin).href;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 3000);
   try {
-    const res = await fetch(href, { credentials: 'omit' });
-    if (!res.ok) return null;
-    const blob = await res.blob();
-    if (blob.size > 65536) return null;
-    return await new Promise((done) => {
-      const reader = new FileReader();
-      reader.onload = () => done(reader.result);
-      reader.onerror = () => done(null);
-      reader.readAsDataURL(blob);
+    const res = await fetch(href, { credentials: 'omit', signal: ctrl.signal });
+    if (!res.ok || !res.body) return null;
+    const type = (res.headers.get('content-type') || '').split(';')[0];
+    const reader = res.body.getReader();
+    const chunks = [];
+    let size = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.length;
+      if (size > 65536) {
+        ctrl.abort();
+        return null;
+      }
+      chunks.push(value);
+    }
+    const blob = new Blob(chunks, { type });
+    return await new Promise((resolve) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => resolve(null);
+      r.readAsDataURL(blob);
     });
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 })()"#;
+
+/// Longest the scan waits for the icon, on top of the page's own 3 s abort; then the report goes out
+/// without one.
+const FAVICON_WAIT: Duration = Duration::from_secs(5);
 
 /// Largest icon accepted, as a data URI (base64 of 64 KiB, plus the header).
 const MAX_ICON_URI: usize = 90_000;
