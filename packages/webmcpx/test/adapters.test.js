@@ -48,7 +48,8 @@ test("react: the tool re-registers only when its name, description or input chan
   const { useTool } = await import("../src/react.js");
   useTool({ name: "count", description: "Counts.", run: () => 1 });
   const first = effects.at(-1);
-  assert.deepEqual(first.deps, ["count", "Counts.", "{}"]);
+  // Annotations are part of what the agent is told: changing them re-registers the tool.
+  assert.deepEqual(first.deps, ["count", "Counts.", "[{},null]", false, false, false, undefined]);
   const unmount = mount();
   await Promise.resolve();
   assert.deepEqual(await call("count", {}), { ok: true, data: 1 });

@@ -51,7 +51,7 @@ const OWN_TOOLS = `A site's own tools (add to cart, book, filter) get the same c
 import { tool } from "webmcpx"; // or useTool from "webmcpx/react" (16.8+), "webmcpx/vue" (2.7+), "webmcpx/svelte" (3+)
 tool({ name: "add_to_cart", description: "Add a product to the cart by SKU.", input: { sku: "string", "qty?": "integer" }, acts: true, run: ({ sku, qty = 1 }) => cart.add(sku, qty) });
 \`\`\`
-Input shorthand: "type", "type?" (optional), [choices] or a JSON Schema. run() returns data; a thrown error becomes {ok:false, error}. No JavaScript: <form toolname="..." tooldescription="..."> with toolparamdescription on fields (and toolautosubmit) is a tool (WebMCP declarative API), added by the script tag where the browser lacks it.`;
+Input shorthand: "type", "type?" (optional), [choices]; or inputSchema with a full JSON Schema (checked before run()). run() returns data; a thrown error becomes {ok:false, error}. No JavaScript: <form toolname="..." tooldescription="..."> with toolparamdescription on fields (and toolautosubmit) is a tool (WebMCP declarative API), added by the script tag where the browser lacks it.`;
 
 const SCAN_API = `GET ${ORIGIN}/api/scan?url=<site> returns JSON: { url, final_url, title, verdict: "ready" | "issues" | "missing", tools: [{ name, description, ... }], diagnostics: [{ rule, severity, message }], page_tokens, elapsed_ms }. One scan per minute per visitor; results from the last minutes are free. Share a result: ${ORIGIN}/?scan=<site>. README badge: ${ORIGIN}/badge/<host>.svg.`;
 

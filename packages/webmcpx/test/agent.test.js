@@ -72,6 +72,9 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <button>Book</button>
 </form>
 <script>
+  // A field added later (as apps do) must reach the tool's schema.
+  setTimeout(() => document.querySelector("form[method=get]").insertAdjacentHTML("beforeend",
+    '<input name="kiln" required toolparamdescription="Which kiln.">'), 1500);
   document.querySelector('form[method=post]').addEventListener("submit", (event) => {
     event.preventDefault();
     if (event.agentInvoked) {
@@ -241,6 +244,11 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.deepEqual(booked, { ok: true, data: { booked: "Ana", day: "friday", wheel: true } });
     const invalid = JSON.parse(await session.call(book, { day: "friday" }));
     assert.equal(invalid.error.code, "INVALID_INPUT");
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const updated = (await session.tools()).find((t) => t.name === "search_mugs");
+    assert.deepEqual(updated.inputSchema.required, ["glaze", "kiln"]);
+    assert.equal(updated.inputSchema.properties.kiln.description, "Which kiln.");
   } finally {
     session.close();
   }

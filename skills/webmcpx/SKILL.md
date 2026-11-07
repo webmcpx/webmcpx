@@ -33,7 +33,7 @@ import { tool } from "webmcpx"; // or useTool from "webmcpx/react" | "webmcpx/vu
 tool({
   name: "add_to_cart",                          // [A-Za-z0-9_.-], under 30 chars
   description: "Add a product to the cart by SKU.", // what it does and when to use it, under 500 chars
-  input: { sku: "string", "qty?": "integer" },  // shorthand ("?" = optional, [..] = choices) or a JSON Schema
+  input: { sku: "string", "qty?": "integer" },  // shorthand ("?" = optional, [..] = choices); or inputSchema: {...}
   acts: true,                                   // changes something for the user; readOnly: true for reads
   run: ({ sku, qty = 1 }) => cart.add(sku, qty), // return data; throw on failure (error.code = a webmcpx code)
 });

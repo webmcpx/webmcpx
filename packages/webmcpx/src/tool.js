@@ -13,10 +13,9 @@ let count = 0;
 /**
  * Input shorthand to JSON Schema: `{ sku: "string", qty: "number?", size: ["S", "M"] }`. A "?" (on
  * the type or the key) makes a field optional; an array is a choice; an object is a property schema.
- * A full schema (with `type`) passes through.
+ * For a full JSON Schema, pass `inputSchema` to `tool()` instead.
  */
 export function schema(input = {}) {
-  if (input.type) return input;
   const properties = {};
   const required = [];
   for (const [rawKey, spec] of Object.entries(input)) {
@@ -38,14 +37,40 @@ const TYPES = {
   object: (v) => v !== null && typeof v === "object" && !Array.isArray(v),
 };
 
-/** The first problem with `args` against the top level of `s` (required, type, enum), or "". */
-function check(s, args) {
-  for (const key of s.required ?? []) if (args[key] === undefined) return `\`${key}\` is required`;
-  for (const [key, p] of Object.entries(s.properties ?? {})) {
-    const v = args[key];
-    if (v === undefined) continue;
-    if (p.type && TYPES[p.type] && !TYPES[p.type](v)) return `\`${key}\` must be of type ${p.type}`;
-    if (p.enum && !p.enum.includes(v)) return `\`${key}\` must be one of ${p.enum.join(", ")}`;
+/**
+ * The first problem with `value` against `s`, or "". Covers what tool inputs use: type, enum,
+ * required, properties, additionalProperties: false, items, minimum/maximum, minLength/maxLength,
+ * pattern, minItems/maxItems, recursively.
+ */
+function check(s, value, at = "input") {
+  if (!s || typeof s !== "object") return "";
+  if (s.type && TYPES[s.type] && !TYPES[s.type](value)) return `${at} must be of type ${s.type}`;
+  if (s.enum && !s.enum.includes(value)) return `${at} must be one of ${s.enum.join(", ")}`;
+  if (typeof value === "number") {
+    if (value < s.minimum) return `${at} must be at least ${s.minimum}`;
+    if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
+  }
+  if (typeof value === "string") {
+    if (value.length < s.minLength) return `${at} must have at least ${s.minLength} chars`;
+    if (value.length > s.maxLength) return `${at} must have at most ${s.maxLength} chars`;
+    if (s.pattern && !new RegExp(s.pattern, "u").test(value)) return `${at} must match ${s.pattern}`;
+  }
+  if (Array.isArray(value)) {
+    if (value.length < s.minItems) return `${at} must have at least ${s.minItems} items`;
+    if (value.length > s.maxItems) return `${at} must have at most ${s.maxItems} items`;
+    for (let i = 0; i < value.length; i++) {
+      const problem = check(s.items, value[i], `${at}[${i}]`);
+      if (problem) return problem;
+    }
+  }
+  if (TYPES.object(value)) {
+    for (const key of s.required ?? []) if (value[key] === undefined) return `\`${key}\` is required`;
+    for (const [key, v] of Object.entries(value)) {
+      const p = s.properties?.[key];
+      if (!p && s.additionalProperties === false) return `\`${key}\` is not an input of this tool`;
+      const problem = p && v !== undefined ? check(p, v, `\`${key}\``) : "";
+      if (problem) return problem;
+    }
   }
   return "";
 }
@@ -54,13 +79,14 @@ function check(s, args) {
 const contract = (inputSchema, run) => async (raw, client) => {
   let args;
   try {
-    args = typeof raw === "string" ? JSON.parse(raw || "{}") : raw ?? {};
+    // Omitted input is {} (as in the spec); anything that is not an object is refused below.
+    args = typeof raw === "string" ? JSON.parse(raw || "{}") : raw === undefined ? {} : raw;
   } catch {
     return fail("INVALID_INPUT", "the input is not JSON");
   }
-  const problem = check(inputSchema, args);
-  if (problem) return fail("INVALID_INPUT", problem);
   try {
+    const problem = TYPES.object(args) ? check(inputSchema, args) : "the input must be an object";
+    if (problem) return fail("INVALID_INPUT", problem);
     const out = envelope({ ok: true, data: (await run(args, client)) ?? null });
     return out.length > LIMITS.OUTPUT_MAX
       ? fail("RESULT_TOO_LARGE", `the result has ${out.length} chars`, `Return at most ${LIMITS.OUTPUT_MAX}: page it.`)
@@ -95,10 +121,10 @@ function register(definition, signal) {
  * @param {import("./index").ToolDefinition} definition
  * @returns {{ready: Promise<boolean>, dispose(): void}}
  */
-export function tool({ name, description, input, run, readOnly, acts, untrusted, signal } = {}) {
+export function tool({ name, description, input, inputSchema = schema(input), run, readOnly, acts, untrusted, signal } = {}) {
   const controller = new AbortController();
+  if (signal?.aborted) return { ready: Promise.resolve(false), dispose() {} };
   signal?.addEventListener("abort", () => controller.abort(), { once: true });
-  const inputSchema = schema(input);
   const ready = register(
     {
       name,
@@ -116,6 +142,9 @@ export function tool({ name, description, input, run, readOnly, acts, untrusted,
   return { ready, dispose: () => controller.abort() };
 }
 
+const TOOL_ATTRIBUTES = ["toolname", "tooldescription", "toolautosubmit"];
+// What a control contributes to the schema (option values included).
+const CONTROL_ATTRIBUTES = ["name", "type", "required", "disabled", "min", "max", "multiple", "value", "toolparamdescription", "method"];
 const FORMATS = { email: "email", url: "uri", date: "date", "datetime-local": "date-time", time: "time" };
 const SKIPPED = /^(submit|button|reset|image|file|password|hidden)$/;
 
@@ -199,9 +228,12 @@ export function forms() {
     return { dispose() {} };
   }
   const live = new Map();
+  // A form's tool is its attributes plus the schema of its controls: re-registered when either changes.
+  const key = (form) =>
+    JSON.stringify([...TOOL_ATTRIBUTES.map((a) => form.getAttribute(a)), form.method, formSchema(form)]);
   const sync = () => {
     for (const [form, entry] of live) {
-      if (!form.isConnected || entry.key !== key(form)) {
+      if (!form.isConnected || !form.hasAttribute("toolname") || entry.key !== key(form)) {
         entry.controller.abort();
         live.delete(form);
       }
@@ -224,14 +256,13 @@ export function forms() {
       );
     }
   };
-  const key = (form) => [form.getAttribute("toolname"), form.getAttribute("tooldescription")].join("\n");
   sync();
   const observer = new MutationObserver(sync);
   observer.observe(doc.documentElement, {
     subtree: true,
     childList: true,
     attributes: true,
-    attributeFilter: ["toolname", "tooldescription"],
+    attributeFilter: [...TOOL_ATTRIBUTES, ...CONTROL_ATTRIBUTES],
   });
   return {
     dispose() {

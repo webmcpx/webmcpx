@@ -37,8 +37,41 @@ test("input shorthand becomes a JSON Schema; a full schema passes through", () =
     required: ["sku", "size"],
   });
   assert.deepEqual(schema(), { type: "object", properties: {} });
-  const full = { type: "object", properties: { q: { type: "string" } } };
-  assert.equal(schema(full), full);
+  // A field may be called "type": the shorthand is never mistaken for a schema.
+  assert.deepEqual(schema({ type: "string" }), { type: "object", properties: { type: { type: "string" } }, required: ["type"] });
+});
+
+test("invalid input never reaches run(): bounds, extra fields, nested objects, non-objects", async () => {
+  const page = host();
+  const ran = [];
+  tool({
+    name: "book",
+    description: "Books seats.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        qty: { type: "integer", minimum: 1, maximum: 10 },
+        code: { type: "string", pattern: "^[A-Z]{3}$" },
+        guest: { type: "object", properties: { name: { type: "string", minLength: 1 } }, required: ["name"] },
+        tags: { type: "array", items: { type: "string" }, maxItems: 2 },
+      },
+      required: ["qty"],
+      additionalProperties: false,
+    },
+    run: (input) => (ran.push(input), "ok"),
+  });
+  const problem = async (input) => (await page.call("book", input)).error?.message;
+  assert.equal(await problem({ qty: -5 }), "`qty` must be at least 1");
+  assert.equal(await problem({ qty: 11 }), "`qty` must be at most 10");
+  assert.equal(await problem({ qty: 1, code: "lis" }), "`code` must match ^[A-Z]{3}$");
+  assert.equal(await problem({ qty: 1, guest: {} }), "`name` is required");
+  assert.equal(await problem({ qty: 1, guest: { name: "" } }), "`name` must have at least 1 chars");
+  assert.equal(await problem({ qty: 1, tags: ["a", 2] }), "`tags`[1] must be of type string");
+  assert.equal(await problem({ qty: 1, tags: ["a", "b", "c"] }), "`tags` must have at most 2 items");
+  assert.equal(await problem({ qty: 1, admin: true }), "`admin` is not an input of this tool");
+  for (const input of ["null", "3", '"x"', "[]", null]) assert.equal(await problem(input), "the input must be an object");
+  assert.equal(ran.length, 0);
+  assert.deepEqual(await page.call("book", { qty: 2, code: "LIS", guest: { name: "Ana" } }), { ok: true, data: "ok" });
 });
 
 test("a tool answers with the standard envelope and checks its input", async () => {
@@ -93,6 +126,16 @@ test("dispose and an aborted signal unregister; no WebMCP means a quiet no-op", 
   assert.deepEqual([...page.tools.keys()], ["a", "b"]);
   handle.dispose();
   controller.abort();
+  assert.equal(page.tools.size, 0);
+
+  // Aborted before or while registering: never left registered.
+  const before = new AbortController();
+  before.abort();
+  assert.equal(await tool({ name: "d", description: "D.", run: () => 4, signal: before.signal }).ready, false);
+  const during = new AbortController();
+  const pending = tool({ name: "e", description: "E.", run: () => 5, signal: during.signal });
+  during.abort();
+  await pending.ready;
   assert.equal(page.tools.size, 0);
 
   host({ webmcp: false });
