@@ -570,6 +570,25 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
     // Same visitor, within the minute: served from the cache, not refused.
     assert_eq!(reqwest::get(&api).await.unwrap().status().as_u16(), 200);
 
+    std::fs::write(root.path().join("site/build/index.md"), "# landing").unwrap();
+    let markdown = reqwest::Client::new()
+        .get(format!("http://{addr}/"))
+        .header("accept", "text/markdown, text/html;q=0.9")
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(
+        markdown.headers()["content-type"],
+        "text/markdown; charset=utf-8"
+    );
+    assert_eq!(markdown.text().await.unwrap(), "# landing");
+    assert_eq!(markdown.headers()["vary"], "Accept");
+    let html = reqwest::get(format!("http://{addr}/")).await.unwrap();
+    // Browsers get HTML at the same URL, so caches must key on Accept.
+    assert_eq!(html.headers()["vary"], "Accept");
+    let html = html.text().await.unwrap();
+    assert!(html.contains("landing</body>"), "{html}");
+
     let page = reqwest::get(format!("http://{addr}/?scan={target}"))
         .await
         .unwrap()

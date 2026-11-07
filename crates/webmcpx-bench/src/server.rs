@@ -102,8 +102,46 @@ async fn page(
         )
             .into_response();
     }
+    // Agents that ask for Markdown (Accept: text/markdown) get a page's Markdown twin when it has one.
+    let wants_markdown = headers
+        .get(axum::http::header::ACCEPT)
+        .and_then(|h| h.to_str().ok())
+        .is_some_and(|a| a.contains("text/markdown"));
+    if wants_markdown
+        && path.ends_with('/')
+        && !path.contains("..")
+        && let Ok(md) = tokio::fs::read_to_string(
+            state
+                .site
+                .join(path.trim_start_matches('/'))
+                .join("index.md"),
+        )
+        .await
+    {
+        return (
+            [
+                (
+                    axum::http::header::CONTENT_TYPE,
+                    "text/markdown; charset=utf-8",
+                ),
+                (axum::http::header::VARY, "Accept"),
+            ],
+            md,
+        )
+            .into_response();
+    }
     match ServeDir::new(state.site.as_ref()).try_call(request).await {
-        Ok(response) => response.into_response(),
+        Ok(response) => {
+            let mut response = response.into_response();
+            // The same URL can also answer in Markdown: caches must key on Accept.
+            if path.ends_with('/') {
+                response.headers_mut().append(
+                    axum::http::header::VARY,
+                    axum::http::HeaderValue::from_static("Accept"),
+                );
+            }
+            response
+        }
         Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
     }
 }
