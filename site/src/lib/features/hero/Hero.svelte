@@ -9,10 +9,16 @@
 	import ScanResult from '#lib/features/scan/ScanResult.svelte';
 	import { scanner } from '#lib/features/scan/scanner.svelte.ts';
 	import type { Highlighted } from '#lib/content/snippets.ts';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
+	import Rich from '#lib/i18n/Rich.svelte';
 
 	let { scriptTag }: { scriptTag: Highlighted } = $props();
 
+	const i18n = useI18n();
+	const m = $derived(i18n.m.hero);
 	const TRY = SITES.slice(0, 3);
+	/** The date of the WebMCP draft this release tracks. */
+	const DRAFT = '2026-11-02';
 </script>
 
 <section id="scan" aria-labelledby="hero-title" class="scroll-mt-4 px-3 pt-3 sm:px-5 sm:pt-5">
@@ -28,34 +34,38 @@
 		<div class="mx-auto max-w-5xl text-center">
 			<Reveal>
 				<a href={SPEC} class="group inline-flex items-center gap-2 text-sm text-ink-2 hover:text-ink">
-					<Stamp tone="marker" size="sm">New</Stamp>
-					Tracks the WebMCP draft of 2026-11-02
+					<Stamp tone="marker" size="sm">{m.stamp}</Stamp>
+					{fmt(m.draft, { date: DRAFT })}
 					<ArrowRight size={14} class="transition group-hover:translate-x-0.5" aria-hidden="true" />
 				</a>
 			</Reveal>
 			<Reveal delay={60}>
 				<h1 id="hero-title" class="mx-auto mt-8 max-w-4xl font-display text-giant font-bold text-balance">
-					Make your site <span class="marker">agent-ready</span>.
+					<Rich text={m.title.text}>
+						{#snippet mark()}<span class="marker">{m.title.mark}</span>{/snippet}
+					</Rich>
 				</h1>
 			</Reveal>
 			<Reveal delay={120}>
 				<p class="mx-auto mt-7 max-w-xl text-lg text-pretty text-ink-2 sm:text-xl">
-					AI agents are already reading your pages. See what they get, then give them real tools with one
-					line.
+					{m.lead}
 				</p>
 			</Reveal>
 			<Reveal delay={180} class="mt-10">
 				<ScanForm fromQuery focusOnLoad>
 					{#snippet hint()}
 						<p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink-3">
-							Try
-							{#each TRY as s (s.url)}
-								<button
-									type="button"
-									class="font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
-									onclick={() => scanner.run(s.url)}>{s.name}</button
-								>
-							{/each}
+							<Rich text={m.try}>
+								{#snippet sites()}
+									{#each TRY as s (s.url)}
+										<button
+											type="button"
+											class="font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
+											onclick={() => scanner.run(s.url)}>{s.name}</button
+										>
+									{/each}
+								{/snippet}
+							</Rich>
 						</p>
 					{/snippet}
 				</ScanForm>

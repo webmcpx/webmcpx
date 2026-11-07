@@ -19,7 +19,6 @@
 	import Section from '#lib/components/ui/Section.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import Tabs from '#lib/components/ui/Tabs.svelte';
-	import { resolve } from '$app/paths';
 	import { modelLook } from '#lib/content/models.ts';
 	import { REPO } from '#lib/content/site.ts';
 	import type { Highlighted } from '#lib/content/snippets.ts';
@@ -38,6 +37,8 @@
 	import { siteTools } from '#lib/features/benchmark/tools.ts';
 	import Rotator from './Rotator.svelte';
 	import ToolTable from './ToolTable.svelte';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
+	import Rich from '#lib/i18n/Rich.svelte';
 
 	interface Props {
 		/** One run per model, in switcher order. */
@@ -48,6 +49,8 @@
 	}
 
 	let { runs, models: published, reproduce }: Props = $props();
+	const i18n = useI18n();
+	const m = $derived(i18n.m.proof);
 	const pages = $derived((published ?? runs.map((r) => r.results.model)).map(modelLook));
 
 	const models = $derived(
@@ -62,14 +65,17 @@
 	let siteId = $state(initial().site);
 
 	/** The tabs under a site's questions: one per metric, then its tools and the method. */
-	const DETAILS: { id: string; label: string; icon: Component }[] = [
-		{ id: 'tokens', label: 'Tokens', icon: Zap },
-		{ id: 'duration_ms', label: 'Time', icon: Timer },
-		{ id: 'steps', label: 'Steps', icon: Footprints },
-		{ id: 'cost_usd', label: 'Cost', icon: Coins },
-		{ id: 'tools', label: 'Tools', icon: Wrench },
-		{ id: 'method', label: 'Method', icon: FlaskConical }
-	];
+	const ICONS = {
+		tokens: Zap,
+		duration_ms: Timer,
+		steps: Footprints,
+		cost_usd: Coins,
+		tools: Wrench,
+		method: FlaskConical
+	} satisfies Record<keyof typeof m.tabs, Component>;
+	const DETAILS = $derived(
+		(Object.keys(ICONS) as (keyof typeof ICONS)[]).map((id) => ({ id, label: m.tabs[id], icon: ICONS[id] }))
+	);
 	let detailId = $state('tokens');
 	const solved = (s: ArmSummary) => `${Math.round(s.success_rate * s.runs)}/${s.runs}`;
 	const shown = (sites: BenchSite[]) => sites.reduce((n, s) => n + s.tasks.length, 0);
@@ -84,11 +90,17 @@
 	<Card padding="lg" shadow="lg" class="h-full text-center">
 		<Stamp tone={ours ? 'marker' : 'plain'}>{label}</Stamp>
 		<p class="mt-6 font-display text-display font-bold tabular-nums">{tokens(arm.tokens)}</p>
-		<p class="font-mono text-xs tracking-widest text-ink-3 uppercase">tokens</p>
+		<p class="font-mono text-xs tracking-widest text-ink-3 uppercase">{m.tokens}</p>
 		<p class="mt-4 text-ink-2">
-			{seconds(arm.duration_ms)} · {arm.steps.toFixed(1)} steps · {perThousand(arm.cost_usd)} per 1k
+			{fmt(m.stats, {
+				time: seconds(arm.duration_ms),
+				steps: arm.steps.toFixed(1),
+				cost: arm.cost_usd == null ? m.na : perThousand(arm.cost_usd)
+			})}
 		</p>
-		<Stamp tone={ok ? 'good' : 'bad'} size="lg" class="mt-5">{ok ? 'Solved' : 'Failed'} {solved(arm)}</Stamp>
+		<Stamp tone={ok ? 'good' : 'bad'} size="lg" class="mt-5"
+			>{fmt(ok ? m.solved : m.failed, { n: solved(arm) })}</Stamp
+		>
 	</Card>
 {/snippet}
 
@@ -102,27 +114,27 @@
 					class="group inline-flex shrink-0 items-center gap-1 font-mono text-sm font-medium text-ink underline decoration-marker decoration-[3px] underline-offset-[5px] transition hover:decoration-ink"
 				>
 					<span class="hidden sm:inline">{new URL(site.url).hostname}</span>
-					<span class="sm:hidden">Open</span>
+					<span class="sm:hidden">{m.open}</span>
 					<ArrowUpRight
 						size={15}
 						strokeWidth={2.5}
 						class="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
 						aria-hidden="true"
 					/>
-					<span class="sr-only">(opens {site.name})</span>
+					<span class="sr-only">{fmt(m.opens, { site: site.name })}</span>
 				</a>
 			{/if}
 		</div>
 	</div>
 	{#if task.baseline && task.webmcp}
-		{@const r = compare(task.baseline.tokens, task.webmcp.tokens, 'fewer tokens', 'more tokens')}
+		{@const r = compare(task.baseline.tokens, task.webmcp.tokens, m.fewerTokens, m.moreTokens)}
 		<div class="grid items-center gap-6 lg:grid-cols-[1fr_auto_1fr] [&>*]:min-w-0">
-			{@render side(task.baseline, 'Without WebMCP', false)}
+			{@render side(task.baseline, m.arms.baseline, false)}
 			<div class="flex justify-center">
 				<div
 					class={[
 						'grid size-32 place-items-center rounded-full border-2 border-ink text-center shadow-hard sm:size-36',
-						r.label === 'fewer tokens' ? 'bg-marker' : 'bg-card'
+						task.webmcp.tokens <= task.baseline.tokens ? 'bg-marker' : 'bg-card'
 					]}
 				>
 					<p class="font-display leading-none font-bold">
@@ -131,26 +143,21 @@
 					</p>
 				</div>
 			</div>
-			{@render side(task.webmcp, 'With webmcpx', true)}
+			{@render side(task.webmcp, m.arms.webmcp, true)}
 		</div>
 	{/if}
 {/snippet}
 
-<Section
-	id="proof"
-	kicker="Benchmark"
-	title="Same agent. Same question."
-	lead="One agent reads, clicks and fills using page snapshots; the other calls the site's WebMCP tools. Pick a model; biggest savings first."
->
+<Section id="proof" kicker={m.kicker} title={m.title} lead={m.lead}>
 	{#if pages.length > 1}
 		<!-- Without JavaScript the switcher cannot switch: each model has its own prerendered page. -->
-		<nav aria-label="Benchmark by model" class="no-js-only mb-8">
-			<p class="font-mono text-[11px] tracking-widest text-ink-3 uppercase">Models</p>
+		<nav aria-label={m.byModel} class="no-js-only mb-8">
+			<p class="font-mono text-[11px] tracking-widest text-ink-3 uppercase">{m.models}</p>
 			<ul class="mt-2 flex flex-wrap gap-x-5 gap-y-2">
 				{#each pages as p (p.id)}
 					<li>
 						<a
-							href={resolve('/benchmark/[model]', { model: p.id })}
+							href={i18n.href(`/benchmark/${p.id}/`)}
 							class="font-medium underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
 							>{p.name}</a
 						>
@@ -163,52 +170,64 @@
 		<Tabs
 			items={models}
 			bind:value={modelId}
-			label="Model"
+			label={m.model}
 			lazy
 			listClass="-mx-4 mb-8 gap-2 px-4 pt-1 pb-3 sm:mx-0 sm:flex-wrap sm:px-0"
 			tabClass="h-10 border-ink/0 px-3.5 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-card aria-selected:text-ink aria-selected:shadow-hard-sm [&_svg]:size-4"
 		>
-			{#snippet tab(m)}
-				{#if m.logo}<SiteLogo logo={m.logo} size={16} />{/if}
-				{m.name}
-				<span class="font-mono text-[10px] tracking-wider text-ink-3 uppercase">{m.tier}</span>
+			{#snippet tab(model)}
+				{#if model.logo}<SiteLogo logo={model.logo} size={16} />{/if}
+				{model.name}
+				<span class="font-mono text-[10px] tracking-wider text-ink-3 uppercase">{m.tiers[model.tier]}</span>
 			{/snippet}
-			{#snippet panel(m)}
-				<h3 class="sr-only">{m.name}{m.provider ? ` (${m.provider})` : ''}</h3>
-				{@render run(m)}
+			{#snippet panel(model)}
+				<h3 class="sr-only">
+					{model.provider ? fmt(m.modelHeading, { name: model.name, provider: model.provider }) : model.name}
+				</h3>
+				{@render run(model)}
 			{/snippet}
 		</Tabs>
 	{:else}
 		<Card padding="lg" shadow="none" class="border-dashed">
-			<p class="font-display font-bold">No run published yet.</p>
-			<p class="mt-1 text-sm text-ink-2">Run <code class="font-mono">just bench</code> and this fills in.</p>
+			<p class="font-display font-bold">{m.empty.title}</p>
+			<p class="mt-1 text-sm text-ink-2">
+				<Rich text={m.empty.text}
+					>{#snippet command()}<code class="font-mono">just bench</code>{/snippet}</Rich
+				>
+			</p>
 		</Card>
 	{/if}
 </Section>
 
-{#snippet run(m: ModelRun)}
-	{@const { results, sites, tools } = m}
+{#snippet run(model: ModelRun)}
+	{@const { results: result, sites, tools } = model}
 	{@const items = sites.map((s) => ({ ...s, label: s.name }))}
 	{@const questions = sites.flatMap((site) => site.tasks.map((task) => ({ task, site })))}
 	<p class="mb-10 text-sm text-ink-3">
-		Selected cases: {shown(sites)} of {m.totalQuestions} questions, where WebMCP used at most half the tokens.
-		<a
-			href="{REPO}/blob/main/site/src/lib/content/bench/{results.model}.json"
-			class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
-			>All results</a
+		<Rich
+			text={i18n.plural(model.totalQuestions, m.selected, {
+				shown: i18n.number(shown(sites)),
+				total: i18n.number(model.totalQuestions)
+			})}
 		>
-		are public, or run it yourself with <code class="font-mono text-ink">just bench</code>.
+			{#snippet results()}<a
+					href="{REPO}/blob/main/site/src/lib/content/bench/{model.results.model}.json"
+					class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
+					>{m.results}</a
+				>{/snippet}
+			{#snippet command()}<code class="font-mono text-ink">just bench</code>{/snippet}
+		</Rich>
 	</p>
 	{#if !sites.length}
 		<Card padding="lg" shadow="none" class="border-dashed">
-			<p class="font-display font-bold">No question met the bar on {results.model}.</p>
-			<p class="mt-1 text-sm text-ink-2">Every question and both arms are in the full results above.</p>
+			<p class="font-display font-bold">{fmt(m.none.title, { model: result.model })}</p>
+			<p class="mt-1 text-sm text-ink-2">{m.none.text}</p>
 		</Card>
 	{/if}
 	<Tabs
 		{items}
 		bind:value={siteId}
-		label="Site"
+		label={m.site}
 		listClass="-mx-4 mb-10 gap-2.5 px-4 pt-1 pb-3 sm:mx-0 sm:mb-12 sm:flex-wrap sm:px-0"
 		tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none"
 	>
@@ -220,7 +239,7 @@
 				{#if site.logo}<SiteLogo logo={site.logo} size={20} />{/if}
 				{site.name}
 			{/if}
-			{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70">local</span
+			{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70">{m.local}</span
 				>{/if}
 		{/snippet}
 		{#snippet panel(site, visible)}
@@ -231,7 +250,7 @@
 			{:else}
 				<!-- Keyed by site: switching sites starts the rotation over. -->
 				{#key site.id}
-					<Rotator items={site.tasks} noun="Question" enabled={visible}>
+					<Rotator items={site.tasks} label={m.rotator.label} itemLabel={m.rotator.item} enabled={visible}>
 						{#snippet item(t)}
 							{@render question(site, t)}
 						{/snippet}
@@ -243,7 +262,7 @@
 			<Tabs
 				items={DETAILS}
 				bind:value={detailId}
-				label="Details for {site.name}"
+				label={fmt(m.details, { site: site.name })}
 				class="mt-12"
 				listClass="mb-6 flex-wrap"
 			>
@@ -259,20 +278,18 @@
 							<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
 								<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
 									<li>
-										{results.model}{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
-										headless Chrome. Same prompt and step limit in both arms; {repeats(m)} runs per question and
-										arm.
+										{i18n.plural(
+											repeats(model),
+											result.reasoning_effort ? m.method.setup : m.method.setupNoEffort,
+											{ model: result.model, effort: result.reasoning_effort ?? '' }
+										)}
 									</li>
-									<li>Without WebMCP: a DOM-snapshot agent that reads, clicks and fills.</li>
-									<li>With webmcpx: only the tools the page registers.</li>
-									<li>Graded by facts in the answer and page state. No LLM judge.</li>
-									<li>
-										{site.live
-											? 'A live site: it ships its own WebMCP tools.'
-											: 'A local test site: its tools come from webmcpx.'}
-									</li>
+									<li>{m.method.baseline}</li>
+									<li>{m.method.webmcp}</li>
+									<li>{m.method.graded}</li>
+									<li>{site.live ? m.method.live : m.method.local}</li>
 								</ul>
-								<CodeBlock snippet={reproduce} title="reproduce it" />
+								<CodeBlock snippet={reproduce} title={m.method.reproduce} />
 							</div>
 						{/if}
 					</div>

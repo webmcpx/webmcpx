@@ -94,3 +94,48 @@
 [data-js] [role='tabpanel'][data-inactive] {
 	display: none;
 }
+
+/*
+ * Scripts the brand fonts do not cover use each system's native fonts (no download): the display face
+ * becomes the text face, since a grotesque display font has no CJK, Devanagari or Bengali counterpart.
+ * Bricolage has no Cyrillic, so Russian headings use Geist, which does.
+ */
+:lang(ru) {
+	--font-display: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+}
+:lang(zh) {
+	--font-display: 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+	--font-sans:
+		'Geist Variable', 'PingFang SC', 'Hiragino Sans GB', 'Noto Sans SC', 'Microsoft YaHei', system-ui,
+		sans-serif;
+}
+:lang(ja) {
+	--font-display:
+		'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', 'Meiryo', system-ui, sans-serif;
+	--font-sans:
+		'Geist Variable', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic', 'Meiryo',
+		system-ui, sans-serif;
+}
+:lang(hi) {
+	--font-display:
+		'Kohinoor Devanagari', 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', system-ui, sans-serif;
+	--font-sans:
+		'Geist Variable', 'Kohinoor Devanagari', 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', system-ui,
+		sans-serif;
+}
+:lang(bn) {
+	--font-display: 'Kohinoor Bangla', 'Noto Sans Bengali', 'Nirmala UI', 'Vrinda', system-ui, sans-serif;
+	--font-sans:
+		'Geist Variable', 'Kohinoor Bangla', 'Noto Sans Bengali', 'Nirmala UI', 'Vrinda', system-ui, sans-serif;
+}
+/* CJK has no word spaces: let headlines break anywhere instead of overflowing, and keep words apart in
+   mixed text with a little extra line height. */
+:lang(zh) :is(h1, h2, h3),
+:lang(ja) :is(h1, h2, h3) {
+	word-break: auto-phrase;
+	line-break: strict;
+}
+:lang(hi),
+:lang(bn) {
+	line-height: 1.65;
+}

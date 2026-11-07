@@ -27,8 +27,8 @@ OPENAI_API_KEY=sk-... just bench`
 
 export type SnippetId = keyof typeof SNIPPETS;
 
-/** Other ways in, shown as one-liners next to the script tag. */
+/** Other ways in, shown as one-liners next to the script tag (who each is for: `fix.alternatives.<id>`). */
 export const ALTERNATIVES = [
-	{ label: 'npm', code: 'npm i webmcpx' },
-	{ label: 'your coding agent', code: 'npx skills add webmcpx/webmcpx' }
-];
+	{ id: 'npm', code: 'npm i webmcpx' },
+	{ id: 'agent', code: 'npx skills add webmcpx/webmcpx' }
+] as const;

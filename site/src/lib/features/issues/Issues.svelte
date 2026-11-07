@@ -4,9 +4,13 @@
 	import Section from '#lib/components/ui/Section.svelte';
 	import { ISSUES, issueUrl } from '#lib/content/issues.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
+	import { useI18n } from '#lib/i18n/index.svelte.ts';
+
+	const i18n = useI18n();
+	const m = $derived(i18n.m.issues);
 </script>
 
-<Section id="issues" kicker="From the spec tracker" title="What the community asked for. Shipped.">
+<Section id="issues" kicker={m.kicker} title={m.title}>
 	<!-- Seven cards on four columns: the first spans two, so both rows are full. -->
 	<ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		{#each ISSUES as issue, i (issue.number)}
@@ -22,8 +26,10 @@
 								#{issue.number}<ArrowUpRight size={14} aria-hidden="true" />
 							</span>
 						</span>
-						<span class="font-display text-lg leading-tight font-bold tracking-tight">{issue.title}</span>
-						<span class="text-sm text-ink-2">{issue.fix}</span>
+						<span class="font-display text-lg leading-tight font-bold tracking-tight"
+							>{m.items[issue.id].title}</span
+						>
+						<span class="text-sm text-ink-2">{m.items[issue.id].fix}</span>
 					</a>
 				</Reveal>
 			</li>

@@ -164,13 +164,33 @@ test('the menu marks the section in view and opens on phones', async ({ page }) 
 	await expect(menu.getByRole('link', { name: 'Benchmark' }).first()).toHaveAttribute('aria-current', 'true');
 	await menu.getByRole('link', { name: 'vs MCP' }).first().click();
 	await expect(menu.getByRole('link', { name: 'vs MCP' }).first()).toHaveAttribute('aria-current', 'true');
-	await expect(menu.locator('[aria-current]')).toHaveCount(1);
+	// One section marked at a time (the language switcher marks the current language separately).
+	await expect(menu.locator('[aria-current]:not([hreflang])')).toHaveCount(1);
 
 	await page.setViewportSize({ width: 390, height: 844 });
-	await menu.locator('summary').click();
+	await menu.locator('summary').filter({ hasText: 'Menu' }).click();
 	await menu.getByRole('link', { name: 'Install' }).last().click();
 	await expect(page).toHaveURL(/#fix$/);
 	await expect(menu.getByRole('link', { name: 'Install' }).last()).toBeHidden();
+});
+
+test('the language switcher links this page in every language, without JavaScript', async ({ browser }) => {
+	const page = await browser.newPage({ javaScriptEnabled: false });
+	await page.goto('/brand/');
+	const menu = page.getByRole('navigation', { name: 'Main' });
+	const switcher = menu.locator('summary').filter({ hasText: 'Language' }).first();
+	await switcher.click();
+	const list = menu.locator('details[open] ul').first();
+	await expect(list.getByRole('link')).toHaveCount(11);
+	await expect(list.getByRole('link', { name: 'English' })).toHaveAttribute('aria-current', 'true');
+	await expect(list.locator('[aria-current]')).toHaveCount(1);
+	const ja = list.getByRole('link', { name: '日本語' });
+	await expect(ja).toHaveAttribute('href', '/ja/brand/');
+	await expect(ja).toHaveAttribute('hreflang', 'ja');
+	await ja.click();
+	await expect(page).toHaveURL(/\/ja\/brand\/$/);
+	await expect(page.locator('html')).toHaveAttribute('lang', 'ja');
+	await page.close();
 });
 
 test('the menu still marks sections after coming from another page', async ({ page }) => {

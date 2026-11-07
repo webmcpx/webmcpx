@@ -9,18 +9,22 @@
 	import type { Snippet } from 'svelte';
 	import { prefersReducedMotion } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 
 	interface Props {
 		items: T[];
-		/** What one item is called, for the controls: "Question 2 of 4". */
-		noun: string;
+		/** Names the group for screen readers: "Questions". */
+		label: string;
+		/** Names one item's dot, with `{n}` and `{total}`: "Question {n} of {total}". */
+		itemLabel: string;
 		interval?: number;
 		/** False while hidden (e.g. behind another tab): no rotation in the background. */
 		enabled?: boolean;
 		item: Snippet<[T]>;
 	}
 
-	let { items, noun, interval = 5000, enabled = true, item }: Props = $props();
+	let { items, label, itemLabel, interval = 5000, enabled = true, item }: Props = $props();
+	const i18n = useI18n();
 
 	let index = $state(0);
 	let paused = $state(false);
@@ -41,7 +45,7 @@
 <div
 	role="group"
 	aria-roledescription="carousel"
-	aria-label="{noun}s"
+	aria-label={label}
 	onmouseenter={() => (hovering = true)}
 	onmouseleave={() => (hovering = false)}
 	onfocusin={() => (focused = true)}
@@ -64,7 +68,7 @@
 			<!-- A 24 px hit area (WCAG 2.2 target size) around a small visual dot. -->
 			<button
 				type="button"
-				aria-label="{noun} {i + 1} of {items.length}"
+				aria-label={fmt(itemLabel, { n: i18n.number(i + 1), total: i18n.number(items.length) })}
 				aria-current={i === index ? 'true' : undefined}
 				onclick={() => (index = i)}
 				class="group grid h-6 min-w-6 place-items-center"
@@ -80,7 +84,7 @@
 		<button
 			type="button"
 			onclick={() => (paused = !paused)}
-			aria-label={paused ? 'Resume rotation' : 'Pause rotation'}
+			aria-label={paused ? i18n.m.proof.rotator.resume : i18n.m.proof.rotator.pause}
 			class="ml-1 grid size-6 place-items-center rounded-full text-ink-3 hover:text-ink"
 		>
 			{#if paused}<Play size={12} aria-hidden="true" />{:else}<Pause size={12} aria-hidden="true" />{/if}

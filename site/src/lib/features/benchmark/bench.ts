@@ -92,19 +92,18 @@ export function parse(data: unknown): Results {
 	return data as Results;
 }
 
-/** A per-task metric the chart can show. Every one is "lower is better". */
+/** A per-task metric the chart can show. Every one is "lower is better". Its name and unit are in the
+ * dictionary (`proof.metrics.<id>`). */
 export interface Metric {
 	id: 'tokens' | 'duration_ms' | 'steps' | 'cost_usd';
-	label: string;
-	unit: string;
 	format: (x: number) => string;
 }
 
 export const METRICS: Metric[] = [
-	{ id: 'tokens', label: 'Tokens', unit: 'tokens per run', format: tokens },
-	{ id: 'duration_ms', label: 'Time', unit: 'seconds per run', format: seconds },
-	{ id: 'steps', label: 'Steps', unit: 'model turns per run', format: (x) => x.toFixed(1) },
-	{ id: 'cost_usd', label: 'Cost', unit: 'USD per 1,000 runs', format: (x) => perThousand(x) }
+	{ id: 'tokens', format: tokens },
+	{ id: 'duration_ms', format: seconds },
+	{ id: 'steps', format: (x) => x.toFixed(1) },
+	{ id: 'cost_usd', format: (x) => perThousand(x) }
 ];
 
 export interface Row {

@@ -11,6 +11,7 @@
 	import { ARMS } from './arms.ts';
 	import { metricValue, percent, type Metric, type Row } from './bench.ts';
 	import type { BenchSite, SiteTask } from './sites.ts';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 
 	interface Props {
 		/** Every question with its site, in display order. */
@@ -19,6 +20,10 @@
 	}
 
 	let { questions, metric }: Props = $props();
+	const i18n = useI18n();
+	const m = $derived(i18n.m.proof);
+	const c = $derived(m.chart);
+	const name = $derived(m.metrics[metric.id]);
 	const rows = $derived(questions.map((q) => q.task));
 
 	const max = $derived(
@@ -33,7 +38,9 @@
 <Reveal>
 	<div aria-hidden="true">
 		<div class="hidden grid-cols-[30%_1fr_4.5rem] gap-4 pb-3 text-xs text-ink-3 sm:grid">
-			<span>Question</span><span>{metric.label} · {metric.unit}</span><span class="text-right">Solved</span>
+			<span>{c.question}</span><span>{fmt(c.head, { metric: name.label, unit: name.unit })}</span><span
+				class="text-right">{c.solved}</span
+			>
 		</div>
 		<ul>
 			{#each questions as { task: row, site } (row.task)}
@@ -43,7 +50,7 @@
 					<div class="min-w-0 [grid-area:name]">
 						<p class="flex items-center gap-1.5 font-mono text-[11px] tracking-wider text-ink-3 uppercase">
 							{#if site.logo && !site.logo.wordmark}<SiteLogo logo={site.logo} size={12} />{/if}
-							{site.name}{#if !site.live}<span>· local</span>{/if}
+							{site.name}{#if !site.live}<span>· {m.local}</span>{/if}
 						</p>
 						<p class="mt-0.5 line-clamp-2 text-sm text-pretty" title={row.prompt}>{row.prompt}</p>
 					</div>
@@ -75,18 +82,25 @@
 <!-- Tables ignore width/overflow, so the visually hidden box is a wrapper. -->
 <div class="sr-only">
 	<table>
-		<caption>{metric.label} per question, {metric.unit}; lower is better. Success rate per arm.</caption>
+		<caption>{fmt(c.caption, { metric: name.label, unit: name.unit })}</caption>
 		<thead>
 			<tr>
-				<th scope="col">Question</th>
-				{#each ARMS as a (a.arm)}<th scope="col">{a.label}: {metric.label.toLowerCase()}</th>{/each}
-				{#each ARMS as a (a.arm)}<th scope="col">{a.label}: solved</th>{/each}
+				<th scope="col">{c.question}</th>
+				{#each ARMS as a (a.arm)}<th scope="col"
+						>{fmt(c.armMetric, { arm: m.arms[a.arm], metric: name.column })}</th
+					>{/each}
+				{#each ARMS as a (a.arm)}<th scope="col">{fmt(c.armSolved, { arm: m.arms[a.arm] })}</th>{/each}
 			</tr>
 		</thead>
 		<tbody>
 			{#each questions as { task: row, site } (row.task)}
 				<tr>
-					<th scope="row">{site.name}{site.live ? '' : ' (local test site)'}: {row.prompt}</th>
+					<th scope="row"
+						>{fmt(c.row, {
+							site: site.live ? site.name : fmt(c.localSite, { site: site.name }),
+							question: row.prompt
+						})}</th
+					>
 					{#each ARMS as a (a.arm)}<td>{value(row, a.arm)}</td>{/each}
 					{#each ARMS as a (a.arm)}<td>{row[a.arm] ? percent(row[a.arm]!.success_rate) : '–'}</td>{/each}
 				</tr>

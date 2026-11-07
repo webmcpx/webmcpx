@@ -1,7 +1,9 @@
-// The webmcpx brand: marks (path data from site/static/brand-assets, the downloadable source), the naming
-// and wording rules, and the trademark notices. The /brand page and the site's logo read from here.
+// The webmcpx brand: marks (path data from site/static/brand-assets, the downloadable source), their files,
+// and the misuse examples; their text is in the dictionary (`brand.*`). The /brand page and the site's logo
+// read from here.
 // Concepts and rationale: reports/Marca e logo do webmcpx.md (research), marks drawn with Codex.
 
+import type { Messages } from '#lib/i18n/dict/en.ts';
 import type { Logo } from './logos.ts';
 
 /** Primary mark, "Junction": two chevrons facing each other with a gap, page and agent meeting at the
@@ -43,69 +45,36 @@ export const JUNCTION_FAVICON: Logo = {
 	wordmark: false
 };
 
+/** A downloadable file of a mark; its label and use live in the dictionary under `brand.logo.assets.<id>`. */
 export interface Asset {
-	label: string;
+	id: keyof Messages['brand']['logo']['assets'];
 	file: string;
-	use: string;
 }
 
 const files = (concept: string): Asset[] => [
-	{
-		label: 'Mark',
-		file: `/brand-assets/${concept}/mark.svg`,
-		use: 'One color (currentColor). Docs, READMEs, slides.'
-	},
-	{ label: 'Inverse', file: `/brand-assets/${concept}/mark-inverse.svg`, use: 'Paper on an ink square.' },
-	{
-		label: 'Favicon',
-		file: `/brand-assets/${concept}/favicon.svg`,
-		use: '16–32px. Follows light and dark mode.'
-	},
-	{ label: 'App icon', file: `/brand-assets/${concept}/app-icon-512.svg`, use: 'Color, for 512px exports.' },
-	{ label: 'Avatar', file: `/brand-assets/${concept}/avatar.svg`, use: '20% padding: safe in a circle crop.' }
+	{ id: 'mark', file: `/brand-assets/${concept}/mark.svg` },
+	{ id: 'inverse', file: `/brand-assets/${concept}/mark-inverse.svg` },
+	{ id: 'favicon', file: `/brand-assets/${concept}/favicon.svg` },
+	{ id: 'appIcon', file: `/brand-assets/${concept}/app-icon-512.svg` },
+	{ id: 'avatar', file: `/brand-assets/${concept}/avatar.svg` }
 ];
 
+/** The three marks; names and roles live in the dictionary under `brand.logo.marks.<id>`. */
 export const MARKS = [
-	{ id: 'junction', name: 'Junction', role: 'Primary mark', logo: JUNCTION, assets: files('junction') },
-	{ id: 'card', name: 'Card', role: 'Badge and app icon, 32px and up', logo: CARD, assets: files('card') },
-	{ id: 'page-slot', name: 'Page with slot', role: 'Alternate', logo: PAGE_SLOT, assets: files('page-slot') }
-];
+	{ id: 'junction', logo: JUNCTION, assets: files('junction') },
+	{ id: 'card', logo: CARD, assets: files('card') },
+	{ id: 'page-slot', logo: PAGE_SLOT, assets: files('page-slot') }
+] as const satisfies readonly { id: keyof Messages['brand']['logo']['marks']; logo: Logo; assets: Asset[] }[];
 
-/** How to write the name, and the words we use and avoid. */
-export const NAMING = [
-	'Always lowercase: webmcpx, also at the start of a sentence (rewrite the sentence instead).',
-	'In code and commands, set it in Geist Mono.',
-	'WebMCP is the browser API, spelled as the draft spells it. webmcp.zone is the community site.',
-	'webmcpx is not WebMCP itself and never claims the name WebMCP.'
-];
+// The naming rules, the voice, the approved phrasings (see TRADEMARK.md) and the trademark notices are
+// text: they live in the dictionary (`brand.name.rules`, `brand.trademark`, `footer.notices`).
 
-export const VOICE = {
-	use: ['declares', 'exposes', 'calls', 'measured', 'tracks the Community Group draft', 'works with webmcpx'],
-	avoid: ['official', 'W3C standard', 'W3C-compliant', 'MCP certified', 'revolutionary', 'magic']
-};
-
-/** Approved and forbidden phrasings about third-party marks (see TRADEMARK.md). */
-export const PHRASES = {
-	ok: [
-		'Implements the WebMCP Draft Community Group Report of the W3C Web Machine Learning Community Group (not a W3C Standard).',
-		'Built with webmcpx. Compatible with webmcpx.',
-		'Works in Chrome with the WebMCP flag enabled.'
-	],
-	no: ['The official WebMCP library', 'W3C WebMCP standard', 'MCP certified', 'webmcpx for Chrome']
-};
-
-export const NOTICES = [
-	'webmcpx is an independent project, not affiliated with or endorsed by LF Projects, the Agentic AI Foundation, Anthropic, W3C, Google or Microsoft.',
-	'Model Context Protocol and the MCP logo are trademarks of LF Projects, LLC.',
-	'W3C® is a trademark of the World Wide Web Consortium.'
-];
-
-/** Misuses, shown on the brand page. Each one is rendered as an example. */
+/** Misuses, shown on the brand page. Each one is rendered as an example; labels: `brand.misuse.items`. */
 export const MISUSE = [
-	{ id: 'stretch', label: 'Don’t stretch or squash it' },
-	{ id: 'rotate', label: 'Don’t rotate it' },
-	{ id: 'outline', label: 'Don’t add outlines or strokes' },
-	{ id: 'yellow', label: 'Don’t draw it in yellow' },
-	{ id: 'shadow', label: 'Don’t add shadows or effects to the mark' },
-	{ id: 'touch', label: 'Don’t close the gap between the chevrons' }
-] as const;
+	'stretch',
+	'rotate',
+	'outline',
+	'yellow',
+	'shadow',
+	'touch'
+] as const satisfies readonly (keyof Messages['brand']['misuse']['items'])[];

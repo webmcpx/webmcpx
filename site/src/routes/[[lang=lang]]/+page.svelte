@@ -10,17 +10,16 @@
 	import Versus from '#lib/features/versus/Versus.svelte';
 	import Why from '#lib/features/why/Why.svelte';
 	import Proof from '#lib/features/proof/Proof.svelte';
+	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import type { PageProps } from './$types';
 
 	let { data: page }: PageProps = $props();
+	const i18n = useI18n();
 </script>
 
 <svelte:head>
-	<title>webmcpx: is your site agent-ready?</title>
-	<meta
-		name="description"
-		content="Scan any site for WebMCP tools. One script tag makes it agent-ready. Reproducible benchmark, open source."
-	/>
+	<title>{i18n.m.meta.home.title}</title>
+	<meta name="description" content={i18n.m.meta.home.description} />
 </svelte:head>
 
 <Hero scriptTag={page.code.scriptTag} />

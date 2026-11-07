@@ -3,7 +3,7 @@
 	import ScanSearch from '@lucide/svelte/icons/scan-search';
 	import { onMount, type Snippet } from 'svelte';
 	import Button from '#lib/components/ui/Button.svelte';
-	import { HOME } from '#lib/content/site.ts';
+	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import { scanner } from './scanner.svelte.ts';
 
 	interface Props {
@@ -17,6 +17,8 @@
 	}
 
 	let { fromQuery = false, size = 'lg', hint, focusOnLoad = false }: Props = $props();
+	const i18n = useI18n();
+	const m = $derived(i18n.m.scan);
 	const uid = $props.id();
 	let input: HTMLInputElement | undefined = $state();
 
@@ -45,12 +47,12 @@
 <form
 	{onsubmit}
 	method="get"
-	action="{HOME}#scan"
+	action="{i18n.href('/')}#scan"
 	role="search"
-	aria-label="Scan a site"
+	aria-label={m.form}
 	class="mx-auto grid w-full max-w-2xl gap-3 sm:grid-cols-[1fr_auto]"
 >
-	<label for="{uid}-url" class="sr-only">Your site's address</label>
+	<label for="{uid}-url" class="sr-only">{m.address}</label>
 	<input
 		bind:this={input}
 		id="{uid}-url"
@@ -60,7 +62,7 @@
 		inputmode="url"
 		autocomplete="url"
 		spellcheck="false"
-		placeholder="yoursite.com"
+		placeholder={m.placeholder}
 		class={[
 			'min-w-0 rounded-full border-2 border-ink bg-card px-6 font-display font-bold text-ink shadow-hard',
 			'placeholder:text-ink-3 focus:outline-none focus-visible:shadow-hard-lg',
@@ -73,7 +75,7 @@
 		disabled={scanner.status === 'loading'}
 		class={size === 'lg' ? 'sm:h-16' : ''}
 	>
-		<ScanSearch aria-hidden="true" />{scanner.status === 'loading' ? 'Scanning…' : 'Scan it'}
+		<ScanSearch aria-hidden="true" />{scanner.status === 'loading' ? m.scanning : m.submit}
 	</Button>
 	{#if hint}
 		<!-- Grid column 1 only: under the input, so it centers on the input, not on input + button. -->

@@ -6,6 +6,7 @@
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
 	import type { QuestionTools } from '#lib/features/benchmark/tools.ts';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 
 	interface Props {
 		tools: QuestionTools;
@@ -13,26 +14,28 @@
 	}
 
 	let { tools, siteName }: Props = $props();
+	const i18n = useI18n();
+	const m = $derived(i18n.m.proof.tools);
 </script>
 
-<section aria-label="WebMCP tools on {siteName}">
+<section aria-label={fmt(m.label, { site: siteName })}>
 	<div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
 		<h4 class="font-display text-xl font-bold tracking-tight">
-			The {tools.tools.length} WebMCP tools {siteName} registers
+			{i18n.plural(tools.tools.length, m.title, { site: siteName })}
 		</h4>
 		<p class="font-mono text-[11px] tracking-wider text-ink-3 uppercase">
 			{tools.source === 'run'
-				? `as the agent saw them · ${tools.date}`
-				: `descriptions as registered ${tools.date} · benchmark ran ${tools.runDate}`}
+				? fmt(m.fromRun, { date: tools.date })
+				: fmt(m.fromSnapshot, { date: tools.date, runDate: tools.runDate })}
 		</p>
 	</div>
 
 	<table class="w-full table-fixed text-left text-sm">
 		<thead class="text-xs text-ink-3">
 			<tr>
-				<th scope="col" class="w-[38%] pb-3 font-normal sm:w-[30%]">Tool</th>
-				<th scope="col" class="pb-3 font-normal">Description</th>
-				<th scope="col" class="w-16 pb-3 text-right font-normal">Called</th>
+				<th scope="col" class="w-[38%] pb-3 font-normal sm:w-[30%]">{m.tool}</th>
+				<th scope="col" class="pb-3 font-normal">{m.description}</th>
+				<th scope="col" class="w-16 pb-3 text-right font-normal">{m.called}</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -46,7 +49,7 @@
 					</th>
 					<td class="min-w-0 py-3 pr-4">
 						<p class="text-pretty whitespace-pre-line text-ink-2">
-							{tool.description || '(not registered when the snapshot was taken)'}
+							{tool.description || m.missing}
 						</p>
 						{#each calls as call, i (i)}
 							<p
@@ -60,9 +63,9 @@
 					<td class="py-3 text-right">
 						{#if tool.called}
 							<Check size={16} strokeWidth={3} class="ml-auto" aria-hidden="true" />
-							<span class="sr-only">Called</span>
+							<span class="sr-only">{m.called}</span>
 						{:else}
-							<span class="font-mono text-xs text-ink-3">–<span class="sr-only">Not called</span></span>
+							<span class="font-mono text-xs text-ink-3">–<span class="sr-only">{m.notCalled}</span></span>
 						{/if}
 					</td>
 				</tr>

@@ -113,6 +113,8 @@ tests/                       Playwright e2e against the prerendered build
 - Imports use `#lib/...` with the file extension (`#lib/content/site.ts`). No barrel files.
 - Components: PascalCase `.svelte`, typed `$props()` with an `interface Props`, snippets (not slots).
   Rune modules end in `.svelte.ts`.
-- Internal links go through `resolve()` (`content/site.ts`).
+- Internal links are English paths through `useI18n().href('/brand/')`, so readers stay in their language.
+- Copy lives in `lib/i18n/dict/en.ts` (typed `Messages`); components read `useI18n().m`. Sentences with markup
+  use `Rich` with `{placeholders}`, counts use `i18n.plural()`. Never concatenate translated fragments.
 - Must work at 390 px wide without horizontal scroll, and with keyboard only. Anything that moves on its own
   (the question rotator) pauses on hover and focus, has a pause control, and stays still for reduced motion.

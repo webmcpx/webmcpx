@@ -15,21 +15,29 @@
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import type { Highlighted } from '#lib/content/snippets.ts';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
-	import { tokens } from '#lib/features/benchmark/bench.ts';
-	import { BADGES, badgeEmbed, errors, host, shareLink, type BadgeStyle } from './scan.ts';
+	import { tokens as pageTokens } from '#lib/features/benchmark/bench.ts';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
+	import Rich from '#lib/i18n/Rich.svelte';
+	import { BADGES, badgeEmbed, errors, errorText, host, shareLink, type BadgeStyle } from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
 
-	const STEPS = [
-		'Opening the page…',
-		'Looking for WebMCP tools…',
-		'Reading it like an agent…',
-		'Linting the tools…'
-	];
+	const i18n = useI18n();
+	const m = $derived(i18n.m.scan);
+	/** The steps shown while a scan runs (their text: `scan.steps`). */
+	const STEPS = $derived(m.steps);
+	/** Each verdict's look; its stamp text is `scan.verdicts.<verdict>`. */
 	const VERDICT = {
-		ready: { stamp: 'Agent-ready', tone: 'good', icon: CircleCheck, fill: 'bg-good-soft' },
-		issues: { stamp: 'Almost', tone: 'marker', icon: CircleAlert, fill: 'bg-marker' },
-		missing: { stamp: 'Not yet', tone: 'bad', icon: CircleX, fill: 'bg-bad-soft' }
+		ready: { tone: 'good', icon: CircleCheck, fill: 'bg-good-soft' },
+		issues: { tone: 'marker', icon: CircleAlert, fill: 'bg-marker' },
+		missing: { tone: 'bad', icon: CircleX, fill: 'bg-bad-soft' }
 	} as const;
+	const error = $derived(
+		scanner.error === 'invalid'
+			? m.errors.invalid
+			: scanner.error
+				? errorText(scanner.error.status, scanner.error.detail, scanner.error.retryAfter, m.errors)
+				: ''
+	);
 
 	/** The install line, highlighted at build time. */
 	let { scriptTag }: { scriptTag: Highlighted } = $props();
@@ -84,7 +92,7 @@
 
 	async function share(url: string) {
 		try {
-			await navigator.clipboard.writeText(shareLink(location.origin, url));
+			await navigator.clipboard.writeText(shareLink(location.origin, url, i18n.href('/')));
 			shared = true;
 			setTimeout(() => (shared = false), 1600);
 		} catch {
@@ -101,13 +109,13 @@
 			</span>
 			<div>
 				<p class="font-display text-xl font-bold">{host(scanner.input)}</p>
-				<p class="text-ink-2">{STEPS[step]}</p>
+				<p class="text-ink-2">{STEPS[Math.min(step, STEPS.length - 1)]}</p>
 			</div>
 		</Card>
 	{:else if scanner.status === 'error'}
 		<Card padding="md" shadow="none" class="border-dashed text-left">
-			<p class="font-display font-bold">Couldn't scan that.</p>
-			<p class="mt-1 text-sm text-ink-2">{scanner.error}</p>
+			<p class="font-display font-bold">{m.failed}</p>
+			<p class="mt-1 text-sm text-ink-2">{error}</p>
 		</Card>
 	{:else if scanner.status === 'done' && scanner.report}
 		{@const r = scanner.report}
@@ -129,19 +137,21 @@
 				<div class="min-w-0 flex-1">
 					<div class="flex flex-wrap items-center gap-3">
 						<p class="truncate font-display text-2xl font-bold tracking-tight">{host(r.final_url)}</p>
-						<Stamp tone={v.tone} size="lg">{v.stamp}</Stamp>
+						<Stamp tone={v.tone} size="lg">{m.verdicts[r.verdict]}</Stamp>
 					</div>
 					<p class="mt-2 text-ink-2">
 						{#if r.verdict === 'missing'}
-							No WebMCP tools. Agents have to read about <strong class="text-ink"
-								>{tokens(r.page_tokens)} tokens</strong
-							>
-							of this page and guess.
+							<Rich text={m.result.missing}>
+								{#snippet tokens()}<strong class="text-ink"
+										>{fmt(m.result.tokens, { n: pageTokens(r.page_tokens) })}</strong
+									>{/snippet}
+							</Rich>
 						{:else if r.verdict === 'issues'}
-							{r.tools.length} tools, but {errors(r)} lint {errors(r) === 1 ? 'error' : 'errors'} agents will trip
-							on.
+							{i18n.plural(errors(r), m.result.issues, {
+								tools: i18n.plural(r.tools.length, m.result.toolCount)
+							})}
 						{:else}
-							{r.tools.length} tools agents can call directly. Nice.
+							{i18n.plural(r.tools.length, m.result.ready)}
 						{/if}
 					</p>
 				</div>
@@ -149,7 +159,7 @@
 
 			{#if r.tools.length}
 				<div class="border-t-2 border-ink bg-paper-2 px-5 py-4 sm:px-7">
-					<ul class="flex flex-wrap gap-2" aria-label="Tools found">
+					<ul class="flex flex-wrap gap-2" aria-label={m.result.tools}>
 						{#each r.tools.slice(0, 10) as t (t.name)}
 							<li>
 								<!-- Hover, focus or tap shows the description; screen readers get it as part of the name. -->
@@ -165,11 +175,11 @@
 							</li>
 						{/each}
 						{#if r.tools.length > 10}<li class="px-1 py-0.5 text-xs text-ink-3">
-								+{r.tools.length - 10} more
+								{fmt(m.result.more, { n: i18n.number(r.tools.length - 10) })}
 							</li>{/if}
 					</ul>
 					{#if r.diagnostics.length}
-						<ul class="mt-4 space-y-1.5 text-sm" aria-label="Lint findings">
+						<ul class="mt-4 space-y-1.5 text-sm" aria-label={m.result.findings}>
 							{#each r.diagnostics.slice(0, 3) as d, i (i)}
 								<li class="flex gap-2">
 									<span
@@ -188,24 +198,21 @@
 
 			{#if r.verdict === 'missing'}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
-					<p class="mb-3 font-medium">Fix it with one line. Paste it before &lt;/body&gt;:</p>
+					<p class="mb-3 font-medium">{fmt(m.result.fix, { tag: '</body>' })}</p>
 					<CodeBlock snippet={scriptTag} title="index.html" class="shadow-none" />
 				</div>
 			{:else if r.verdict === 'issues'}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
-					<p class="mb-3 font-medium">Find every issue in your source, with fixes:</p>
-					<CodeBlock snippet={plain('webmcpx lint src/')} title="terminal" class="shadow-none" />
+					<p class="mb-3 font-medium">{m.result.lint}</p>
+					<CodeBlock snippet={plain('webmcpx lint src/')} title={m.result.terminal} class="shadow-none" />
 				</div>
 			{:else}
-				{@const embed = badgeEmbed(location.origin, r.url, badge)}
+				{@const embed = badgeEmbed(location.origin, r.url, badge, m.result.badgeTitle, i18n.href('/'))}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
-					<p class="font-medium">Show it. Pick a badge and paste it on your site:</p>
-					<p class="mt-1 text-sm text-ink-3">
-						The SVG is in the code, so nothing loads from us. It links to a live scan of your site, so anyone
-						can check it.
-					</p>
+					<p class="font-medium">{m.result.badge}</p>
+					<p class="mt-1 text-sm text-ink-3">{m.result.badgeNote}</p>
 					<fieldset class="mt-4 grid gap-3 sm:grid-cols-3">
-						<legend class="sr-only">Badge style</legend>
+						<legend class="sr-only">{m.result.badgeStyle}</legend>
 						{#each BADGES as b (b.id)}
 							<label
 								class="flex cursor-pointer flex-col overflow-hidden rounded-card border-2 border-hairline transition hover:border-ink has-checked:border-ink has-checked:shadow-hard-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink"
@@ -223,8 +230,8 @@
 									{@html b.svg}
 								</span>
 								<span class="flex items-baseline justify-between gap-2 border-t-2 border-inherit px-3 py-2">
-									<span class="font-medium">{b.name}</span>
-									<span class="text-xs text-ink-3">{b.fits}</span>
+									<span class="font-medium">{m.badges[b.id].name}</span>
+									<span class="text-xs text-ink-3">{m.badges[b.id].fits}</span>
 								</span>
 							</label>
 						{/each}
@@ -235,7 +242,7 @@
 
 			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7">
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
-					<Link aria-hidden="true" />{shared ? 'Link copied' : 'Share result'}
+					<Link aria-hidden="true" />{shared ? m.result.shared : m.result.share}
 				</Button>
 			</div>
 		</Card>

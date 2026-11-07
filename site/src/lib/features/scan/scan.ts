@@ -1,6 +1,8 @@
 import cardSvg from '#lib/content/badges/card.svg?raw';
 import darkSvg from '#lib/content/badges/dark.svg?raw';
 import flatSvg from '#lib/content/badges/flat.svg?raw';
+import { fmt } from '#lib/i18n/format.ts';
+import type { Messages } from '#lib/i18n/dict/en.ts';
 
 // Client for `GET /api/scan?url=` (crates/webmcpx-bench/src/scan.rs). Types mirror the Rust `Report`.
 
@@ -32,7 +34,56 @@ export interface Report {
 	elapsed_ms: number;
 }
 
-export type Outcome = { ok: true; report: Report } | { ok: false; error: string };
+/**
+ * Why a scan failed, as data: the page turns it into words in its language with `errorText()`.
+ * `status` is the HTTP status, or 0 when the scanner could not be reached; `detail` is the server's own
+ * (English) reason; `retryAfter` the seconds from a 429's `Retry-After` header.
+ */
+export interface Failure {
+	status: number;
+	detail: string | null;
+	retryAfter: number | null;
+}
+
+export type Outcome = { ok: true; report: Report } | { ok: false; failure: Failure };
+
+/** The messages `errorText()` picks from (`m.scan.errors`). */
+export type ScanErrors = Messages['scan']['errors'];
+
+/** A failed scan in the reader's language. The server's detail stays in English, in parentheses. */
+export function errorText(
+	status: number,
+	detail: string | null,
+	retryAfter: number | null,
+	m: ScanErrors
+): string {
+	const withDetail = (lead: string) => (detail ? fmt(m.withDetail, { lead, detail }) : lead);
+	switch (status) {
+		case 0:
+			return m.offline;
+		case 404:
+			return m.noScanner;
+		case 429:
+			return retryAfter != null ? fmt(m.busy, { s: retryAfter }) : m.busyLater;
+		case 504:
+			return m.timeout;
+		case 400:
+			return withDetail(m.badAddress);
+		case 422:
+			return withDetail(m.unreadable);
+		default:
+			return fmt(m.other, { status });
+	}
+}
+
+/** `Retry-After` in seconds: a number, or an HTTP date from now; null when absent or unreadable. */
+function retryAfter(header: string | null, now = Date.now()): number | null {
+	if (!header) return null;
+	const s = Number(header);
+	if (Number.isFinite(s) && s >= 0) return Math.ceil(s);
+	const at = Date.parse(header);
+	return Number.isNaN(at) ? null : Math.max(0, Math.ceil((at - now) / 1000));
+}
 
 /** Trims, and rejects what is obviously not a site, before a round trip. */
 export function normalize(input: string): string | null {
@@ -62,15 +113,20 @@ export async function scan(url: string, fetcher: typeof fetch = fetch): Promise<
 	try {
 		res = await fetcher(`/api/scan?url=${encodeURIComponent(url)}`);
 	} catch {
-		return { ok: false, error: 'The scanner is offline. Run it locally with `just serve`.' };
-	}
-	if (res.status === 404) {
-		return { ok: false, error: 'This copy of the site has no scanner. Run it locally with `just serve`.' };
+		return { ok: false, failure: { status: 0, detail: null, retryAfter: null } };
 	}
 	const body = (await res.json().catch(() => null)) as Report | { error?: string } | null;
 	if (!res.ok || !body || !('verdict' in body)) {
-		const error = body && 'error' in body && body.error ? body.error : `Scan failed (${res.status}).`;
-		return { ok: false, error };
+		const detail = body && 'error' in body && body.error ? body.error : null;
+		return {
+			ok: false,
+			// A 200 without a report is the scanner misbehaving: report it like a server error.
+			failure: {
+				status: res.ok ? 502 : res.status,
+				detail,
+				retryAfter: retryAfter(res.headers.get('Retry-After'))
+			}
+		};
 	}
 	return { ok: true, report: body };
 }
@@ -78,14 +134,18 @@ export async function scan(url: string, fetcher: typeof fetch = fetch): Promise<
 export const errors = (r: Report) => r.diagnostics.filter((d) => d.severity === 'error').length;
 export const warnings = (r: Report) => r.diagnostics.filter((d) => d.severity === 'warning').length;
 
-/** The link that re-runs this scan when opened: `/?scan=<url>`. */
-export const shareLink = (origin: string, url: string) => `${origin}/?scan=${encodeURIComponent(url)}`;
+/** The link that re-runs this scan when opened: `/?scan=<url>` (`home` is the landing in the reader's language). */
+export const shareLink = (origin: string, url: string, home = '/') =>
+	`${origin}${home}?scan=${encodeURIComponent(url)}`;
 
-/** The badge styles, inlined into the embed code: sites never load an image from our server. */
+/**
+ * The badge styles, inlined into the embed code: sites never load an image from our server. Their names
+ * are in the dictionary (`scan.badges.<id>`); the artwork's own <title> stays English, like the logo.
+ */
 export const BADGES = [
-	{ id: 'card', name: 'Card', fits: 'Light pages', svg: cardSvg.trim() },
-	{ id: 'flat', name: 'Flat', fits: 'READMEs and footers', svg: flatSvg.trim() },
-	{ id: 'dark', name: 'Dark', fits: 'Dark pages', svg: darkSvg.trim() }
+	{ id: 'card', svg: cardSvg.trim() },
+	{ id: 'flat', svg: flatSvg.trim() },
+	{ id: 'dark', svg: darkSvg.trim() }
 ] as const;
 export type BadgeStyle = (typeof BADGES)[number]['id'];
 
@@ -94,9 +154,16 @@ const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').rep
 /**
  * The HTML a site pastes to show it is agent-ready: the badge SVG itself, inside a link back to a live
  * scan of that site. Nothing is fetched from us; the link lets anyone check the claim (and credits us).
+ * `title` is the link's tooltip (`m.scan.result.badgeTitle`), `home` the landing to re-scan on.
  */
-export function badgeEmbed(origin: string, url: string, style: BadgeStyle = 'card'): string {
-	const href = attr(`${shareLink(origin, url)}#scan`);
+export function badgeEmbed(
+	origin: string,
+	url: string,
+	style: BadgeStyle,
+	title: string,
+	home = '/'
+): string {
+	const href = attr(`${shareLink(origin, url, home)}#scan`);
 	const svg = BADGES.find((b) => b.id === style)?.svg ?? BADGES[0].svg;
-	return `<a href="${href}" title="Agent-ready: check it live with webmcpx">${svg}</a>`;
+	return `<a href="${href}" title="${attr(title)}">${svg}</a>`;
 }

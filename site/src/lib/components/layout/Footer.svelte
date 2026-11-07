@@ -17,8 +17,8 @@
 	import { siGithub, siNpm } from 'simple-icons';
 	import type { Component } from 'svelte';
 	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
-	import { NOTICES } from '#lib/content/brand.ts';
-	import { BRAND, COMMUNITY, HOME, NPM, REPO, SPEC, SPEC_ISSUES } from '#lib/content/site.ts';
+	import { COMMUNITY, NPM, REPO, SPEC, SPEC_ISSUES } from '#lib/content/site.ts';
+	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import Logo from './Logo.svelte';
 
 	type Icon = { lucide: Component } | { brand: typeof siGithub };
@@ -28,35 +28,39 @@
 		icon: Icon;
 	}
 
-	const COLUMNS: { title: string; links: Link[] }[] = [
+	const i18n = useI18n();
+	const m = $derived(i18n.m.footer);
+	const home = $derived(i18n.href('/'));
+	// Product and site names (GitHub, npm, crates.io, webmcp.zone) are not translated.
+	const COLUMNS: { title: string; links: Link[] }[] = $derived([
 		{
-			title: 'Product',
+			title: m.columns.product,
 			links: [
-				{ label: 'Scan your site', href: `${HOME}#scan`, icon: { lucide: ScanSearch } },
-				{ label: 'Benchmark', href: `${HOME}#proof`, icon: { lucide: ChartColumn } },
-				{ label: 'Install', href: `${HOME}#fix`, icon: { lucide: Download } },
-				{ label: 'Issues it solves', href: `${HOME}#issues`, icon: { lucide: Bug } }
+				{ label: m.links.scan, href: `${home}#scan`, icon: { lucide: ScanSearch } },
+				{ label: m.links.proof, href: `${home}#proof`, icon: { lucide: ChartColumn } },
+				{ label: m.links.install, href: `${home}#fix`, icon: { lucide: Download } },
+				{ label: m.links.issues, href: `${home}#issues`, icon: { lucide: Bug } }
 			]
 		},
 		{
-			title: 'Project',
+			title: m.columns.project,
 			links: [
 				{ label: 'GitHub', href: REPO, icon: { brand: siGithub } },
 				{ label: 'npm', href: NPM, icon: { brand: siNpm } },
 				{ label: 'crates.io', href: 'https://crates.io/crates/webmcpx', icon: { lucide: Package } },
-				{ label: 'Brand and design', href: BRAND, icon: { lucide: Palette } },
-				{ label: 'Trademark policy', href: `${REPO}/blob/main/TRADEMARK.md`, icon: { lucide: Scale } }
+				{ label: m.links.brand, href: i18n.href('/brand/'), icon: { lucide: Palette } },
+				{ label: m.links.trademark, href: `${REPO}/blob/main/TRADEMARK.md`, icon: { lucide: Scale } }
 			]
 		},
 		{
-			title: 'WebMCP',
+			title: m.columns.webmcp,
 			links: [
-				{ label: 'Specification draft', href: SPEC, icon: { lucide: FileText } },
-				{ label: 'Spec issues', href: SPEC_ISSUES, icon: { lucide: ScrollText } },
+				{ label: m.links.spec, href: SPEC, icon: { lucide: FileText } },
+				{ label: m.links.specIssues, href: SPEC_ISSUES, icon: { lucide: ScrollText } },
 				{ label: 'webmcp.zone', href: COMMUNITY, icon: { lucide: Globe } }
 			]
 		}
-	];
+	]);
 
 	const external = (href: string) => href.startsWith('http');
 </script>
@@ -69,9 +73,9 @@
 		<div class="grid gap-12 px-6 pt-14 sm:px-10 md:grid-cols-[1.3fr_repeat(3,1fr)] md:gap-8">
 			<div class="max-w-xs">
 				<p class="font-display text-2xl leading-tight font-bold">
-					Standard WebMCP tools for any website, and a linter for your own.
+					{m.tagline}
 				</p>
-				<p class="mt-4 text-sm">MIT license · an independent community project.</p>
+				<p class="mt-4 text-sm">{m.license}</p>
 			</div>
 			{#each COLUMNS as col (col.title)}
 				<nav aria-label={col.title}>
@@ -115,7 +119,7 @@
 
 		<div class="mt-8 border-t-2 border-paper/20 px-6 py-6 sm:px-10">
 			<ul class="space-y-1 text-xs">
-				{#each NOTICES as n (n)}<li>{n}</li>{/each}
+				{#each m.notices as n (n)}<li>{n}</li>{/each}
 			</ul>
 		</div>
 	</div>

@@ -5,34 +5,34 @@
 	import Section from '#lib/components/ui/Section.svelte';
 	import { ALTERNATIVES, type Highlighted } from '#lib/content/snippets.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
+	import Rich from '#lib/i18n/Rich.svelte';
 
 	let { scriptTag }: { scriptTag: Highlighted } = $props();
 
-	const GIVES = [
-		{ tool: 'search_page', what: 'finds the passage' },
-		{ tool: 'fetch_as_markdown', what: 'reads the page, paged' },
-		{ tool: 'get_page_context', what: 'knows where it is' }
-	];
+	const i18n = useI18n();
+	const m = $derived(i18n.m.fix);
+	/** The standard tools the script registers (what each does: `fix.gives.<tool>`). */
+	const GIVES = ['search_page', 'fetch_as_markdown', 'get_page_context'] as const;
 </script>
 
-<Section
-	id="fix"
-	title="One line. Agent-ready."
-	lead="Paste it before </body>. Where WebMCP is missing, it does nothing."
-	center
->
+<Section id="fix" title={m.title} lead={fmt(m.lead, { tag: '</body>' })} center>
 	<Reveal class="mx-auto max-w-3xl">
 		<CodeBlock snippet={scriptTag} title="index.html" />
 		<p class="mt-4 flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm text-ink-2">
-			{#each ALTERNATIVES as alt (alt.label)}
+			{#each ALTERNATIVES as alt (alt.id)}
 				<span
-					>or <code class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-ink">{alt.code}</code> for {alt.label}</span
+					><Rich text={fmt(m.alternative, { label: m.alternatives[alt.id] })}
+						>{#snippet code()}<code class="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-ink"
+								>{alt.code}</code
+							>{/snippet}</Rich
+					></span
 				>
 			{/each}
 		</p>
 	</Reveal>
 	<ul class="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
-		{#each GIVES as g, i (g.tool)}
+		{#each GIVES as tool, i (tool)}
 			<li>
 				<Reveal
 					delay={i * 90}
@@ -41,13 +41,13 @@
 					<span class="grid size-9 place-items-center rounded-full border-2 border-ink bg-good-soft">
 						<Check size={18} strokeWidth={3} aria-hidden="true" />
 					</span>
-					<code class="font-mono text-sm font-semibold">{g.tool}</code>
-					<span class="text-sm text-ink-2">{g.what}</span>
+					<code class="font-mono text-sm font-semibold">{tool}</code>
+					<span class="text-sm text-ink-2">{m.gives[tool]}</span>
 				</Reveal>
 			</li>
 		{/each}
 	</ul>
 	<p class="mt-8 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">
-		~2.7 KB on load · Rust + WebAssembly · MIT license
+		{m.facts}
 	</p>
 </Section>

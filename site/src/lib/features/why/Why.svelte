@@ -14,8 +14,9 @@
 	import Timer from '@lucide/svelte/icons/timer';
 	import type { Component } from 'svelte';
 	import Section from '#lib/components/ui/Section.svelte';
-	import { REASONS, STATUS, type Reason } from '#lib/content/why.ts';
+	import { REASONS, sourceLabel, type Reason } from '#lib/content/why.ts';
 	import { ratio } from '#lib/features/benchmark/bench.ts';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
 
 	interface Props {
@@ -26,6 +27,8 @@
 	}
 
 	let { bestSaving, bestSite }: Props = $props();
+	const i18n = useI18n();
+	const m = $derived(i18n.m.why);
 
 	const ICONS: Record<Reason['id'], Component> = {
 		finish: CircleCheck,
@@ -37,18 +40,14 @@
 		control: Sliders,
 		small: Blocks
 	};
-	const fill = (s: string) => s.replace('{best}', ratio(bestSaving)).replace('{bestSite}', bestSite);
+	const fill = (s: string) => fmt(s, { best: ratio(bestSaving), bestSite });
 </script>
 
-<Section
-	id="why"
-	kicker="Why WebMCP?"
-	title="Give agents a contract, not a screenshot."
-	lead="WebMCP lets your page hand AI agents typed tools that run in the user’s own tab. Here is what that changes, strongest evidence first."
->
+<Section id="why" kicker={m.kicker} title={m.title} lead={m.lead}>
 	<ol class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		{#each REASONS as r, i (r.id)}
 			{@const Icon = ICONS[r.id]}
+			{@const t = m.reasons[r.id]}
 			<li class="min-w-0">
 				<Reveal delay={(i % 4) * 60} class="h-full">
 					<div class="flex h-full flex-col rounded-card border-2 border-ink bg-card p-5 shadow-hard">
@@ -59,20 +58,20 @@
 							>
 								<Icon size={20} strokeWidth={2} />
 							</span>
-							<span class="text-balance">{r.title}</span>
+							<span class="text-balance">{t.title}</span>
 						</h3>
-						<p class="mt-4 font-mono text-[10px] tracking-widest text-ink-3 uppercase">Today</p>
-						<p class="mt-1 text-[15px] text-pretty text-ink-2">{r.pain}</p>
-						<p class="mt-3 font-mono text-[10px] tracking-widest text-ink-3 uppercase">With WebMCP</p>
-						<p class="mt-1 text-[15px] text-pretty">{fill(r.gain)}</p>
+						<p class="mt-4 font-mono text-[10px] tracking-widest text-ink-3 uppercase">{m.today}</p>
+						<p class="mt-1 text-[15px] text-pretty text-ink-2">{t.pain}</p>
+						<p class="mt-3 font-mono text-[10px] tracking-widest text-ink-3 uppercase">{m.with}</p>
+						<p class="mt-1 text-[15px] text-pretty">{fill(t.gain)}</p>
 						<p class="mt-auto pt-4 font-mono text-[11px] leading-relaxed text-ink-3">
-							<span class="tracking-widest uppercase">Sources</span>
+							<span class="tracking-widest uppercase">{i18n.m.sources.title}</span>
 							{#each r.sources as s, j (s.href)}
 								{#if j}<span class="mx-1" aria-hidden="true">·</span>{/if}
 								<a
 									href={s.href}
 									class="text-ink-2 underline decoration-hairline underline-offset-2 hover:text-ink hover:decoration-ink"
-									>{s.label}</a
+									>{sourceLabel(s, i18n.m)}</a
 								>
 							{/each}
 						</p>
@@ -81,5 +80,5 @@
 			</li>
 		{/each}
 	</ol>
-	<p class="mt-8 max-w-3xl text-sm text-pretty text-ink-3">{STATUS}</p>
+	<p class="mt-8 max-w-3xl text-sm text-pretty text-ink-3">{m.status}</p>
 </Section>
