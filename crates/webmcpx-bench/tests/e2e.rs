@@ -801,7 +801,8 @@ async fn a_cancelled_scan_leaves_no_page_running() {
     )
     .await;
     assert!(gone.is_err(), "the scan should still be running");
-    for _ in 0..50 {
+    // Disposal runs in the background; give a loaded machine up to 15 s.
+    for _ in 0..150 {
         if scanner.open_contexts().await.unwrap() == 0 {
             return;
         }

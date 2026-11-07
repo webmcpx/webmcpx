@@ -212,24 +212,34 @@ impl Browser {
     /// Opens a page in its own browser context (no shared cookies or storage), with `init_scripts`
     /// evaluated before any page script on every navigation.
     pub async fn page(&self, init_scripts: &[&str]) -> Result<Page> {
-        let context = self
-            .conn
-            // Disposed if our connection drops (a restarted server, a replaced session), so a remote Chrome
-            // never keeps an abandoned page running.
-            .call(
-                None,
-                "Target.createBrowserContext",
-                json!({ "disposeOnDetach": true }),
-            )
-            .await?["browserContextId"]
-            .as_str()
-            .context("no browserContextId")?
-            .to_owned();
-        // From here on, a cancelled or failed setup still disposes the context.
-        let context = ContextGuard {
-            conn: self.conn.clone(),
-            id: Some(context),
-        };
+        // Created in a task of its own: if this call is cancelled while Chrome is still answering, the
+        // task disposes the new context instead of leaving it running unowned.
+        let (tx, rx) = tokio::sync::oneshot::channel();
+        let conn = self.conn.clone();
+        tokio::spawn(async move {
+            let created = conn
+                // Disposed if our connection drops (a restarted server, a replaced session), so a remote
+                // Chrome never keeps an abandoned page running.
+                .call(
+                    None,
+                    "Target.createBrowserContext",
+                    json!({ "disposeOnDetach": true }),
+                )
+                .await
+                .and_then(|v| {
+                    v["browserContextId"]
+                        .as_str()
+                        .map(str::to_owned)
+                        .context("no browserContextId")
+                })
+                .map(|id| ContextGuard {
+                    conn: conn.clone(),
+                    id: Some(id),
+                });
+            // Nobody waiting any more: dropping the guard disposes the context.
+            drop(tx.send(created));
+        });
+        let context = rx.await.context("creating a browser context")??;
         let target = self
             .conn
             .call(
