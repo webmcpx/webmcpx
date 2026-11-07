@@ -6,8 +6,9 @@ const PKG = new URL("../packages/webmcpx/", import.meta.url);
 const BUDGETS = [
   // Loaded on every page: loader + tool contracts.
   { name: "on load (auto.js + loader.js + generated.js)", files: ["src/auto.js", "src/loader.js", "src/generated.js"], max: 3_300 },
-  // Loaded by pages with a <form toolname>, and by sites that import tool().
-  { name: "own tools and forms (tool.js)", files: ["src/tool.js"], max: 3_600 },
+  // Loaded only by pages with a <form toolname> and by sites that import tool(); most of it is the
+  // input checker that keeps invalid input away from the site's own code.
+  { name: "own tools and forms (tool.js)", files: ["src/tool.js"], max: 4_096 },
   // Loaded on the first tool call only.
   { name: "wasm module", files: ["wasm/webmcpx_wasm_bg.wasm"], max: 12_288 },
   { name: "wasm glue", files: ["wasm/webmcpx_wasm.js"], max: 2_200 },
