@@ -36,8 +36,24 @@ const TYPES = {
   object: (v) => v !== null && typeof v === "object" && !Array.isArray(v),
 };
 
+// Object keys sorted by name, so the same content always gives the same text.
 const canonical = (v) =>
-  JSON.stringify(v, (_, x) => (x && typeof x === "object" && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort()) : x));
+  JSON.stringify(v, (_, x) =>
+    x && typeof x === "object" && !Array.isArray(x)
+      ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      : x,
+  );
+// Decimal digits of a number, exponent included (1e-7 has 7).
+const decimals = (x) => {
+  const [m, e = 0] = String(x).toLowerCase().split("e");
+  return Math.max(0, (m.split(".")[1]?.length ?? 0) - e);
+};
+// Exact decimal divisibility (4.1 is a multiple of 0.01; 10000000.005 is not), not float division.
+const multiple = (value, of) => {
+  const f = 10 ** Math.max(decimals(value), decimals(of));
+  const [a, b] = [Math.round(value * f), Math.round(of * f)];
+  return Number.isSafeInteger(a) && Number.isSafeInteger(b) ? a % b === 0 : Number.isInteger(value / of);
+};
 
 // JSON equality, by content.
 const same = (a, b) =>
@@ -91,9 +107,7 @@ function check(s, value, at = "input") {
     if (value > s.maximum) return `${at} must be at most ${s.maximum}`;
     if (value <= s.exclusiveMinimum) return `${at} must be more than ${s.exclusiveMinimum}`;
     if (value >= s.exclusiveMaximum) return `${at} must be less than ${s.exclusiveMaximum}`;
-    // Within float error: 4.1 is a multiple of 0.01 even though 4.1 / 0.01 is 409.99999999999994.
-    const q = s.multipleOf && value / s.multipleOf;
-    if (q && Math.abs(q - Math.round(q)) > 1e-9 * Math.max(1, Math.abs(q))) return `${at} must be a multiple of ${s.multipleOf}`;
+    if (s.multipleOf && !multiple(value, s.multipleOf)) return `${at} must be a multiple of ${s.multipleOf}`;
   }
   if (typeof value === "string") {
     if (value.length < s.minLength) return `${at} must have at least ${s.minLength} chars`;

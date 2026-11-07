@@ -190,11 +190,14 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   tool({ name: "price", description: "Price.", input: { amount: { type: "number", multipleOf: 0.01 } }, run: () => "ok" });
   assert.equal((await page.call("price", { amount: 4.1 })).ok, true);
   assert.equal((await page.call("price", { amount: 4.105 })).error.message, "`amount` must be a multiple of 0.01");
+  assert.equal((await page.call("price", { amount: 10000000.005 })).ok, false);
+  assert.equal((await page.call("price", { amount: 10000000.01 })).ok, true);
   // Uniqueness is linear: a large distinct array is checked fast, objects compare by content.
   const startedUnique = Date.now();
   assert.equal(await nums({ tags: Array.from({ length: 90_000 }, (_, i) => i) }), undefined);
   assert.ok(Date.now() - startedUnique < 1_000, `took ${Date.now() - startedUnique} ms`);
   assert.equal(await nums({ tags: [{ a: 1, b: 2 }, { b: 2, a: 1 }] }), "`tags` must not repeat items");
+  assert.equal(await nums({ tags: [{ a: "b,c", "a,b": "c" }, { "a,b": "c", a: "b,c" }] }), "`tags` must not repeat items");
   let iffy = 0;
   tool({ name: "iffy", description: "If.", inputSchema: { type: "object", if: { required: ["a"] }, then: { required: ["b"] } }, run: () => ++iffy });
   assert.match(await (async () => (await page.call("iffy", { a: 1 })).error.message)(), /can't check if/);
