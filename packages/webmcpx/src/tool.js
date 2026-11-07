@@ -54,7 +54,7 @@ const resolve = (ref) =>
 
 /** The first problem with `value` against JSON Schema `s` (the keywords tool inputs use), or "". */
 function check(s, value, at = "input") {
-  if (++steps > 10_000) return `${at}: the schema is too complex to check`;
+  if (++steps > 100_000) return `${at}: too complex to check`;
   if (s === false) return `${at} is not allowed`;
   if (!s || typeof s !== "object") return "";
   if (s.$ref) {
@@ -119,7 +119,9 @@ const contract = (inputSchema, run) => async (raw, client) => {
     root = inputSchema;
     depth = 0;
     steps = 0;
-    const problem = TYPES.object(args) ? check(inputSchema, args) : "the input must be an object";
+    let problem = TYPES.object(args) ? check(inputSchema, args) : "the input must be an object";
+    // Running out of steps anywhere (even inside oneOf) refuses the whole input.
+    if (steps > 100_000) problem = "the input is too complex to check";
     if (problem) return fail("INVALID_INPUT", problem);
     const out = envelope({ ok: true, data: (await run(args, client)) ?? null });
     return out.length > LIMITS.OUTPUT_MAX

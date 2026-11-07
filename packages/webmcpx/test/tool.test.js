@@ -125,6 +125,19 @@ test("invalid input never reaches run(): bounds, extra fields, nested objects, n
   const started = Date.now();
   assert.equal((await page.call("spin", {})).ok, false);
   assert.ok(Date.now() - started < 500, `took ${Date.now() - started} ms`);
+  // Running out of steps inside a oneOf branch refuses the input; run() never sees it.
+  let ran = 0;
+  tool({
+    name: "bulk",
+    description: "Bulk.",
+    inputSchema: {
+      type: "object",
+      oneOf: [{ required: ["sku"] }, { required: ["items"], properties: { items: { type: "array", items: { type: "integer" } } } }],
+    },
+    run: () => ++ran,
+  });
+  assert.equal((await page.call("bulk", { sku: "MUG", items: Array(200_000).fill(1) })).error.code, "INVALID_INPUT");
+  assert.equal(ran, 0);
   // An empty pointer token names a member called "" (RFC 6901), not the container.
   tool({
     name: "empty",
