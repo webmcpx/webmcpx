@@ -74,12 +74,13 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
 	await expect(page.getByRole('heading', { name: 'One line. Agent-ready.' })).toBeVisible();
-	// The best case shows first; every question stays readable in the full table.
+	// The best case shows first; its details open natively and list every tool in full.
 	await expect(page.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
-	await page.getByText(/Every question on one chart/).click();
-	await expect(page.locator('#proof table')).toContainText(
-		'Cloudflare: What is the maximum size of a single value stored in Cloudflare Workers KV?'
-	);
+	await page.getByText(/Its WebMCP tools, every question/).click();
+	const tools = page.getByRole('region', { name: 'WebMCP tools on Notion' });
+	await expect(tools.locator('code')).toHaveCount(5);
+	await expect(tools.getByText('read_skill', { exact: true })).toBeVisible();
+	await expect(tools.getByRole('button', { name: /Show/ })).toHaveCount(0);
 	await page.close();
 });
 
@@ -120,12 +121,16 @@ test('logos scan their site, and shared links rerun a scan', async ({ page }) =>
 	await expect.poll(() => seen).toEqual(['https://developers.notion.com/', 'https://kith.com/']);
 });
 
-test('the full benchmark switches metrics', async ({ page }) => {
+test('the site details switch metrics and only show that site', async ({ page }) => {
 	await page.goto('/');
-	await page.getByText(/Every question on one chart/).click();
 	const proof = page.locator('#proof');
+	await proof.getByRole('tab', { name: /Orbit docs/ }).click();
+	await proof.getByText(/Its WebMCP tools, every question/).click();
 	await proof.getByRole('tab', { name: 'Time' }).click();
-	await expect(proof.getByRole('table')).toContainText('seconds per run');
+	const table = proof.getByRole('table');
+	await expect(table).toContainText('seconds per run');
+	await expect(table.locator('tbody tr')).toHaveCount(4);
+	await expect(table).not.toContainText('Notion');
 });
 
 test('the site filter shows each site and each question on its own, never averaged', async ({ page }) => {
@@ -209,16 +214,21 @@ test('the page says the first site is the best case', async ({ request }) => {
 	expect(html).toContain('sorted by their biggest saving');
 });
 
-test('each question shows the site tools with their descriptions and what the agent called', async ({
-	page
-}) => {
+test('the site details show its tools, their descriptions and what the agent called', async ({ page }) => {
 	await page.goto('/#proof');
+	await page
+		.locator('#proof')
+		.getByText(/Its WebMCP tools, every question/)
+		.click();
 	const tools = page.locator('#proof').getByRole('region', { name: 'WebMCP tools on Notion' });
 	await expect(tools.getByRole('heading', { name: /WebMCP tools Notion registers/ })).toBeVisible();
 	await expect(tools.getByText('search_docs', { exact: true })).toBeVisible();
 	await expect(tools.getByText(/Search the Notion Docs documentation/)).toBeVisible();
 	await expect(tools.getByText('Called').first()).toBeVisible();
 	await expect(tools.getByText(/benchmark ran 2026-11-06/)).toBeVisible();
+	// Once the page is live, the list collapses to four tools until expanded.
+	await expect(tools.locator('code')).toHaveCount(4);
 	await tools.getByRole('button', { name: /Show/ }).click();
+	await expect(tools.locator('code')).toHaveCount(5);
 	await expect(tools.getByRole('button', { name: 'Show less' })).toHaveAttribute('aria-expanded', 'true');
 });

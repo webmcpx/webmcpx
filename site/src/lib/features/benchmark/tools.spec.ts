@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import bench from '#lib/content/bench.json';
 import snapshot from '#lib/content/tools.json';
 import { parse, type Results, type RunInfo } from './bench.ts';
-import { toolsFor } from './tools.ts';
+import { siteTools, toolsFor } from './tools.ts';
 
 const run = (over: Partial<RunInfo>): RunInfo => ({
 	task: 't',
@@ -49,6 +49,23 @@ describe('toolsFor', () => {
 		expect(r.t.runDate).toBe('2026-11-06');
 	});
 
+	it('takes tools and calls from the same attempt, and keeps a called tool missing from the list', () => {
+		const r = toolsFor(
+			results([
+				run({ success: false, tools: [{ name: 'old_search', description: 'Old' }] }),
+				run({
+					success: true,
+					tools: [{ name: 'new_search', description: 'New' }],
+					tool_calls: [{ name: 'new_search', arguments: '{}' }]
+				})
+			]),
+			SNAP
+		);
+		expect(r.t.tools).toEqual([{ name: 'new_search', description: 'New', called: true }]);
+		const drift = toolsFor(results([run({ tool_calls: [{ name: 'gone', arguments: '{}' }] })]), SNAP);
+		expect(drift.t.tools[0]).toEqual({ name: 'gone', description: '', called: true });
+	});
+
 	it('puts called tools first and keeps the example calls of a successful attempt', () => {
 		const r = toolsFor(
 			results([
@@ -58,9 +75,9 @@ describe('toolsFor', () => {
 			SNAP
 		);
 		expect(r.t.tools.map((t) => [t.name, t.called])).toEqual([
-			['b', true],
 			['search', true],
-			['a', false]
+			['a', false],
+			['b', false]
 		]);
 		expect(r.t.calls).toEqual([{ name: 'search', arguments: '{"query":"x"}' }]);
 	});
@@ -68,5 +85,27 @@ describe('toolsFor', () => {
 	it('covers every question of the published run', () => {
 		const r = toolsFor(parse(bench), snapshot);
 		for (const [task, q] of Object.entries(r)) expect(q.tools.length, task).toBeGreaterThan(0);
+	});
+});
+
+describe('siteTools', () => {
+	it("merges a site's questions: called if any question called it", () => {
+		const q = (called: string) => ({
+			source: 'snapshot' as const,
+			date: 'd',
+			runDate: 'r',
+			tools: [
+				{ name: 'a', description: 'A', called: called === 'a' },
+				{ name: 'b', description: 'B', called: called === 'b' }
+			],
+			calls: [{ name: called, arguments: '{}' }]
+		});
+		const s = siteTools([q('b'), q('a')]);
+		expect(s?.tools.map((t) => [t.name, t.called])).toEqual([
+			['b', true],
+			['a', true]
+		]);
+		expect(s?.calls).toHaveLength(2);
+		expect(siteTools([])).toBeNull();
 	});
 });

@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
+	import { onMount } from 'svelte';
 	import type { QuestionTools } from '#lib/features/benchmark/tools.ts';
 
 	interface Props {
@@ -13,14 +14,20 @@
 
 	let { tools, siteName }: Props = $props();
 
-	/** Long lists and long descriptions stay short until asked for. */
+	/**
+	 * Long lists and long descriptions stay short until asked for, but only once the page is live: the
+	 * prerendered HTML (and readers without JavaScript) always get every tool and every full description.
+	 */
 	const PREVIEW = 4;
+	let hydrated = $state(false);
 	let expanded = $state(false);
-	const shown = $derived(expanded ? tools.tools : tools.tools.slice(0, PREVIEW));
+	onMount(() => (hydrated = true));
+	const collapsed = $derived(hydrated && !expanded);
+	const shown = $derived(collapsed ? tools.tools.slice(0, PREVIEW) : tools.tools);
 	const hidden = $derived(tools.tools.length - shown.length);
 </script>
 
-<section class="mt-8" aria-label="WebMCP tools on {siteName}">
+<section aria-label="WebMCP tools on {siteName}">
 	<div class="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
 		<h4 class="font-display text-xl font-bold tracking-tight">
 			The {tools.tools.length} WebMCP tools {siteName} registers
@@ -51,8 +58,8 @@
 						</span>
 					{/if}
 				</p>
-				<p class={['mt-2 text-sm text-pretty whitespace-pre-line text-ink-2', !expanded && 'line-clamp-3']}>
-					{tool.description || '(no description)'}
+				<p class={['mt-2 text-sm text-pretty whitespace-pre-line text-ink-2', collapsed && 'line-clamp-3']}>
+					{tool.description || '(not registered when the snapshot was taken)'}
 				</p>
 				{#each calls as call, i (i)}
 					<p
@@ -66,16 +73,18 @@
 		{/each}
 	</ul>
 
-	<button
-		type="button"
-		onclick={() => (expanded = !expanded)}
-		aria-expanded={expanded}
-		class="mt-4 font-mono text-sm font-medium underline decoration-marker decoration-[3px] underline-offset-[5px] hover:decoration-ink"
-	>
-		{expanded
-			? 'Show less'
-			: hidden > 0
-				? `Show all ${tools.tools.length} tools and full descriptions`
-				: 'Show full descriptions'}
-	</button>
+	{#if hydrated}
+		<button
+			type="button"
+			onclick={() => (expanded = !expanded)}
+			aria-expanded={expanded}
+			class="mt-4 font-mono text-sm font-medium underline decoration-marker decoration-[3px] underline-offset-[5px] hover:decoration-ink"
+		>
+			{expanded
+				? 'Show less'
+				: hidden > 0
+					? `Show all ${tools.tools.length} tools and full descriptions`
+					: 'Show full descriptions'}
+		</button>
+	{/if}
 </section>

@@ -15,7 +15,6 @@
 	import type { Highlighted } from '#lib/content/snippets.ts';
 	import {
 		compare,
-		losses,
 		METRICS,
 		perThousand,
 		rows,
@@ -26,7 +25,7 @@
 	} from '#lib/features/benchmark/bench.ts';
 	import type { BenchSite, SiteTask } from '#lib/features/benchmark/sites.ts';
 	import TaskChart from '#lib/features/benchmark/TaskChart.svelte';
-	import type { QuestionTools } from '#lib/features/benchmark/tools.ts';
+	import { siteTools, type QuestionTools } from '#lib/features/benchmark/tools.ts';
 	import Rotator from './Rotator.svelte';
 	import ToolList from './ToolList.svelte';
 
@@ -51,10 +50,6 @@
 
 	let metricId = $state<string>(METRICS[0].id);
 	const metric = $derived(METRICS.find((m) => m.id === metricId) ?? METRICS[0]);
-	const worse = $derived.by(() => {
-		const lost = new Set(losses(results, metric.id));
-		return [...new Set(questions.filter((q) => lost.has(q.task.task)).map((q) => q.site.name))];
-	});
 	const solved = (s: ArmSummary) => `${Math.round(s.success_rate * s.runs)}/${s.runs}`;
 </script>
 
@@ -113,9 +108,6 @@
 			{@render side(task.webmcp, 'With webmcpx', true)}
 		</div>
 	{/if}
-	{#if tools[task.task]?.tools.length}
-		<ToolList tools={tools[task.task]} siteName={site.name} />
-	{/if}
 {/snippet}
 
 <Section
@@ -158,43 +150,48 @@
 						</Rotator>
 					{/key}
 				{/if}
+				{@const siteQuestions = questions.filter((q) => q.site.id === site.id)}
+				{@const st = siteTools(site.tasks.map((t) => tools[t.task]).filter(Boolean))}
+				<details class="group mt-12 rounded-card border-2 border-ink bg-card">
+					<summary
+						class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold sm:px-7 [&::-webkit-details-marker]:hidden"
+					>
+						Its WebMCP tools, every question, and how we measured
+						<ChevronDown class="shrink-0 transition group-open:rotate-180" aria-hidden="true" />
+					</summary>
+					<div class="space-y-12 border-t-2 border-ink p-5 sm:p-7">
+						{#if st}<ToolList tools={st} siteName={site.name} />{/if}
+						<section aria-label="Questions on {site.name}">
+							<h4 class="mb-4 font-display text-xl font-bold tracking-tight">
+								{siteQuestions.length === 1 ? 'The question' : `All ${siteQuestions.length} questions`}
+							</h4>
+							<Tabs items={METRICS} bind:value={metricId} label="Metric" listClass="mb-6 flex-wrap">
+								{#snippet panel()}
+									<TaskChart questions={siteQuestions} {metric} />
+								{/snippet}
+							</Tabs>
+						</section>
+						<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+							<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
+								<li>
+									{results.model}{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
+									headless Chrome. Same prompt and step limit in both arms; {repeats} runs per question and arm.
+								</li>
+								<li>Without WebMCP: a DOM-snapshot agent that reads, clicks and fills.</li>
+								<li>With webmcpx: only the tools the page registers.</li>
+								<li>Graded by facts in the answer and page state. No LLM judge.</li>
+								<li>
+									{site.live
+										? 'A live site: it ships its own WebMCP tools.'
+										: 'A local test site: its tools come from webmcpx.'}
+								</li>
+							</ul>
+							<CodeBlock snippet={reproduce} title="reproduce it" />
+						</div>
+					</div>
+				</details>
 			{/snippet}
 		</Tabs>
-
-		<details class="group mt-12 rounded-card border-2 border-ink bg-card">
-			<summary
-				class="flex cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold sm:px-7 [&::-webkit-details-marker]:hidden"
-			>
-				Every question on one chart, and how we measured
-				<ChevronDown class="transition group-open:rotate-180" aria-hidden="true" />
-			</summary>
-			<div class="border-t-2 border-ink p-5 sm:p-7">
-				<Tabs items={METRICS} bind:value={metricId} label="Metric" listClass="mb-6 flex-wrap">
-					{#snippet panel()}
-						<TaskChart {questions} {metric} />
-						{#if worse.length}
-							<p class="mt-5 text-sm text-ink-2">
-								<strong class="text-ink">webmcpx loses on {metric.label.toLowerCase()} on:</strong>
-								{worse.join(', ')}. Published as measured.
-							</p>
-						{/if}
-					{/snippet}
-				</Tabs>
-				<div class="mt-8 grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
-					<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
-						<li>
-							{results.model}{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
-							headless Chrome. Same prompt and step limit in both arms; {repeats} runs per question and arm.
-						</li>
-						<li>Without WebMCP: a DOM-snapshot agent that reads, clicks and fills.</li>
-						<li>With webmcpx: only the tools the page registers.</li>
-						<li>Graded by facts in the answer and page state. No LLM judge.</li>
-						<li>Live sites ship their own WebMCP tools; local fixtures use webmcpx.</li>
-					</ul>
-					<CodeBlock snippet={reproduce} title="reproduce it" />
-				</div>
-			</div>
-		</details>
 	{:else}
 		<Card padding="lg" shadow="none" class="border-dashed">
 			<p class="font-display font-bold">No run published yet.</p>
