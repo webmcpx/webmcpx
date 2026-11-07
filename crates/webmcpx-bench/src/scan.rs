@@ -211,10 +211,7 @@ impl Scanner {
             return Ok(Arc::clone(b));
         }
         if let Some(remote) = &self.remote {
-            let host = remote
-                .chrome
-                .rsplit_once(':')
-                .map_or(remote.chrome.as_str(), |(h, _)| h);
+            let host = endpoint_host(&remote.chrome);
             self.remote_proxy
                 .get_or_try_init(|| {
                     proxy::spawn_on(self.egress.clone(), remote.proxy, host.to_owned())
