@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { compare, headline, parse, perThousand, ratio, tokens, type ArmSummary, type Results } from './bench';
+import {
+	compare,
+	headline,
+	losses,
+	parse,
+	perThousand,
+	ratio,
+	rows,
+	tokens,
+	type ArmSummary,
+	type Results
+} from './bench.ts';
 
 const arm = (tokens: number, duration_ms: number, cost_usd: number | null): ArmSummary => ({
 	runs: 3,
@@ -60,5 +71,33 @@ describe('compare', () => {
 	it('names the direction', () => {
 		expect(compare(15, 1.5, 'fewer tokens', 'more tokens')).toEqual({ value: '10×', label: 'fewer tokens' });
 		expect(compare(3.6, 4.9, 'faster', 'slower')).toEqual({ value: '1.4×', label: 'slower' });
+	});
+});
+
+describe('rows and losses', () => {
+	const r: Results = {
+		...results({}),
+		summary: {
+			arms: {},
+			tasks: {
+				'live-docs': { baseline: arm(9000, 5000, 0.001), webmcp: arm(900, 2000, 0.0001) },
+				tiny: { baseline: arm(800, 1000, 0.0001), webmcp: arm(1200, 900, 0.0002) },
+				'baseline-only': { baseline: arm(1, 1, null) }
+			}
+		}
+	};
+
+	it('keeps task order and marks live tasks', () => {
+		expect(rows(r).map((x) => [x.task, x.live])).toEqual([
+			['live-docs', true],
+			['tiny', false],
+			['baseline-only', false]
+		]);
+	});
+
+	it('lists the tasks where webmcpx did worse, per metric', () => {
+		expect(losses(r, 'tokens')).toEqual(['tiny']);
+		expect(losses(r, 'duration_ms')).toEqual([]);
+		expect(losses(r, 'cost_usd')).toEqual(['tiny']);
 	});
 });

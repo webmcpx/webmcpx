@@ -60,3 +60,48 @@ export function parse(data: unknown): Results {
 	if (version !== 2) throw new Error(`bench.json: unsupported schema_version ${String(version)}`);
 	return data as Results;
 }
+
+/** A per-task metric the chart can show. Every one is "lower is better". */
+export interface Metric {
+	id: 'tokens' | 'duration_ms' | 'steps' | 'cost_usd';
+	label: string;
+	unit: string;
+	format: (x: number) => string;
+}
+
+export const METRICS: Metric[] = [
+	{ id: 'tokens', label: 'Tokens', unit: 'tokens per run', format: tokens },
+	{ id: 'duration_ms', label: 'Time', unit: 'seconds per run', format: seconds },
+	{ id: 'steps', label: 'Steps', unit: 'model turns per run', format: (x) => x.toFixed(1) },
+	{ id: 'cost_usd', label: 'Cost', unit: 'USD per 1,000 runs', format: (x) => perThousand(x) }
+];
+
+export interface Row {
+	task: string;
+	live: boolean;
+	baseline: ArmSummary | undefined;
+	webmcp: ArmSummary | undefined;
+}
+
+/** One row per task, in the order the harness wrote them. */
+export function rows(r: Results): Row[] {
+	return Object.entries(r.summary.tasks).map(([task, arms]) => ({
+		task,
+		live: task.startsWith('live-'),
+		baseline: arms.baseline,
+		webmcp: arms.webmcp
+	}));
+}
+
+export const metricValue = (s: ArmSummary | undefined, m: Metric['id']) => s?.[m] ?? null;
+
+/** Tasks where webmcpx did worse than the baseline on `metric`: shown, never hidden. */
+export function losses(r: Results, metric: Metric['id']): string[] {
+	return rows(r)
+		.filter((row) => {
+			const b = metricValue(row.baseline, metric);
+			const w = metricValue(row.webmcp, metric);
+			return b != null && w != null && w > b;
+		})
+		.map((row) => row.task);
+}

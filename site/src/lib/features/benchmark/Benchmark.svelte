@@ -1,132 +1,130 @@
 <script lang="ts">
-	import Code from './Code.svelte';
-	import Section from './Section.svelte';
-	import {
-		compare,
-		headline,
-		percent,
-		perThousand,
-		seconds,
-		tokens,
-		type Arm,
-		type Results
-	} from '#lib/bench.ts';
+	import ChartColumn from '@lucide/svelte/icons/chart-no-axes-column';
+	import Coins from '@lucide/svelte/icons/coins';
+	import FlaskConical from '@lucide/svelte/icons/flask-conical';
+	import Footprints from '@lucide/svelte/icons/footprints';
+	import Timer from '@lucide/svelte/icons/timer';
+	import Zap from '@lucide/svelte/icons/zap';
+	import Card from '#lib/components/ui/Card.svelte';
+	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
+	import Section from '#lib/components/ui/Section.svelte';
+	import Tabs from '#lib/components/ui/Tabs.svelte';
+	import type { Highlighted } from '#lib/content/snippets.ts';
+	import Reveal from '#lib/motion/Reveal.svelte';
+	import { ARMS } from './arms.ts';
+	import { headline, losses, METRICS, rows, type Results } from './bench.ts';
+	import StatTiles from './StatTiles.svelte';
+	import TaskChart from './TaskChart.svelte';
 
-	let { results }: { results: Results } = $props();
+	let { results, reproduce }: { results: Results; reproduce: Highlighted } = $props();
 
+	const ICONS = { tokens: Zap, duration_ms: Timer, steps: Footprints, cost_usd: Coins };
 	const h = $derived(headline(results));
-	const rows = $derived(Object.entries(results.summary.tasks));
-	const maxTokens = $derived(
-		Math.max(1, ...rows.flatMap(([, arms]) => Object.values(arms).map((a) => a?.tokens ?? 0)))
-	);
+	const taskRows = $derived(rows(results));
+	const repeats = $derived(taskRows[0]?.webmcp?.runs ?? taskRows[0]?.baseline?.runs);
+	const live = $derived(taskRows.filter((r) => r.live).length);
 	const ran = $derived(
 		results.started_at ? new Date(results.started_at * 1000).toISOString().slice(0, 10) : null
 	);
-	const ARMS: { arm: Arm; label: string; bar: string }[] = [
-		{ arm: 'baseline', label: 'Without WebMCP', bar: 'bg-zinc-400 dark:bg-zinc-600' },
-		{ arm: 'webmcp', label: 'With webmcpx', bar: 'bg-accent' }
-	];
+	let metricId = $state<string>(METRICS[0].id);
+	const metric = $derived(METRICS.find((m) => m.id === metricId) ?? METRICS[0]);
+	const worse = $derived(losses(results, metric.id));
 </script>
 
-<Section id="benchmark" eyebrow="Benchmark" title="Same agent, same pages. Only the tools differ.">
+<Section
+	id="benchmark"
+	eyebrow="Benchmark"
+	icon={ChartColumn}
+	title="Same agent, same pages. Only the tools differ."
+	lead="{taskRows.length} tasks, {live} of them on public sites that already ship WebMCP. Each runs in both arms, graded without an LLM judge."
+>
 	{#if h}
-		<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-			{#each [compare(h.baseline.tokens, h.webmcp.tokens, 'fewer tokens', 'more tokens'), compare(h.baseline.duration_ms, h.webmcp.duration_ms, 'faster', 'slower'), { value: percent(h.webmcp.success_rate), label: `tasks solved (baseline ${percent(h.baseline.success_rate)})` }, { value: perThousand(h.webmcp.cost_usd), label: `per 1,000 tasks (baseline ${perThousand(h.baseline.cost_usd)})` }] as tile (tile.label)}
-				<div class="rounded-2xl border border-zinc-200 p-4 dark:border-zinc-800">
-					<p class="text-3xl font-bold tracking-tight tabular-nums">{tile.value}</p>
-					<p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{tile.label}</p>
-				</div>
-			{/each}
-		</div>
+		<StatTiles headline={h} />
 
-		<div class="mt-10 overflow-x-auto">
-			<table class="w-full min-w-[36rem] text-left text-sm">
-				<thead class="text-zinc-500">
-					<tr>
-						<th class="py-2 font-medium">Task</th>
-						<th class="py-2 font-medium">Tokens per run</th>
-						<th class="py-2 text-right font-medium">Solved</th>
-						<th class="py-2 text-right font-medium">Time</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each rows as [task, arms] (task)}
-						<tr class="border-t border-zinc-200 align-top dark:border-zinc-800">
-							<td class="py-3 pr-4 font-mono text-xs">
-								{task.replace(/^live-/, '')}
-								{#if task.startsWith('live-')}
-									<span class="ml-1 rounded bg-accent/15 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-accent-ink uppercase dark:text-accent">live</span>
-								{/if}
-							</td>
-							<td class="w-1/2 py-3 pr-4">
-								{#each ARMS as { arm, bar } (arm)}
-									{@const s = arms[arm]}
-									{#if s}
-										<div class="flex items-center gap-2 py-0.5">
-											<div
-												class="h-2 rounded-full {bar}"
-												style:width="{Math.max(2, (s.tokens / maxTokens) * 100)}%"
-											></div>
-											<span class="text-xs tabular-nums text-zinc-500">{tokens(s.tokens)}</span>
-										</div>
-									{/if}
-								{/each}
-							</td>
-							<td class="py-3 text-right tabular-nums">
-								{#each ARMS as { arm } (arm)}
-									<div>{arms[arm] ? percent(arms[arm].success_rate) : '–'}</div>
-								{/each}
-							</td>
-							<td class="py-3 text-right tabular-nums">
-								{#each ARMS as { arm } (arm)}
-									<div>{arms[arm] ? seconds(arms[arm].duration_ms) : '–'}</div>
-								{/each}
-							</td>
-						</tr>
+		<Card padding="none" class="mt-6">
+			<div class="flex flex-wrap items-center justify-between gap-4 border-b border-border p-4 sm:px-6">
+				<div class="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted">
+					{#each ARMS as a (a.arm)}
+						<span class="flex items-center gap-2"
+							><span class="size-2.5 rounded-full {a.bar}"></span>{a.label}</span
+						>
 					{/each}
-				</tbody>
-			</table>
-			<div class="mt-3 flex gap-4 text-xs text-zinc-500">
-				{#each ARMS as { arm, label, bar } (arm)}
-					<span class="flex items-center gap-1.5"><span class="size-2 rounded-full {bar}"></span>{label}</span>
-				{/each}
+					<span class="text-subtle">Lower is better</span>
+				</div>
 			</div>
-		</div>
+			<Tabs
+				items={METRICS}
+				bind:value={metricId}
+				label="Metric"
+				listClass="border-b border-border p-2 sm:px-4"
+			>
+				{#snippet tab(m)}
+					{@const Icon = ICONS[m.id]}
+					<Icon aria-hidden="true" />{m.label}
+				{/snippet}
+				{#snippet panel()}
+					<div class="p-4 sm:p-6">
+						<TaskChart rows={taskRows} {metric} />
+						{#if worse.length}
+							<p class="mt-5 rounded-xl border border-border bg-bg p-3 text-xs leading-relaxed text-muted">
+								<strong class="font-medium text-fg"
+									>Where webmcpx loses on {metric.label.toLowerCase()}:</strong
+								>
+								{worse.map((t) => t.replace(/^live-/, '')).join(', ')}. Published as measured.
+							</p>
+						{/if}
+					</div>
+				{/snippet}
+			</Tabs>
+		</Card>
 	{:else}
-		<div class="rounded-2xl border border-dashed border-zinc-300 p-6 dark:border-zinc-700">
+		<Card padding="lg" class="border-dashed">
 			<p class="font-medium">No run published yet.</p>
-			<p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-				Run the benchmark locally and this section fills in from <code>bench/results/latest.json</code>.
+			<p class="mt-1 text-sm text-muted">
+				Run the benchmark locally and this section fills in from <code class="font-mono"
+					>bench/results/latest.json</code
+				>.
 			</p>
-		</div>
+		</Card>
 	{/if}
 
-	<div class="mt-10 grid gap-8 sm:grid-cols-2 [&>*]:min-w-0">
-		<div class="space-y-3 text-sm leading-relaxed text-zinc-700 dark:text-zinc-300">
-			<h3 class="text-base font-semibold text-zinc-900 dark:text-zinc-100">How it is measured</h3>
-			<p>
-				Model <code class="font-mono">{results.model}</code>{#if results.reasoning_effort}, reasoning {results.reasoning_effort}{/if},
-				headless Chrome{#if ran}, run on {ran}{/if}. Every task runs in both arms with the same prompt,
-				system prompt and step limit.
+	<div class="mt-6 grid gap-6 lg:grid-cols-5 [&>*]:min-w-0">
+		<Reveal class="lg:col-span-3">
+			<Card padding="lg" class="h-full">
+				<h3 class="flex items-center gap-2 font-semibold">
+					<FlaskConical size={18} class="text-accent-ink" aria-hidden="true" />How it is measured
+				</h3>
+				<ul class="mt-4 space-y-3 text-sm leading-relaxed text-muted">
+					<li>
+						Model <code class="font-mono text-fg">{results.model}</code>{#if results.reasoning_effort},
+							reasoning
+							{results.reasoning_effort}{/if}, headless Chrome{#if ran}, run on {ran}{/if}. Same prompt,
+						system prompt and step limit in both arms{#if repeats}; {repeats} runs per task and arm{/if}.
+					</li>
+					<li>
+						<strong class="font-medium text-fg">Without WebMCP</strong>, the agent reads a text snapshot of
+						the page and clicks or fills elements by reference, like DOM-snapshot browser agents.
+						<strong class="font-medium text-fg">With webmcpx</strong>, it gets only the tools the page
+						registers.
+					</li>
+					<li>
+						<strong class="font-medium text-fg">Live</strong> tasks run on Cloudflare and Notion docs, a Shopify
+						store, a WooCommerce store and specification.website. The others run on local fixture sites.
+					</li>
+					<li>
+						Deterministic grading: the answer must contain the expected facts, and actions are checked against
+						the page state.{#if results.price_per_mtok}
+							Cost uses the provider's list prices, cached input included.{/if}
+					</li>
+				</ul>
+			</Card>
+		</Reveal>
+		<Reveal delay={100} class="flex flex-col gap-3 lg:col-span-2">
+			<h3 class="font-semibold">Reproduce it</h3>
+			<p class="text-sm text-muted">
+				Any OpenAI-compatible model works; results land in the same JSON this page reads.
 			</p>
-			<p>
-				Tasks marked <strong>live</strong> run on public sites that already ship WebMCP: Cloudflare and
-				Notion docs, a Shopify store, a WooCommerce store and specification.website. The others run on
-				local fixture sites that use webmcpx.
-			</p>
-			<p>
-				<strong>Without WebMCP</strong>, the agent reads a text snapshot of the page and clicks or fills
-				elements by reference, like DOM-snapshot browser agents. <strong>With webmcpx</strong>, it gets
-				only the tools the page registers.
-			</p>
-			<p>
-				Grading is deterministic: the answer must contain the expected facts, and actions are checked
-				against the page state. No LLM judge.
-			</p>
-		</div>
-		<div class="space-y-3">
-			<h3 class="text-base font-semibold">Reproduce it</h3>
-			<Code code={'git clone https://github.com/webmcpx/webmcpx\ncd webmcpx && just setup\nOPENAI_API_KEY=sk-... just bench'} />
-		</div>
+			<CodeBlock snippet={reproduce} title="terminal" />
+		</Reveal>
 	</div>
 </Section>
