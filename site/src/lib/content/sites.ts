@@ -14,8 +14,14 @@ export interface Site {
 
 export const VERIFIED_ON = '2026-11-07';
 
-/** Sites with WebMCP in the Known Good index (the dataset behind webmcp#319) on its last update. */
-export const INDEX = { sites: 541, asOf: '2026-11-04', url: 'https://knowngood.sh' };
+/**
+ * How many sites register WebMCP tools. The headline uses the webmcp.com directory: hosts listed as live
+ * (demos excluded; /api/directory.json had 8,556 of 8,612 on its generatedAt date), rounded down to the
+ * hundred. Known Good is the stricter count: sites seen registering tools when the page actually ran
+ * (it ran only 648 of the 57,273 it lists, so the real number is higher).
+ */
+export const DIRECTORY = { sites: 8500, asOf: '2026-11-05', url: 'https://webmcp.com' };
+export const VERIFIED = { sites: 541, asOf: '2026-11-04', url: 'https://knowngood.sh' };
 
 export const SITES: Site[] = [
 	{ name: 'Cloudflare', url: 'https://developers.cloudflare.com/', logo: CLOUDFLARE },

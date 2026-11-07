@@ -1,7 +1,7 @@
 <!-- Sites that already ship WebMCP. Each logo runs a live scan of that site: proof you can click. -->
 <script lang="ts">
 	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
-	import { INDEX, SITES, VERIFIED_ON } from '#lib/content/sites.ts';
+	import { DIRECTORY, SITES, VERIFIED, VERIFIED_ON } from '#lib/content/sites.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import { scanner } from '#lib/features/scan/scanner.svelte.ts';
 </script>
@@ -9,7 +9,7 @@
 <section aria-labelledby="logos-title" class="mx-auto max-w-6xl px-4 py-16 text-center sm:px-6 sm:py-20">
 	<Reveal>
 		<h2 id="logos-title" class="font-display text-headline font-bold text-balance">
-			<span class="marker">{INDEX.sites}+ sites</span> already speak WebMCP.
+			<span class="marker">{DIRECTORY.sites.toLocaleString('en-US')}+ sites</span> already speak WebMCP.
 		</h2>
 		<p class="mt-3 text-ink-2">Click any of them to scan it live.</p>
 	</Reveal>
@@ -35,9 +35,10 @@
 			{/each}
 		</ul>
 		<p class="mt-8 text-xs text-ink-3">
-			Checked with the scanner on {VERIFIED_ON}. Count from the
-			<a class="underline" href={INDEX.url}>Known Good index</a> ({INDEX.asOf}). Logos belong to their owners;
-			no affiliation.
+			Count: live sites in the <a class="underline" href={DIRECTORY.url}>webmcp.com directory</a>
+			({DIRECTORY.asOf}). The stricter <a class="underline" href={VERIFIED.url}>Known Good index</a> saw
+			{VERIFIED.sites} sites register tools when it ran their pages ({VERIFIED.asOf}). Logos checked with the
+			scanner on {VERIFIED_ON}; they belong to their owners, no affiliation.
 		</p>
 	</Reveal>
 </section>
