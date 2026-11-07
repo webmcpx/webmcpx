@@ -16,6 +16,8 @@ export default defineConfig({
 			inlineStyleThreshold: 48_000
 		})
 	],
+	// In `vite dev`, the scan API comes from `just serve` (the Rust server).
+	server: { proxy: { '/api': 'http://127.0.0.1:4173' } },
 	test: {
 		expect: { requireAssertions: true },
 		projects: [
