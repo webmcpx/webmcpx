@@ -1,6 +1,6 @@
 # webmcpx in production: three containers, least privilege each.
 #
-#   visitors ─▶ Cloudflare ◀─outbound tunnel─ cloudflared ──edge──▶ caddy ──▶ web ──scan──▶ chrome
+#   visitors ─▶ Cloudflare ◀─outbound tunnel─ cloudflared ──edge──▶ nginx ──▶ web ──scan──▶ chrome
 #                                                                             ▲            │
 #                                                     egress proxy (public IPs only) ◀─────┘
 #
@@ -26,21 +26,22 @@ services:
   tunnel:
     <<: *hardening
     image: cloudflare/cloudflared:2026.10.7
-    # A remotely managed tunnel: its public hostname (-> http://caddy:8080) is set in Cloudflare.
+    # A remotely managed tunnel: its public hostname (-> http://nginx:8080) is set in Cloudflare.
     command: [tunnel, --no-autoupdate, run]
     environment:
       TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN in deploy/.env}
     read_only: true
     networks: [edge]
-    depends_on: [caddy]
+    depends_on: [nginx]
 
-  caddy:
+  nginx:
     <<: *hardening
-    build: { context: .., dockerfile: deploy/caddy.Dockerfile }
+    build: { context: .., dockerfile: deploy/nginx.Dockerfile }
     read_only: true
-    volumes: [caddy-data:/data, caddy-config:/config]
+    tmpfs: [/tmp]
     networks: [edge]
     depends_on: [web]
+    mem_limit: 128m
 
   web:
     <<: *hardening
@@ -79,7 +80,3 @@ networks:
   edge: {}
   scan:
     internal: true
-
-volumes:
-  caddy-data: {}
-  caddy-config: {}

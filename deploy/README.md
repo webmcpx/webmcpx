@@ -6,14 +6,14 @@ internet:
 | Service | Image | Runs as | Network |
 |---|---|---|---|
 | `tunnel` | `cloudflare/cloudflared`, pinned | nonroot | `edge`: dials out to Cloudflare |
-| `caddy` | Caddy, static binary on `distroless/static-debian13` | nonroot | `edge` |
+| `nginx` | nginx on Chainguard's distroless image, pinned by digest | nonroot | `edge` |
 | `web` | Rust server and the prerendered landing on `distroless/cc-debian13` (site built with Node 26 LTS) | nonroot | `edge` and `scan` |
 | `chrome` | `chromedp/headless-shell`, pinned | nobody | `scan` only |
 
 ## Security model
 
 - **Nothing listens on the internet.** A [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/)
-  connects out to Cloudflare, which terminates TLS and forwards requests to Caddy. The server's firewall
+  connects out to Cloudflare, which terminates TLS and forwards requests to nginx. The server's firewall
   can keep 80 and 443 closed.
 - **The scan browser has no route to the network.** `scan` is an internal Docker network. Chrome's only way
   out is the egress proxy inside `web`, which resolves every host itself, refuses private, loopback,
@@ -29,7 +29,7 @@ internet:
 ## Run it
 
 1. In Cloudflare, create a tunnel (Zero Trust → Networks → Tunnels, or the API) and give it a public
-   hostname for your domain pointing to `http://caddy:8080`.
+   hostname for your domain pointing to `http://nginx:8080`.
 2. Put its token on the server and start the stack:
 
 ```sh
