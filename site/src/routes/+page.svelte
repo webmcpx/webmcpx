@@ -1,9 +1,8 @@
 <!--
 	The landing, in order of importance: can agents use YOUR site (scan) → others already do (logos) →
-	proof it matters (benchmark) → the fix (one line) → what the community asked for → scan again.
+	proof it matters (benchmark) → the fix (one line) → what the community asked for .
 -->
 <script lang="ts">
-	import FinalCta from '#lib/features/cta/FinalCta.svelte';
 	import Fix from '#lib/features/fix/Fix.svelte';
 	import Hero from '#lib/features/hero/Hero.svelte';
 	import Issues from '#lib/features/issues/Issues.svelte';
@@ -33,4 +32,3 @@
 />
 <Fix scriptTag={page.code.scriptTag} />
 <Issues />
-<FinalCta />

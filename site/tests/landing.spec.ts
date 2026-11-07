@@ -249,11 +249,8 @@ test('the Tools tab shows the site tools, their descriptions and what the agent 
 	await expect(tools.getByText(/^search_docs\(/).first()).toBeVisible();
 	// Schema 4 runs record the tools the agent was given: no snapshot disclaimer.
 	await expect(tools.getByText(/as the agent saw them/)).toBeVisible();
-	await tools.getByRole('button', { name: 'Full descriptions' }).click();
-	await expect(tools.getByRole('button', { name: 'Shorter descriptions' })).toHaveAttribute(
-		'aria-expanded',
-		'true'
-	);
+	// Descriptions are always in full: no toggle.
+	await expect(tools.getByRole('button')).toHaveCount(0);
 });
 
 test('the brand page shows the marks, real token values and downloadable assets', async ({

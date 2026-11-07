@@ -12,7 +12,7 @@
 	const TRY = SITES.slice(0, 3);
 </script>
 
-<section aria-labelledby="hero-title" class="px-3 pt-3 sm:px-5 sm:pt-5">
+<section id="scan" aria-labelledby="hero-title" class="scroll-mt-4 px-3 pt-3 sm:px-5 sm:pt-5">
 	<div
 		class="relative isolate overflow-hidden rounded-frame border-2 border-ink bg-paper px-4 pt-28 pb-14 sm:pt-36 sm:pb-20"
 	>

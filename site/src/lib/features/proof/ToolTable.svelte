@@ -1,11 +1,10 @@
 <!--
 	A site's WebMCP tools as a table, like the question charts: name, description (the text the agent reads
 	to choose a tool), and whether the agent called it, with the exact call. Called tools come first.
-	Every row and full description is in the HTML; descriptions clamp only after hydration.
+	Descriptions always show in full: they are the text the agent reads.
 -->
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
-	import { onMount } from 'svelte';
 	import type { QuestionTools } from '#lib/features/benchmark/tools.ts';
 
 	interface Props {
@@ -14,11 +13,6 @@
 	}
 
 	let { tools, siteName }: Props = $props();
-
-	let hydrated = $state(false);
-	let expanded = $state(false);
-	onMount(() => (hydrated = true));
-	const clamp = $derived(hydrated && !expanded);
 </script>
 
 <section aria-label="WebMCP tools on {siteName}">
@@ -51,7 +45,7 @@
 						>
 					</th>
 					<td class="min-w-0 py-3 pr-4">
-						<p class={['text-pretty whitespace-pre-line text-ink-2', clamp && 'line-clamp-2']}>
+						<p class="text-pretty whitespace-pre-line text-ink-2">
 							{tool.description || '(not registered when the snapshot was taken)'}
 						</p>
 						{#each calls as call, i (i)}
@@ -75,15 +69,4 @@
 			{/each}
 		</tbody>
 	</table>
-
-	{#if hydrated}
-		<button
-			type="button"
-			onclick={() => (expanded = !expanded)}
-			aria-expanded={expanded}
-			class="mt-4 font-mono text-sm font-medium underline decoration-marker decoration-[3px] underline-offset-[5px] hover:decoration-ink"
-		>
-			{expanded ? 'Shorter descriptions' : 'Full descriptions'}
-		</button>
-	{/if}
 </section>
