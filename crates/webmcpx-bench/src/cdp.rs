@@ -309,6 +309,36 @@ impl Page {
         Ok(r["result"]["value"].clone())
     }
 
+    /// Renders `html` at `width`×`height` CSS pixels and returns a PNG. The page loads from a data: URL,
+    /// so nothing is fetched from the network.
+    pub async fn render_png(&self, html: &str, width: u32, height: u32) -> Result<Vec<u8>> {
+        self.send(
+            "Emulation.setDeviceMetricsOverride",
+            json!({ "width": width, "height": height, "deviceScaleFactor": 1, "mobile": false }),
+        )
+        .await?;
+        let frame = self.send("Page.getFrameTree", json!({})).await?["frameTree"]["frame"]["id"]
+            .as_str()
+            .context("no frame id")?
+            .to_owned();
+        self.goto("about:blank").await?;
+        self.send(
+            "Page.setDocumentContent",
+            json!({ "frameId": frame, "html": html }),
+        )
+        .await?;
+        // Fonts are inlined; wait until they are ready so the PNG never shows a fallback face.
+        self.eval("document.fonts.ready.then(() => true)").await?;
+        let shot = self
+            .send(
+                "Page.captureScreenshot",
+                json!({ "format": "png", "clip": { "x": 0, "y": 0, "width": width, "height": height, "scale": 1 } }),
+            )
+            .await?;
+        let data = shot["data"].as_str().context("no screenshot data")?;
+        decode_base64(data)
+    }
+
     /// Closes the page and its browser context.
     pub async fn close(self) -> Result<()> {
         self.conn
@@ -320,6 +350,33 @@ impl Page {
             .await
             .map(drop)
     }
+}
+
+fn decode_base64(s: &str) -> Result<Vec<u8>> {
+    let value = |c: u8| -> Result<u32> {
+        Ok(u32::from(match c {
+            b'A'..=b'Z' => c - b'A',
+            b'a'..=b'z' => c - b'a' + 26,
+            b'0'..=b'9' => c - b'0' + 52,
+            b'+' => 62,
+            b'/' => 63,
+            _ => bail!("invalid base64"),
+        }))
+    };
+    let bytes: Vec<u8> = s
+        .bytes()
+        .filter(|&c| c != b'=' && !c.is_ascii_whitespace())
+        .collect();
+    let mut out = Vec::with_capacity(bytes.len() * 3 / 4);
+    for chunk in bytes.chunks(4) {
+        let mut n = 0u32;
+        for (i, &c) in chunk.iter().enumerate() {
+            n |= value(c)? << (18 - 6 * i);
+        }
+        let take = chunk.len().saturating_sub(1);
+        out.extend_from_slice(&n.to_be_bytes()[1..=take]);
+    }
+    Ok(out)
 }
 
 /// `CHROME_PATH`, then the usual install locations and `PATH`.
@@ -345,4 +402,16 @@ pub fn find_chrome() -> Option<PathBuf> {
     std::env::split_paths(&path)
         .flat_map(|dir| names.iter().map(move |n| dir.join(n)))
         .find(|p| p.is_file())
+}
+
+#[cfg(test)]
+mod base64_tests {
+    use super::decode_base64;
+
+    #[test]
+    fn base64_decodes() {
+        assert_eq!(decode_base64("Zm9vYmFy").unwrap(), b"foobar");
+        assert_eq!(decode_base64("Zm8=").unwrap(), b"fo");
+        assert_eq!(decode_base64("Zg==").unwrap(), b"f");
+    }
 }

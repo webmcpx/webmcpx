@@ -531,6 +531,85 @@ async fn the_snapshot_reads_through_display_contents_wrappers() {
     );
 }
 
+/// Sharing a result: the link's page carries that site's card, the card renders, the badge shows the
+/// verdict, and a repeat scan comes from the cache without counting against the visitor's limit.
+#[tokio::test]
+async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(|| async { axum::response::Html("<title>t</title><p>Hello there</p>") }),
+    ))
+    .await;
+    let root = tempfile::tempdir().unwrap();
+    std::fs::create_dir_all(root.path().join("site/build")).unwrap();
+    std::fs::write(
+        root.path().join("site/build/index.html"),
+        r#"<html><head><meta property="og:image" content="/og.png"></head><body>landing</body></html>"#,
+    )
+    .unwrap();
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
+    let visitors = Arc::new(webmcpx_bench::visitors::Visitors::new(
+        std::time::Duration::from_secs(60),
+        false,
+    ));
+    let addr = server::spawn_with(
+        root.path(),
+        ([127, 0, 0, 1], 0).into(),
+        Some(scanner),
+        Some(visitors),
+    )
+    .await
+    .unwrap();
+    let target = format!("http://{site}/");
+    let api = format!("http://{addr}/api/scan?url={target}");
+    assert_eq!(reqwest::get(&api).await.unwrap().status().as_u16(), 200);
+    // Same visitor, within the minute: served from the cache, not refused.
+    assert_eq!(reqwest::get(&api).await.unwrap().status().as_u16(), 200);
+
+    let page = reqwest::get(format!("http://{addr}/?scan={target}"))
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+    assert!(page.contains("/og/scan.png?url="), "{page}");
+    assert!(
+        page.contains("Not agent-ready yet") && page.contains("landing"),
+        "{page}"
+    );
+
+    let card = reqwest::get(format!("http://{addr}/og/scan.png?url={target}"))
+        .await
+        .unwrap();
+    assert_eq!(card.headers()["content-type"], "image/png");
+    let png = card.bytes().await.unwrap();
+    assert!(
+        png.starts_with(b"\x89PNG") && png.len() > 10_000,
+        "{} bytes",
+        png.len()
+    );
+
+    let host = target.trim_start_matches("http://").trim_end_matches('/');
+    let badge = reqwest::get(format!("http://{addr}/badge/{host}.svg"))
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+    assert!(badge.contains(">not yet</text>"), "{badge}");
+    let unknown = reqwest::get(format!("http://{addr}/badge/never.example.svg"))
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+    assert!(unknown.contains(">scan</text>"));
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

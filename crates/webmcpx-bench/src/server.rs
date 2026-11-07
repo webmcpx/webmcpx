@@ -31,6 +31,8 @@ use crate::visitors::{Refused, Visitors};
 struct ScanState {
     scanner: Arc<Scanner>,
     visitors: Option<Arc<Visitors>>,
+    /// The built site (`site/build`).
+    site: Arc<std::path::PathBuf>,
 }
 
 pub fn router(root: &Path, scanner: Option<Arc<Scanner>>) -> Router {
@@ -44,18 +46,196 @@ pub fn router_with(
     visitors: Option<Arc<Visitors>>,
 ) -> Router {
     let package = root.join("packages/webmcpx");
-    let mut app = Router::new()
+    let site = root.join("site/build");
+    let app = Router::new()
         .nest_service("/sites", ServeDir::new(root.join("bench/sites")))
         .nest_service("/webmcpx/src", ServeDir::new(package.join("src")))
-        .nest_service("/webmcpx/wasm", ServeDir::new(package.join("wasm")))
-        .fallback_service(ServeDir::new(root.join("site/build")));
-    if let Some(scanner) = scanner {
-        app = app.route(
-            "/api/scan",
-            get(scan).with_state(ScanState { scanner, visitors }),
-        );
+        .nest_service("/webmcpx/wasm", ServeDir::new(package.join("wasm")));
+    let Some(scanner) = scanner else {
+        return app.fallback_service(ServeDir::new(site));
+    };
+    let state = ScanState {
+        scanner,
+        visitors,
+        site: Arc::new(site),
+    };
+    let scanning = Router::new()
+        .route("/api/scan", get(scan))
+        .route("/og/scan.png", get(scan_card))
+        .route("/badge/{file}", get(badge))
+        .fallback(page)
+        .with_state(state);
+    app.merge(scanning)
+}
+
+/// A site page. A shared scan link (`/?scan=<url>`, any language) gets that site's preview tags, so a
+/// post shows its scan card; everything else is the prerendered page as is.
+async fn page(
+    State(state): State<ScanState>,
+    headers: HeaderMap,
+    request: axum::extract::Request,
+) -> Response {
+    let scanned = request.uri().query().and_then(|q| {
+        reqwest::Url::parse(&format!("http://x/?{q}"))
+            .ok()?
+            .query_pairs()
+            .find(|(k, _)| k == "scan")
+            .map(|(_, v)| v.into_owned())
+    });
+    let path = request.uri().path().to_owned();
+    if let Some(target) = scanned.filter(|t| !t.is_empty())
+        && path.ends_with('/')
+        && !path.contains("..")
+        && let Ok(html) = tokio::fs::read_to_string(
+            state
+                .site
+                .join(path.trim_start_matches('/'))
+                .join("index.html"),
+        )
+        .await
+    {
+        let origin = origin(&headers);
+        let report = state.scanner.recent(&target);
+        return (
+            [(axum::http::header::CONTENT_TYPE, "text/html; charset=utf-8")],
+            share_page(&html, &origin, &target, report.as_ref()),
+        )
+            .into_response();
     }
-    app
+    match ServeDir::new(state.site.as_ref()).try_call(request).await {
+        Ok(response) => response.into_response(),
+        Err(_) => StatusCode::INTERNAL_SERVER_ERROR.into_response(),
+    }
+}
+
+/// `https://host`, from our proxy's headers (plain `http://` locally).
+fn origin(headers: &HeaderMap) -> String {
+    let host = headers
+        .get(axum::http::header::HOST)
+        .and_then(|h| h.to_str().ok())
+        .unwrap_or("webmcpx.dev");
+    let proto = headers
+        .get("x-forwarded-proto")
+        .and_then(|h| h.to_str().ok())
+        .unwrap_or("http");
+    format!("{proto}://{host}")
+}
+
+fn attr(s: &str) -> String {
+    s.replace('&', "&amp;")
+        .replace('"', "&quot;")
+        .replace('<', "&lt;")
+        .replace('>', "&gt;")
+}
+
+/// The page with its `og:` and `twitter:` tags replaced by ones for the scanned site.
+pub fn share_page(
+    html: &str,
+    origin: &str,
+    target: &str,
+    report: Option<&crate::scan::Report>,
+) -> String {
+    let host = crate::card::host_of(target);
+    let (title, description) = match report {
+        Some(r) => {
+            let s = crate::card::Summary::of(r);
+            let verdict = match r.verdict {
+                crate::scan::Verdict::Ready => "Agent-ready",
+                crate::scan::Verdict::Issues => "Almost agent-ready",
+                crate::scan::Verdict::Missing => "Not agent-ready yet",
+            };
+            (format!("{} · {verdict}", s.host), crate::card::line(s))
+        }
+        None => (
+            format!("Is {host} agent-ready?"),
+            "Scan any site for WebMCP tools: what agents get, and the one line that fixes it."
+                .to_owned(),
+        ),
+    };
+    let encoded: String = reqwest::Url::parse_with_params("http://x/", [("url", target)])
+        .map(|u| u.query().unwrap_or_default().to_owned())
+        .unwrap_or_default();
+    let image = if report.is_some() {
+        format!("{origin}/og/scan.png?{encoded}")
+    } else {
+        format!("{origin}/og.png")
+    };
+    let url = format!("{origin}/?scan={}", encoded.trim_start_matches("url="));
+    let tags = format!(
+        r#"<meta property="og:type" content="website"><meta property="og:site_name" content="webmcpx"><meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{u}"><meta property="og:image" content="{i}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{d}"><meta name="twitter:image" content="{i}">"#,
+        t = attr(&title),
+        d = attr(&description),
+        u = attr(&url),
+        i = attr(&image),
+    );
+    let mut out = strip_social_tags(html);
+    if let Some(at) = out.find("</head>") {
+        out.insert_str(at, &tags);
+    }
+    out
+}
+
+/// Removes `<meta property="og:...">` and `<meta name="twitter:...">` tags.
+fn strip_social_tags(html: &str) -> String {
+    let mut out = String::with_capacity(html.len());
+    let mut rest = html;
+    while let Some(start) = rest.find("<meta ") {
+        let Some(len) = rest[start..].find('>') else {
+            break;
+        };
+        let tag = &rest[start..=start + len];
+        out.push_str(&rest[..start]);
+        if !(tag.contains("property=\"og:") || tag.contains("name=\"twitter:")) {
+            out.push_str(tag);
+        }
+        rest = &rest[start + len + 1..];
+    }
+    out.push_str(rest);
+    out
+}
+
+#[derive(Deserialize)]
+struct CardQuery {
+    url: String,
+}
+
+/// The share card of a site scanned in the last minutes; the generic card otherwise.
+async fn scan_card(State(state): State<ScanState>, Query(q): Query<CardQuery>) -> Response {
+    let Some(report) = state.scanner.recent(&q.url) else {
+        return axum::response::Redirect::temporary("/og.png").into_response();
+    };
+    match state.scanner.card(&report).await {
+        Ok(png) => (
+            [
+                (axum::http::header::CONTENT_TYPE, "image/png"),
+                (axum::http::header::CACHE_CONTROL, "public, max-age=600"),
+            ],
+            png.as_ref().clone(),
+        )
+            .into_response(),
+        Err(_) => axum::response::Redirect::temporary("/og.png").into_response(),
+    }
+}
+
+/// `/badge/<host>.svg`: the site's latest verdict as a README badge ("scan" until it has one).
+async fn badge(
+    State(state): State<ScanState>,
+    axum::extract::Path(file): axum::extract::Path<String>,
+) -> Response {
+    let Some(host) = file
+        .strip_suffix(".svg")
+        .filter(|h| !h.is_empty() && h.len() <= 253)
+    else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    (
+        [
+            (axum::http::header::CONTENT_TYPE, "image/svg+xml"),
+            (axum::http::header::CACHE_CONTROL, "public, max-age=300"),
+        ],
+        crate::card::badge(state.scanner.verdict_for(host)),
+    )
+        .into_response()
 }
 
 #[derive(Deserialize)]
@@ -69,6 +249,10 @@ async fn scan(
     headers: HeaderMap,
     Query(q): Query<ScanQuery>,
 ) -> Response {
+    // A recent report costs nothing: shared links and repeat visits never count against the limit.
+    if let Some(report) = state.scanner.recent(&q.url) {
+        return Json(report).into_response();
+    }
     let _scanning = match &state.visitors {
         None => None,
         Some(visitors) => {
@@ -152,4 +336,27 @@ pub async fn spawn_with(
         .await
     });
     Ok(bound)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn share_pages_replace_the_social_tags_and_escape() {
+        let html = r#"<html><head><meta property="og:image" content="/og.png"><meta name="twitter:card" content="summary"><meta name="description" content="keep"></head><body></body></html>"#;
+        let out = share_page(
+            html,
+            "https://webmcpx.dev",
+            r#"https://a.example/?q="x"&y"#,
+            None,
+        );
+        assert!(!out.contains(r#"content="/og.png""#), "{out}");
+        assert!(out.contains(r#"<meta name="description" content="keep">"#));
+        assert!(out.contains(r#"<meta property="og:image" content="https://webmcpx.dev/og.png">"#));
+        assert!(out.contains("Is a.example agent-ready?"));
+        assert!(out.contains("summary_large_image"));
+        assert!(!out.contains(r#""x""#), "unescaped quotes: {out}");
+        assert_eq!(out.matches("og:image\"").count(), 1);
+    }
 }

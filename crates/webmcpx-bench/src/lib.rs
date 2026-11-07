@@ -4,6 +4,7 @@
 pub mod agent;
 pub mod anthropic;
 pub mod arm;
+pub mod card;
 pub mod cdp;
 pub mod gemini;
 pub mod model;

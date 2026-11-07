@@ -34,6 +34,11 @@ const CACHE_FOR: Duration = Duration::from_mins(10);
 /// Memory the cache may hold (reports as JSON); the oldest go first. Pages control their reports' size
 /// (tool descriptions), so a report bigger than `CACHE_ENTRY_MAX` is never kept.
 const CACHE_BYTES: usize = 64 * 1024 * 1024;
+/// A site's latest verdict feeds its README badge for this long (a few bytes per site).
+const VERDICT_FOR: Duration = Duration::from_hours(24 * 7);
+const VERDICTS_MAX: usize = 50_000;
+/// Share cards kept rendered (about 50 KB each).
+const CARDS_MAX: usize = 200;
 const CACHE_ENTRY_MAX: usize = 256 * 1024;
 /// Whole scan, navigation included.
 const DEADLINE: Duration = Duration::from_secs(45);
@@ -129,6 +134,10 @@ pub struct Scanner {
     cache: std::sync::Mutex<Cache>,
     /// Scans in flight by URL: callers asking for the same URL meanwhile share the one result.
     inflight: Inflight,
+    /// Each site's latest verdict, by host, for its badge.
+    verdicts: std::sync::Mutex<HashMap<String, (Verdict, Instant)>>,
+    /// Rendered share cards, by what they show.
+    cards: std::sync::Mutex<HashMap<String, Arc<Vec<u8>>>>,
 }
 
 /// A browser and the proxy it is locked to; both stop when the last scan using them ends (a remote
@@ -163,6 +172,8 @@ impl Scanner {
             places: Semaphore::new(PARALLEL + MAX_WAITING),
             cache: std::sync::Mutex::default(),
             inflight: std::sync::Mutex::default(),
+            verdicts: std::sync::Mutex::default(),
+            cards: std::sync::Mutex::default(),
         }
     }
 
@@ -226,8 +237,65 @@ impl Scanner {
         lock(&self.cache).get(key)
     }
 
+    /// A report of `raw` from the last few minutes, without scanning: what a shared link shows.
+    pub fn recent(&self, raw: &str) -> Option<Report> {
+        self.cached(parse_url(raw).ok()?.as_str())
+    }
+
+    /// The latest verdict for `host` (without `www.`), if it was scanned this week.
+    pub fn verdict_for(&self, host: &str) -> Option<Verdict> {
+        let host = host
+            .strip_prefix("www.")
+            .unwrap_or(host)
+            .to_ascii_lowercase();
+        let verdicts = lock(&self.verdicts);
+        let (verdict, at) = verdicts.get(&host)?;
+        (at.elapsed() < VERDICT_FOR).then_some(*verdict)
+    }
+
     fn remember(&self, key: String, report: Report) {
+        {
+            let mut verdicts = lock(&self.verdicts);
+            if verdicts.len() >= VERDICTS_MAX {
+                verdicts.retain(|_, (_, at)| at.elapsed() < VERDICT_FOR);
+                if verdicts.len() >= VERDICTS_MAX {
+                    verdicts.clear();
+                }
+            }
+            for url in [report.url.as_str(), report.final_url.as_str()] {
+                let host = crate::card::host_of(url).to_ascii_lowercase();
+                verdicts.insert(host, (report.verdict, Instant::now()));
+            }
+        }
         lock(&self.cache).put(key, report, CACHE_BYTES);
+    }
+
+    /// The share card (1200×630 PNG) for a report, rendered by the scan browser and kept.
+    pub async fn card(&self, report: &Report) -> Result<Arc<Vec<u8>>, ScanError> {
+        let summary = crate::card::Summary::of(report);
+        let key = format!("{summary:?}");
+        if let Some(png) = lock(&self.cards).get(&key) {
+            return Ok(Arc::clone(png));
+        }
+        let _slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire())
+            .await
+            .map_err(|_| ScanError::Busy)?
+            .map_err(|_| ScanError::Busy)?;
+        let browser = self.browser().await.map_err(failed)?;
+        let page = browser.browser.page(&[]).await.map_err(failed)?;
+        let png = tokio::time::timeout(
+            CLOSE_WAIT,
+            page.render_png(&crate::card::html(summary), 1200, 630),
+        )
+        .await;
+        let _ = tokio::time::timeout(CLOSE_WAIT, page.close()).await;
+        let png = Arc::new(png.map_err(|_| ScanError::TimedOut)?.map_err(failed)?);
+        let mut cards = lock(&self.cards);
+        if cards.len() >= CARDS_MAX {
+            cards.clear();
+        }
+        cards.insert(key, Arc::clone(&png));
+        Ok(png)
     }
 
     /// One browser visit, after waiting in line for a slot.
