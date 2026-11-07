@@ -35,7 +35,7 @@ async function mockScan(page: Page, body: object = REPORT, status = 200) {
 test('no axe violations', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await mockScan(page);
-	for (const path of ['/', '/design']) {
+	for (const path of ['/', '/brand']) {
 		await page.goto(path);
 		if (path === '/') {
 			// Include the scan result card in the audit.
@@ -254,4 +254,27 @@ test('the Tools tab shows the site tools, their descriptions and what the agent 
 		'aria-expanded',
 		'true'
 	);
+});
+
+test('the brand page shows the marks, real token values and downloadable assets', async ({
+	page,
+	request
+}) => {
+	await page.goto('/brand');
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Paper, ink and a junction.');
+	// Hex values come from tokens.css; ink on paper is the main pair.
+	await expect(page.getByText(/ink on paper/).first()).toBeVisible();
+	const downloads = page.getByRole('link', { name: /Download .* SVG/ });
+	await expect(downloads).toHaveCount(15);
+	for (const href of await downloads.evaluateAll((as) => as.map((a) => a.getAttribute('href')))) {
+		const res = await request.get(href!);
+		expect(res.status(), href!).toBe(200);
+		expect(await res.text(), href!).not.toMatch(/stroke|Gradient|<text|<image/);
+	}
+	await expect(page.getByRole('link', { name: 'Read TRADEMARK.md' })).toBeVisible();
+});
+
+test('every page carries the trademark notices', async ({ page }) => {
+	await page.goto('/');
+	await expect(page.getByText(/not affiliated with or endorsed by LF Projects/)).toBeVisible();
 });

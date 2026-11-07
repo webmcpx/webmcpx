@@ -1,4 +1,4 @@
-// The color roles defined in `tokens.css`, for the /design page and its test.
+// The color roles defined in `tokens.css`, for the /brand page and its test.
 // Each one is a CSS variable (`--ink-2`) and a Tailwind color (`text-ink-2`, `bg-ink-2`, ...).
 
 export interface ColorToken {
@@ -21,4 +21,25 @@ export const COLORS: ColorToken[] = [
 	{ name: 'bad-soft', use: 'Missing, failed (fill)' },
 	{ name: 'code', use: 'Code block background' },
 	{ name: 'on-code', use: 'Text on code blocks' }
+];
+
+/** [text, background] pairs the components actually use. */
+export const PAIRS: [string, string][] = [
+	['ink', 'paper'],
+	['ink', 'paper-2'],
+	['ink', 'card'],
+	['ink', 'marker'],
+	['ink', 'good-soft'],
+	['ink', 'bad-soft'],
+	['paper', 'ink'],
+	['ink-2', 'paper'],
+	['ink-2', 'card'],
+	['ink-3', 'paper'],
+	['ink-3', 'paper-2'],
+	['ink-3', 'card'],
+	['good', 'paper'],
+	['good', 'card'],
+	['bad', 'paper'],
+	['bad', 'card'],
+	['on-code', 'code']
 ];
