@@ -52,7 +52,7 @@
 	]);
 </script>
 
-<div id="own" class="mx-auto mt-14 max-w-3xl scroll-mt-20 text-left">
+<div id="own" class="mt-14 max-w-3xl scroll-mt-20">
 	<Reveal>
 		<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
 			<span class="font-mono text-base text-ink-3" aria-hidden="true">2</span>{m.title}

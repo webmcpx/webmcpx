@@ -136,7 +136,8 @@ pub fn generic_html() -> String {
 }
 
 /// A published run's preview image (`/og/benchmark-<model>.png`): its best case, the question with the
-/// largest token saving, named as a best case (results are never averaged). None without a comparison.
+/// largest token saving among those solved at least as often with WebMCP, named as a best case (results
+/// are never averaged). None without such a comparison.
 pub fn bench_html(results: &serde_json::Value) -> Option<String> {
     let tasks = results["summary"]["tasks"].as_object()?;
     let (task, ratio) = tasks
@@ -144,7 +145,9 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
         .filter_map(|(id, arms)| {
             let base = arms["baseline"]["tokens"].as_f64()?;
             let with = arms["webmcp"]["tokens"].as_f64()?;
-            (with > 0.0).then_some((id, base / with))
+            // Like the page's showcase: a best case is solved at least as often with WebMCP.
+            let solved = |arm: &str| arms[arm]["success_rate"].as_f64().unwrap_or(0.0);
+            (with > 0.0 && solved("webmcp") >= solved("baseline")).then_some((id, base / with))
         })
         .max_by(|a, b| a.1.total_cmp(&b.1))?;
     let place = results["tasks"][task.as_str()]["url"].as_str().map_or_else(
@@ -215,7 +218,9 @@ mod tests {
             "summary": { "tasks": {
                 "a": { "baseline": { "tokens": 1000.0 }, "webmcp": { "tokens": 500.0 } },
                 "b": { "baseline": { "tokens": 9000.0 }, "webmcp": { "tokens": 100.0 } },
-                "c": { "baseline": { "tokens": 10.0 } }
+                "c": { "baseline": { "tokens": 10.0 } },
+                // Fewer tokens, but solved less often: never a best case.
+                "d": { "baseline": { "tokens": 9000.0, "success_rate": 1.0 }, "webmcp": { "tokens": 10.0, "success_rate": 0.5 } }
             }},
             "tasks": { "b": { "url": "https://www.example.com/docs" } }
         });

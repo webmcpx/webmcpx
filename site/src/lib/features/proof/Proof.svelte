@@ -1,7 +1,7 @@
 <!--
 	The evidence, one model, one site and one question at a time: no averages. The model switcher picks the
-	run; logos pick the site (best case first). The questions rotate through every site in turn, and the
-	selected logo follows, so the logos are the carousel's position (WCAG 2.2.2: a pause button before
+	run; logos pick the site (best case first). The rotation moves from site to site (each by its best
+	question), and the selected logo follows, so the logos are the carousel's position (WCAG 2.2.2: a pause button before
 	them; it holds while hovered, focused or off screen, and never moves for reduced motion). Under them, tabs show that site's questions per metric, its
 	WebMCP tools and the method. All tab panels are in the HTML, so everything reads without JavaScript.
 -->
@@ -10,8 +10,6 @@
 	import Coins from '@lucide/svelte/icons/coins';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Footprints from '@lucide/svelte/icons/footprints';
-	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
-	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Pause from '@lucide/svelte/icons/pause';
 	import Play from '@lucide/svelte/icons/play';
 	import Timer from '@lucide/svelte/icons/timer';
@@ -86,9 +84,8 @@
 	);
 	let detailId = $state('tokens');
 
-	// The carousel: the question shown is its index within the selected site.
-	let step = $state({ site: initial().site, i: 0 });
-	const questionIndex = $derived(step.site === siteId ? step.i : 0);
+	// The carousel: one site at a time, in the selected model's order (best case first), each shown by
+	// its best question; the selected logo is where it is. A site's other questions are in the tabs below.
 	let paused = $state(false);
 	let hovering = $state(false);
 	let focused = $state(false);
@@ -97,35 +94,19 @@
 		!paused && !hovering && !focused && onScreen && !prefersReducedMotion.current && !!current
 	);
 	$effect(() => {
-		if (!running || !current) return;
+		if (!running || !current || current.sites.length < 2) return;
 		const sites = current.sites;
-		if (sites.reduce((n, x) => n + x.tasks.length, 0) < 2) return;
-		void [siteId, questionIndex]; // read here: the clock restarts on every move, so each gets its full time
+		void siteId; // read here: the clock restarts on every move (by hand too), so each site gets its full time
 		const t = setInterval(() => {
 			if (document.hidden) return;
 			const at = Math.max(
 				0,
 				sites.findIndex((x) => x.id === siteId)
 			);
-			const [site, i] =
-				questionIndex + 1 < sites[at].tasks.length
-					? [sites[at], questionIndex + 1]
-					: [sites[(at + 1) % sites.length], 0];
-			siteId = site.id;
-			step = { site: site.id, i };
-		}, 5000);
+			siteId = sites[(at + 1) % sites.length].id;
+		}, 6000);
 		return () => clearInterval(t);
 	});
-	/** A site picked by hand starts at its first question. */
-	function pick(id: string) {
-		siteId = id;
-		step = { site: id, i: 0 };
-	}
-	/** Previous or next question of a site by hand (the only way with reduced motion or focus inside). */
-	function go(site: BenchSite, by: number) {
-		const n = site.tasks.length;
-		step = { site: site.id, i: (Math.min(questionIndex, n - 1) + by + n) % n };
-	}
 	function watch(node: HTMLElement) {
 		const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting));
 		io.observe(node);
@@ -300,7 +281,7 @@
 	>
 		<Tabs
 			{items}
-			bind:value={() => siteId, pick}
+			bind:value={siteId}
 			label={m.site}
 			listClass="-mr-4 gap-2.5 pt-1 pr-4 pb-3 sm:mr-0 sm:flex-wrap sm:pr-0"
 			tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none"
@@ -328,41 +309,27 @@
 					>{/if}
 			{/snippet}
 			{#snippet panel(site, visible)}
-				<!-- The selected logo already names the site: the heading is for screen readers only. -->
-				<h4 class="sr-only">{site.name}</h4>
-				<div class="mt-8 grid sm:mt-10" aria-live={running ? 'off' : 'polite'}>
-					{#key visible ? questionIndex : 0}
-						{@const task = site.tasks[visible ? Math.min(questionIndex, site.tasks.length - 1) : 0]}
-						<div
-							class="col-start-1 row-start-1"
-							in:fade={{ duration: prefersReducedMotion.current ? 0 : 400 }}
-							out:fade={{ duration: prefersReducedMotion.current ? 0 : 200 }}
+				{@const task = site.tasks[0]}
+				<!-- Keyed by visibility: the site fades in when the rotation (or a click) brings it up. -->
+				{#key visible}
+					<div
+						class="mt-8 sm:mt-10"
+						aria-live={running ? 'off' : 'polite'}
+						in:fade={{ duration: prefersReducedMotion.current ? 0 : 400 }}
+					>
+						<!-- The site, named big above its numbers. -->
+						<h4
+							class="mb-4 flex items-center gap-3 font-display text-3xl font-bold tracking-tight sm:text-4xl"
 						>
-							{#if task}{@render question(site, task)}{/if}
-						</div>
-					{/key}
-				</div>
-				{#if site.tasks.length > 1}
-					{@const at = visible ? Math.min(questionIndex, site.tasks.length - 1) : 0}
-					<!-- Where the rotation is within this site, and a way through it by hand. -->
-					<div class="mt-6 flex items-center justify-center gap-3 font-mono text-xs text-ink-3">
-						<button
-							type="button"
-							onclick={() => go(site, -1)}
-							aria-label={m.rotator.previous}
-							class="grid size-8 place-items-center rounded-full border-2 border-ink/20 text-ink-2 transition hover:border-ink hover:text-ink"
-							><ChevronLeft size={14} aria-hidden="true" /></button
-						>
-						<span class="tabular-nums">{i18n.number(at + 1)} / {i18n.number(site.tasks.length)}</span>
-						<button
-							type="button"
-							onclick={() => go(site, 1)}
-							aria-label={m.rotator.next}
-							class="grid size-8 place-items-center rounded-full border-2 border-ink/20 text-ink-2 transition hover:border-ink hover:text-ink"
-							><ChevronRight size={14} aria-hidden="true" /></button
-						>
+							{#if site.logo}<SiteLogo logo={site.logo} size={32} />{/if}
+							{#if !site.logo?.wordmark}{site.name}{:else}<span class="sr-only">{site.name}</span>{/if}
+							{#if !site.live}<span class="font-mono text-xs font-normal tracking-wider text-ink-3 uppercase"
+									>{m.local}</span
+								>{/if}
+						</h4>
+						{#if task}{@render question(site, task)}{/if}
 					</div>
-				{/if}
+				{/key}
 				{@const siteQuestions = questions.filter((q) => q.site.id === site.id)}
 				{@const st = siteTools(site.tasks.map((t) => tools[t.task]).filter(Boolean))}
 				<Tabs

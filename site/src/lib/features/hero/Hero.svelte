@@ -8,10 +8,17 @@
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import ScanForm from '#lib/features/scan/ScanForm.svelte';
 	import ScanResult from '#lib/features/scan/ScanResult.svelte';
+	import { ratio } from '#lib/features/benchmark/bench.ts';
 	import { scanner } from '#lib/features/scan/scanner.svelte.ts';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
 
+	interface Props {
+		/** The leaderboard's best-case saving (a ratio), quoted in the lead; null: no run published. */
+		best: number | null;
+	}
+
+	let { best }: Props = $props();
 	const i18n = useI18n();
 	const m = $derived(i18n.m.hero);
 	// Three sites that ship WebMCP, then ours: scanning the scanner's own site had better say agent-ready.
@@ -47,7 +54,7 @@
 			</Reveal>
 			<Reveal delay={120}>
 				<p class="mx-auto mt-7 max-w-xl text-lg text-pretty text-ink-2 sm:text-xl">
-					{m.lead}
+					{best ? fmt(m.lead, { best: ratio(best) }) : m.leadPlain}
 				</p>
 			</Reveal>
 			<Reveal delay={180} class="mt-8">

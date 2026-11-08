@@ -47,8 +47,8 @@
 		// In page order; then the two audiences: people who run a site, people who use an agent.
 		{ label: m.links.why, href: `${home}#why`, icon: Lightbulb, section: 'why' },
 		{ label: m.links.proof, href: `${home}#leaderboard`, icon: ChartColumn, section: 'leaderboard' },
-		{ label: m.links.sites, href: `${home}#for-sites`, icon: AppWindow, section: 'for-sites' },
 		{ label: m.links.agents, href: `${home}#for-agents`, icon: Bot, section: 'for-agents' },
+		{ label: m.links.sites, href: `${home}#for-sites`, icon: AppWindow, section: 'for-sites' },
 		{ label: m.links.vsMcp, href: `${home}#vs-mcp`, icon: Scale, section: 'vs-mcp' },
 		{ label: m.links.issues, href: `${home}#issues`, icon: CircleDot, section: 'issues' },
 		{ label: m.links.docs, href: `${REPO}#readme`, icon: BookOpen }

@@ -32,9 +32,11 @@
 		code: Record<SnippetId, Highlighted>;
 		/** Each model's whole-run token saving (null: no run published, and the number is left out). */
 		saving: TokenSaving | null;
+		/** The leaderboard's best case (one question, on one site and model): the big number. */
+		best: { saving: number; site: string; model: string } | null;
 	}
 
-	let { code, saving }: Props = $props();
+	let { code, saving, best }: Props = $props();
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.agents);
@@ -105,37 +107,40 @@
 	]);
 </script>
 
-<Section id="for-agents" title={m.title} lead={m.lead} center>
+<Section id="for-agents" title={m.title} lead={m.lead}>
 	{#if saving}
-		<Reveal class="-mt-2 mb-10 text-center">
+		<Reveal class="-mt-2 mb-10">
 			<a href="#leaderboard" class="inline-block font-display font-bold text-ink">
 				<span class="align-middle text-2xl sm:text-3xl">{m.hype.up}</span>
 				<span
 					class="px-1 text-7xl leading-none tracking-tight sm:text-8xl"
 					style="background: linear-gradient(transparent 62%, var(--color-marker) 62%)"
-					>{ratio(saving.high)}</span
+					>{ratio(best?.saving ?? saving.high)}</span
 				>
 				<span class="align-middle text-2xl sm:text-3xl">{m.hype.fewer}</span>
 			</a>
-			<p class="mx-auto mt-4 max-w-xl text-pretty text-ink-2">
+			{#if best}<p class="mt-3 font-mono text-xs tracking-wider text-ink-3 uppercase">
+					{fmt(m.hype.bestCase, { site: best.site, model: best.model })}
+				</p>{/if}
+			<p class="mt-4 max-w-xl text-pretty text-ink-2">
 				<span class="font-medium text-ink">{m.hype.same}</span>
 				<a
 					href="#leaderboard"
 					class="underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink">{range}</a
 				>
 			</p>
-			{#if losses}<p class="mx-auto mt-1 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
+			{#if losses}<p class="mt-1 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
 		</Reveal>
 	{/if}
-	<Reveal class="mx-auto mb-8 max-w-3xl">
-		<p class="text-center font-mono text-xs tracking-wider text-ink-3 uppercase">{m.worksWith}</p>
-		<ul class="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-3 text-sm text-ink-2">
+	<Reveal class="mb-8 max-w-3xl">
+		<p class="font-mono text-xs tracking-wider text-ink-3 uppercase">{m.worksWith}</p>
+		<ul class="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm text-ink-2">
 			{#each WORKS as w (w.name)}
 				<li class="inline-flex items-center gap-1.5"><SiteLogo logo={w.logo} size={16} />{w.name}</li>
 			{/each}
 		</ul>
 	</Reveal>
-	<Reveal class="mx-auto max-w-3xl text-left">
+	<Reveal class="max-w-3xl">
 		<CodeTabs label={m.title} {tabs} />
 	</Reveal>
 </Section>

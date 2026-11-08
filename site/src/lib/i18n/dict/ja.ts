@@ -18,9 +18,11 @@ const ja: Messages = {
 			description: '各判定の意味、スキャンの流れ、判定が違うと思ったときの連絡先。'
 		},
 		home: {
-			title: 'webmcpx：あなたのサイトはエージェント対応？',
+			title: 'webmcpx：すべてのサイトとエージェントに WebMCP を',
 			description:
-				'あらゆるサイトの WebMCP ツールをスキャン。script タグ 1 つでエージェント対応に。再現可能なベンチマーク、オープンソース。'
+				'あらゆるサイトの WebMCP ツールをスキャン。1 行で自分のサイトをエージェント対応にし、Claude Code や Codex にどのサイトでも WebMCP を。トークンは最大 {best} 削減。オープンソース。',
+			descriptionPlain:
+				'あらゆるサイトの WebMCP ツールをスキャン。1 行で自分のサイトをエージェント対応にし、Claude Code や Codex にどのサイトでも WebMCP を。オープンソース。'
 		},
 		brand: {
 			title: 'ブランドとデザインシステム · webmcpx',
@@ -77,7 +79,10 @@ const ja: Messages = {
 		stamp: '最新',
 		draft: '{date} 版の WebMCP ドラフトに追従',
 		title: { text: 'そのサイトを、{mark}に。', mark: 'エージェント対応' },
-		lead: 'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',
+		lead: 'Claude Code、Codexなどのエージェントは、WebMCP対応サイトでトークンを最大{best}削減。あなたのサイトでエージェントが何を得るかを確認し、1行で改善しましょう。',
+		// Without a published run (no number to quote).
+		leadPlain:
+			'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',
 		try: 'お試し：{sites}',
 		entry: { question: 'サイトはなく、エージェントだけ使う？', agent: 'エージェントを設定' }
 	},
@@ -192,8 +197,6 @@ const ja: Messages = {
 		opens: '（{site} を開きます）',
 		rotator: {
 			label: '質問',
-			previous: '前の質問',
-			next: '次の質問',
 			pause: '自動切り替えを一時停止',
 			resume: '自動切り替えを再開'
 		},
@@ -334,7 +337,7 @@ const ja: Messages = {
 
 	agents: {
 		title: 'あなたのエージェントに',
-		lead: 'Claude Code と Codex に入れておくべき MCP。どのサイトでも同じ答えを、ごく一部のトークンで。',
+		lead: 'どのサイトでも動作。計測したサイトでは、同じ回答をわずかなトークンで。Claude CodeとCodexのすべての環境に入れるべきMCPです。',
 		saving: {
 			range: { other: 'リーダーボードの全 {n} モデルで、トークンを {low}〜{high} 削減。' },
 			best: 'リーダーボードで、トークンを最大 {high} 削減。',
@@ -353,7 +356,12 @@ const ja: Messages = {
 				text: 'Playwright、Selenium、Puppeteer、browser-use、CDP。Chrome、Firefox、Safari：ページ内で {api} を呼ぶだけ。webmcpx を入れたサイトならどこでも使えます。'
 			}
 		},
-		hype: { up: '最大', fewer: 'トークン削減', same: '答えは同じ。' },
+		hype: {
+			up: '最大',
+			fewer: 'トークン削減',
+			same: '答えは同じ。',
+			bestCase: '最良ケース：{site}、{model}'
+		},
 		worksWith: '対応',
 		tabs: { scripts: 'スクリプト' },
 		notes: {
@@ -407,7 +415,7 @@ const ja: Messages = {
 
 	issues: {
 		kicker: '仕様トラッカーから',
-		title: 'コミュニティが求めたもの。実装済み。',
+		title: 'webmcpxが対応済みのspecへの要望。',
 		items: {
 			shared: {
 				title: '共通ツール',
@@ -436,6 +444,33 @@ const ja: Messages = {
 			budget: {
 				title: 'ツール数の上限',
 				fix: 'webmcpx lint は、1 ページあたり 20 ツールを超えると警告、100 を超えるとエラーにします（ドラフトではなく当プロジェクトの方針です）。'
+			}
+		}
+	},
+
+	faq: {
+		kicker: 'FAQ',
+		title: 'WebMCP のよくある質問',
+		items: {
+			what: {
+				q: 'WebMCP とは？',
+				a: 'W3C の Web Machine Learning Community Group で策定中のブラウザ API です。ページが document.modelContext.registerTool() でツールを登録し、AI エージェントはスクリーンショットやページの HTML を読む代わりに、そのツールを呼び出します。ツールはユーザー自身のタブで動作します。'
+			},
+			site: {
+				q: 'サイトをエージェント対応にするには？',
+				a: 'webmcpx の script タグを追加するだけで、すべてのページに標準ツール（検索、読み取り、ページのコンテキスト）が入ります。ほかのコードは不要です。そのうえで、検索やカートへの追加といった独自のアクションを tool() で登録しましょう。確認は、ここでサイトをスキャンするだけです。'
+			},
+			agent: {
+				q: 'Claude Code や Codex から WebMCP を使うには？',
+				a: 'claude mcp add webmcpx -- npx -y webmcpx mcp を実行します（Codex なら codex mcp add webmcpx -- npx -y webmcpx mcp）。以後エージェントは自前の Chromium でページを開き、どのサイトでも各ページの WebMCP ツールと標準ツールを使えます。'
+			},
+			browsers: {
+				q: 'Firefox や Safari でも動きますか？',
+				a: 'はい。ブラウザ自体に WebMCP がない場合は、webmcpx が HTTPS ページで W3C の WebMCP ポリフィルを読み込みます。Chrome、Firefox、Safari のどれでも同じツールが見えます。'
+			},
+			mcp: {
+				q: 'WebMCP と MCP は同じもの？',
+				a: 'いいえ。WebMCP は MCP のツールモデルを借りていますが、MCP プロトコルではなくブラウザ API です。ツールはページの中にあり、ユーザーのタブで動作します。両者は補い合う関係で、webmcpx の MCP サーバーがその 2 つをつなぎます。'
 			}
 		}
 	},

@@ -8,6 +8,8 @@
 	import Meta from '#lib/components/layout/Meta.svelte';
 	import Divider from '#lib/components/ui/Divider.svelte';
 	import Agents from '#lib/features/agents/Agents.svelte';
+	import Faq from '#lib/features/faq/Faq.svelte';
+	import { homeJsonLd, jsonForScript } from '#lib/features/faq/jsonld.ts';
 	import Fix from '#lib/features/fix/Fix.svelte';
 	import Hero from '#lib/features/hero/Hero.svelte';
 	import Issues from '#lib/features/issues/Issues.svelte';
@@ -15,16 +17,30 @@
 	import Versus from '#lib/features/versus/Versus.svelte';
 	import Why from '#lib/features/why/Why.svelte';
 	import Proof from '#lib/features/proof/Proof.svelte';
-	import { useI18n } from '#lib/i18n/index.svelte.ts';
+	import { ratio } from '#lib/features/benchmark/bench.ts';
+	import { locale } from '#lib/i18n/locales.ts';
+	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import type { PageProps } from './$types';
 
 	let { data: page }: PageProps = $props();
 	const i18n = useI18n();
+	const home = $derived(i18n.m.meta.home);
+	const description = $derived(
+		page.best ? fmt(home.description, { best: ratio(page.best.saving) }) : home.descriptionPlain
+	);
+	const ld = $derived(jsonForScript(homeJsonLd(i18n.m.faq, description, locale(i18n.code).tag)));
+	// Built here: a closing script tag can't be written literally inside this script block.
+	const ldTag = $derived(`<script type="application/ld+json">${ld}<${'/'}script>`);
 </script>
 
-<Meta title={i18n.m.meta.home.title} description={i18n.m.meta.home.description} />
+<Meta title={home.title} {description} />
+<svelte:head>
+	<!-- Our own JSON, with < escaped (jsonForScript). -->
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+	{@html ldTag}
+</svelte:head>
 
-<Hero />
+<Hero best={page.best?.saving ?? null} />
 <LogoWall />
 {#if page.best}
 	<Divider />
@@ -33,10 +49,12 @@
 <Divider />
 <Proof runs={page.runs} reproduce={page.code.reproduce} />
 <Divider />
-<Fix code={page.code} own={page.own} />
+<Agents code={page.code} saving={page.saving} best={page.best} />
 <Divider />
-<Agents code={page.code} saving={page.saving} />
+<Fix code={page.code} own={page.own} />
 <Divider />
 <Versus />
 <Divider />
 <Issues />
+<Divider />
+<Faq />

@@ -21,9 +21,11 @@ const zh: Messages = {
 			description: '每种扫描判定的含义、扫描如何进行，以及判定有误时去哪里反馈。'
 		},
 		home: {
-			title: 'webmcpx：你的网站智能体就绪了吗？',
+			title: 'webmcpx：让每个网站、每个智能体都用上 WebMCP',
 			description:
-				'扫描任意网站的 WebMCP 工具。一个 script 标签，让网站智能体就绪。基准测试可复现，代码开源。'
+				'扫描任意网站的 WebMCP 工具，一行代码让你的网站智能体就绪，让 Claude Code 或 Codex 在任何网站上都能用 WebMCP：token 最多减少 {best}。代码开源。',
+			descriptionPlain:
+				'扫描任意网站的 WebMCP 工具，一行代码让你的网站智能体就绪，让 Claude Code 或 Codex 在任何网站上都能用 WebMCP。代码开源。'
 		},
 		brand: {
 			title: '品牌与设计系统 · webmcpx',
@@ -80,7 +82,9 @@ const zh: Messages = {
 		draft: '已跟进 {date} 版 WebMCP 草案',
 		// \u200b: where the headline may break (headings only break at punctuation and these).
 		title: { text: '让你的网站\u200b{mark}。', mark: '智能体就绪' },
-		lead: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
+		lead: 'Claude Code、Codex 等智能体在支持 WebMCP 的网站上最多可少用 {best} 的 token。看看智能体能从你的网站拿到什么，然后一行代码搞定。',
+		// Without a published run (no number to quote).
+		leadPlain: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
 		try: '试试 {sites}',
 		entry: { question: '没有网站，只用智能体？', agent: '配置你的智能体' }
 	},
@@ -195,8 +199,6 @@ const zh: Messages = {
 		opens: '（打开 {site}）',
 		rotator: {
 			label: '问题',
-			previous: '上一个问题',
-			next: '下一个问题',
 			pause: '暂停轮播',
 			resume: '继续轮播'
 		},
@@ -332,7 +334,7 @@ const zh: Messages = {
 
 	agents: {
 		title: '给你的智能体',
-		lead: '每个 Claude Code 和 Codex 都该装的 MCP：在任何网站得到同样的答案，只用一小部分 token。',
+		lead: '适用于任何网站。在我们测量的网站上：答案相同，token 只需一小部分。每个 Claude Code 和 Codex 环境都该装的 MCP。',
 		saving: {
 			range: { other: '排行榜全部 {n} 个模型，token 减少 {low} 到 {high}。' },
 			best: '排行榜上，token 最多减少 {high}。',
@@ -349,7 +351,7 @@ const zh: Messages = {
 				text: 'Playwright、Selenium、Puppeteer、browser-use、CDP；Chrome、Firefox、Safari：在页面里调用 {api}。装了 webmcpx 的网站都有它。'
 			}
 		},
-		hype: { up: '最多', fewer: '更少 token', same: '答案相同。' },
+		hype: { up: '最多', fewer: '更少 token', same: '答案相同。', bestCase: '最佳案例：{site}，{model}' },
 		worksWith: '适用于',
 		tabs: { scripts: '脚本' },
 		notes: {
@@ -398,7 +400,7 @@ const zh: Messages = {
 
 	issues: {
 		kicker: '来自规范议题区',
-		title: '社区提过的需求，已经实现。',
+		title: 'webmcpx 已经解决的规范诉求。',
 		items: {
 			shared: {
 				title: '共享工具',
@@ -427,6 +429,33 @@ const zh: Messages = {
 			budget: {
 				title: '工具数量上限',
 				fix: 'webmcpx lint 在单页超过 20 个工具时警告，超过 100 个时报错（这是我们的规则，不是草案的）。'
+			}
+		}
+	},
+
+	faq: {
+		kicker: 'FAQ',
+		title: '关于 WebMCP 的常见问题',
+		items: {
+			what: {
+				q: '什么是 WebMCP？',
+				a: '一种浏览器 API，由 W3C Web Machine Learning 社区组起草：页面用 document.modelContext.registerTool() 注册工具，AI 智能体直接调用这些工具，不必再读截图或页面 HTML。工具在用户自己的标签页中运行。'
+			},
+			site: {
+				q: '怎样让我的网站智能体就绪？',
+				a: '加上 webmcpx 的 script 标签：每个页面都会获得标准工具（搜索、读取、页面上下文），无需再写其他代码。然后用 tool() 注册你自己的操作，比如搜索或加入购物车。在这里扫描你的网站，就能检查效果。'
+			},
+			agent: {
+				q: '怎样在 Claude Code 或 Codex 中使用 WebMCP？',
+				a: '运行 claude mcp add webmcpx -- npx -y webmcpx mcp（Codex 用 codex mcp add webmcpx -- npx -y webmcpx mcp）。之后智能体会在自己的 Chromium 中打开页面，在任何网站上都能拿到每个页面的 WebMCP 工具和标准工具。'
+			},
+			browsers: {
+				q: '能在 Firefox 和 Safari 中用吗？',
+				a: '能。浏览器本身没有 WebMCP 时，webmcpx 会在 HTTPS 页面上加载 W3C 的 WebMCP polyfill。Chrome、Firefox 和 Safari 看到的都是同一套工具。'
+			},
+			mcp: {
+				q: 'WebMCP 和 MCP 是一回事吗？',
+				a: '不是。WebMCP 借用了 MCP 的工具模型，但它是浏览器 API，不是 MCP 协议：工具存在于页面中，在用户的标签页里运行。两者互为补充，webmcpx 的 MCP 服务器把它们连接起来。'
 			}
 		}
 	},

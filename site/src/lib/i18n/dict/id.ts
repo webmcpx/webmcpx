@@ -20,9 +20,11 @@ const id: Messages = {
 				'Arti tiap verdik pemindaian, cara pemindaian berjalan, dan tempat melapor jika verdik salah.'
 		},
 		home: {
-			title: 'webmcpx: apakah situs Anda sudah siap agent?',
+			title: 'webmcpx: WebMCP untuk setiap situs dan setiap agen',
 			description:
-				'Scan situs mana pun untuk menemukan tool WebMCP. Satu tag script membuatnya siap agent. Benchmark yang bisa direproduksi, open source.'
+				'Scan situs mana pun untuk tool WebMCP, buat situs Anda siap agent dengan satu baris, beri Claude Code atau Codex WebMCP: hingga {best} lebih sedikit token.',
+			descriptionPlain:
+				'Scan situs mana pun untuk tool WebMCP, jadikan situs Anda siap agent dengan satu baris, dan beri Claude Code atau Codex WebMCP di setiap situs. Open source.'
 		},
 		brand: {
 			title: 'Merek dan sistem desain · webmcpx',
@@ -79,7 +81,10 @@ const id: Messages = {
 		stamp: 'Baru',
 		draft: 'Mengikuti draf WebMCP per {date}',
 		title: { text: 'Jadikan situs Anda {mark}.', mark: 'siap agent' },
-		lead: 'Agent AI sudah membaca halaman Anda. Lihat apa yang mereka dapat, lalu beri mereka tool sungguhan dengan satu baris.',
+		lead: 'Claude Code, Codex, dan agen lain memakai hingga {best} lebih sedikit token di situs dengan WebMCP. Lihat apa yang didapat agen dari situs Anda, lalu perbaiki dengan satu baris.',
+		// Without a published run (no number to quote).
+		leadPlain:
+			'Agent AI sudah membaca halaman Anda. Lihat apa yang mereka dapat, lalu beri mereka tool sungguhan dengan satu baris.',
 		try: 'Coba {sites}',
 		entry: { question: 'Tidak punya situs, hanya pakai agen?', agent: 'Siapkan agen Anda' }
 	},
@@ -194,8 +199,6 @@ const id: Messages = {
 		opens: '(membuka {site})',
 		rotator: {
 			label: 'Pertanyaan',
-			previous: 'Pertanyaan sebelumnya',
-			next: 'Pertanyaan berikutnya',
 			pause: 'Jeda rotasi',
 			resume: 'Lanjutkan rotasi'
 		},
@@ -340,7 +343,7 @@ const id: Messages = {
 
 	agents: {
 		title: 'Untuk agen Anda',
-		lead: 'MCP yang wajib ada di setiap setup Claude Code dan Codex: jawaban yang sama di setiap situs, dengan sebagian kecil token.',
+		lead: 'Bekerja di situs mana pun. Di situs yang kami ukur: jawaban yang sama, dengan sebagian kecil token. MCP yang wajib ada di setiap setup Claude Code dan Codex.',
 		saving: {
 			range: { other: '{low} hingga {high} lebih sedikit token di semua {n} model peringkat.' },
 			best: 'Hingga {high} lebih sedikit token di peringkat.',
@@ -360,7 +363,12 @@ const id: Messages = {
 				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: panggil {api} di halaman. Setiap situs dengan webmcpx memilikinya.'
 			}
 		},
-		hype: { up: 'Hingga', fewer: 'lebih sedikit token', same: 'Jawaban yang sama.' },
+		hype: {
+			up: 'Hingga',
+			fewer: 'lebih sedikit token',
+			same: 'Jawaban yang sama.',
+			bestCase: 'Kasus terbaik: {site}, {model}'
+		},
 		worksWith: 'Bekerja dengan',
 		tabs: { scripts: 'Skrip' },
 		notes: {
@@ -414,7 +422,7 @@ const id: Messages = {
 
 	issues: {
 		kicker: 'Dari tracker spesifikasi',
-		title: 'Yang diminta komunitas. Sudah dirilis.',
+		title: 'Permintaan spec yang sudah ditangani webmcpx.',
 		items: {
 			shared: {
 				title: 'Tool bersama',
@@ -443,6 +451,33 @@ const id: Messages = {
 			budget: {
 				title: 'Batas jumlah tool',
 				fix: 'webmcpx lint memberi peringatan di atas 20 tool per halaman dan error di atas 100 (kebijakan kami, bukan dari draf).'
+			}
+		}
+	},
+
+	faq: {
+		kicker: 'FAQ',
+		title: 'Pertanyaan seputar WebMCP',
+		items: {
+			what: {
+				q: 'Apa itu WebMCP?',
+				a: 'API browser yang drafnya disusun di W3C Web Machine Learning Community Group: halaman mendaftarkan tool dengan document.modelContext.registerTool(), lalu agen AI memanggilnya alih-alih membaca screenshot atau HTML halaman. Tool berjalan di tab milik pengguna sendiri.'
+			},
+			site: {
+				q: 'Bagaimana membuat situs saya siap agent?',
+				a: 'Tambahkan tag script webmcpx: setiap halaman langsung mendapat tool standar (pencarian, membaca, konteks halaman) tanpa kode lain. Lalu daftarkan aksi Anda sendiri, seperti pencarian atau tambah ke keranjang, dengan tool(). Scan situs Anda di sini untuk mengeceknya.'
+			},
+			agent: {
+				q: 'Bagaimana memakai WebMCP dari Claude Code atau Codex?',
+				a: 'Jalankan claude mcp add webmcpx -- npx -y webmcpx mcp (Codex: codex mcp add webmcpx -- npx -y webmcpx mcp). Setelah itu agen Anda membuka halaman di Chromium-nya sendiri dan mendapat tool WebMCP setiap halaman plus tool standar, di situs mana pun.'
+			},
+			browsers: {
+				q: 'Apakah bisa di Firefox dan Safari?',
+				a: 'Bisa. Jika browser belum punya WebMCP sendiri, webmcpx memuat polyfill WebMCP dari W3C di halaman HTTPS. Chrome, Firefox, dan Safari melihat tool yang sama.'
+			},
+			mcp: {
+				q: 'Apakah WebMCP sama dengan MCP?',
+				a: 'Tidak. WebMCP meminjam model tool dari MCP, tetapi ia adalah API browser, bukan protokol MCP: tool-nya ada di halaman dan berjalan di tab pengguna. Keduanya saling melengkapi, dan server MCP webmcpx menghubungkan keduanya.'
 			}
 		}
 	},

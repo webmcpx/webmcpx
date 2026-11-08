@@ -20,9 +20,11 @@ const ptBr: Messages = {
 				'O que cada veredito do scan significa, como um scan roda e onde dizer que um veredito está errado.'
 		},
 		home: {
-			title: 'webmcpx: seu site está pronto para agentes?',
+			title: 'webmcpx: WebMCP para todo site e todo agente',
 			description:
-				'Verifique se qualquer site tem ferramentas WebMCP. Uma tag script deixa o seu pronto para agentes. Benchmark reproduzível, open source.'
+				'Ache ferramentas WebMCP em qualquer site, deixe o seu pronto para agentes em uma linha e dê WebMCP ao Claude Code ou Codex: até {best} menos tokens. Open source.',
+			descriptionPlain:
+				'Escaneie qualquer site atrás de ferramentas WebMCP, deixe o seu pronto para agentes com uma linha e dê WebMCP ao Claude Code ou Codex em todo site. Open source.'
 		},
 		brand: {
 			title: 'Marca e design system · webmcpx',
@@ -79,7 +81,10 @@ const ptBr: Messages = {
 		stamp: 'Novo',
 		draft: 'Acompanha o rascunho do WebMCP de {date}',
 		title: { text: 'Deixe seu site {mark}.', mark: 'pronto para agentes' },
-		lead: 'Agentes de IA já leem suas páginas. Veja o que eles recebem e entregue ferramentas de verdade com uma linha.',
+		lead: 'Claude Code, Codex e outros agentes gastam até {best} menos tokens em sites com WebMCP. Veja o que os agentes recebem do seu, e resolva com uma linha.',
+		// Without a published run (no number to quote).
+		leadPlain:
+			'Agentes de IA já leem suas páginas. Veja o que eles recebem e entregue ferramentas de verdade com uma linha.',
 		try: 'Experimente {sites}',
 		entry: { question: 'Não tem site, só usa agentes?', agent: 'Configure seu agente' }
 	},
@@ -195,8 +200,6 @@ const ptBr: Messages = {
 		opens: '(abre {site})',
 		rotator: {
 			label: 'Perguntas',
-			previous: 'Pergunta anterior',
-			next: 'Próxima pergunta',
 			pause: 'Pausar rotação',
 			resume: 'Retomar rotação'
 		},
@@ -347,7 +350,7 @@ const ptBr: Messages = {
 
 	agents: {
 		title: 'Para o seu agente',
-		lead: 'O MCP que todo setup de Claude Code e Codex deveria ter: as mesmas respostas em qualquer site, com uma fração dos tokens.',
+		lead: 'Funciona em qualquer site. Nos sites que medimos: as mesmas respostas, com uma fração dos tokens. O MCP que todo setup de Claude Code e Codex deveria ter.',
 		saving: {
 			range: { other: 'De {low} a {high} menos tokens nos {n} modelos do leaderboard.' },
 			best: 'Até {high} menos tokens no leaderboard.',
@@ -366,7 +369,12 @@ const ptBr: Messages = {
 				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: chame {api} na página. Todo site com webmcpx tem.'
 			}
 		},
-		hype: { up: 'Até', fewer: 'menos tokens', same: 'As mesmas respostas.' },
+		hype: {
+			up: 'Até',
+			fewer: 'menos tokens',
+			same: 'As mesmas respostas.',
+			bestCase: 'Melhor caso: {site}, {model}'
+		},
 		worksWith: 'Funciona com',
 		tabs: { scripts: 'Scripts' },
 		notes: {
@@ -419,7 +427,7 @@ const ptBr: Messages = {
 
 	issues: {
 		kicker: 'Das issues da spec',
-		title: 'O que a comunidade pediu. Feito.',
+		title: 'Pedidos da spec que o webmcpx já resolve.',
 		items: {
 			shared: {
 				title: 'Ferramentas compartilhadas',
@@ -448,6 +456,33 @@ const ptBr: Messages = {
 			budget: {
 				title: 'Limite de ferramentas',
 				fix: 'O webmcpx lint avisa acima de 20 ferramentas por página e dá erro acima de 100 (regra nossa, não do rascunho).'
+			}
+		}
+	},
+
+	faq: {
+		kicker: 'FAQ',
+		title: 'Perguntas sobre WebMCP',
+		items: {
+			what: {
+				q: 'O que é WebMCP?',
+				a: 'Uma API de navegador, em rascunho no W3C Web Machine Learning Community Group: a página registra ferramentas com document.modelContext.registerTool(), e o agente de IA chama essas ferramentas em vez de ler screenshots ou o HTML da página. Tudo roda na própria aba do usuário.'
+			},
+			site: {
+				q: 'Como deixo meu site pronto para agentes?',
+				a: 'Adicione a tag script do webmcpx: toda página ganha ferramentas padrão (busca, leitura, contexto da página) sem mais nenhum código. Depois registre suas próprias ações, como buscar ou adicionar ao carrinho, com tool(). Escaneie seu site aqui para conferir.'
+			},
+			agent: {
+				q: 'Como uso WebMCP no Claude Code ou no Codex?',
+				a: 'Rode claude mcp add webmcpx -- npx -y webmcpx mcp (no Codex: codex mcp add webmcpx -- npx -y webmcpx mcp). Aí seu agente abre as páginas no próprio Chromium e recebe as ferramentas WebMCP de cada página, mais as padrão, em qualquer site.'
+			},
+			browsers: {
+				q: 'Funciona no Firefox e no Safari?',
+				a: 'Sim. Quando o navegador não tem WebMCP próprio, o webmcpx carrega o polyfill WebMCP do W3C, em páginas HTTPS. Chrome, Firefox e Safari enxergam as mesmas ferramentas.'
+			},
+			mcp: {
+				q: 'WebMCP é a mesma coisa que MCP?',
+				a: 'Não. O WebMCP pega emprestado o modelo de ferramentas do MCP, mas é uma API de navegador, não o protocolo MCP: as ferramentas vivem na página e rodam na aba do usuário. Um complementa o outro, e o servidor MCP do webmcpx conecta os dois.'
 			}
 		}
 	},

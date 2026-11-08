@@ -15,15 +15,17 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 Scan your site (hero: the scan is its one action; under it, a quiet link for people with no site: "Set up your agent") → sites already on
 WebMCP (logos, each one scans live) → why WebMCP (four pains it removes, each backed by the draft or the
 benchmark; the saving is computed) → proof (`#leaderboard`: pick a site by logo; biggest savings first) →
-then one section per audience, each standing on its own (nobody has to do both):
+then one section per audience, each standing on its own (nobody has to do both), agents first (it works on
+any site today, one command, the larger audience; their use is what pulls sites in):
 
+- For agents (`#for-agents`, `features/agents`; no site or scan needed): the big number is the leaderboard's
+  best case (one question; computed in `+page.server.ts`, named with its site and model), the whole-run
+  range across models under it (`tokenSaving()`), then the setup tabs (prompt first).
 - For sites (`#for-sites`, `features/fix`, where a scan's "Fix it" lands): install tabs (coding agent,
   HTML, npm), then your own tools (`#own`: `tool()`, forms, React/Vue/Svelte as tabs).
-- For agents (`#for-agents`, `features/agents`; no site or scan needed): the whole-run token saving across
-  models (`tokenSaving()`, computed from the published runs, left out when none is), one prompt with
-  Copy, then the two ways as small print: MCP, or `document.modelContext` from any browser automation.
 
-Then WebMCP vs MCP → what the community asked for → the footer (giant lockup, every link with its icon,
+Then WebMCP vs MCP → what the community asked for → FAQ (`features/faq`: plain-text answers, also published as
+FAQPage and SoftwareApplication JSON-LD) → the footer (giant lockup, every link with its icon,
 notices). The header and footer menus name both audiences ("For sites", "For agents"), in page order.
 Tabs list "Agent" (the coding agent) first, always, then the most used options; the first opens by default
 (`CodeTabs`, built on `Tabs`). The agent section is one prompt, not a list of clients.
@@ -67,6 +69,9 @@ tests/                       Playwright e2e against the prerendered build
   standard or MCP certified.
 
 ## Design system rules
+
+- Alignment: one rule. Section titles, leads and content are left-aligned (one left edge to scan, as long
+  centered text reads worse); only the hero and the logo wall are centered.
 
 - Style: "paper and ink". Off-white paper, near-black ink, 2px outlines, short hard offset shadows, pill
   buttons, one highlighter yellow (`marker`) used sparingly. Serious and editorial: sentence-case headlines in
@@ -147,6 +152,6 @@ tests/                       Playwright e2e against the prerendered build
   smaller, untracked display type; Chinese headings break only at punctuation and at `\u200b` placed in the
   copy. The wordmark (`font-brand`) is artwork and never changes font.
 - Must work at 390 px wide without horizontal scroll, and with keyboard only. Anything that moves on its own
-  (the leaderboard carousel: it runs through every site's questions and the selected logo follows) pauses on
-  hover, focus and off screen, has a pause control before the logos, stays still for reduced motion, and has
-  previous/next buttons with an "n / total" count, so every question is reachable by hand.
+  (the leaderboard carousel: it moves site by site, each by its best question, and the selected logo is its
+  only position; the site's other questions are in the tabs below) pauses on hover, focus and off screen, has
+  a pause control before the logos, and stays still for reduced motion.

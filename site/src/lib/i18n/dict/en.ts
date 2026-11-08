@@ -34,11 +34,14 @@ const en = {
 			description: 'What each scan verdict means, how a scan runs, and where to say a verdict is wrong.'
 		},
 		home: {
-			// max 60: search results cut longer titles.
-			title: 'webmcpx: is your site agent-ready?',
-			// max 160: search results cut longer descriptions.
+			// max 60: search results cut longer titles. Leads with "WebMCP" (what people search for).
+			title: 'webmcpx: WebMCP for every site and every agent',
+			// max 160: search results cut longer descriptions. {best} is a ratio (20×) from the benchmark.
 			description:
-				'Scan any site for WebMCP tools. One script tag makes it agent-ready. Reproducible benchmark, open source.'
+				'Scan any site for WebMCP tools, make yours agent-ready with one line, and give Claude Code or Codex WebMCP on every site: up to {best} fewer tokens. Open source.',
+			// Without a published run (no number to quote).
+			descriptionPlain:
+				'Scan any site for WebMCP tools, make yours agent-ready with one line, and give Claude Code or Codex WebMCP on every site. Open source.'
 		},
 		brand: {
 			// max 60
@@ -115,7 +118,10 @@ const en = {
 		// use it through tools; keep it short and use the same word everywhere it appears.
 		title: { text: 'Make your site {mark}.', mark: 'agent-ready' },
 		// max 120: 3 lines on a phone.
-		lead: 'AI agents are already reading your pages. See what they get, then give them real tools with one line.',
+		lead: 'Claude Code, Codex and other agents use up to {best} fewer tokens on sites with WebMCP. See what agents get from yours, then fix it with one line.',
+		// Without a published run (no number to quote).
+		leadPlain:
+			'AI agents are already reading your pages. See what they get, then give them real tools with one line.',
 		// {sites} is a row of three site names (buttons that start a scan).
 		try: 'Try {sites}',
 		// Under the scan, for people who use agents but run no site: a question, then a link.
@@ -274,8 +280,6 @@ const en = {
 		rotator: {
 			/** Names the rotating questions for screen readers. */
 			label: 'Questions',
-			previous: 'Previous question',
-			next: 'Next question',
 			pause: 'Pause rotation',
 			resume: 'Resume rotation'
 		},
@@ -458,7 +462,7 @@ const en = {
 		// max 45
 		title: 'For your agent',
 		// max 160
-		lead: 'The one MCP every Claude Code and Codex setup should have: same answers on every site, for a fraction of the tokens.',
+		lead: 'Works on any site. On the sites we measured: the same answers, for a fraction of the tokens. The one MCP every Claude Code and Codex setup should have.',
 		// One line, linked to the leaderboard. {low} and {high} are ratios (2.4×, 5.7×): each model's
 		// tokens without WebMCP over its tokens with WebMCP, over its whole run. {n} (2 or more) is how many
 		// models are on the leaderboard. `best` is used when there is one model, or one did not save.
@@ -484,7 +488,12 @@ const en = {
 			}
 		},
 		// The big number: "Up to" before a ratio (6.0×), "fewer tokens" after it.
-		hype: { up: 'Up to', fewer: 'fewer tokens', same: 'Same answers.' },
+		hype: {
+			up: 'Up to',
+			fewer: 'fewer tokens',
+			same: 'Same answers.',
+			bestCase: 'Best case: {site}, {model}'
+		},
 		worksWith: 'Works with',
 		tabs: { scripts: 'Scripts' },
 		notes: {
@@ -538,7 +547,7 @@ const en = {
 
 	issues: {
 		kicker: 'From the spec tracker',
-		title: 'What the community asked for. Shipped.',
+		title: 'Spec requests webmcpx already handles.',
 		// Each card: a title (max 28) and what webmcpx does about it. Keep code (search_page, registerTool(),
 		// --fix, modelContext...) as it is; "our policy" marks our own rule, not the draft's.
 		items: {
@@ -573,6 +582,35 @@ const en = {
 		}
 	},
 
+	faq: {
+		kicker: 'FAQ',
+		// Says plainly what the section is; no slogans.
+		title: 'Questions about WebMCP',
+		// Each answer: two or three short sentences, plain text (also published as FAQPage structured
+		// data). Keep code (registerTool(), npx ..., tool()) and names as they are.
+		items: {
+			what: {
+				q: 'What is WebMCP?',
+				a: 'A browser API, drafted in the W3C Web Machine Learning Community Group: a page registers tools with document.modelContext.registerTool(), and an AI agent calls them instead of reading screenshots or the page’s HTML. The tools run in the user’s own tab.'
+			},
+			site: {
+				q: 'How do I make my site agent-ready?',
+				a: 'Add the webmcpx script tag: every page gets standard tools (search, read, page context) with no other code. Then register your own actions, like search or add to cart, with tool(). Scan your site here to check.'
+			},
+			agent: {
+				q: 'How do I use WebMCP from Claude Code or Codex?',
+				a: 'Run claude mcp add webmcpx -- npx -y webmcpx mcp (Codex: codex mcp add webmcpx -- npx -y webmcpx mcp). Your agent then opens pages in its own Chromium and gets each page’s WebMCP tools plus the standard ones, on any site.'
+			},
+			browsers: {
+				q: 'Does it work in Firefox and Safari?',
+				a: 'Yes. Where a browser has no WebMCP of its own, webmcpx loads the W3C WebMCP polyfill, on HTTPS pages. Chrome, Firefox and Safari all see the same tools.'
+			},
+			mcp: {
+				q: 'Is WebMCP the same as MCP?',
+				a: 'No. WebMCP borrows MCP’s tool model, but it is a browser API, not the MCP protocol: the tools live in the page and run in the user’s tab. They complement each other, and the webmcpx MCP server connects the two.'
+			}
+		}
+	},
 	scan: {
 		/** Names the scan form for screen readers. */
 		form: 'Scan a site',

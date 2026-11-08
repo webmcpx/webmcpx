@@ -312,47 +312,49 @@ test('the model switcher shows each model on its own run', async ({ page }) => {
 });
 
 // The carousel: the question on screen, and the site whose logo is selected.
-const shownQuestion = (proof: Locator) =>
-	proof
-		.locator('[aria-roledescription=carousel] [role=tabpanel]:not([data-inactive]) p')
+/** The selected site's panel in the carousel (by its tab's aria-controls). */
+const sitePanel = async (proof: Locator) => {
+	const id = await proof
+		.locator('[aria-roledescription=carousel] [role=tab][aria-selected=true]')
 		.first()
-		.textContent();
+		.getAttribute('aria-controls');
+	return proof.locator(`[id="${id}"]`);
+};
+const shownQuestion = async (proof: Locator) => (await sitePanel(proof)).locator('p').first().textContent();
 const selectedSite = (proof: Locator) =>
 	proof.locator('[aria-roledescription=carousel] [role=tab][aria-selected=true]').first().textContent();
 
-/** Lets time pass (a second at a time, as the carousel starts once it is on screen) until the question changes. */
-const nextQuestion = (page: Page, proof: Locator, from: string | null) =>
+/** Lets time pass (a second at a time, as the carousel starts once it is on screen) until the site changes. */
+const nextSite = (page: Page, proof: Locator, from: string | null) =>
 	expect
 		.poll(async () => {
 			await page.clock.runFor(1000);
-			return shownQuestion(proof);
+			return selectedSite(proof);
 		})
 		.not.toBe(from);
 
-test('the questions rotate through every site, the selected logo follows, and it can be paused', async ({
-	page
-}) => {
+test('the carousel moves site by site, the selected logo follows, and it can be paused', async ({ page }) => {
 	await page.clock.install();
 	await page.goto('/#leaderboard');
 	const proof = page.locator('#leaderboard');
 	await page.mouse.move(0, 0);
-	const firstSite = await selectedSite(proof);
-	let question = await shownQuestion(proof);
-	// Each tick shows another question; within a few, the next site's logo is selected.
-	let moved = false;
-	for (let n = 0; n < 12 && !moved; n++) {
-		await nextQuestion(page, proof, question);
-		question = await shownQuestion(proof);
-		moved = (await selectedSite(proof)) !== firstSite;
+	// Each move selects the next site's logo and shows that site's question, named above it.
+	for (let n = 0; n < 2; n++) {
+		const site = await selectedSite(proof);
+		const question = await shownQuestion(proof);
+		await nextSite(page, proof, site);
+		expect(await shownQuestion(proof)).not.toBe(question);
+		const now = (await selectedSite(proof))?.replace(/local$/i, '').trim() ?? '';
+		await expect((await sitePanel(proof)).locator('h4').first()).toContainText(now);
 	}
-	expect(moved).toBe(true);
+	// No second way through it: the logos are the only position.
+	await expect(proof.getByRole('button', { name: /question/i })).toHaveCount(0);
 
 	const site = await selectedSite(proof);
 	await proof.getByRole('button', { name: 'Pause rotation' }).click();
 	await page.mouse.move(0, 0);
-	await page.clock.runFor(12000);
+	await page.clock.runFor(15000);
 	expect(await selectedSite(proof)).toBe(site);
-	expect(await shownQuestion(proof)).toBe(question);
 	await expect(proof.getByRole('button', { name: 'Resume rotation' })).toBeVisible();
 });
 
@@ -364,36 +366,9 @@ test('no automatic rotation for people who prefer reduced motion', async ({ page
 	await page.mouse.move(0, 0);
 	const site = await selectedSite(proof);
 	const question = await shownQuestion(proof);
-	await page.clock.runFor(12000);
+	await page.clock.runFor(15000);
 	expect(await selectedSite(proof)).toBe(site);
 	expect(await shownQuestion(proof)).toBe(question);
-});
-
-test('every question is reachable by hand, with reduced motion too', async ({ page }) => {
-	await page.emulateMedia({ reducedMotion: 'reduce' });
-	await page.goto('/#leaderboard');
-	const proof = page.locator('#leaderboard');
-	const first = await shownQuestion(proof);
-	await expect(proof.getByText(/^1 \/ \d+$/).filter({ visible: true })).toBeVisible();
-	await proof.getByRole('button', { name: 'Next question' }).filter({ visible: true }).click();
-	await expect(proof.getByText(/^2 \/ \d+$/).filter({ visible: true })).toBeVisible();
-	await expect.poll(() => shownQuestion(proof)).not.toBe(first);
-	await proof.getByRole('button', { name: 'Previous question' }).filter({ visible: true }).click();
-	await expect.poll(() => shownQuestion(proof)).toBe(first);
-});
-
-test('picking a site starts at its first question', async ({ page }) => {
-	await page.clock.install();
-	await page.goto('/#leaderboard');
-	const proof = page.locator('#leaderboard');
-	await page.mouse.move(0, 0);
-	const first = await shownQuestion(proof);
-	// Rotate past the first question, then come back to the site by its logo.
-	await nextQuestion(page, proof, first);
-	const logos = proof.locator('[aria-roledescription=carousel] [role=tablist]').first().getByRole('tab');
-	await logos.nth(1).click();
-	await logos.nth(0).click();
-	await expect.poll(() => shownQuestion(proof)).toBe(first);
 });
 
 test('the page says its benchmark shows selected cases and links to all results', async ({ page }) => {
@@ -630,8 +605,8 @@ test('the menus name both audiences, in page order', async ({ page }) => {
 	await expect(pill.getByRole('link')).toHaveText([
 		'Why',
 		'Leaderboard',
-		'For sites',
 		'For agents',
+		'For sites',
 		'vs MCP',
 		'Issues',
 		'Docs'
