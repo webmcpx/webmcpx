@@ -373,7 +373,7 @@
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="font-medium">{m.result.badge}</p>
 					<!-- The styles as one slim row of small tiles: the badge, then its name (what it fits is the tile's title). -->
-					<fieldset class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+					<fieldset class="mt-4 grid grid-cols-2 gap-2">
 						<legend class="sr-only">{m.result.badgeStyle}</legend>
 						{#each BADGES as b (b.id)}
 							<label
@@ -392,7 +392,9 @@
 									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 									{@html b.svg}
 								</span>
-								<span class="border-t-2 border-inherit px-2.5 py-1.5 text-sm font-medium">
+								<span
+									class="border-t-2 border-inherit px-2.5 py-1.5 font-mono text-[11px] tracking-wider uppercase"
+								>
 									{m.badges[b.id].name}<span class="sr-only">: {m.badges[b.id].fits}</span>
 								</span>
 							</label>
