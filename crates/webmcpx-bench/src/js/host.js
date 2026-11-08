@@ -14,6 +14,8 @@
   const LIST_MAX = 1_000_000;
   // Built now, while JSON and Object.prototype.toJSON are still the browser's own.
   const TOO_BIG = stringify({ error: `the tool list is over ${LIST_MAX} chars` });
+  // What a page's getter or toJSON throws never leaves the page: its message could be megabytes.
+  const THREW = stringify({ error: "reading the tool list threw" });
   const tools = new Map();
   const provided = new Set();
   const NAME = /^[A-Za-z0-9_.-]{1,128}$/;
@@ -85,30 +87,37 @@
     for (const [tool] of every()) if (!found.has(tool.name)) found.set(tool.name, tool);
     return found;
   };
+  // Bounded before it leaves the page, as one JSON string: a page must not be able to send the scanner
+  // megabytes. The caps sit far above every lint limit, so the linter still sees what is too long or too
+  // many; a list past LIST_MAX in all is an error, not a cut. The scanner checks the shape again: a
+  // page's toJSON can still replace what this builds.
+  const listed = () => {
+    const list = every().slice(0, 200).map(([t, doc]) => {
+      // A schema we can't read or that is too big to send is reported as a problem, never replaced.
+      let inputSchema;
+      let schemaError;
+      try {
+        inputSchema = schema(t.inputSchema);
+        if (cut(stringify(inputSchema), 50_001).length > 50_000) [inputSchema, schemaError] = [undefined, "the input schema is over 50,000 chars"];
+      } catch {
+        schemaError = "the input schema is not valid JSON";
+      }
+      const annotations = {};
+      for (const [k, v] of Object.entries(t.annotations ?? {}).slice(0, 20)) annotations[cut(k, 64)] = v === true;
+      return { name: cut(t.name, 256), description: cut(t.description, 2_000), inputSchema, annotations, schemaError, document: cut(doc, 64) };
+    });
+    const out = cut(stringify(list), LIST_MAX + 1);
+    return out.length > LIST_MAX ? TOO_BIG : out;
+  };
   Object.defineProperty(window, "__webmcpHost", {
     value: Object.freeze({
       every,
-      // Bounded before it leaves the page, as one JSON string: a page must not be able to send the
-      // scanner megabytes. The caps sit far above every lint limit, so the linter still sees what is too
-      // long or too many; a list past LIST_MAX in all is an error, not a cut.
       list: () => {
-        const list = every().slice(0, 200).map(([t, doc]) => {
-          const cap = cut;
-          // A schema we can't read or that is too big to send is reported as a problem, never replaced.
-          let inputSchema;
-          let schemaError;
-          try {
-            inputSchema = schema(t.inputSchema);
-            if (cut(stringify(inputSchema), 50_001).length > 50_000) [inputSchema, schemaError] = [undefined, "the input schema is over 50,000 chars"];
-          } catch {
-            schemaError = "the input schema is not valid JSON";
-          }
-          const annotations = {};
-          for (const [k, v] of Object.entries(t.annotations ?? {}).slice(0, 20)) annotations[cap(k, 64)] = v === true;
-          return { name: cap(t.name, 256), description: cap(t.description, 2_000), inputSchema, annotations, schemaError, document: cap(doc, 64) };
-        });
-        const out = cut(stringify(list), LIST_MAX + 1);
-        return out.length > LIST_MAX ? TOO_BIG : out;
+        try {
+          return listed();
+        } catch {
+          return THREW;
+        }
       },
       async call(name, input) {
         const tool = all().get(name);

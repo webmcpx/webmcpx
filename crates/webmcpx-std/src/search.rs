@@ -16,11 +16,28 @@ const HEADING_CHARS: usize = 120;
 const K1: f32 = 1.2;
 const B: f32 = 0.75;
 
+/// A passage keeps only what ranking needs: per query term, how often it occurs (heading included),
+/// and its length in tokens. No token lists: a long heading over many paragraphs would be copied into
+/// each one.
 struct Passage {
-    heading: String,
+    heading: usize,
     anchor: String,
     text: String,
-    tokens: Vec<String>,
+    tf: Vec<u32>,
+    len: usize,
+}
+
+/// How often each term occurs in `tokens`, and how many tokens there are.
+fn counts(text: &str, terms: &[String]) -> (Vec<u32>, usize) {
+    let mut tf = alloc::vec![0u32; terms.len()];
+    let mut len = 0;
+    for token in tokenize(text) {
+        len += 1;
+        if let Some(i) = terms.iter().position(|t| *t == token) {
+            tf[i] += 1;
+        }
+    }
+    (tf, len)
 }
 
 /// `search_page`: ranks the passages of a block stream against `query` with BM25.
@@ -36,8 +53,8 @@ pub fn search(stream: &str, query: &str, limit: usize) -> String {
         n => n.min(MAX_LIMIT),
     };
 
-    let passages = passages(stream);
-    let mut ranked = rank(&passages, &terms);
+    let (headings, passages) = passages(stream, &terms);
+    let mut ranked = rank(&passages, terms.len());
     if ranked.is_empty() {
         return Envelope::new()
             .hint("Try fewer or different words, or read the page with fetch_as_markdown.")
@@ -52,7 +69,7 @@ pub fn search(stream: &str, query: &str, limit: usize) -> String {
     for &(index, _) in &ranked {
         let p = &passages[index];
         let mut entry = String::from(r#"{"heading":"#);
-        push_json_str(&mut entry, &p.heading);
+        push_json_str(&mut entry, &headings[p.heading]);
         entry.push_str(r#","snippet":"#);
         push_json_str(&mut entry, &snippet(&p.text, &terms));
         entry.push_str(r#","url":"#);
@@ -79,17 +96,18 @@ pub fn search(stream: &str, query: &str, limit: usize) -> String {
     Envelope::new().ok(&data)
 }
 
-fn passages(stream: &str) -> Vec<Passage> {
-    let mut heading = String::new();
-    let mut heading_tokens = Vec::new();
+/// The display headings (shortened), and the passages that point into them.
+fn passages(stream: &str, terms: &[String]) -> (Vec<String>, Vec<Passage>) {
+    let mut headings = alloc::vec![String::new()];
+    // The current heading, searched in full: its term counts and length, once.
+    let (mut heading_tf, mut heading_len) = (alloc::vec![0u32; terms.len()], 0);
     let mut heading_anchor = "";
     let mut out = Vec::new();
     for block in blocks::parse(stream) {
         let text = clean(block.text);
         if let Kind::Heading(_) = block.kind {
-            // Searched in full; shown shortened.
-            heading_tokens = tokenize(&text);
-            heading = shorten(text, HEADING_CHARS);
+            (heading_tf, heading_len) = counts(&text, terms);
+            headings.push(shorten(text, HEADING_CHARS));
             heading_anchor = block.anchor;
             continue;
         }
@@ -101,31 +119,33 @@ fn passages(stream: &str) -> Vec<Passage> {
         } else {
             block.anchor
         };
-        let mut tokens = heading_tokens.clone();
-        tokens.extend(tokenize(&text));
+        let (mut tf, len) = counts(&text, terms);
+        for (t, h) in tf.iter_mut().zip(&heading_tf) {
+            *t += h;
+        }
         out.push(Passage {
-            tokens,
-            heading: heading.clone(),
+            heading: headings.len() - 1,
             anchor: anchor.to_owned(),
             text,
+            tf,
+            len: len + heading_len,
         });
     }
-    out
+    (headings, out)
 }
 
 /// (passage index, score), best first; ties keep document order.
-fn rank(passages: &[Passage], terms: &[String]) -> Vec<(usize, f32)> {
+fn rank(passages: &[Passage], terms: usize) -> Vec<(usize, f32)> {
     #[expect(clippy::cast_precision_loss, reason = "page-sized counts")]
     let (n, avg_len) = {
         let n = passages.len() as f32;
-        let total: usize = passages.iter().map(|p| p.tokens.len()).sum();
+        let total: usize = passages.iter().map(|p| p.len).sum();
         (n, total as f32 / n.max(1.0))
     };
     #[expect(clippy::cast_precision_loss, reason = "page-sized counts")]
-    let idf: Vec<f32> = terms
-        .iter()
-        .map(|t| {
-            let df = passages.iter().filter(|p| p.tokens.contains(t)).count() as f32;
+    let idf: Vec<f32> = (0..terms)
+        .map(|j| {
+            let df = passages.iter().filter(|p| p.tf[j] > 0).count() as f32;
             libm::logf((n - df + 0.5) / (df + 0.5) + 1.0)
         })
         .collect();
@@ -135,16 +155,16 @@ fn rank(passages: &[Passage], terms: &[String]) -> Vec<(usize, f32)> {
         .enumerate()
         .filter_map(|(i, p)| {
             #[expect(clippy::cast_precision_loss, reason = "page-sized counts")]
-            let len = p.tokens.len() as f32;
-            let score: f32 = terms
-                .iter()
-                .zip(&idf)
-                .map(|(t, idf)| {
-                    #[expect(clippy::cast_precision_loss, reason = "page-sized counts")]
-                    let tf = p.tokens.iter().filter(|x| *x == t).count() as f32;
-                    idf * tf * (K1 + 1.0) / (tf + K1 * (1.0 - B + B * len / avg_len.max(1.0)))
-                })
-                .sum();
+            let len = p.len as f32;
+            let score: f32 =
+                p.tf.iter()
+                    .zip(&idf)
+                    .map(|(&tf, idf)| {
+                        #[expect(clippy::cast_precision_loss, reason = "page-sized counts")]
+                        let tf = tf as f32;
+                        idf * tf * (K1 + 1.0) / (tf + K1 * (1.0 - B + B * len / avg_len.max(1.0)))
+                    })
+                    .sum();
             (score > 0.0).then_some((i, score))
         })
         .collect();
@@ -311,5 +331,17 @@ mod tests {
         );
         let v = parse(&search(&page, "refunds", 5));
         assert_eq!(v["data"]["results"][0]["url"], "https://x.test/#r");
+    }
+
+    #[test]
+    fn a_long_heading_over_many_paragraphs_is_kept_once() {
+        let heading = "word ".repeat(2_000);
+        let mut page = format!("h2\u{1F}{heading}\u{1F}https://x.test/#h\u{1E}");
+        for _ in 0..1_000 {
+            page.push_str("p\u{1F}short paragraph\u{1E}");
+        }
+        let (headings, passages) = passages(&page, &["word".into()]);
+        assert_eq!(headings.len(), 2);
+        assert!(passages.iter().all(|p| p.tf == [2_000] && p.len == 2_002));
     }
 }

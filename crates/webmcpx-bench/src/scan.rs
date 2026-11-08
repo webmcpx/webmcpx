@@ -428,7 +428,10 @@ impl Scanner {
         // Only the snapshot's size travels: that is all the token estimate needs. It is read from the
         // page's world (the snapshot script lives there), so it is forced to a number there.
         let snapshot_chars = page
-            .eval("+__bench.snapshot().length || 0")
+            // A throw is caught here: its message, page-made, could be megabytes.
+            .eval(
+                "(() => { try { return +__bench.snapshot().length || 0; } catch { return 0; } })()",
+            )
             .await
             .map_err(failed)?;
         let title = page

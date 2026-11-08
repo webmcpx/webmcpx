@@ -176,8 +176,9 @@ pub async fn registered_tools(page: &Page, wait: Duration) -> Result<Vec<Value>>
             None => anyhow::bail!("unexpected tool list: {now}"),
         };
         if let Some(e) = now.get("error").and_then(Value::as_str) {
-            anyhow::bail!("{e}");
+            anyhow::bail!("{}", e.chars().take(200).collect::<String>());
         }
+        check_list(&now)?;
         // Registration is async; take the list once it is non-empty and unchanged for 100 ms.
         stable = if now == listed && now.as_array().is_some_and(|a| !a.is_empty()) {
             stable + 1
@@ -197,9 +198,53 @@ pub async fn registered_tools(page: &Page, wait: Duration) -> Result<Vec<Value>>
     }
 }
 
+/// The shape host.js promises, checked again here: a page's `toJSON` can replace what host.js built
+/// (200,000 tools, or 40,000 documents, within the size cap), and the scan's grouping and linting
+/// must never see more than that promise.
+fn check_list(list: &Value) -> Result<()> {
+    let Some(tools) = list.as_array() else {
+        return if list.is_null() {
+            Ok(())
+        } else {
+            anyhow::bail!("the tool list is not a list")
+        };
+    };
+    anyhow::ensure!(
+        tools.len() <= 200,
+        "the tool list has {} entries (at most 200)",
+        tools.len()
+    );
+    let short =
+        |v: &Value, max: usize| v.is_null() || v.as_str().is_some_and(|s| s.chars().count() <= max);
+    for t in tools {
+        let ok = t.is_object()
+            && short(&t["name"], 256)
+            && short(&t["description"], 2_000)
+            && short(&t["document"], 64)
+            && short(&t["schemaError"], 100)
+            && (t["annotations"].is_null()
+                || t["annotations"]
+                    .as_object()
+                    .is_some_and(|a| a.len() <= 20 && a.values().all(Value::is_boolean)));
+        anyhow::ensure!(ok, "the tool list has an entry the host never builds");
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_list_the_host_never_builds_is_refused() {
+        let tool = json!({"name": "a", "description": "d", "document": "0", "annotations": {"readOnlyHint": true}});
+        assert!(check_list(&json!([tool])).is_ok());
+        assert!(check_list(&Value::Null).is_ok());
+        assert!(check_list(&Value::Array(vec![tool.clone(); 201])).is_err());
+        assert!(check_list(&json!([{"name": "a", "document": "d".repeat(65)}])).is_err());
+        assert!(check_list(&json!([{"name": "a", "annotations": {"x": "big"}}])).is_err());
+        assert!(check_list(&json!("x")).is_err());
+    }
 
     #[test]
     fn cap_cuts_on_char_boundaries() {

@@ -562,8 +562,17 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
         inputSchema: { type: "object", properties: { v: { enum: Array(4000).fill(0) } } }, execute() {},
       });
     </script>"#;
+    // A throw carries its message out through CDP: list() must catch it in the page.
+    let throws = r#"<!doctype html><title>x</title><script>
+      document.modelContext.registerTool({ name: "t", description: "d", execute() {},
+        get annotations() { throw new Error("X".repeat(7e7)); } });
+    </script>"#;
     let site = serve_html(
         axum::Router::new()
+            .route(
+                "/throws",
+                axum::routing::get(move || std::future::ready(axum::response::Html(throws))),
+            )
             .route(
                 "/tampered",
                 axum::routing::get(move || std::future::ready(axum::response::Html(tampered))),
@@ -607,6 +616,11 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
         .await
         .unwrap_err();
     assert!(format!("{err:?}").contains("over 1000000 chars"), "{err:?}");
+    let err = scanner
+        .scan(&format!("http://{site}/throws"))
+        .await
+        .unwrap_err();
+    assert!(format!("{err:?}").contains("threw"), "{err:?}");
     let err = scanner
         .scan(&format!("http://{site}/tojson"))
         .await
