@@ -236,6 +236,13 @@ const id: Messages = {
 			graded: 'Dinilai dari fakta dalam jawaban dan state halaman. Tanpa LLM judge.',
 			live: 'Situs live: menyediakan tool WebMCP-nya sendiri.',
 			local: 'Situs uji lokal: tool-nya berasal dari webmcpx.',
+			scope:
+				'35 pertanyaan di 7 situs, 32 hanya membaca; penghematan terbesar datang dari alat pencarian milik situs itu sendiri.',
+			runs: '3 eksekusi per pertanyaan dan lengan: 3 dari 3 adalah bukti, bukan jaminan 100%.',
+			measures:
+				'Waktu adalah loop agen setelah halaman dimuat; biaya adalah penggunaan API model dengan harga daftar bertanggal, termasuk cache.',
+			failures:
+				'Setiap eksekusi yang gagal menyebut alasannya di hasil (blokir situs, jawaban bukan dari halaman, batas langkah…).',
 			reproduce: 'reproduksi sendiri'
 		},
 		tools: {

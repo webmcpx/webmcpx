@@ -83,7 +83,18 @@ impl<'a> Session<'a> {
 
     async fn dispatch(&self, name: &str, args: &Value) -> Result<String> {
         let expression = match (self.arm, name) {
-            (Arm::Baseline, "read_page") => "__bench.snapshot()".to_owned(),
+            (Arm::Baseline, "read_page") => {
+                let snapshot = self.page.eval("__bench.snapshot()").await?;
+                let offset = args["offset"]
+                    .as_u64()
+                    .map_or(0, |o| usize::try_from(o).unwrap_or(usize::MAX));
+                return Ok(part(snapshot.as_str().unwrap_or_default(), offset));
+            }
+            (Arm::Baseline, "navigate") => {
+                return self
+                    .navigate(args["url"].as_str().unwrap_or_default())
+                    .await;
+            }
             (Arm::Baseline, "click") => format!("__bench.click({})", args["ref"]),
             (Arm::Baseline, "fill") => {
                 format!("__bench.fill({}, {})", args["ref"], args["value"])
@@ -98,6 +109,52 @@ impl<'a> Session<'a> {
     }
 }
 
+impl Session<'_> {
+    /// Opens `url` (relative to the current page) in this tab and says where it landed.
+    async fn navigate(&self, url: &str) -> Result<String> {
+        let target = self
+            .page
+            .eval(&format!("new URL({}, location.href).href", json!(url)))
+            .await?;
+        let target = target.as_str().context("not a URL")?.to_owned();
+        if !(target.starts_with("http://") || target.starts_with("https://")) {
+            return Ok(format!(
+                "Error: only http(s) URLs can be opened, not {target}"
+            ));
+        }
+        self.page.goto(&target).await?;
+        let here = self
+            .page
+            .eval("`${document.title} (${location.href})`")
+            .await?;
+        Ok(format!(
+            "Opened {}. Call read_page to see it.",
+            here.as_str().unwrap_or(&target)
+        ))
+    }
+}
+
+/// One part of a long snapshot, from `offset` (in characters), ending with how to read the next one.
+fn part(text: &str, offset: usize) -> String {
+    // Room for the note, so the result stays under RESULT_MAX_CHARS.
+    const SIZE: usize = RESULT_MAX_CHARS - 200;
+    let total = text.chars().count();
+    if offset == 0 && total <= SIZE {
+        return text.to_owned();
+    }
+    let start = offset.min(total);
+    let end = (start + SIZE).min(total);
+    let body: String = text.chars().skip(start).take(end - start).collect();
+    let note = if end < total {
+        format!(
+            "\n[characters {start}-{end} of {total}; call read_page with offset={end} for more]"
+        )
+    } else {
+        format!("\n[characters {start}-{end} of {total}; end of page]")
+    };
+    body + &note
+}
+
 fn cap(mut s: String) -> String {
     if let Some((cut, _)) = s.char_indices().nth(RESULT_MAX_CHARS) {
         s.truncate(cut);
@@ -106,15 +163,44 @@ fn cap(mut s: String) -> String {
     s
 }
 
+/// The baseline's tools, as the model is given them (for the results file's `config`).
+pub fn baseline_tool_specs() -> Vec<serde_json::Value> {
+    baseline_tools()
+        .into_iter()
+        .map(
+            |t| json!({ "name": t.name, "description": t.description, "parameters": t.parameters }),
+        )
+        .collect()
+}
+
 fn baseline_tools() -> Vec<ToolSpec> {
     let reference = json!({ "type": "integer", "description": "The [n] ref from read_page." });
     vec![
         ToolSpec {
             name: "read_page".into(),
             description: "Return the visible text of the current page. Interactive elements are \
-                          listed as [n] with their label; use n with click and fill."
+                          listed as [n] with their label (links with where they go, selects with \
+                          their options); use n with click and fill. A long page comes in parts: \
+                          pass the offset the result names to read the next one."
                 .into(),
-            parameters: json!({ "type": "object", "properties": {}, "additionalProperties": false }),
+            parameters: json!({
+                "type": "object",
+                "properties": { "offset": {
+                    "type": "integer", "minimum": 0,
+                    "description": "Character offset to read from (default 0)."
+                } },
+                "additionalProperties": false
+            }),
+        },
+        ToolSpec {
+            name: "navigate".into(),
+            description: "Open a URL in this tab, like typing it in the address bar. A path such \
+                          as /docs/limits opens on the current site."
+                .into(),
+            parameters: json!({
+                "type": "object", "properties": { "url": { "type": "string" } },
+                "required": ["url"], "additionalProperties": false
+            }),
         },
         ToolSpec {
             name: "click".into(),
@@ -244,6 +330,27 @@ fn check_list(list: &Value) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_long_snapshot_reads_in_parts() {
+        let text = "x".repeat(RESULT_MAX_CHARS * 2);
+        let first = part(&text, 0);
+        assert!(first.chars().count() <= RESULT_MAX_CHARS);
+        let next: usize = first
+            .rsplit("offset=")
+            .next()
+            .and_then(|s| s.trim_end_matches(" for more]").parse().ok())
+            .unwrap();
+        let mut read = next;
+        let mut offset = next;
+        while !part(&text, offset).ends_with("end of page]") {
+            offset += RESULT_MAX_CHARS - 200;
+            read = offset;
+        }
+        assert!(read <= text.len());
+        assert_eq!(part("short", 0), "short");
+        assert!(part(&text, text.len()).ends_with("end of page]"));
+    }
 
     #[test]
     fn a_list_the_host_never_builds_is_refused() {

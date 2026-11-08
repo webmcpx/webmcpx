@@ -479,7 +479,8 @@ mod tests {
         assert!(!c.answer_passes("I couldn’t confirm this on the docs page. It is probably 2000."));
         // Not confirming a side detail is fine.
         assert!(c.answer_passes("The limit is 2000. I can't confirm whether it changed recently."));
-        assert!(blocked("The page is stuck on a \"Just a moment...\" check."));
+        assert!(blocked(
+            "The page is stuck on a \"Just a moment...\" check."
+        ));
     }
-
 }

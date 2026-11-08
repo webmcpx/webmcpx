@@ -239,6 +239,13 @@ const ptBr: Messages = {
 			graded: 'Avaliado pelos fatos na resposta e pelo estado da página. Sem LLM como juiz.',
 			live: 'Um site no ar: ele publica as próprias ferramentas WebMCP.',
 			local: 'Um site de teste local: as ferramentas vêm do webmcpx.',
+			scope:
+				'35 perguntas em 7 sites, 32 só de leitura; as maiores economias vêm das ferramentas de busca dos próprios sites.',
+			runs: '3 execuções por pergunta e braço: 3 de 3 é evidência, não prova de 100%.',
+			measures:
+				'Tempo é o loop do agente depois de a página carregar; custo é o uso de API do modelo a preços de tabela datados, com cache.',
+			failures:
+				'Cada execução que falhou diz o motivo nos resultados (bloqueio do site, resposta fora da página, limite de passos…).',
 			reproduce: 'reproduza você mesmo'
 		},
 		tools: {

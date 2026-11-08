@@ -149,6 +149,35 @@ async fn webmcp_arm_uses_the_page_tools() {
     );
 }
 
+/// A competent DOM agent can open a URL it found (a link's destination, a path in an index) and read
+/// a page in parts; the baseline was once stuck on a page whose answer was one link away.
+#[tokio::test]
+async fn baseline_arm_navigates_and_sees_link_destinations() {
+    let Some((run, model)) = run_one(
+        "docs-config-path",
+        Arm::Baseline,
+        move |step, _| match step {
+            0 => call("read_page", "{}"),
+            1 => call("navigate", r#"{"url":"/sites/docs/#env"}"#),
+            2 => call("read_page", r#"{"offset":0}"#),
+            _ => answer("Set ORBIT_CONFIG to the config file's path."),
+        },
+    )
+    .await
+    else {
+        return;
+    };
+    assert_eq!(run.harness_error, None);
+    assert!(run.success, "{run:?}");
+    let seen = model.seen.lock().unwrap();
+    assert!(
+        last_tool_result(&seen[1].0).contains(" -> /"),
+        "links show where they go"
+    );
+    assert!(last_tool_result(&seen[2].0).starts_with("Opened "));
+    assert!(last_tool_result(&seen[3].0).contains("ORBIT_CONFIG"));
+}
+
 #[tokio::test]
 async fn baseline_arm_drives_the_dom() {
     // Read the page, find the refs next to "Harbor Mug", set quantity 2, click add.
@@ -185,7 +214,7 @@ async fn baseline_arm_drives_the_dom() {
     assert_eq!(run.harness_error, None);
     assert!(run.success, "{run:?}");
     let seen = model.seen.lock().unwrap();
-    assert_eq!(seen[0].1, ["read_page", "click", "fill"]);
+    assert_eq!(seen[0].1, ["read_page", "navigate", "click", "fill"]);
     assert_eq!(
         last_tool_result(&seen[3].0),
         "Clicked [".to_owned() + &refs(&seen[1].0).to_string() + "]."

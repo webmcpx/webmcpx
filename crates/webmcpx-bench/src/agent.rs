@@ -39,6 +39,10 @@ pub struct TraceCall {
     pub name: String,
     pub arguments: String,
     pub result_chars: usize,
+    /// What the agent got back. Kept out of the published results file (it goes to the run's
+    /// observations file, see main.rs), so it is empty in files read back from disk.
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub result: String,
 }
 
 pub async fn run(
@@ -87,6 +91,7 @@ pub async fn run(
                 name: call.function.name,
                 arguments: call.function.arguments,
                 result_chars: result.chars().count(),
+                result: result.clone(),
             });
             messages.push(Message::Tool {
                 tool_call_id: call.id,

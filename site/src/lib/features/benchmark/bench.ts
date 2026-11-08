@@ -35,7 +35,7 @@ export interface RunInfo {
 }
 
 export interface Results {
-	schema_version: 3 | 4;
+	schema_version: 3 | 4 | 5;
 	model: string;
 	reasoning_effort: string | null;
 	price_per_mtok: { input: number; cached_input: number; output: number } | null;
@@ -89,7 +89,7 @@ export interface ModelRun {
 /** Accepts the JSON written by the harness; fails the build on an unknown schema. */
 export function parse(data: unknown): Results {
 	const version = (data as { schema_version?: unknown } | null)?.schema_version;
-	if (version !== 3 && version !== 4)
+	if (version !== 3 && version !== 4 && version !== 5)
 		throw new Error(`bench.json: unsupported schema_version ${String(version)}`);
 	return data as Results;
 }

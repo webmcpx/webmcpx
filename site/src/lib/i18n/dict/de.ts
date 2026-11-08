@@ -241,6 +241,13 @@ const de: Messages = {
 			graded: 'Bewertet anhand der Fakten in der Antwort und des Seitenzustands. Kein LLM-Judge.',
 			live: 'Eine Live-Website: Sie liefert eigene WebMCP-Tools mit.',
 			local: 'Eine lokale Test-Website: Ihre Tools stammen von webmcpx.',
+			scope:
+				'35 Fragen auf 7 Websites, 32 davon nur lesend; die größten Einsparungen kommen von den Suchwerkzeugen der Websites selbst.',
+			runs: '3 Läufe pro Frage und Arm: 3 von 3 ist ein Hinweis, kein Beweis für 100 %.',
+			measures:
+				'Zeit ist die Agentenschleife nach dem Laden der Seite; Kosten sind die API-Nutzung des Modells zu datierten Listenpreisen, inklusive Cache.',
+			failures:
+				'Jeder fehlgeschlagene Lauf nennt den Grund in den Ergebnissen (Bot-Sperre, Antwort nicht von der Seite, Schrittlimit…).',
 			reproduce: 'selbst nachstellen'
 		},
 		tools: {

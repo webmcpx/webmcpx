@@ -77,6 +77,8 @@ review-reply reply:
 bench *args: wasm js-build
     cargo run -q --release -p webmcpx-bench -- run {{args}}
     cp bench/results/latest.json "site/src/lib/content/bench/$(jq -r .model bench/results/latest.json).json"
+    # What the agent saw in every tool call, for anyone auditing the run (large; not read by the site).
+    mkdir -p bench/observations && cp bench/results/latest.observations.jsonl "bench/observations/$(jq -r .model bench/results/latest.json).jsonl"
     # The run's preview card; a run without both arms has no comparison: drop any stale card instead.
     card="site/static/og/benchmark-$(jq -r .model bench/results/latest.json).png"; cargo run -q --release -p webmcpx-bench -- card --bench bench/results/latest.json "$card" || rm -f "$card"
 

@@ -87,6 +87,7 @@ async fn run_job(
         task: job.task.id.clone(),
         arm: job.arm,
         attempt: job.attempt,
+        started_at: Some(now_ms()),
         success: false,
         harness_error: None,
         failure: None,
@@ -169,6 +170,7 @@ pub fn regrade(results: &mut report::Results, tasks: &[Task]) -> Regraded {
             out.skipped.push(task.id.clone());
         }
     }
+    let mut flips = Vec::new();
     for run in &mut results.runs {
         let Some(task) = tasks.iter().find(|t| t.id == run.task) else {
             continue;
@@ -190,12 +192,28 @@ pub fn regrade(results: &mut report::Results, tasks: &[Task]) -> Regraded {
         if success != run.success {
             run.success = success;
             out.changed += 1;
+            flips.push(serde_json::json!({
+                "task": run.task, "arm": run.arm, "attempt": run.attempt, "success": success
+            }));
         }
     }
     // Every run's failure category, also for runs whose grade regrading leaves alone.
     results.runs.iter_mut().for_each(report::classify);
+    // Kept in the file, so a reader sees which grades changed after the run, and when.
+    if !flips.is_empty() {
+        results
+            .history
+            .push(serde_json::json!({ "regraded_at": now_ms() / 1000, "changed": flips }));
+    }
     results.summary = report::Summary::of(&results.runs);
     out
+}
+
+/// Unix milliseconds now (0 if the clock is before 1970).
+fn now_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| u64::try_from(d.as_millis()).unwrap_or(u64::MAX))
 }
 
 #[cfg(test)]
@@ -217,6 +235,7 @@ mod tests {
             task: task.into(),
             arm: Arm::Webmcp,
             attempt: 1,
+            started_at: None,
             success,
             harness_error: None,
             failure: None,
@@ -243,6 +262,8 @@ mod tests {
             price_per_mtok: None,
             started_at: 0,
             tasks: tasks.iter().map(|t| (t.id.clone(), t.info())).collect(),
+            config: None,
+            history: Vec::new(),
             runs: vec![
                 run("unit", false, "20 MiB"),
                 run("unit", false, "20 GB"),
@@ -277,6 +298,8 @@ mod tests {
             price_per_mtok: None,
             started_at: 0,
             tasks: [(original.id.clone(), original.info())].into(),
+            config: None,
+            history: Vec::new(),
             runs: vec![run("unit", false, "20 MiB")],
             summary: report::Summary::default(),
         };

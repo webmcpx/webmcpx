@@ -7,6 +7,12 @@ The harness is `crates/webmcpx-bench`; this directory holds what it runs.
   call the same functions as the UI.
 - `tasks/<id>.toml` — one task: `site` (a fixture) or `url` (a live page), `prompt`, optional `max_steps`, and a `[check]` with
   `answer_contains` (all), `answer_any` (at least one), `answer_excludes` (none) and/or `state` (a JS expression that must be truthy after the run).
+- The baseline arm is a competent DOM agent (`crates/webmcpx-bench/src/arm.rs`, `js/baseline.js`): `read_page`
+  (a text snapshot with refs, links with where they go, selects with their options; long pages in parts by
+  `offset`), `navigate` (any URL, relative to the page), `click` and `fill`. Don't weaken it: a skeptic's first
+  question is whether the baseline was a strawman.
+- `observations/<model>.jsonl` — what every tool call returned, per run (`just bench` writes it next to the
+  results file); the results file keeps only sizes. Commit both.
 - `results/` — run outputs (git-ignored). `just bench --model <id>` publishes the run as
   `site/src/lib/content/bench/<id>.json`, one file per model. `latest.json` follows `schema_version` 4 (`report.rs`); it records the task metadata (site or URL, prompt) of the run, so editing a task never relabels old numbers, and the tools (name, description) each WebMCP run was given.
 

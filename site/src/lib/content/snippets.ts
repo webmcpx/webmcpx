@@ -35,13 +35,23 @@ register(); // the standard tools; tool() adds your own`
 		lang: 'text',
 		code: 'Add the webmcpx MCP server to your MCP config (command: `npx`, args: `["-y", "webmcpx", "mcp"]`), so you can call the WebMCP tools of any page you open.'
 	},
-	reproduce: {
+	reproduce: reproduceFor('gpt-6-luna')
+} satisfies Record<string, CodeSample>;
+
+/** How to rerun one model's benchmark: its provider's key, its id, effort medium (bench/AGENTS.md). */
+export function reproduceFor(model: string): CodeSample {
+	const key = model.startsWith('claude-')
+		? 'ANTHROPIC_API_KEY'
+		: model.startsWith('gemini-')
+			? 'GEMINI_API_KEY'
+			: 'OPENAI_API_KEY';
+	return {
 		lang: 'sh',
 		code: `git clone https://github.com/webmcpx/webmcpx
 cd webmcpx && just setup
-OPENAI_API_KEY=sk-... just bench`
-	}
-} satisfies Record<string, CodeSample>;
+${key}=... just bench --model ${model} --reasoning-effort medium`
+	};
+}
 
 export type SnippetId = keyof typeof SNIPPETS;
 

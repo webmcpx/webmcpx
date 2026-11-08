@@ -300,6 +300,10 @@
 									<li>{m.method.webmcp}</li>
 									<li>{m.method.graded}</li>
 									<li>{site.live ? m.method.live : m.method.local}</li>
+									<li>{m.method.scope}</li>
+									<li>{m.method.runs}</li>
+									<li>{m.method.measures}</li>
+									<li>{m.method.failures}</li>
 								</ul>
 								<CodeBlock snippet={reproduce} title={m.method.reproduce} />
 							</div>

@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs';
 import { error } from '@sveltejs/kit';
 import { DEFAULT_LOCALE, LOCALE_CODES } from '#lib/i18n/locales.ts';
-import { SNIPPETS } from '#lib/content/snippets.ts';
+import { reproduceFor } from '#lib/content/snippets.ts';
 import { loadRuns } from '#lib/server/bench.ts';
 import { highlight } from '#lib/server/highlight.ts';
 import type { EntryGenerator, PageServerLoad } from './$types';
@@ -23,7 +23,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		run,
 		models: runs.map((r) => r.results.model),
-		reproduce: await highlight(SNIPPETS.reproduce),
+		reproduce: await highlight(reproduceFor(params.model)),
 		og: existsSync(`static${og}`) ? og : undefined,
 		// Its Markdown twin, for agents (`benchmark/[model]/index.md`).
 		markdown: `/benchmark/${params.model}/index.md`

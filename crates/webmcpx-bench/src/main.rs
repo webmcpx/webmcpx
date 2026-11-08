@@ -7,12 +7,13 @@
 
 use std::io::Write as _;
 use std::net::SocketAddr;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
+use serde_json::json;
 use webmcpx_bench::arm::{Arm, INIT_SCRIPTS, Session, registered_tools, webmcp_tools};
 use webmcpx_bench::cdp::Browser;
 use webmcpx_bench::model::{Client, Price, list_price};
@@ -328,6 +329,27 @@ async fn main() -> Result<()> {
                 progress,
             )
             .await;
+            let mut runs = runs;
+            // What each tool call returned goes to its own file (large); the results file keeps sizes.
+            let observations: String = runs
+                .iter()
+                .map(|r| {
+                    let calls: Vec<_> = r
+                        .outcome
+                        .tool_calls
+                        .iter()
+                        .map(|c| json!({ "name": c.name, "arguments": c.arguments, "result": c.result }))
+                        .collect();
+                    json!({ "task": r.task, "arm": r.arm, "attempt": r.attempt, "calls": calls })
+                        .to_string()
+                        + "\n"
+                })
+                .collect();
+            for run in &mut runs {
+                for call in &mut run.outcome.tool_calls {
+                    call.result.clear();
+                }
+            }
             let results = Results {
                 schema_version: SCHEMA_VERSION,
                 model: model.clone(),
@@ -338,6 +360,8 @@ async fn main() -> Result<()> {
                     .into_iter()
                     .map(|(id, info)| (id.to_owned(), info))
                     .collect(),
+                config: Some(run_config(&root, jobs, repeat)),
+                history: Vec::new(),
                 summary: Summary::of(&runs),
                 runs,
             };
@@ -350,11 +374,41 @@ async fn main() -> Result<()> {
             std::fs::write(&latest, &json).with_context(|| latest.display().to_string())?;
             let stamped = latest.with_file_name(format!("{model}-{started_at}.json"));
             std::fs::write(&stamped, &json)?;
+            std::fs::write(
+                latest.with_file_name("latest.observations.jsonl"),
+                &observations,
+            )?;
+            std::fs::write(
+                latest.with_file_name(format!("{model}-{started_at}.observations.jsonl")),
+                &observations,
+            )?;
             writeln!(std::io::stdout().lock(), "{}", markdown(&results))?;
             eprintln!("wrote {} and {}", latest.display(), stamped.display());
         }
     }
     Ok(())
+}
+
+/// How a run was made, for readers who audit or repeat it.
+fn run_config(root: &Path, jobs: usize, repeat: u32) -> serde_json::Value {
+    let git = |args: &[&str]| {
+        std::process::Command::new("git")
+            .args(args)
+            .current_dir(root)
+            .output()
+            .ok()
+            .map(|o| String::from_utf8_lossy(&o.stdout).trim().to_owned())
+    };
+    json!({
+        "harness_revision": git(&["rev-parse", "HEAD"]),
+        "uncommitted_changes": git(&["status", "--porcelain"]).is_some_and(|s| !s.is_empty()),
+        "repeat": repeat,
+        "concurrency": jobs,
+        "result_max_chars": webmcpx_bench::arm::RESULT_MAX_CHARS,
+        "baseline_tools": webmcpx_bench::arm::baseline_tool_specs(),
+        "timing": "duration_ms is the agent loop: model calls and tool calls, after the page loaded and (WebMCP arm) its tools were listed",
+        "cost": "cost_usd is the benchmark model's API usage at price_per_mtok (list prices on the date in model.rs), cache reads included; work done behind a site's tools is not counted",
+    })
 }
 
 /// Waits for Ctrl-C, or SIGTERM (how a container is stopped).

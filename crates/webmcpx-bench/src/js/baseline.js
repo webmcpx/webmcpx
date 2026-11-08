@@ -1,5 +1,7 @@
-// Baseline browser-agent tools (no WebMCP), in the style of DOM-snapshot agents: a text snapshot with
-// numbered refs for interactive elements, plus click and fill by ref.
+// Baseline browser-agent tools (no WebMCP), in the style of DOM-snapshot agents (Playwright MCP,
+// browser-use): a text snapshot with numbered refs for interactive elements, where links show their
+// destination and selects their options, plus click and fill by ref. Navigation and paging through a
+// long snapshot are done by the harness (arm.rs).
 (() => {
   const INTERACTIVE = "a[href],button,input,select,textarea,summary,[role=button],[role=link],[contenteditable=true]";
   const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "SVG", "HEAD"]);
@@ -8,15 +10,29 @@
 
   const label = (el) =>
     squash(el.getAttribute("aria-label") || el.labels?.[0]?.textContent || el.textContent ||
-      el.getAttribute("placeholder") || el.getAttribute("title") || el.name).slice(0, 80);
+      el.getAttribute("placeholder") || el.getAttribute("title") || el.name).slice(0, 200);
+  // Where a link goes, relative to this site when it stays on it (shorter, and what an agent navigates to).
+  const destination = (el) => {
+    try {
+      const url = new URL(el.href, location.href);
+      return (url.origin === location.origin ? url.pathname + url.search + url.hash : url.href).slice(0, 300);
+    } catch {
+      return "";
+    }
+  };
 
   const describe = (el, n) => {
     const tag = el.tagName.toLowerCase();
-    if (tag === "input" || tag === "textarea" || tag === "select") {
+    if (tag === "select") {
+      const options = [...el.options].slice(0, 50).map((o) => squash(o.textContent) + (o.disabled ? " (disabled)" : ""));
+      return `[${n}] select "${label(el)}" value="${el.value}" options: ${options.join(" | ")}`;
+    }
+    if (tag === "input" || tag === "textarea") {
       const type = el.type ? ` type=${el.type}` : "";
       return `[${n}] ${tag}${type} "${label(el)}" value="${el.value}"`;
     }
-    return `[${n}] ${el.getAttribute("role") || (tag === "a" ? "link" : tag)} "${label(el)}"`;
+    const href = tag === "a" && el.href ? ` -> ${destination(el)}` : "";
+    return `[${n}] ${el.getAttribute("role") || (tag === "a" ? "link" : tag)} "${label(el)}"${href}`;
   };
 
   function snapshot() {

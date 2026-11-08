@@ -13,7 +13,9 @@ use crate::model::{Price, Usage};
 /// 2: `price_per_mtok` became `{input, cached_input, output}`; usage gained `cache_write`.
 /// 3: `tasks` (where each task ran and what it asked) travels with the run.
 /// 4: each `webmcp` run records the `tools` (name, description) the agent was given.
-pub const SCHEMA_VERSION: u32 = 4;
+/// 5: `config` (harness revision, limits, the baseline's tools, concurrency), `history` (regrades),
+///    each run's `started_at` and `failure`; tool results go to a separate observations file.
+pub const SCHEMA_VERSION: u32 = 5;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Results {
@@ -28,6 +30,12 @@ pub struct Results {
     /// this, not the current task files, which may have changed since.
     #[serde(default)]
     pub tasks: std::collections::BTreeMap<String, serde_json::Value>,
+    /// How the run was made (schema 5): what a reader needs to audit or repeat it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub config: Option<serde_json::Value>,
+    /// Every regrade since the run, oldest first: when, and which runs changed grade.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub history: Vec<serde_json::Value>,
     pub runs: Vec<Run>,
     pub summary: Summary,
 }
@@ -37,6 +45,9 @@ pub struct Run {
     pub task: String,
     pub arm: Arm,
     pub attempt: u32,
+    /// Unix milliseconds when this attempt started (schema 5).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub started_at: Option<u64>,
     pub success: bool,
     /// Set when the harness itself failed (not the agent); such runs count as failures.
     pub harness_error: Option<String>,
@@ -185,6 +196,30 @@ fn compare(baseline: f64, webmcp: f64, better: &str, worse: &str) -> String {
     }
 }
 
+/// Sets `run.failure` from what the run recorded (see [`Run::failure`]).
+pub fn classify(run: &mut Run) {
+    use crate::agent::Stop;
+    let answer = run.outcome.answer.as_deref().unwrap_or_default();
+    run.failure = (!run.success).then(|| {
+        if run.harness_error.is_some() {
+            "harness"
+        } else if run.outcome.stop == Stop::MaxSteps {
+            "step_limit"
+        } else if run.outcome.stop == Stop::ModelError {
+            "model_error"
+        } else if crate::task::blocked(answer) {
+            "blocked"
+        } else if crate::task::ungrounded(answer) {
+            "ungrounded"
+        } else if crate::task::abstained(answer) {
+            "abstained"
+        } else {
+            "wrong"
+        }
+        .to_owned()
+    });
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -195,6 +230,7 @@ mod tests {
             task: task.into(),
             arm,
             attempt: 1,
+            started_at: None,
             success,
             harness_error: None,
             failure: None,
@@ -246,6 +282,8 @@ mod tests {
             price_per_mtok: crate::model::list_price("gpt-6-luna"),
             started_at: 0,
             tasks: std::collections::BTreeMap::new(),
+            config: None,
+            history: Vec::new(),
             summary: Summary::of(&runs),
             runs: runs.into(),
         };
@@ -263,28 +301,4 @@ mod tests {
         WebMCP vs baseline: 10.0x fewer tokens, 2.5x faster.
         ");
     }
-}
-
-/// Sets `run.failure` from what the run recorded (see [`Run::failure`]).
-pub fn classify(run: &mut Run) {
-    use crate::agent::Stop;
-    let answer = run.outcome.answer.as_deref().unwrap_or_default();
-    run.failure = (!run.success).then(|| {
-        if run.harness_error.is_some() {
-            "harness"
-        } else if run.outcome.stop == Stop::MaxSteps {
-            "step_limit"
-        } else if run.outcome.stop == Stop::ModelError {
-            "model_error"
-        } else if crate::task::blocked(answer) {
-            "blocked"
-        } else if crate::task::ungrounded(answer) {
-            "ungrounded"
-        } else if crate::task::abstained(answer) {
-            "abstained"
-        } else {
-            "wrong"
-        }
-        .to_owned()
-    });
 }

@@ -243,6 +243,13 @@ const fr: Messages = {
 			graded: 'Notation sur les faits présents dans la réponse et sur l’état de la page. Pas de LLM juge.',
 			live: 'Un site en ligne : il fournit ses propres outils WebMCP.',
 			local: 'Un site de test local : ses outils viennent de webmcpx.',
+			scope:
+				'35 questions sur 7 sites, dont 32 en lecture seule ; les plus gros gains viennent des outils de recherche des sites eux-mêmes.',
+			runs: '3 exécutions par question et par bras : 3 sur 3 est un indice, pas la preuve de 100 %.',
+			measures:
+				'Le temps est la boucle de l’agent après le chargement de la page ; le coût est l’usage API du modèle aux tarifs datés, cache compris.',
+			failures:
+				'Chaque exécution échouée dit pourquoi dans les résultats (blocage du site, réponse hors page, limite d’étapes…).',
 			reproduce: 'pour reproduire'
 		},
 		tools: {
