@@ -545,6 +545,10 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
       document.title = "T".repeat(3e6);
       Object.defineProperty(document, "readyState", { get: () => "z".repeat(3e6) });
       document.modelContext.registerTool({ name: "big", description: "d".repeat(3e6), execute() {} });
+      // A frame name is page-set and unbounded: nothing may ask Chrome for the frame tree.
+      const f = document.createElement("iframe");
+      document.documentElement.append(f);
+      f.contentWindow.name = "n".repeat(7e7);
     </script>"#;
     let schemas = r#"<!doctype html><title>s</title><script>
       for (let i = 0; i < 200; i++) document.modelContext.registerTool({

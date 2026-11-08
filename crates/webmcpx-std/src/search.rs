@@ -9,6 +9,7 @@ use crate::text::clean;
 
 const DEFAULT_LIMIT: usize = 5;
 const MAX_LIMIT: usize = 20;
+const MAX_TERMS: usize = 32;
 const SNIPPET_CHARS: usize = 240;
 /// A heading is context for a snippet, not content: a page must not fill the answer with one.
 const HEADING_CHARS: usize = 120;
@@ -44,7 +45,9 @@ fn counts(text: &str, terms: &[String]) -> (Vec<u32>, usize) {
 ///
 /// `limit == 0` means the default. Matching is case-insensitive for ASCII letters.
 pub fn search(stream: &str, query: &str, limit: usize) -> String {
-    let terms = dedup(tokenize(query));
+    // A query is a few words; past MAX_TERMS the rest are ignored, so memory stays passages × 32.
+    let mut terms = dedup(tokenize(query));
+    terms.truncate(MAX_TERMS);
     if terms.is_empty() {
         return Envelope::new().err(Code::InvalidInput, "query must contain a word");
     }
@@ -343,5 +346,15 @@ mod tests {
         let (headings, passages) = passages(&page, &["word".into()]);
         assert_eq!(headings.len(), 2);
         assert!(passages.iter().all(|p| p.tf == [2_000] && p.len == 2_002));
+    }
+
+    #[test]
+    fn a_query_counts_at_most_max_terms_words() {
+        let query: String = (0..5_000).map(|i| format!("w{i} ")).collect();
+        let page = "p\u{1F}w0 here\u{1E}";
+        let v = parse(&search(page, &query, 5));
+        assert_eq!(v["data"]["results"][0]["snippet"], "w0 here");
+        let (_, passages) = passages(page, &dedup(tokenize(&query))[..MAX_TERMS]);
+        assert_eq!(passages[0].tf.len(), MAX_TERMS);
     }
 }

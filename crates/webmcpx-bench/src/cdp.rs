@@ -265,6 +265,7 @@ impl Browser {
         let page = Page {
             conn: self.conn.clone(),
             session,
+            frame: target,
             context,
         };
         page.send("Page.enable", json!({})).await?;
@@ -282,6 +283,9 @@ impl Browser {
 pub struct Page {
     conn: Conn,
     session: String,
+    /// The main frame: in Chrome its id is the page target's. Known up front, so finding it never asks
+    /// for the frame tree (whose frame names a page sets, at any length).
+    frame: String,
     context: ContextGuard,
 }
 
@@ -362,14 +366,10 @@ impl Page {
     /// JavaScript globals and prototypes are not, so a page can't tamper with what this reads (say, make
     /// `slice` return a 70 MB title). Use it for every read of untrusted page data.
     pub async fn eval_isolated(&self, expression: &str) -> Result<Value> {
-        let tree = self.send("Page.getFrameTree", json!({})).await?;
-        let frame = tree["frameTree"]["frame"]["id"]
-            .as_str()
-            .context("no main frame")?;
         let world = self
             .send(
                 "Page.createIsolatedWorld",
-                json!({ "frameId": frame, "worldName": "webmcpx-scan" }),
+                json!({ "frameId": self.frame, "worldName": "webmcpx-scan" }),
             )
             .await?;
         let context = world["executionContextId"]
