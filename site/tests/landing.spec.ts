@@ -76,7 +76,10 @@ test('content is visible without JavaScript', async ({ browser }) => {
 	await page.goto('/');
 	await expect(page.getByRole('heading', { name: 'For your site', exact: true })).toBeVisible();
 	await expect(page.getByRole('heading', { name: 'For your agent', exact: true })).toBeVisible();
-	// Every tab panel is in the HTML: the best case first, then every other site, tools included.
+	// The home renders the open site only (a lighter page): its best case is there without JavaScript.
+	await expect(page.getByText(/Notion page through the API/).first()).toBeVisible();
+	// Each model's own page renders every site and tab: everything reads without JavaScript there.
+	await page.goto('/benchmark/gpt-6-luna/');
 	await expect(page.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	const tools = page.getByRole('region', { name: 'WebMCP tools on Notion' });
 	await expect(tools.locator('tbody tr')).toHaveCount(5);

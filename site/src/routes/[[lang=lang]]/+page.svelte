@@ -44,7 +44,7 @@
 	<Why bestSaving={page.best.saving} bestSite={page.best.site} />
 {/if}
 <Divider />
-<Proof runs={page.runs} reproduce={page.code.reproduce} />
+<Proof runs={page.runs} reproduce={page.code.reproduce} compact />
 <Divider />
 <Agents code={page.code} saving={page.saving} best={page.best} />
 <Divider />

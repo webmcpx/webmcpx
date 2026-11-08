@@ -3,7 +3,8 @@
 	run; logos pick the site (best case first). The rotation moves from site to site (each by its best
 	question), and the selected logo follows, so the logos are the carousel's position (WCAG 2.2.2: it holds while hovered,
 	focused or off screen, stops for good once a site is picked, and never moves for reduced motion). Under them, tabs show that site's questions per metric, its
-	WebMCP tools and the method. All tab panels are in the HTML, so everything reads without JavaScript.
+	WebMCP tools and the method. On each model's own page every panel is in the HTML, so everything reads
+	without JavaScript; the home renders only the open site and tab (`compact`).
 -->
 <script lang="ts">
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
@@ -38,9 +39,14 @@
 		/** Every published model, linked to its own page for readers without JavaScript (default: `runs`). */
 		models?: string[];
 		reproduce: Highlighted;
+		/**
+		 * Render only the open site and detail tab (the home: thousands fewer elements, a faster first paint).
+		 * Without JavaScript the home shows the first site; each model's own page renders every site and tab.
+		 */
+		compact?: boolean;
 	}
 
-	let { runs, models: published, reproduce }: Props = $props();
+	let { runs, models: published, reproduce, compact = false }: Props = $props();
 	const i18n = useI18n();
 	const m = $derived(i18n.m.proof);
 	const pages = $derived((published ?? runs.map((r) => r.results.model)).map(modelLook));
@@ -262,6 +268,7 @@
 	>
 		<Tabs
 			{items}
+			lazy={compact}
 			bind:value={() => siteId, pick}
 			label={m.site}
 			listClass="-mr-4 gap-3 pt-1 pr-4 pb-3 sm:mr-0 sm:pr-1"
@@ -302,6 +309,7 @@
 				{@const st = siteTools(site.tasks.map((t) => tools[t.task]).filter(Boolean))}
 				<Tabs
 					items={DETAILS}
+					lazy={compact}
 					bind:value={detailId}
 					label={fmt(m.details, { site: site.name })}
 					class="mt-12"

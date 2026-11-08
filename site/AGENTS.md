@@ -121,8 +121,9 @@ tests/                       Playwright e2e against the prerendered build
   sorted by biggest saving and the section says so, so the first one shown is disclosed as the best case; and every question stays in the full table, which works without JS. Losses are shown, not hidden.
 - Under each site's questions, tabs (with icons) show only that site: one chart per metric, its WebMCP tools
   as a table (name, description: the text the agent reads, and the calls the agent made) and the method.
-  Tools and calls come from the same attempt. `Tabs` puts every panel in the HTML and hides inactive ones
-  only when JavaScript runs, so all of it reads without JavaScript. Schema 4 runs record the tools the agent was given; for older runs the page uses
+  Tools and calls come from the same attempt. Each model's own page (`/benchmark/<model>/`) puts every
+  site and tab panel in the HTML, so all of it reads without JavaScript; the home renders only the open site
+  and tab (`compact`: about 3,000 fewer elements and a faster first paint), with links to those pages. Schema 4 runs record the tools the agent was given; for older runs the page uses
   `lib/content/tools.json` (`just bench-tools`, a dated snapshot) and says it was captured after the run.
 - The benchmark section shows selected cases (owner's decision): questions where webmcpx used at most half
   the tokens and solved at least as often (`showcase()` in `features/benchmark/sites.ts`); sites without one
