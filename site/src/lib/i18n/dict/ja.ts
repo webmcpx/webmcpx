@@ -680,7 +680,7 @@ const ja: Messages = {
 			tools: '検出されたツール',
 			more: 'ほか {n} 件',
 			findings: 'lint の指摘事項',
-			fix: '修正する',
+			fix: 'WebMCP を修正',
 			lint: 'ソース内の問題をすべて洗い出し、修正案も示します：',
 			terminal: 'ターミナル',
 			badge: '対応済みであることを示しましょう。バッジを選んで、サイトに貼り付けてください：',

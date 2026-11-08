@@ -288,6 +288,12 @@
 												{/if}
 											{/each}
 										</ul>
+										{#if g.id === 'webmcp' && r.verdict === 'missing'}
+											<!-- Our offer is WebMCP: the fix sits under its checks; the other groups are the site's own basics. -->
+											<Button href="#for-sites" size="sm" class="mt-3"
+												><Wrench aria-hidden="true" />{m.result.fix}</Button
+											>
+										{/if}
 									</div>
 								{/each}
 							</div>
@@ -386,9 +392,6 @@
 			{/if}
 
 			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7">
-				{#if r.verdict === 'missing'}
-					<Button href="#for-sites" size="sm"><Wrench aria-hidden="true" />{m.result.fix}</Button>
-				{/if}
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
 					<Link aria-hidden="true" />{shared ? m.result.shared : m.result.share}
 				</Button>

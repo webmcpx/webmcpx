@@ -699,7 +699,7 @@ const es: Messages = {
 			tools: 'Herramientas encontradas',
 			more: '+{n} más',
 			findings: 'Hallazgos del linter',
-			fix: 'Corregir',
+			fix: 'Corregir WebMCP',
 			lint: 'Encuentra todos los problemas en tu código fuente, con su corrección:',
 			terminal: 'terminal',
 			badge: 'Muéstralo. Elige una insignia y pégala en tu sitio:',

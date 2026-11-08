@@ -690,7 +690,7 @@ const id: Messages = {
 			tools: 'Tool yang ditemukan',
 			more: '+{n} lainnya',
 			findings: 'Temuan lint',
-			fix: 'Perbaiki',
+			fix: 'Perbaiki WebMCP',
 			lint: 'Temukan semua masalah di source Anda, lengkap dengan perbaikannya:',
 			terminal: 'terminal',
 			badge: 'Tunjukkan. Pilih badge, lalu tempel di situs Anda:',

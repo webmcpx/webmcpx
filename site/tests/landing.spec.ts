@@ -262,7 +262,7 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await page.keyboard.press('Enter');
 	await expect(page.locator('#scan').getByText('Not yet', { exact: true })).toBeVisible();
 	// The fix is one click away: the install steps.
-	await page.locator('#scan').getByRole('link', { name: 'Fix it' }).click();
+	await page.locator('#scan').getByRole('link', { name: 'Fix WebMCP' }).click();
 	await expect(page).toHaveURL(/#for-sites$/);
 	await expect(page.locator('#for-sites')).toBeInViewport();
 });

@@ -699,7 +699,7 @@ const de: Messages = {
 			tools: 'Gefundene Tools',
 			more: '+{n} weitere',
 			findings: 'Lint-Befunde',
-			fix: 'Beheben',
+			fix: 'WebMCP beheben',
 			lint: 'Finden Sie alle Probleme im Quellcode, samt Korrekturen:',
 			terminal: 'Terminal',
 			badge: 'Zeigen Sie es. Wählen Sie ein Badge und binden Sie es auf Ihrer Website ein:',

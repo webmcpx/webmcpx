@@ -698,7 +698,7 @@ const ptBr: Messages = {
 			tools: 'Ferramentas encontradas',
 			more: '+{n} outras',
 			findings: 'Resultados do lint',
-			fix: 'Corrigir',
+			fix: 'Corrigir WebMCP',
 			lint: 'Encontre todos os problemas no seu código-fonte, com as correções:',
 			terminal: 'terminal',
 			badge: 'Mostre isso. Escolha um badge e cole no seu site:',

@@ -704,7 +704,7 @@ const fr: Messages = {
 			tools: 'Outils trouvés',
 			more: '+{n} de plus',
 			findings: 'Résultats du lint',
-			fix: 'Corriger',
+			fix: 'Corriger WebMCP',
 			lint: 'Trouvez chaque problème dans votre code source, avec sa correction :',
 			terminal: 'terminal',
 			badge: 'Affichez-le. Choisissez un badge et collez-le sur votre site :',

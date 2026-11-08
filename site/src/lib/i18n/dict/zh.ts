@@ -651,7 +651,7 @@ const zh: Messages = {
 			tools: '发现的工具',
 			more: '+{n} 个',
 			findings: 'lint 结果',
-			fix: '修复',
+			fix: '修复 WebMCP',
 			lint: '找出源码里的所有问题，并给出修复方案：',
 			terminal: '终端',
 			badge: '亮出来。选一个徽章，贴到你的网站上：',

@@ -836,8 +836,8 @@ const en = {
 			more: '+{n} more',
 			/** Names the list of lint findings. */
 			findings: 'Lint findings',
-			// A button that jumps to the install steps: max 14.
-			fix: 'Fix it',
+			// Under the WebMCP checks of a site without tools, jumps to the install steps; keep WebMCP: max 18.
+			fix: 'Fix WebMCP',
 			lint: 'Find every issue in your source, with fixes:',
 			// A code block's title: max 12.
 			terminal: 'terminal',

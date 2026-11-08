@@ -40,18 +40,20 @@ export type ScoreItemId =
 	| 'link_headers'
 	| 'agent_skills'
 	| 'api_catalog';
-/** The checks by group, in the order the page shows them. */
+/**
+ * The checks by group, from the oldest, most basic web practice to the newest: robots.txt (1994), sitemaps
+ * (2005), llms.txt (2024), Markdown for agents (2025); Link headers (RFC 5988, 2010), the API catalog
+ * (RFC 9727, 2025), Agent Skills discovery (draft); then what agents pay, and WebMCP last, from having tools
+ * to passing the linter.
+ */
 export const SCORE_GROUPS: { id: 'webmcp' | 'cost' | 'readable' | 'discoverable'; items: ScoreItemId[] }[] = [
-	{ id: 'webmcp', items: ['tools', 'lint', 'descriptions', 'annotations'] },
+	{ id: 'readable', items: ['robots', 'sitemap', 'llms_txt', 'markdown'] },
+	{ id: 'discoverable', items: ['link_headers', 'api_catalog', 'agent_skills'] },
 	{ id: 'cost', items: ['cost'] },
-	{ id: 'readable', items: ['llms_txt', 'markdown', 'robots', 'sitemap'] },
-	{ id: 'discoverable', items: ['link_headers', 'agent_skills', 'api_catalog'] }
+	{ id: 'webmcp', items: ['tools', 'descriptions', 'annotations', 'lint'] }
 ];
-/** The groups in two columns from sm up, balanced by item count (5 and 7); one column on phones, in order. */
-export const SCORE_COLUMNS = [
-	SCORE_GROUPS.filter((g) => g.id === 'webmcp' || g.id === 'cost'),
-	SCORE_GROUPS.filter((g) => g.id === 'readable' || g.id === 'discoverable')
-];
+/** The groups in two columns from sm up (7 and 5 checks): the web basics, then the agent level. One column on phones, in order. */
+export const SCORE_COLUMNS = [SCORE_GROUPS.slice(0, 2), SCORE_GROUPS.slice(2)];
 /** The lowest score of an agent-ready site (scan.rs READY_SCORE). */
 export const READY_SCORE = 70;
 
