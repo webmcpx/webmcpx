@@ -178,16 +178,16 @@ const en = {
 		// Three steps, each a short title (max 32) and one sentence.
 		steps: {
 			register: {
-				title: 'Your page registers tools',
-				text: 'A name, a description, an input schema and a function: the actions your buttons already run.'
+				title: 'Your site lists its tools',
+				text: 'Each one is an action with a name and a short description, like “search products” or “add to cart”: the same things your buttons already do.'
 			},
 			list: {
-				title: 'The browser lists them',
-				text: 'An agent asks the browser what the page can do, with typed inputs and hints such as read-only.'
+				title: 'The agent sees the list',
+				text: 'The browser hands it your site’s tools and what each one needs, so it doesn’t read the whole page and guess.'
 			},
 			call: {
-				title: 'The agent calls them',
-				text: 'In the user’s own tab, with their session: no new server and no OAuth.'
+				title: 'The agent uses them',
+				text: 'Right in the visitor’s own tab, already signed in: no new server, no extra login.'
 			}
 		},
 		// The bridge from the hand-written tool above to webmcpx: what it takes off your plate. Each claim

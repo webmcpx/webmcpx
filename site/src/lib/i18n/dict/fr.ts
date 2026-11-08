@@ -130,16 +130,16 @@ const fr: Messages = {
 		},
 		steps: {
 			register: {
-				title: 'Votre page déclare ses outils',
-				text: 'Un nom, une description, un schéma d’entrée et une fonction : les actions que vos boutons exécutent déjà.'
+				title: 'Votre site liste ses outils',
+				text: 'Chacun est une action avec un nom et une courte description, comme « chercher des produits » ou « ajouter au panier » : ce que vos boutons font déjà.'
 			},
 			list: {
-				title: 'Le navigateur les liste',
-				text: 'L’agent demande au navigateur ce que la page sait faire, avec des entrées typées et des indications comme « lecture seule ».'
+				title: 'L’agent voit la liste',
+				text: 'Le navigateur lui donne les outils de votre site et ce dont chacun a besoin, sans lire toute la page ni deviner.'
 			},
 			call: {
-				title: 'L’agent les appelle',
-				text: 'Dans l’onglet même de l’utilisateur, avec sa session : ni serveur en plus, ni OAuth.'
+				title: 'L’agent les utilise',
+				text: 'Dans l’onglet même du visiteur, déjà connecté : pas de nouveau serveur, pas de connexion en plus.'
 			}
 		},
 		webmcpx: {

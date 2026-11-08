@@ -128,16 +128,16 @@ const es: Messages = {
 		},
 		steps: {
 			register: {
-				title: 'Tu página registra herramientas',
-				text: 'Un nombre, una descripción, un schema de entrada y una función: las acciones que tus botones ya ejecutan.'
+				title: 'Tu sitio publica sus herramientas',
+				text: 'Cada una es una acción con nombre y una descripción corta, como «buscar productos» o «añadir al carrito»: lo mismo que ya hacen tus botones.'
 			},
 			list: {
-				title: 'El navegador las lista',
-				text: 'El agente le pregunta al navegador qué puede hacer la página, con entradas tipadas e indicaciones como solo lectura.'
+				title: 'El agente ve la lista',
+				text: 'El navegador le entrega las herramientas de tu sitio y lo que necesita cada una, sin leer la página entera ni adivinar.'
 			},
 			call: {
-				title: 'El agente las llama',
-				text: 'En la propia pestaña del usuario, con su sesión: sin servidor nuevo y sin OAuth.'
+				title: 'El agente las usa',
+				text: 'En la propia pestaña del visitante, con su sesión iniciada: sin servidor nuevo ni inicio de sesión extra.'
 			}
 		},
 		webmcpx: {

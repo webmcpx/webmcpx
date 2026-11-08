@@ -127,16 +127,16 @@ const id: Messages = {
 		},
 		steps: {
 			register: {
-				title: 'Halaman Anda mendaftarkan tool',
-				text: 'Nama, deskripsi, input schema, dan sebuah fungsi: aksi yang selama ini sudah dijalankan tombol Anda.'
+				title: 'Situs Anda mendaftarkan tool-nya',
+				text: 'Setiap tool adalah aksi dengan nama dan deskripsi singkat, seperti “cari produk” atau “tambah ke keranjang”: hal yang sudah dilakukan tombol Anda.'
 			},
 			list: {
-				title: 'Browser menampilkan daftarnya',
-				text: 'Agent bertanya kepada browser apa saja yang bisa dilakukan halaman, lengkap dengan input bertipe dan petunjuk seperti read-only.'
+				title: 'Agent melihat daftarnya',
+				text: 'Browser memberinya tool situs Anda dan apa yang dibutuhkan masing-masing, tanpa membaca seluruh halaman dan menebak.'
 			},
 			call: {
-				title: 'Agent memanggilnya',
-				text: 'Di tab milik pengguna sendiri, dengan sesinya: tanpa server baru dan tanpa OAuth.'
+				title: 'Agent memakainya',
+				text: 'Langsung di tab pengunjung sendiri, sudah masuk: tanpa server baru, tanpa login tambahan.'
 			}
 		},
 		webmcpx: {

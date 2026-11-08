@@ -127,16 +127,16 @@ const ptBr: Messages = {
 		},
 		steps: {
 			register: {
-				title: 'Sua página registra ferramentas',
-				text: 'Nome, descrição, schema de entrada e uma função: as mesmas ações que seus botões já executam.'
+				title: 'Seu site lista as ferramentas',
+				text: 'Cada uma é uma ação com nome e descrição curta, como “buscar produtos” ou “adicionar ao carrinho”: o mesmo que seus botões já fazem.'
 			},
 			list: {
-				title: 'O navegador lista as ferramentas',
-				text: 'O agente pergunta ao navegador o que a página sabe fazer, com entradas tipadas e dicas como somente leitura.'
+				title: 'O agente vê a lista',
+				text: 'O navegador entrega a ele as ferramentas do site e o que cada uma precisa, sem ler a página inteira e adivinhar.'
 			},
 			call: {
-				title: 'O agente chama as ferramentas',
-				text: 'Na própria aba do usuário, com a sessão dele: sem servidor novo e sem OAuth.'
+				title: 'O agente usa',
+				text: 'Na própria aba do visitante, já logado: sem servidor novo, sem login extra.'
 			}
 		},
 		webmcpx: {

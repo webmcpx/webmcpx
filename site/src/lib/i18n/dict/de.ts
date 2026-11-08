@@ -129,16 +129,16 @@ const de: Messages = {
 		},
 		steps: {
 			register: {
-				title: 'Ihre Seite registriert Tools',
-				text: 'Name, Beschreibung, Eingabeschema und eine Funktion: die Aktionen, die Ihre Buttons schon ausführen.'
+				title: 'Ihre Website listet ihre Tools',
+				text: 'Jedes ist eine Aktion mit Namen und kurzer Beschreibung, etwa „Produkte suchen“ oder „In den Warenkorb“: das, was Ihre Buttons schon tun.'
 			},
 			list: {
-				title: 'Der Browser listet sie auf',
-				text: 'Ein Agent fragt den Browser, was die Seite kann, mit typisierten Eingaben und Hinweisen wie „nur lesend“.'
+				title: 'Der Agent sieht die Liste',
+				text: 'Der Browser gibt ihm die Tools Ihrer Website und was jedes braucht, statt dass er die ganze Seite liest und rät.'
 			},
 			call: {
-				title: 'Der Agent ruft sie auf',
-				text: 'Im eigenen Tab des Nutzers, mit seiner Sitzung: kein neuer Server, kein OAuth.'
+				title: 'Der Agent nutzt sie',
+				text: 'Direkt im Tab des Besuchers, schon angemeldet: kein neuer Server, kein zusätzlicher Login.'
 			}
 		},
 		webmcpx: {
