@@ -576,7 +576,7 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	await expect(result.locator('img[src^="data:image/png"]')).toHaveCount(1);
 	// A preview of each style (decorative: the radios carry the names).
 	await expect(result.locator('fieldset svg[aria-label^="Agent-ready: WebMCP tools checked"]')).toHaveCount(
-		4
+		3
 	);
 	const embed = result.getByRole('figure').filter({ hasText: 'badge.html' });
 	await expect(embed).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');
@@ -658,9 +658,12 @@ test('for agents: the measured saving, the tools it works with, one prompt to se
 		'Claude Code',
 		'Codex',
 		'Cursor',
+		'OpenClaw',
+		'Hermes Agent',
 		'Chrome',
-		'Firefox',
-		'Safari'
+		'Microsoft Edge',
+		'Safari',
+		'Firefox'
 	]);
 	// One prompt and nothing to choose from (owner's decision 2026-11-08): no tabs.
 	await expect(agents.getByRole('tab')).toHaveCount(0);
