@@ -59,7 +59,7 @@ export function readPage(what, root) {
   const data = (n) => (css(n.parentNode).visibility == "hidden" ? "" : n.data);
   // Visible text; an element with no block inside is one block.
   const textOf = (el) =>
-    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? textOf(n) : "")).join("");
+    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? (n.matches(BLOCKS) ? ` ${textOf(n)} ` : textOf(n)) : "")).join("");
   const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   let out = "";
   let anchor = "";

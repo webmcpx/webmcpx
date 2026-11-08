@@ -65,7 +65,7 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
 <form toolname="search_mugs" tooldescription="Search the mug catalog." action="/search" method="get">
   <label>Glaze <input name="glaze" required></label>
   <input name="limit" type="number" min="1" max="20" toolparamdescription="How many results.">
-  <input name="when" type="datetime-local">
+  <input name="when" type="datetime-local"><input name="from" type="date">
   <input name="cc" type="email" multiple toolparamdescription="Who else gets the results.">
 </form>
 <form id="note-form" toolname="save_note" tooldescription="Save a note." method="get" toolautosubmit>
@@ -306,6 +306,7 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
         glaze: { type: "string", description: "Glaze" },
         limit: { type: "number", minimum: 1, maximum: 20, description: "How many results." },
         when: { type: "string", format: "date-time" },
+        from: { type: "string", format: "date" },
         cc: { type: "string", format: "email", description: "Who else gets the results." },
       },
       required: ["glaze"],
@@ -323,6 +324,9 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
 
     // Without toolautosubmit the agent fills the form and leaves the submit to the user.
     // An email input with multiple takes a comma-separated list, as text.
+    // A date the field can't hold is cleared by the browser: refused, never sent empty.
+    const badDate = JSON.parse(await session.call(search, { glaze: "celadon", from: "2026-02-30" }));
+    assert.equal(badDate.error.code, "INVALID_INPUT");
     // A datetime with zero seconds is normalized by the browser, not refused.
     const filled = JSON.parse(await session.call(search, { glaze: "celadon", limit: 3, cc: "ana@kiln.test,bo@kiln.test", when: "2026-11-08T12:00:00" }));
     assert.deepEqual(filled, { ok: true, data: { submitted: false, next: "Ask the user to review the form and submit it." } });

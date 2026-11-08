@@ -297,7 +297,10 @@ function fill(form, args) {
       // a value losslessly (a datetime drops zero seconds) and are checked by the browser's validation.
       const got = el.tagName === "SELECT" ? [...el.selectedOptions].map((o) => o.value) : [el.value];
       const exact = el.tagName === "SELECT" || el.type === "range";
-      if (exact && (got.length !== wanted.length || got.some((v) => !wanted.includes(v)))) {
+      // A value the field can't hold at all (a date like 2026-02-30) is cleared by the browser: refused,
+      // never sent as an empty field.
+      const cleared = !exact && String(value) !== "" && el.value === "";
+      if (cleared || (exact && (got.length !== wanted.length || got.some((v) => !wanted.includes(v))))) {
         throw Object.assign(new Error(`\`${name}\`: ${JSON.stringify(value)} is not a value this field takes`), { code: "INVALID_INPUT" });
       }
       // Frameworks listen for these, not for property writes.

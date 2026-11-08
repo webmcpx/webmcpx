@@ -254,3 +254,13 @@ test("get_page_context keeps page-set fields to size and never cuts a URL", asyn
   assert.equal(out.data.headings[0].url, undefined, "a giant id gets no URL rather than a cut one");
   assert.match(out.data.headings[1].url, /#ok$/);
 });
+
+test("nested blocks keep their words apart", async () => {
+  const page = host();
+  document.body.innerHTML = "<main><ul><li><p>Refunds</p><p>Contact support.</p></li><li>Products<ul><li>Notebook</li><li>Mug</li></ul></li></ul></main>";
+  await register({ wasm: WASM });
+  for (const word of ["Contact", "Notebook", "Mug"]) {
+    assert.equal((await page.call("search_page", { query: word })).ok, true, word);
+  }
+  assert.match((await page.call("fetch_as_markdown", {})).data.markdown, /Refunds Contact support\./);
+});
