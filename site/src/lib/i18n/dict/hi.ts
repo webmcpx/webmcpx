@@ -77,7 +77,9 @@ const hi: Messages = {
 		stamp: 'नया',
 		draft: 'WebMCP के {date} वाले ड्राफ़्ट के अनुरूप',
 		title: { text: 'अपनी साइट को {mark} बनाइए', mark: 'एजेंट-रेडी' },
-		lead: 'हमारे बेंचमार्क में WebMCP के साथ एजेंटों ने {best} तक कम टोकन खर्च किए (सबसे अच्छा मामला: {site}, {model})। देखिए एजेंट को आपकी साइट से क्या मिलता है, फिर एक लाइन में ठीक कीजिए।',
+		lead: 'हमारे बेंचमार्क में WebMCP के साथ एजेंटों ने {mark} खर्च किए (सबसे अच्छा मामला: {site}, {model})। देखिए एजेंट को आपकी साइट से क्या मिलता है, फिर एक लाइन में ठीक कीजिए।',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: '{best} तक कम टोकन',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'AI एजेंट आपके पेज पहले से पढ़ रहे हैं। देखिए उन्हें क्या मिलता है, फिर एक लाइन से उन्हें असली टूल्स दीजिए।',
@@ -198,9 +200,7 @@ const hi: Messages = {
 		open: 'खोलें',
 		opens: '({site} पर जाता है)',
 		rotator: {
-			label: 'सवाल',
-			pause: 'रोटेशन रोकें',
-			resume: 'रोटेशन फिर शुरू करें'
+			label: 'सवाल'
 		},
 		details: '{site} का विवरण',
 		tabs: {
@@ -364,15 +364,13 @@ const hi: Messages = {
 			}
 		},
 		hype: { up: 'तक', fewer: 'कम टोकन', same: 'वही जवाब।', bestCase: 'सबसे अच्छा मामला: {site}, {model}' },
-		worksWith: 'हर MCP क्लाइंट और ब्राउज़र के साथ चलता है',
+		worksWith: 'हर एजेंट और ब्राउज़र के साथ चलता है',
 		tabs: { scripts: 'स्क्रिप्ट' },
 		notes: {
 			prompt:
 				'एक प्रॉम्प्ट: आपका एजेंट खुद सेट होता है, हर जगह पहले WebMCP इस्तेमाल करता है और webmcpx.dev पर साबित करता है।',
 			cli: 'टर्मिनल में एक बार चलाएँ। उसके बाद हर पेज के WebMCP टूल आपके एजेंट के टूल बन जाते हैं।',
-			cursor: '.cursor/mcp.json में (या Settings → MCP)। हर MCP क्लाइंट के लिए वही सर्वर।',
-			scripts:
-				'आपका अपना Playwright, Selenium या Puppeteer: webmcpx वाली हर साइट में Chrome, Firefox और Safari में document.modelContext होता है।'
+			cursor: '.cursor/mcp.json में (या Settings → MCP)। हर MCP क्लाइंट के लिए वही सर्वर।'
 		}
 	},
 
@@ -481,7 +479,7 @@ const hi: Messages = {
 		form: 'साइट स्कैन करें',
 		address: 'आपकी साइट का पता',
 		placeholder: 'aapkisite.in',
-		submit: 'स्कैन करें',
+		submit: 'मेरी साइट स्कैन करें',
 		scanning: 'स्कैनिंग…',
 		steps: [
 			'पेज खुल रहा है…',

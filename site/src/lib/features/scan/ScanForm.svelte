@@ -75,7 +75,7 @@
 		type="submit"
 		size={size === 'lg' ? 'lg' : 'md'}
 		disabled={scanner.status === 'loading'}
-		class={size === 'lg' ? 'sm:h-16' : ''}
+		class={['bg-marker text-ink', size === 'lg' && 'sm:h-16']}
 	>
 		<ScanSearch aria-hidden="true" />{scanner.status === 'loading' ? m.scanning : m.submit}
 	</Button>

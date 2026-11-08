@@ -79,7 +79,9 @@ const fr: Messages = {
 		stamp: 'Nouveau',
 		draft: 'Suit le brouillon WebMCP du {date}',
 		title: { text: 'Rendez votre site {mark}', mark: 'prêt pour les agents' },
-		lead: 'Dans notre benchmark, les agents ont consommé jusqu’à {best} moins de tokens avec WebMCP (meilleur cas : {site}, {model}). Voyez ce que les agents tirent de votre site, puis corrigez en une ligne.',
+		lead: 'Dans notre benchmark, les agents ont consommé {mark} avec WebMCP (meilleur cas : {site}, {model}). Voyez ce que les agents tirent de votre site, puis corrigez en une ligne.',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'jusqu’à {best} moins de tokens',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'Les agents IA lisent déjà vos pages. Voyez ce qu’ils en retirent, puis donnez-leur de vrais outils en une ligne.',
@@ -200,9 +202,7 @@ const fr: Messages = {
 		open: 'Ouvrir',
 		opens: '(ouvre {site})',
 		rotator: {
-			label: 'Questions',
-			pause: 'Suspendre la rotation',
-			resume: 'Reprendre la rotation'
+			label: 'Questions'
 		},
 		details: 'Détails pour {site}',
 		tabs: {
@@ -378,15 +378,13 @@ const fr: Messages = {
 			same: 'Les mêmes réponses.',
 			bestCase: 'Meilleur cas : {site}, {model}'
 		},
-		worksWith: 'Fonctionne avec tout client MCP et tout navigateur',
+		worksWith: 'Fonctionne avec tout agent et tout navigateur',
 		tabs: { scripts: 'Scripts' },
 		notes: {
 			prompt:
 				'Un prompt : votre agent se configure, utilise WebMCP d’abord partout et le prouve sur webmcpx.dev.',
 			cli: 'À lancer une fois dans un terminal. Ensuite, les outils WebMCP de chaque page deviennent des outils de votre agent.',
-			cursor: 'Dans .cursor/mcp.json (ou Settings → MCP). Le même serveur, pour tout client MCP.',
-			scripts:
-				'Votre propre Playwright, Selenium ou Puppeteer : chaque site avec webmcpx a document.modelContext, dans Chrome, Firefox et Safari.'
+			cursor: 'Dans .cursor/mcp.json (ou Settings → MCP). Le même serveur, pour tout client MCP.'
 		}
 	},
 
@@ -495,7 +493,7 @@ const fr: Messages = {
 		form: 'Scanner un site',
 		address: 'Adresse de votre site',
 		placeholder: 'votresite.fr',
-		submit: 'Scanner',
+		submit: 'Scanner mon site',
 		scanning: 'En cours…',
 		steps: [
 			'Ouverture de la page…',

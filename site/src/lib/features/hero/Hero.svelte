@@ -2,6 +2,7 @@
 <script lang="ts">
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import Bot from '@lucide/svelte/icons/bot';
+	import PenCircle from '#lib/components/ui/PenCircle.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import { SITES } from '#lib/content/sites.ts';
 	import { SPEC } from '#lib/content/site.ts';
@@ -53,8 +54,14 @@
 				</h1>
 			</Reveal>
 			<Reveal delay={120}>
-				<p class="mx-auto mt-7 max-w-xl text-lg text-pretty text-ink-2 sm:text-xl">
-					{best ? fmt(m.lead, { best: ratio(best.saving), site: best.site, model: best.model }) : m.leadPlain}
+				<p class="mx-auto mt-7 max-w-5xl text-lg text-balance text-ink-2 sm:text-xl">
+					{#if best}
+						<Rich text={fmt(m.lead, { site: best.site, model: best.model })}>
+							{#snippet mark()}<span class="marker text-ink"
+									>{fmt(m.leadMark, { best: ratio(best.saving) })}</span
+								>{/snippet}
+						</Rich>
+					{:else}{m.leadPlain}{/if}
 				</p>
 			</Reveal>
 			<Reveal delay={180} class="mt-8">
@@ -73,17 +80,31 @@
 								{/snippet}
 							</Rich>
 						</p>
-						<!-- The scan is the one action here; people with no site get a quiet way to theirs. -->
-						<p class="mt-3 text-sm text-ink-3">
-							{m.entry.question}
-							<a
-								href="#for-agents"
-								class="ml-1 inline-flex items-center gap-1 font-medium text-ink underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
-								><Bot size={14} aria-hidden="true" />{m.entry.agent}</a
-							>
-						</p>
 					{/snippet}
 				</ScanForm>
+			</Reveal>
+			<Reveal delay={200}>
+				<!-- The sub-CTA: below the scan (the one main action), for people who use agents but run no site. Circled in
+					     the highlighter, drawn by hand. -->
+				<div class="mt-10 flex justify-center">
+					<PenCircle class="px-8 py-4">
+						<span class="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+							<span class="font-medium text-ink">
+								{m.entry.question}
+							</span>
+							<a
+								href="#for-agents"
+								class="group inline-flex items-center gap-1.5 font-semibold text-ink underline decoration-marker decoration-[3px] underline-offset-4 hover:decoration-ink"
+							>
+								<Bot size={16} aria-hidden="true" />{m.entry.agent}<ArrowRight
+									size={14}
+									class="transition group-hover:translate-x-0.5"
+									aria-hidden="true"
+								/>
+							</a>
+						</span>
+					</PenCircle>
+				</div>
 			</Reveal>
 			<div class="mt-10">
 				<ScanResult />

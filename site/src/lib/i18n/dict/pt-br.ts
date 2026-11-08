@@ -79,7 +79,9 @@ const ptBr: Messages = {
 		stamp: 'Novo',
 		draft: 'Acompanha o rascunho do WebMCP de {date}',
 		title: { text: 'Deixe seu site {mark}', mark: 'pronto para agentes' },
-		lead: 'No nosso benchmark, agentes gastaram até {best} menos tokens com WebMCP (melhor caso: {site}, {model}). Veja o que os agentes recebem do seu site e resolva com uma linha.',
+		lead: 'No nosso benchmark, agentes gastaram {mark} com WebMCP (melhor caso: {site}, {model}). Veja o que os agentes recebem do seu site e resolva com uma linha.',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'até {best} menos tokens',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'Agentes de IA já leem suas páginas. Veja o que eles recebem e entregue ferramentas de verdade com uma linha.',
@@ -197,9 +199,7 @@ const ptBr: Messages = {
 		open: 'Abrir',
 		opens: '(abre {site})',
 		rotator: {
-			label: 'Perguntas',
-			pause: 'Pausar rotação',
-			resume: 'Retomar rotação'
+			label: 'Perguntas'
 		},
 		details: 'Detalhes de {site}',
 		tabs: {
@@ -373,14 +373,12 @@ const ptBr: Messages = {
 			same: 'As mesmas respostas.',
 			bestCase: 'Melhor caso: {site}, {model}'
 		},
-		worksWith: 'Funciona com qualquer cliente MCP e navegador',
+		worksWith: 'Funciona com qualquer agente e navegador',
 		tabs: { scripts: 'Scripts' },
 		notes: {
 			prompt: 'Um prompt: seu agente se configura, usa WebMCP primeiro em tudo e prova no webmcpx.dev.',
 			cli: 'Rode uma vez no terminal. A partir daí, as ferramentas WebMCP de cada página viram ferramentas do seu agente.',
-			cursor: 'Em .cursor/mcp.json (ou Settings → MCP). O mesmo servidor, em qualquer cliente MCP.',
-			scripts:
-				'Seu próprio Playwright, Selenium ou Puppeteer: todo site com webmcpx tem document.modelContext, no Chrome, Firefox e Safari.'
+			cursor: 'Em .cursor/mcp.json (ou Settings → MCP). O mesmo servidor, em qualquer cliente MCP.'
 		}
 	},
 
@@ -489,7 +487,7 @@ const ptBr: Messages = {
 		form: 'Escanear um site',
 		address: 'Endereço do seu site',
 		placeholder: 'seusite.com.br',
-		submit: 'Escanear',
+		submit: 'Escanear meu site',
 		scanning: 'Escaneando…',
 		steps: [
 			'Abrindo a página…',

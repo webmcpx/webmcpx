@@ -17,7 +17,7 @@
 </script>
 
 <section {id} aria-labelledby="{id}-title" class="mx-auto max-w-6xl scroll-mt-20 px-4 py-16 sm:px-6 sm:py-24">
-	<Reveal class={['max-w-3xl', center && 'mx-auto text-center']}>
+	<Reveal class={[center && 'mx-auto max-w-3xl text-center']}>
 		{#if kicker}
 			<p class="mb-4 font-mono text-xs font-medium tracking-widest text-ink-3 uppercase">{kicker}</p>
 		{/if}

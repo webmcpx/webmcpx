@@ -77,7 +77,9 @@ const es: Messages = {
 		stamp: 'Nuevo',
 		draft: 'Sigue el borrador de WebMCP del {date}',
 		title: { text: 'Deja tu sitio {mark}', mark: 'listo para agentes' },
-		lead: 'En nuestro benchmark, los agentes gastaron hasta {best} menos tokens con WebMCP (mejor caso: {site}, {model}). Mira qué reciben los agentes de tu sitio y arréglalo con una línea.',
+		lead: 'En nuestro benchmark, los agentes gastaron {mark} con WebMCP (mejor caso: {site}, {model}). Mira qué reciben los agentes de tu sitio y arréglalo con una línea.',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'hasta {best} menos tokens',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'Los agentes de IA ya leen tus páginas. Mira qué obtienen y dales herramientas de verdad con una sola línea.',
@@ -198,9 +200,7 @@ const es: Messages = {
 		open: 'Abrir',
 		opens: '(abre {site})',
 		rotator: {
-			label: 'Preguntas',
-			pause: 'Pausar rotación',
-			resume: 'Reanudar rotación'
+			label: 'Preguntas'
 		},
 		details: 'Detalles de {site}',
 		tabs: {
@@ -374,14 +374,12 @@ const es: Messages = {
 			same: 'Las mismas respuestas.',
 			bestCase: 'Mejor caso: {site}, {model}'
 		},
-		worksWith: 'Funciona con cualquier cliente MCP y navegador',
+		worksWith: 'Funciona con cualquier agente y navegador',
 		tabs: { scripts: 'Scripts' },
 		notes: {
 			prompt: 'Un prompt: tu agente se configura, usa WebMCP primero en todo y lo prueba en webmcpx.dev.',
 			cli: 'Ejecútalo una vez en la terminal. Desde entonces, las herramientas WebMCP de cada página son herramientas de tu agente.',
-			cursor: 'En .cursor/mcp.json (o Settings → MCP). El mismo servidor, en cualquier cliente MCP.',
-			scripts:
-				'Tu propio Playwright, Selenium o Puppeteer: todo sitio con webmcpx tiene document.modelContext, en Chrome, Firefox y Safari.'
+			cursor: 'En .cursor/mcp.json (o Settings → MCP). El mismo servidor, en cualquier cliente MCP.'
 		}
 	},
 
@@ -490,7 +488,7 @@ const es: Messages = {
 		form: 'Escanear un sitio',
 		address: 'La dirección de tu sitio',
 		placeholder: 'tusitio.com',
-		submit: 'Escanear',
+		submit: 'Escanear mi sitio',
 		scanning: 'Escaneando…',
 		steps: [
 			'Abriendo la página…',

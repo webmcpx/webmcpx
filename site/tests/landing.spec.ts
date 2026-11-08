@@ -43,7 +43,7 @@ test('no axe violations', async ({ page }) => {
 		if (path === '/') {
 			// Include the scan result card in the audit.
 			await page.getByLabel("Your site's address").first().fill('docs.example.com');
-			await page.getByRole('button', { name: 'Scan it' }).first().click();
+			await page.getByRole('button', { name: 'Scan my site' }).first().click();
 			await expect(page.getByText('Agent-ready').first()).toBeVisible();
 			// Audit the tools table too.
 			await page.locator('#leaderboard').getByRole('tab', { name: 'Tools' }).first().click();
@@ -114,7 +114,7 @@ test('hovering or focusing a tool shows its description', async ({ page }) => {
 	await mockScan(page);
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
-	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	const tools = page.getByRole('list', { name: 'Tools found' });
 	const first = tools.getByRole('button').first();
 	await first.hover();
@@ -132,7 +132,7 @@ test('a long tool description wraps inside the tooltip on a phone', async ({ pag
 	await mockScan(page, { ...REPORT, tools: [{ ...REPORT.tools[0], description: long }] });
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
-	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	await page.getByRole('list', { name: 'Tools found' }).getByRole('button').first().focus();
 	await expect(page.locator('body > div.absolute')).toHaveText(long);
 	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
@@ -143,7 +143,7 @@ test('an agent-ready site can pick one of four badge styles, inline or a README 
 	await mockScan(page);
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
-	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	const styles = page.getByRole('group', { name: 'Badge style' }).getByRole('radio');
 	await expect(styles).toHaveCount(4);
 	await expect(styles.first()).toBeChecked();
@@ -219,7 +219,7 @@ test('scanning a site shows the verdict and its tools', async ({ page }) => {
 	const seen = await mockScan(page);
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
-	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	await expect(page.getByText('Agent-ready').first()).toBeVisible();
 	await expect(page.getByRole('list', { name: 'Tools found' })).toContainText('search_docs');
 	expect(seen).toEqual(['https://docs.example.com/']);
@@ -258,6 +258,8 @@ test('logos scan their site, and shared links rerun a scan', async ({ page }) =>
 });
 
 test('the detail tabs switch metrics and only show the selected site', async ({ page }) => {
+	// Still: the carousel must not move on to another site mid-test.
+	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await page.goto('/');
 	const proof = page.locator('#leaderboard');
 	await proof.getByRole('tab', { name: /specification\.website/ }).click();
@@ -321,8 +323,12 @@ const sitePanel = async (proof: Locator) => {
 	return proof.locator(`[id="${id}"]`);
 };
 const shownQuestion = async (proof: Locator) => (await sitePanel(proof)).locator('p').first().textContent();
+/** The selected site's name (its tile's first line; the second is its best saving). */
 const selectedSite = (proof: Locator) =>
-	proof.locator('[aria-roledescription=carousel] [role=tab][aria-selected=true]').first().textContent();
+	proof
+		.locator('[aria-roledescription=carousel] [role=tab][aria-selected=true] > span')
+		.first()
+		.textContent();
 
 /** Lets time pass (a second at a time, as the carousel starts once it is on screen) until the site changes. */
 const nextSite = (page: Page, proof: Locator, from: string | null) =>
@@ -333,7 +339,9 @@ const nextSite = (page: Page, proof: Locator, from: string | null) =>
 		})
 		.not.toBe(from);
 
-test('the carousel moves site by site, the selected logo follows, and it can be paused', async ({ page }) => {
+test('the carousel moves site by site, the selected logo follows, and picking a site stops it', async ({
+	page
+}) => {
 	await page.clock.install();
 	await page.goto('/#leaderboard');
 	const proof = page.locator('#leaderboard');
@@ -350,12 +358,14 @@ test('the carousel moves site by site, the selected logo follows, and it can be 
 	// No second way through it: the logos are the only position.
 	await expect(proof.getByRole('button', { name: /question/i })).toHaveCount(0);
 
+	// Picking a site by hand stops the rotation for good, even once focus and pointer leave.
+	const logos = proof.locator('[aria-roledescription=carousel] [role=tab]');
+	await logos.nth(1).click();
 	const site = await selectedSite(proof);
-	await proof.getByRole('button', { name: 'Pause rotation' }).click();
+	await page.locator('body').click({ position: { x: 1, y: 1 } });
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(15000);
 	expect(await selectedSite(proof)).toBe(site);
-	await expect(proof.getByRole('button', { name: 'Resume rotation' })).toBeVisible();
 });
 
 test('no automatic rotation for people who prefer reduced motion', async ({ page }) => {
@@ -486,7 +496,7 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 	await mockScan(page);
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
-	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	const result = page.locator('#scan');
 	await expect(result.getByText('Agent-ready').first()).toBeVisible();
 	await expect(result.locator('img[src^="data:image/png"]')).toHaveCount(1);
@@ -639,7 +649,7 @@ test('a scan with same-named tools in two frames shows both', async ({ page }) =
 	await mockScan(page, { ...REPORT, tools: [...REPORT.tools, ...REPORT.tools] });
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
-	await page.getByRole('button', { name: 'Scan it' }).first().click();
+	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	await expect(
 		page.locator('#scan').getByRole('list', { name: 'Tools found' }).getByRole('listitem')
 	).toHaveCount(REPORT.tools.length * 2);

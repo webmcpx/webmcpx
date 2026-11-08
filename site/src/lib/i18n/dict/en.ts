@@ -115,7 +115,9 @@ const en = {
 		// use it through tools; keep it short and use the same word everywhere it appears.
 		title: { text: 'Make your site {mark}', mark: 'agent-ready' },
 		// max 120: 3 lines on a phone.
-		lead: 'In our benchmark, agents used up to {best} fewer tokens with WebMCP (best case: {site}, {model}). See what agents get from your site, then fix it with one line.',
+		lead: 'In our benchmark, agents used {mark} with WebMCP (best case: {site}, {model}). See what agents get from your site, then fix it with one line.',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'up to {best} fewer tokens',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'AI agents are already reading your pages. See what they get, then give them real tools with one line.',
@@ -276,9 +278,7 @@ const en = {
 		opens: '(opens {site})',
 		rotator: {
 			/** Names the rotating questions for screen readers. */
-			label: 'Questions',
-			pause: 'Pause rotation',
-			resume: 'Resume rotation'
+			label: 'Questions'
 		},
 		/** Names the detail tabs under a site's questions. */
 		details: 'Details for {site}',
@@ -491,15 +491,13 @@ const en = {
 			same: 'Same answers.',
 			bestCase: 'Best case: {site}, {model}'
 		},
-		worksWith: 'Works with any MCP client and browser',
+		worksWith: 'Works with any agent and browser',
 		tabs: { scripts: 'Scripts' },
 		notes: {
 			prompt:
 				'One prompt: your agent sets itself up, uses WebMCP first everywhere, and proves it on webmcpx.dev.',
 			cli: "Run once in a terminal. From then on, every page's WebMCP tools are tools your agent calls.",
-			cursor: 'In .cursor/mcp.json (or Settings → MCP). Same server, any MCP client.',
-			scripts:
-				'Your own Playwright, Selenium or Puppeteer: every site with webmcpx has document.modelContext, in Chrome, Firefox and Safari.'
+			cursor: 'In .cursor/mcp.json (or Settings → MCP). Same server, any MCP client.'
 		}
 	},
 
@@ -615,7 +613,7 @@ const en = {
 		// The input's placeholder: a made-up domain, max 16.
 		placeholder: 'yoursite.com',
 		// Buttons: max 12.
-		submit: 'Scan it',
+		submit: 'Scan my site',
 		scanning: 'Scanning…',
 		// Shown one after the other while a scan runs: max 32 each.
 		steps: [

@@ -22,8 +22,6 @@
 		tabClass?: string;
 		/** Render only the active panel; the tab list is hidden without JavaScript, where it could not switch. */
 		lazy?: boolean;
-		/** A control before the tab list, on its row (e.g. a carousel's pause button). */
-		start?: Snippet;
 	}
 
 	let {
@@ -35,8 +33,7 @@
 		class: className,
 		listClass,
 		tabClass,
-		lazy = false,
-		start
+		lazy = false
 	}: Props = $props();
 
 	const uid = $props.id();
@@ -96,14 +93,7 @@
 			{/each}
 		</div>
 	{/snippet}
-	{#if start}
-		<div class="flex items-center gap-2">
-			{@render start()}
-			<div class="min-w-0 flex-1">{@render list()}</div>
-		</div>
-	{:else}
-		{@render list()}
-	{/if}
+	{@render list()}
 	{#each items as item (item.id)}
 		{@const on = item.id === active?.id}
 		<div

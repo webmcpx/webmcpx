@@ -83,7 +83,9 @@ const ru: Messages = {
 		stamp: 'Новое',
 		draft: 'По черновику WebMCP от {date}',
 		title: { text: 'Сделайте сайт готовым {mark}', mark: 'для агентов' },
-		lead: 'В нашем бенчмарке агенты с WebMCP тратили до {best} меньше токенов (лучший случай: {site}, {model}). Посмотрите, что агенты получают от вашего сайта, и исправьте одной строкой.',
+		lead: 'В нашем бенчмарке агенты с WebMCP тратили {mark} (лучший случай: {site}, {model}). Посмотрите, что агенты получают от вашего сайта, и исправьте одной строкой.',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'до {best} меньше токенов',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'ИИ-агенты уже читают ваши страницы. Посмотрите, что они видят, и дайте им настоящие инструменты одной строкой.',
@@ -211,9 +213,7 @@ const ru: Messages = {
 		open: 'Открыть',
 		opens: '(откроется {site})',
 		rotator: {
-			label: 'Вопросы',
-			pause: 'Остановить смену вопросов',
-			resume: 'Продолжить смену вопросов'
+			label: 'Вопросы'
 		},
 		details: 'Подробности: {site}',
 		tabs: {
@@ -397,15 +397,13 @@ const ru: Messages = {
 			same: 'Те же ответы.',
 			bestCase: 'Лучший случай: {site}, {model}'
 		},
-		worksWith: 'Работает с любым MCP-клиентом и браузером',
+		worksWith: 'Работает с любым агентом и браузером',
 		tabs: { scripts: 'Скрипты' },
 		notes: {
 			prompt:
 				'Один промпт: агент настраивается, везде сначала использует WebMCP и доказывает это на webmcpx.dev.',
 			cli: 'Запустите один раз в терминале. Дальше инструменты WebMCP каждой страницы станут инструментами вашего агента.',
-			cursor: 'В .cursor/mcp.json (или Settings → MCP). Тот же сервер для любого MCP-клиента.',
-			scripts:
-				'Ваш Playwright, Selenium или Puppeteer: у каждого сайта с webmcpx есть document.modelContext — в Chrome, Firefox и Safari.'
+			cursor: 'В .cursor/mcp.json (или Settings → MCP). Тот же сервер для любого MCP-клиента.'
 		}
 	},
 
@@ -514,7 +512,7 @@ const ru: Messages = {
 		form: 'Проверка сайта',
 		address: 'Адрес вашего сайта',
 		placeholder: 'vashsait.ru',
-		submit: 'Проверить',
+		submit: 'Проверить мой сайт',
 		scanning: 'Проверяем…',
 		steps: [
 			'Открываем страницу…',

@@ -78,7 +78,9 @@ const bn: Messages = {
 		stamp: 'নতুন',
 		draft: 'WebMCP-এর {date} তারিখের খসড়া অনুসারে',
 		title: { text: 'আপনার সাইটকে {mark} করুন', mark: 'এজেন্ট-রেডি' },
-		lead: 'আমাদের বেঞ্চমার্কে WebMCP দিয়ে এজেন্টরা {best} পর্যন্ত কম টোকেন খরচ করেছে (সেরা ক্ষেত্র: {site}, {model})। দেখুন এজেন্ট আপনার সাইট থেকে কী পায়, তারপর এক লাইনে ঠিক করুন।',
+		lead: 'আমাদের বেঞ্চমার্কে WebMCP দিয়ে এজেন্টরা {mark} খরচ করেছে (সেরা ক্ষেত্র: {site}, {model})। দেখুন এজেন্ট আপনার সাইট থেকে কী পায়, তারপর এক লাইনে ঠিক করুন।',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: '{best} পর্যন্ত কম টোকেন',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'AI এজেন্টরা এরই মধ্যে আপনার পেজ পড়ছে। দেখুন তারা কী পায়, তারপর এক লাইনেই তাদের হাতে দিন আসল টুল।',
@@ -199,9 +201,7 @@ const bn: Messages = {
 		open: 'খুলুন',
 		opens: '({site} খুলবে)',
 		rotator: {
-			label: 'প্রশ্নগুলো',
-			pause: 'ঘোরানো থামান',
-			resume: 'আবার ঘোরান'
+			label: 'প্রশ্নগুলো'
 		},
 		details: '{site}-এর বিস্তারিত',
 		tabs: {
@@ -374,15 +374,13 @@ const bn: Messages = {
 			same: 'একই উত্তর।',
 			bestCase: 'সেরা ক্ষেত্র: {site}, {model}'
 		},
-		worksWith: 'যেকোনো MCP ক্লায়েন্ট ও ব্রাউজারে চলে',
+		worksWith: 'যেকোনো এজেন্ট ও ব্রাউজারে চলে',
 		tabs: { scripts: 'স্ক্রিপ্ট' },
 		notes: {
 			prompt:
 				'একটি প্রম্পট: আপনার এজেন্ট নিজেই সেট আপ হয়, সব জায়গায় আগে WebMCP ব্যবহার করে এবং webmcpx.dev-এ প্রমাণ করে।',
 			cli: 'টার্মিনালে একবার চালান। তারপর প্রতিটি পেজের WebMCP টুল আপনার এজেন্টের টুল হয়ে যায়।',
-			cursor: '.cursor/mcp.json-এ (বা Settings → MCP)। যেকোনো MCP ক্লায়েন্টের জন্য একই সার্ভার।',
-			scripts:
-				'আপনার নিজের Playwright, Selenium বা Puppeteer: webmcpx থাকা প্রতিটি সাইটে Chrome, Firefox ও Safari-তে document.modelContext থাকে।'
+			cursor: '.cursor/mcp.json-এ (বা Settings → MCP)। যেকোনো MCP ক্লায়েন্টের জন্য একই সার্ভার।'
 		}
 	},
 
@@ -491,7 +489,7 @@ const bn: Messages = {
 		form: 'একটি সাইট স্ক্যান করুন',
 		address: 'আপনার সাইটের ঠিকানা',
 		placeholder: 'apnarsite.com',
-		submit: 'স্ক্যান করুন',
+		submit: 'আমার সাইট স্ক্যান করুন',
 		scanning: 'স্ক্যানিং…',
 		steps: [
 			'পেজ খোলা হচ্ছে…',

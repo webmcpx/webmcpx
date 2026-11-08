@@ -78,7 +78,9 @@ const de: Messages = {
 		stamp: 'Neu',
 		draft: 'Folgt dem WebMCP-Entwurf vom {date}',
 		title: { text: 'Machen Sie Ihre Website {mark}', mark: 'agentenfähig' },
-		lead: 'In unserem Benchmark brauchten Agenten mit WebMCP bis zu {best} weniger Tokens (bester Fall: {site}, {model}). Sehen Sie, was Agenten von Ihrer Website bekommen, und beheben Sie es mit einer Zeile.',
+		lead: 'In unserem Benchmark brauchten Agenten mit WebMCP {mark} (bester Fall: {site}, {model}). Sehen Sie, was Agenten von Ihrer Website bekommen, und beheben Sie es mit einer Zeile.',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'bis zu {best} weniger Tokens',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'KI-Agenten lesen Ihre Seiten längst. Sehen Sie, was bei ihnen ankommt, und geben Sie ihnen mit einer Zeile echte Tools.',
@@ -199,9 +201,7 @@ const de: Messages = {
 		open: 'Öffnen',
 		opens: '(öffnet {site})',
 		rotator: {
-			label: 'Fragen',
-			pause: 'Rotation anhalten',
-			resume: 'Rotation fortsetzen'
+			label: 'Fragen'
 		},
 		details: 'Details zu {site}',
 		tabs: {
@@ -376,15 +376,13 @@ const de: Messages = {
 			same: 'Dieselben Antworten.',
 			bestCase: 'Bester Fall: {site}, {model}'
 		},
-		worksWith: 'Läuft mit jedem MCP-Client und Browser',
+		worksWith: 'Läuft mit jedem Agenten und Browser',
 		tabs: { scripts: 'Skripte' },
 		notes: {
 			prompt:
 				'Ein Prompt: Dein Agent richtet sich ein, nutzt WebMCP überall zuerst und beweist es auf webmcpx.dev.',
 			cli: 'Einmal im Terminal ausführen. Danach sind die WebMCP-Tools jeder Seite Tools deines Agenten.',
-			cursor: 'In .cursor/mcp.json (oder Settings → MCP). Derselbe Server für jeden MCP-Client.',
-			scripts:
-				'Dein eigenes Playwright, Selenium oder Puppeteer: Jede Website mit webmcpx hat document.modelContext, in Chrome, Firefox und Safari.'
+			cursor: 'In .cursor/mcp.json (oder Settings → MCP). Derselbe Server für jeden MCP-Client.'
 		}
 	},
 
@@ -493,7 +491,7 @@ const de: Messages = {
 		form: 'Website scannen',
 		address: 'Adresse Ihrer Website',
 		placeholder: 'ihre-website.de',
-		submit: 'Scannen',
+		submit: 'Meine Website scannen',
 		scanning: 'Scan läuft…',
 		steps: [
 			'Seite wird geöffnet…',

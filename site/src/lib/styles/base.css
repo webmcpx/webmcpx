@@ -176,3 +176,78 @@
 .font-brand {
 	font-family: 'Bricolage Grotesque Variable', ui-sans-serif, system-ui, sans-serif;
 }
+
+/* The highlighter pen circling something (PenCircle): drawn, held, faded, drawn again. Still for reduced motion. */
+.pen-path {
+	stroke-dasharray: 1;
+	stroke-dashoffset: 1;
+	animation: pen-loop 4.5s var(--ease-out-expo) 0.5s infinite;
+}
+@keyframes pen-loop {
+	0% {
+		stroke-dashoffset: 1;
+		opacity: 1;
+	}
+	30% {
+		stroke-dashoffset: 0;
+		opacity: 1;
+	}
+	80% {
+		stroke-dashoffset: 0;
+		opacity: 1;
+	}
+	100% {
+		stroke-dashoffset: 0;
+		opacity: 0;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.pen-path {
+		animation: none;
+		stroke-dashoffset: 0;
+	}
+}
+
+/*
+	Motion that makes the page feel alive, never in the way; all of it off for reduced motion.
+	1. The highlighter draws in from the left, holds, lifts off to the right and draws again, in a loop.
+	2. A tab's panel fades in when it is picked.
+*/
+@keyframes marker-sweep {
+	0% {
+		background-size: 0% 100%;
+		background-position: 0% 0;
+		background-repeat: no-repeat;
+	}
+	25%,
+	80% {
+		background-size: 100% 100%;
+		background-position: 0% 0;
+		background-repeat: no-repeat;
+	}
+	81% {
+		background-size: 100% 100%;
+		background-position: 100% 0;
+		background-repeat: no-repeat;
+	}
+	100% {
+		background-size: 0% 100%;
+		background-position: 100% 0;
+		background-repeat: no-repeat;
+	}
+}
+@keyframes panel-in {
+	from {
+		opacity: 0;
+		translate: 0 6px;
+	}
+}
+@media (prefers-reduced-motion: no-preference) {
+	.marker,
+	.sweep {
+		animation: marker-sweep 5s var(--ease-out-expo) 0.35s infinite both;
+	}
+	[data-js] [role='tabpanel']:not([data-inactive]) {
+		animation: panel-in 0.35s var(--ease-out-expo);
+	}
+}

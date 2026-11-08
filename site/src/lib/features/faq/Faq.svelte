@@ -35,7 +35,9 @@
 			{@const Icon = ICONS[id]}
 			<li class={['min-w-0', id === 'agent' && 'lg:col-span-2']}>
 				<Reveal delay={(i % 3) * 70} class="h-full">
-					<div class="flex h-full flex-col gap-3 rounded-card border-2 border-ink bg-card p-6 shadow-hard-sm">
+					<div
+						class="flex h-full flex-col gap-3 rounded-card border-2 border-ink bg-card p-6 shadow-hard-sm transition-[translate,box-shadow] duration-200 ease-out-expo hover:-translate-y-1 hover:shadow-hard"
+					>
 						<span class="flex items-center justify-between">
 							<span class="grid size-9 place-items-center rounded-full border-2 border-ink bg-marker">
 								<Icon size={18} strokeWidth={2} aria-hidden="true" />

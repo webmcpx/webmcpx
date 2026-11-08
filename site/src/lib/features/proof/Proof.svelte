@@ -1,8 +1,8 @@
 <!--
 	The evidence, one model, one site and one question at a time: no averages. The model switcher picks the
 	run; logos pick the site (best case first). The rotation moves from site to site (each by its best
-	question), and the selected logo follows, so the logos are the carousel's position (WCAG 2.2.2: a pause button before
-	them; it holds while hovered, focused or off screen, and never moves for reduced motion). Under them, tabs show that site's questions per metric, its
+	question), and the selected logo follows, so the logos are the carousel's position (WCAG 2.2.2: it holds while hovered,
+	focused or off screen, stops for good once a site is picked, and never moves for reduced motion). Under them, tabs show that site's questions per metric, its
 	WebMCP tools and the method. All tab panels are in the HTML, so everything reads without JavaScript.
 -->
 <script lang="ts">
@@ -10,8 +10,6 @@
 	import Coins from '@lucide/svelte/icons/coins';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Footprints from '@lucide/svelte/icons/footprints';
-	import Pause from '@lucide/svelte/icons/pause';
-	import Play from '@lucide/svelte/icons/play';
 	import Timer from '@lucide/svelte/icons/timer';
 	import Wrench from '@lucide/svelte/icons/wrench';
 	import Zap from '@lucide/svelte/icons/zap';
@@ -22,22 +20,12 @@
 	import Card from '#lib/components/ui/Card.svelte';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
-	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import Tabs from '#lib/components/ui/Tabs.svelte';
 	import { modelLook } from '#lib/content/models.ts';
 	import { REPO } from '#lib/content/site.ts';
 	import type { Highlighted } from '#lib/content/snippets.ts';
-	import {
-		compare,
-		METRICS,
-		perRun,
-		rows,
-		seconds,
-		tokens,
-		type ArmSummary,
-		type ModelRun
-	} from '#lib/features/benchmark/bench.ts';
-	import type { BenchSite, SiteTask } from '#lib/features/benchmark/sites.ts';
+	import { compare, METRICS, ratio, rows, tokens, type ModelRun } from '#lib/features/benchmark/bench.ts';
+	import { bestGain, type BenchSite, type SiteTask } from '#lib/features/benchmark/sites.ts';
 	import TaskChart from '#lib/features/benchmark/TaskChart.svelte';
 	import { siteTools } from '#lib/features/benchmark/tools.ts';
 	import ToolTable from './ToolTable.svelte';
@@ -107,12 +95,16 @@
 		}, 6000);
 		return () => clearInterval(t);
 	});
+	/** A site picked by hand stops the rotation for good: the reader has taken over (WCAG 2.2.2). */
+	function pick(id: string) {
+		siteId = id;
+		paused = true;
+	}
 	function watch(node: HTMLElement) {
 		const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting));
 		io.observe(node);
 		return { destroy: () => io.disconnect() };
 	}
-	const solved = (s: ArmSummary) => `${Math.round(s.success_rate * s.runs)}/${s.runs}`;
 	const shown = (sites: BenchSite[]) => sites.reduce((n, s) => n + s.tasks.length, 0);
 	const repeats = (run: ModelRun) => {
 		const first = rows(run.results)[0];
@@ -120,36 +112,30 @@
 	};
 </script>
 
-{#snippet side(arm: ArmSummary, label: string, ours: boolean)}
-	{@const ok = arm.success_rate >= 0.5}
-	<Card padding="lg" shadow="lg" class="h-full text-center">
-		<Stamp tone={ours ? 'marker' : 'plain'}>{label}</Stamp>
-		<p class="mt-6 font-display text-display font-bold tabular-nums">{tokens(arm.tokens)}</p>
-		<p class="font-mono text-xs tracking-widest text-ink-3 uppercase">{m.tokens}</p>
-		<p class="mt-4 text-ink-2">
-			{fmt(m.stats, {
-				time: seconds(arm.duration_ms),
-				steps: arm.steps.toFixed(1),
-				cost: arm.cost_usd == null ? m.na : perRun(arm.cost_usd)
-			})}
-		</p>
-		<Stamp tone={ok ? 'good' : 'bad'} size="lg" class="mt-5"
-			>{fmt(ok ? m.solved : m.failed, { n: solved(arm) })}</Stamp
-		>
-	</Card>
-{/snippet}
-
 {#snippet question(site: BenchSite, task: SiteTask)}
-	<div class="mb-8">
-		<div class="flex items-baseline justify-between gap-4 sm:gap-8">
-			<p class="max-w-3xl min-w-0 text-lg text-pretty sm:text-xl">“{task.prompt}”</p>
+	{@const r =
+		task.baseline && task.webmcp
+			? compare(task.baseline.tokens, task.webmcp.tokens, m.fewerTokens, m.moreTokens)
+			: null}
+	<!-- The saving, one number, on the left past a rule; the site and its question next to it (the number
+	     below them on small screens). The per-arm numbers are in the tabs underneath. -->
+	<div class="flex flex-col gap-8 sm:flex-row sm:items-center sm:gap-10">
+		<div class="min-w-0 flex-1">
+			<!-- The site, named big above its question. -->
+			<h4 class="mb-4 flex items-center gap-3 font-display text-3xl font-bold tracking-tight sm:text-4xl">
+				{#if site.logo}<SiteLogo logo={site.logo} size={32} />{/if}
+				{#if !site.logo?.wordmark}{site.name}{:else}<span class="sr-only">{site.name}</span>{/if}
+				{#if !site.live}<span class="font-mono text-xs font-normal tracking-wider text-ink-3 uppercase"
+						>{m.local}</span
+					>{/if}
+			</h4>
+			<p class="text-lg text-pretty sm:text-xl">“{task.prompt}”</p>
 			{#if site.url}
 				<a
 					href={site.url}
-					class="group inline-flex shrink-0 items-center gap-1 font-mono text-sm font-medium text-ink underline decoration-marker decoration-[3px] underline-offset-[5px] transition hover:decoration-ink"
+					class="group mt-4 inline-flex items-center gap-1 font-mono text-sm font-medium text-ink underline decoration-marker decoration-[3px] underline-offset-[5px] transition hover:decoration-ink"
 				>
-					<span class="hidden sm:inline">{new URL(site.url).hostname}</span>
-					<span class="sm:hidden">{m.open}</span>
+					<span>{new URL(site.url).hostname}</span>
 					<ArrowUpRight
 						size={15}
 						strokeWidth={2.5}
@@ -160,27 +146,25 @@
 				</a>
 			{/if}
 		</div>
-	</div>
-	{#if task.baseline && task.webmcp}
-		{@const r = compare(task.baseline.tokens, task.webmcp.tokens, m.fewerTokens, m.moreTokens)}
-		<div class="grid items-center gap-6 lg:grid-cols-[1fr_auto_1fr] [&>*]:min-w-0">
-			{@render side(task.baseline, m.arms.baseline, false)}
-			<div class="flex justify-center">
-				<div
-					class={[
-						'grid size-32 place-items-center rounded-full border-2 border-ink text-center shadow-hard sm:size-36',
-						task.webmcp.tokens <= task.baseline.tokens ? 'bg-marker' : 'bg-card'
-					]}
-				>
-					<p class="font-display leading-none font-bold">
-						<span class="block text-5xl sm:text-6xl">{r.value}</span>
-						<span class="font-mono text-[11px] tracking-wider uppercase">{r.label}</span>
-					</p>
-				</div>
+		{#if r && task.baseline && task.webmcp}
+			<!-- The saving as type, highlighted like the page's other big numbers, with what it is made of. -->
+			<div class="shrink-0 sm:order-first sm:border-r-2 sm:border-ink sm:pr-10">
+				<p class="font-display text-7xl leading-none font-bold tracking-tight sm:text-8xl">
+					<span
+						class="sweep px-1"
+						style={task.webmcp.tokens <= task.baseline.tokens
+							? 'background: linear-gradient(transparent 60%, var(--color-marker) 60%)'
+							: undefined}>{r.value}</span
+					>
+				</p>
+				<p class="mt-3 font-mono text-xs font-bold tracking-wider uppercase">{r.label}</p>
+				<p class="mt-1 font-mono text-xs text-ink-3 tabular-nums">
+					{tokens(task.baseline.tokens)} → {tokens(task.webmcp.tokens)}
+					{m.tokens}
+				</p>
 			</div>
-			{@render side(task.webmcp, m.arms.webmcp, true)}
-		</div>
-	{/if}
+		{/if}
+	</div>
 {/snippet}
 
 <Section id="leaderboard" kicker={m.kicker} title={m.title} lead={m.lead}>
@@ -228,15 +212,12 @@
 			bind:value={modelId}
 			label={m.model}
 			lazy
-			listClass="-mx-4 mb-8 gap-2.5 px-4 pt-3 pb-3 sm:mx-0 sm:px-1"
-			tabClass="h-10 border-ink/0 px-4 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-card aria-selected:text-ink aria-selected:shadow-hard-sm [&_svg]:size-4"
+			listClass="mb-10 w-full rounded-full border-2 border-ink bg-card p-1 shadow-hard-sm"
+			tabClass="h-9 grow justify-center border-transparent px-3.5 text-sm whitespace-nowrap text-ink-2 hover:text-ink aria-selected:bg-ink aria-selected:text-paper [&_svg]:size-4"
 		>
 			{#snippet tab(model)}
-				<!-- The place hangs on the tab's corner, taking no room in the row. -->
-				<span
-					class="absolute -top-2 -left-1 grid size-[18px] place-items-center rounded-full border border-ink bg-marker font-mono text-[10px] leading-none font-bold text-ink"
-					aria-label={fmt(m.rank, { n: model.rank })}>{model.rank}</span
-				>
+				<!-- One segment per model, its place first: a quiet "#1" in the segment, not a badge. -->
+				<span class="font-mono text-[11px]" aria-label={fmt(m.rank, { n: model.rank })}>#{model.rank}</span>
 				{#if model.logo}<SiteLogo logo={model.logo} size={16} />{/if}
 				{model.name}
 			{/snippet}
@@ -281,32 +262,29 @@
 	>
 		<Tabs
 			{items}
-			bind:value={siteId}
+			bind:value={() => siteId, pick}
 			label={m.site}
-			listClass="-mr-4 gap-2.5 pt-1 pr-4 pb-3 sm:mr-0 sm:flex-wrap sm:pr-0"
-			tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none"
+			listClass="-mr-4 gap-3 pt-1 pr-4 pb-3 sm:mr-0 sm:pr-1"
+			tabClass="min-w-40 flex-1 flex-col! items-start! gap-1.5! rounded-card! border-ink bg-card px-4 py-3 text-left text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none"
 		>
-			{#snippet start()}
-				<button
-					type="button"
-					onclick={() => (paused = !paused)}
-					aria-label={paused ? m.rotator.resume : m.rotator.pause}
-					class="mb-2 grid size-11 shrink-0 place-items-center rounded-full border-2 border-ink bg-card text-ink shadow-hard-sm transition hover:-translate-y-0.5"
-				>
-					{#if paused}<Play size={16} aria-hidden="true" />{:else}<Pause size={16} aria-hidden="true" />{/if}
-				</button>
-			{/snippet}
 			{#snippet tab(site)}
-				{#if site.logo?.wordmark}
-					<SiteLogo logo={site.logo} size={18} />
-					<span class="sr-only">{site.name}</span>
-				{:else}
-					{#if site.logo}<SiteLogo logo={site.logo} size={20} />{/if}
-					{site.name}
-				{/if}
-				{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70"
-						>{m.local}</span
-					>{/if}
+				<!-- A small scoreboard tile: the site, then its best saving. -->
+				<span class="flex items-center gap-2 text-[15px]">
+					{#if site.logo?.wordmark}
+						<SiteLogo logo={site.logo} size={18} />
+						<span class="sr-only">{site.name}</span>
+					{:else}
+						{#if site.logo}<SiteLogo logo={site.logo} size={18} />{/if}
+						{site.name}
+					{/if}
+					{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase">{m.local}</span>{/if}
+				</span>
+				<span class="font-mono text-xs tracking-wider whitespace-nowrap uppercase">
+					<span class="font-display text-lg font-bold tracking-normal normal-case"
+						>{ratio(bestGain(site))}</span
+					>
+					{m.fewerTokens}
+				</span>
 			{/snippet}
 			{#snippet panel(site, visible)}
 				{@const task = site.tasks[0]}
@@ -317,16 +295,6 @@
 						aria-live={running ? 'off' : 'polite'}
 						in:fade={{ duration: prefersReducedMotion.current ? 0 : 400 }}
 					>
-						<!-- The site, named big above its numbers. -->
-						<h4
-							class="mb-4 flex items-center gap-3 font-display text-3xl font-bold tracking-tight sm:text-4xl"
-						>
-							{#if site.logo}<SiteLogo logo={site.logo} size={32} />{/if}
-							{#if !site.logo?.wordmark}{site.name}{:else}<span class="sr-only">{site.name}</span>{/if}
-							{#if !site.live}<span class="font-mono text-xs font-normal tracking-wider text-ink-3 uppercase"
-									>{m.local}</span
-								>{/if}
-						</h4>
 						{#if task}{@render question(site, task)}{/if}
 					</div>
 				{/key}

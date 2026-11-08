@@ -55,7 +55,9 @@
 			{@const t = m.reasons[r.id]}
 			<li class="min-w-0">
 				<Reveal delay={(i % 4) * 60} class="h-full">
-					<div class="flex h-full flex-col rounded-card border-2 border-ink bg-card p-5 shadow-hard">
+					<div
+						class="flex h-full flex-col rounded-card border-2 border-ink bg-card p-5 shadow-hard transition-[translate,box-shadow] duration-200 ease-out-expo hover:-translate-y-1 hover:shadow-hard-lg"
+					>
 						<h3 class="flex items-center gap-3 font-display text-xl leading-tight font-bold tracking-tight">
 							<span
 								class="grid size-10 shrink-0 place-items-center rounded-xl border-2 border-ink bg-marker"
@@ -85,11 +87,11 @@
 			</li>
 		{/each}
 	</ol>
-	<p class="mt-6 flex max-w-4xl flex-wrap items-center gap-2 text-ink-2">
+	<p class="mt-6 flex flex-wrap items-center gap-2 text-ink-2">
 		<span>{m.also}</span>
 		{#each also as title (title)}
 			<span class="rounded-full border-2 border-ink/15 px-3 py-0.5 text-sm font-medium">{title}</span>
 		{/each}
 	</p>
-	<p class="mt-4 max-w-3xl text-sm text-pretty text-ink-3">{m.status}</p>
+	<p class="mt-4 text-sm text-pretty text-ink-3">{m.status}</p>
 </Section>

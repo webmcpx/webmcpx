@@ -77,7 +77,9 @@ const ja: Messages = {
 		stamp: '最新',
 		draft: '{date} 版の WebMCP ドラフトに追従',
 		title: { text: 'そのサイトを、{mark}に', mark: 'エージェント対応' },
-		lead: '私たちのベンチマークでは、WebMCPを使うとエージェントのトークンが最大{best}削減されました（最良ケース：{site}、{model}）。あなたのサイトでエージェントが何を得るかを確認し、1行で改善しましょう。',
+		lead: '私たちのベンチマークでは、WebMCPを使うとエージェントの{mark}されました（最良ケース：{site}、{model}）。あなたのサイトでエージェントが何を得るかを確認し、1行で改善しましょう。',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'トークンが最大{best}削減',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',
@@ -194,9 +196,7 @@ const ja: Messages = {
 		open: '開く',
 		opens: '（{site} を開きます）',
 		rotator: {
-			label: '質問',
-			pause: '自動切り替えを一時停止',
-			resume: '自動切り替えを再開'
+			label: '質問'
 		},
 		details: '{site} の詳細',
 		tabs: {
@@ -360,15 +360,13 @@ const ja: Messages = {
 			same: '答えは同じ。',
 			bestCase: '最良ケース：{site}、{model}'
 		},
-		worksWith: 'あらゆるMCPクライアントとブラウザで動作',
+		worksWith: 'あらゆるエージェントとブラウザで動作',
 		tabs: { scripts: 'スクリプト' },
 		notes: {
 			prompt:
 				'1 つのプロンプトで、エージェントが自分で設定し、どこでも WebMCP を先に使い、webmcpx.dev で確認します。',
 			cli: 'ターミナルで 1 回実行するだけ。以降、各ページの WebMCP ツールがエージェントのツールになります。',
-			cursor: '.cursor/mcp.json (または Settings → MCP) に。どの MCP クライアントでも同じサーバー。',
-			scripts:
-				'自分の Playwright・Selenium・Puppeteer でも。webmcpx のサイトには Chrome・Firefox・Safari で document.modelContext があります。'
+			cursor: '.cursor/mcp.json (または Settings → MCP) に。どの MCP クライアントでも同じサーバー。'
 		}
 	},
 
@@ -477,7 +475,7 @@ const ja: Messages = {
 		form: 'サイトをスキャン',
 		address: 'サイトのアドレス',
 		placeholder: 'yoursite.jp',
-		submit: 'スキャン',
+		submit: 'サイトをスキャン',
 		scanning: 'スキャン中…',
 		steps: [
 			'ページを開いています…',

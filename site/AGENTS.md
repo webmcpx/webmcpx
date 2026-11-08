@@ -75,11 +75,14 @@ tests/                       Playwright e2e against the prerendered build
   drops only the final period. Running text (leads, answers, notes) keeps its periods.
 - Alignment: one rule. Section titles, leads and content are left-aligned (one left edge to scan, as long
   centered text reads worse); only the hero and the logo wall are centered.
+- Titles, leads and descriptions run the full content width (no narrower max-width); only the centered
+  hero keeps a measure. Dividers run edge to edge within the page's side gutter.
 - Wide screens use the width: a section's explanation on the left (4 or 5 of 12 columns) and its code on the
   right (`lg:grid-cols-12`), stacked below `lg`. No content block alone in a narrow left column.
 
 - Style: "paper and ink". Off-white paper, near-black ink, 2px outlines, short hard offset shadows, pill
-  buttons, one highlighter yellow (`marker`) used sparingly. Serious and editorial: sentence-case headlines in
+  buttons, one highlighter yellow (`marker`) used sparingly: behind words, as the main CTA's fill and as a
+  hand-drawn circle (`PenCircle`). Serious and editorial: sentence-case headlines in
   Bricolage Grotesque, Geist for text, Geist Mono for small uppercase labels. No mascots or jokes.
 - Colors come only from the tokens in `lib/styles/tokens.css` (`bg-paper`, `text-ink-2`, `border-ink`,
   `bg-marker`, ...). Tailwind's default palette is removed, so `bg-zinc-900` does not exist. A new color: add

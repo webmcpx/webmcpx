@@ -129,8 +129,7 @@
 			label: m.tabs.scripts,
 			icon: Code,
 			snippet: code.pageScript,
-			title: 'script.js',
-			note: m.notes.scripts
+			title: 'script.js'
 		}
 	]);
 </script>
@@ -144,7 +143,7 @@
 					<a href="#leaderboard" class="inline-block font-display font-bold text-ink">
 						<span class="align-middle text-2xl sm:text-3xl">{m.hype.up}</span>
 						<span
-							class="px-1 text-7xl leading-none tracking-tight sm:text-8xl"
+							class="sweep px-1 text-7xl leading-none tracking-tight sm:text-8xl"
 							style="background: linear-gradient(transparent 62%, var(--color-marker) 62%)"
 							>{ratio(best?.saving ?? saving.high)}</span
 						>
@@ -153,7 +152,7 @@
 					{#if best}<p class="mt-3 font-mono text-xs tracking-wider text-ink-3 uppercase">
 							{fmt(m.hype.bestCase, { site: best.site, model: best.model })}
 						</p>{/if}
-					<p class="mt-4 max-w-xl text-pretty text-ink-2">
+					<p class="mt-4 text-pretty text-ink-2">
 						<span class="font-medium text-ink">{m.hype.same}</span>
 						<a
 							href="#leaderboard"
@@ -161,10 +160,13 @@
 							>{range}</a
 						>
 					</p>
-					{#if losses}<p class="mt-1 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
+					{#if losses}<p class="mt-1 text-sm text-pretty text-ink-3">{losses}</p>{/if}
 				</Reveal>
 			{/if}
-			<Reveal>
+		</div>
+		<Reveal class="min-w-0 lg:col-span-7">
+			<!-- What it works with, right above how to set it up. -->
+			<div class="mb-8">
 				<p class="font-mono text-xs tracking-wider text-ink-3 uppercase">{m.worksWith}</p>
 				{#each [CLIENTS, BROWSERS] as group, g (g)}
 					<ul
@@ -178,9 +180,7 @@
 						{/each}
 					</ul>
 				{/each}
-			</Reveal>
-		</div>
-		<Reveal class="min-w-0 lg:col-span-7">
+			</div>
 			<CodeTabs label={m.title} {tabs} />
 		</Reveal>
 	</div>

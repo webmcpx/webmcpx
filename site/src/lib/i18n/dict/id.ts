@@ -79,7 +79,9 @@ const id: Messages = {
 		stamp: 'Baru',
 		draft: 'Mengikuti draf WebMCP per {date}',
 		title: { text: 'Jadikan situs Anda {mark}', mark: 'siap agent' },
-		lead: 'Di benchmark kami, agen memakai hingga {best} lebih sedikit token dengan WebMCP (kasus terbaik: {site}, {model}). Lihat apa yang didapat agen dari situs Anda, lalu perbaiki dengan satu baris.',
+		lead: 'Di benchmark kami, agen memakai {mark} dengan WebMCP (kasus terbaik: {site}, {model}). Lihat apa yang didapat agen dari situs Anda, lalu perbaiki dengan satu baris.',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: 'hingga {best} lebih sedikit token',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'Agent AI sudah membaca halaman Anda. Lihat apa yang mereka dapat, lalu beri mereka tool sungguhan dengan satu baris.',
@@ -196,9 +198,7 @@ const id: Messages = {
 		open: 'Buka',
 		opens: '(membuka {site})',
 		rotator: {
-			label: 'Pertanyaan',
-			pause: 'Jeda rotasi',
-			resume: 'Lanjutkan rotasi'
+			label: 'Pertanyaan'
 		},
 		details: 'Detail untuk {site}',
 		tabs: {
@@ -367,15 +367,13 @@ const id: Messages = {
 			same: 'Jawaban yang sama.',
 			bestCase: 'Kasus terbaik: {site}, {model}'
 		},
-		worksWith: 'Bekerja dengan klien MCP dan browser apa pun',
+		worksWith: 'Bekerja dengan agen dan browser apa pun',
 		tabs: { scripts: 'Skrip' },
 		notes: {
 			prompt:
 				'Satu prompt: agen Anda menyiapkan dirinya, memakai WebMCP lebih dulu di mana saja, dan membuktikannya di webmcpx.dev.',
 			cli: 'Jalankan sekali di terminal. Setelah itu, alat WebMCP setiap halaman menjadi alat agen Anda.',
-			cursor: 'Di .cursor/mcp.json (atau Settings → MCP). Server yang sama untuk klien MCP apa pun.',
-			scripts:
-				'Playwright, Selenium, atau Puppeteer Anda sendiri: setiap situs dengan webmcpx punya document.modelContext, di Chrome, Firefox, dan Safari.'
+			cursor: 'Di .cursor/mcp.json (atau Settings → MCP). Server yang sama untuk klien MCP apa pun.'
 		}
 	},
 
@@ -484,7 +482,7 @@ const id: Messages = {
 		form: 'Scan situs',
 		address: 'Alamat situs Anda',
 		placeholder: 'situsanda.com',
-		submit: 'Mulai scan',
+		submit: 'Scan situs saya',
 		scanning: 'Sedang scan…',
 		steps: [
 			'Membuka halaman…',

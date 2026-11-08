@@ -80,7 +80,9 @@ const zh: Messages = {
 		draft: '已跟进 {date} 版 WebMCP 草案',
 		// \u200b: where the headline may break (headings only break at punctuation and these).
 		title: { text: '让你的网站\u200b{mark}', mark: '智能体就绪' },
-		lead: '在我们的基准测试中，使用 WebMCP 的智能体最多少用 {best} 的 token（最佳案例：{site}，{model}）。看看智能体能从你的网站拿到什么，然后一行代码搞定。',
+		lead: '在我们的基准测试中，使用 WebMCP 的智能体{mark}（最佳案例：{site}，{model}）。看看智能体能从你的网站拿到什么，然后一行代码搞定。',
+		// The part of the lead set in highlighter ({best} is the ratio).
+		leadMark: '最多少用 {best} 的 token',
 		// Without a published run (no number to quote).
 		leadPlain: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
 		try: '试试 {sites}',
@@ -196,9 +198,7 @@ const zh: Messages = {
 		open: '打开',
 		opens: '（打开 {site}）',
 		rotator: {
-			label: '问题',
-			pause: '暂停轮播',
-			resume: '继续轮播'
+			label: '问题'
 		},
 		details: '{site} 的详情',
 		tabs: {
@@ -350,14 +350,12 @@ const zh: Messages = {
 			}
 		},
 		hype: { up: '最多', fewer: '更少 token', same: '答案相同。', bestCase: '最佳案例：{site}，{model}' },
-		worksWith: '适用于任何 MCP 客户端和浏览器',
+		worksWith: '适用于任何智能体和浏览器',
 		tabs: { scripts: '脚本' },
 		notes: {
 			prompt: '一个提示词：智能体自行配置，处处先用 WebMCP，并在 webmcpx.dev 上验证。',
 			cli: '在终端运行一次。之后每个页面的 WebMCP 工具都会成为你智能体的工具。',
-			cursor: '写入 .cursor/mcp.json（或 Settings → MCP）。任何 MCP 客户端都用同一个服务器。',
-			scripts:
-				'你自己的 Playwright、Selenium 或 Puppeteer：任何装了 webmcpx 的网站在 Chrome、Firefox、Safari 中都有 document.modelContext。'
+			cursor: '写入 .cursor/mcp.json（或 Settings → MCP）。任何 MCP 客户端都用同一个服务器。'
 		}
 	},
 
@@ -462,7 +460,7 @@ const zh: Messages = {
 		form: '扫描网站',
 		address: '你的网站地址',
 		placeholder: 'yoursite.com',
-		submit: '开始扫描',
+		submit: '扫描我的网站',
 		scanning: '扫描中…',
 		steps: ['正在打开页面…', '正在查找 WebMCP 工具…', '正在像智能体一样阅读…', '正在检查工具规范…'],
 		verdicts: { ready: '智能体就绪', issues: '差一点', missing: '还没有' },
