@@ -15,7 +15,6 @@
 	import Rich from '#lib/i18n/Rich.svelte';
 
 	let { code }: { code: Record<SnippetId, Highlighted> } = $props();
-	const OPENAI_DOCS = 'https://learn.chatgpt.com/docs/webmcp';
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.fix);
@@ -82,14 +81,6 @@
 								</div>
 							{/each}
 						</dl>
-						<p class="mt-4 rounded-xl bg-paper-2 px-3.5 py-2.5 text-sm text-pretty text-ink">
-							<Rich text={m.steps.agent.skip}
-								>{#snippet docs()}<a
-										class="font-medium underline decoration-marker decoration-2 underline-offset-4"
-										href={OPENAI_DOCS}>{m.docs}</a
-									>{/snippet}</Rich
-							>
-						</p>
 					{/if}
 				</Reveal>
 			</li>

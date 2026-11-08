@@ -370,11 +370,9 @@ const ru: Messages = {
 						label: 'Агенты, которые управляют браузером',
 						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: вызовите {api} на странице. Он есть на каждом сайте с шагом 1.'
 					}
-				},
-				skip: 'Пользуетесь десктопным ChatGPT или приложением Codex? Пропустите этот шаг: они вызывают WebMCP-инструменты нативно ({docs}).'
+				}
 			}
-		},
-		docs: 'документация OpenAI'
+		}
 	},
 
 	own: {

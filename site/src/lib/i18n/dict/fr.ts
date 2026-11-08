@@ -355,11 +355,9 @@ const fr: Messages = {
 						label: 'Agents qui pilotent un navigateur',
 						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP ; Chrome, Firefox, Safari : appelez {api} dans la page. Tout site doté de l’étape 1 l’expose.'
 					}
-				},
-				skip: 'Vous utilisez l’app de bureau ChatGPT ou l’app Codex ? Sautez cette étape : elles appellent les outils WebMCP nativement ({docs}).'
+				}
 			}
-		},
-		docs: 'docs d’OpenAI'
+		}
 	},
 
 	own: {

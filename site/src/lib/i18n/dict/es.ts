@@ -352,11 +352,9 @@ const es: Messages = {
 						label: 'Agentes que controlan un navegador',
 						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: llama a {api} en la página. Todo sitio con el paso 1 lo tiene.'
 					}
-				},
-				skip: '¿Usas la app de escritorio de ChatGPT o la app de Codex? Sáltate este paso: llaman a herramientas WebMCP de forma nativa ({docs}).'
+				}
 			}
-		},
-		docs: 'docs de OpenAI'
+		}
 	},
 
 	own: {

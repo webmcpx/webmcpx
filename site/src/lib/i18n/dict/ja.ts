@@ -341,11 +341,9 @@ const ja: Messages = {
 						label: 'ブラウザを自分で操作するエージェント',
 						text: 'Playwright、Selenium、Puppeteer、browser-use、CDP。Chrome、Firefox、Safari：ページ内で {api} を呼ぶだけ。ステップ 1 を済ませたサイトならどこでも使えます。'
 					}
-				},
-				skip: 'ChatGPT デスクトップアプリや Codex アプリなら、このステップは不要です。WebMCP ツールをネイティブに呼び出します（{docs}）。'
+				}
 			}
-		},
-		docs: 'OpenAI のドキュメント'
+		}
 	},
 
 	own: {

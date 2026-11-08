@@ -344,11 +344,9 @@ const id: Messages = {
 						label: 'Agen yang mengendalikan browser',
 						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: panggil {api} di halaman. Setiap situs dengan langkah 1 memilikinya.'
 					}
-				},
-				skip: 'Pakai aplikasi desktop ChatGPT atau aplikasi Codex? Lewati langkah ini: keduanya memanggil tool WebMCP secara native ({docs}).'
+				}
 			}
-		},
-		docs: 'dokumentasi OpenAI'
+		}
 	},
 
 	own: {

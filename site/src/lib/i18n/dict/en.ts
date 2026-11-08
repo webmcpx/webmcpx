@@ -436,7 +436,7 @@ const en = {
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
 		facts: '~2.7 KB on load · Rust + WebAssembly · MIT license',
-		// {tag} is `</body>`, {cmd} and {api} are code and {docs} a link: keep them. Product and library
+		// {tag} is `</body>`, {cmd} and {api} are code: keep them. Product and library
 		// names (ChatGPT, Codex, Claude Code, Cursor, Playwright, Selenium, Puppeteer, browser-use, CDP,
 		// Chrome, Chromium, Firefox, Safari) stay as they are.
 		steps: {
@@ -457,11 +457,9 @@ const en = {
 						label: 'Agents that drive a browser',
 						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: call {api} in the page. Every site with step 1 has it.'
 					}
-				},
-				skip: 'Using the ChatGPT desktop app or the Codex app? Skip this step: they call WebMCP tools natively ({docs}).'
+				}
 			}
-		},
-		docs: 'OpenAI docs'
+		}
 	},
 
 	own: {

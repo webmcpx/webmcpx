@@ -339,11 +339,9 @@ const zh: Messages = {
 						label: '自己驱动浏览器的智能体',
 						text: 'Playwright、Selenium、Puppeteer、browser-use、CDP；Chrome、Firefox、Safari：在页面里调用 {api}。完成第 1 步的网站都有它。'
 					}
-				},
-				skip: '用的是 ChatGPT 桌面应用或 Codex 应用？跳过这一步：它们原生调用 WebMCP 工具（{docs}）。'
+				}
 			}
-		},
-		docs: 'OpenAI 文档'
+		}
 	},
 
 	own: {

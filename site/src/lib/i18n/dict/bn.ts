@@ -351,11 +351,9 @@ const bn: Messages = {
 						label: 'যে এজেন্ট নিজে ব্রাউজার চালায়',
 						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: পেজে {api} কল করুন। ধাপ ১ করা প্রতিটি সাইটে এটি আছে।'
 					}
-				},
-				skip: 'ChatGPT ডেস্কটপ অ্যাপ বা Codex অ্যাপ ব্যবহার করেন? এই ধাপ বাদ দিন: তারা নেটিভভাবে WebMCP টুল কল করে ({docs})।'
+				}
 			}
-		},
-		docs: 'OpenAI ডকস'
+		}
 	},
 
 	own: {
