@@ -257,8 +257,8 @@ const en = {
 		arms: { baseline: 'Without WebMCP', webmcp: 'With WebMCP' },
 		// Under the big token count: max 10, small capitals.
 		tokens: 'tokens',
-		// {time} (3.4s), {steps} (4.0) and {cost} ($1.20) are formatted numbers. max 45.
-		stats: '{time} · {steps} steps · {cost} per 1k',
+		// {time} (3.4s), {steps} (4.0) and {cost} ($0.054, the cost of one run) are formatted numbers. max 50.
+		stats: '{time} · {steps} steps · {cost} per task',
 		/** Shown for a cost the run did not record. */
 		na: 'n/a',
 		// Stamps: max 14 with {n}, which is "3/3" (solved of runs).
@@ -295,7 +295,7 @@ const en = {
 			tokens: { label: 'Tokens', unit: 'tokens per run', column: 'tokens' },
 			duration_ms: { label: 'Time', unit: 'seconds per run', column: 'time' },
 			steps: { label: 'Steps', unit: 'model turns per run', column: 'steps' },
-			cost_usd: { label: 'Cost', unit: 'USD per 1,000 runs', column: 'cost' }
+			cost_usd: { label: 'Cost', unit: 'USD per task', column: 'cost' }
 		},
 		chart: {
 			// Column heads: max 12.

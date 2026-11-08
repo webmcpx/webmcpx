@@ -184,7 +184,7 @@ const id: Messages = {
 		local: 'lokal',
 		arms: { baseline: 'Tanpa WebMCP', webmcp: 'Dengan WebMCP' },
 		tokens: 'token',
-		stats: '{time} · {steps} langkah · {cost} per 1.000',
+		stats: '{time} · {steps} langkah · {cost} per tugas',
 		na: 't/a',
 		solved: 'Berhasil {n}',
 		failed: 'Gagal {n}',
@@ -211,7 +211,7 @@ const id: Messages = {
 			tokens: { label: 'Token', unit: 'token per run', column: 'token' },
 			duration_ms: { label: 'Waktu', unit: 'detik per run', column: 'waktu' },
 			steps: { label: 'Langkah', unit: 'giliran model per run', column: 'langkah' },
-			cost_usd: { label: 'Biaya', unit: 'USD per 1.000 run', column: 'biaya' }
+			cost_usd: { label: 'Biaya', unit: 'USD per tugas', column: 'biaya' }
 		},
 		chart: {
 			question: 'Pertanyaan',

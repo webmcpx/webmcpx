@@ -185,7 +185,7 @@ const zh: Messages = {
 		local: '本地',
 		arms: { baseline: '不用 WebMCP', webmcp: '用 WebMCP' },
 		tokens: 'token',
-		stats: '{time} · {steps} 步 · 每千次 {cost}',
+		stats: '{time} · {steps} 步 · 每个任务 {cost}',
 		na: '暂无',
 		solved: '解决 {n}',
 		failed: '失败 {n}',
@@ -212,7 +212,7 @@ const zh: Messages = {
 			tokens: { label: 'Token', unit: '每次运行的 token 数', column: 'token' },
 			duration_ms: { label: '耗时', unit: '每次运行的秒数', column: '耗时' },
 			steps: { label: '步数', unit: '每次运行的模型轮次', column: '步数' },
-			cost_usd: { label: '成本', unit: '每 1,000 次运行的美元数', column: '成本' }
+			cost_usd: { label: '成本', unit: '每个任务的美元数', column: '成本' }
 		},
 		chart: {
 			question: '问题',

@@ -182,7 +182,7 @@ const ja: Messages = {
 		local: 'テスト',
 		arms: { baseline: 'WebMCP なし', webmcp: 'WebMCP あり' },
 		tokens: 'トークン',
-		stats: '{time} · {steps} ステップ · {cost}/1,000 回',
+		stats: '{time} · {steps} ステップ · 1 タスクあたり {cost}',
 		na: '記録なし',
 		solved: '成功 {n}',
 		failed: '失敗 {n}',
@@ -209,7 +209,7 @@ const ja: Messages = {
 			tokens: { label: 'トークン', unit: '実行 1 回あたりのトークン数', column: 'トークン' },
 			duration_ms: { label: '時間', unit: '実行 1 回あたりの秒数', column: '時間' },
 			steps: { label: 'ステップ', unit: '実行 1 回あたりのモデルのターン数', column: 'ステップ' },
-			cost_usd: { label: 'コスト', unit: '1,000 回あたりの USD', column: 'コスト' }
+			cost_usd: { label: 'コスト', unit: '1 タスクあたりの USD', column: 'コスト' }
 		},
 		chart: {
 			question: '質問',

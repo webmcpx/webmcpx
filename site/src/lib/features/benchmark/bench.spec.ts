@@ -5,7 +5,7 @@ import {
 	headline,
 	losses,
 	parse,
-	perThousand,
+	perRun,
 	ratio,
 	rows,
 	tokens,
@@ -58,8 +58,10 @@ describe('formatting', () => {
 		expect(tokens(23400)).toBe('23k');
 		expect(ratio(7.94)).toBe('7.9×');
 		expect(ratio(12.4)).toBe('12×');
-		expect(perThousand(0.000154)).toBe('$0.15');
-		expect(perThousand(null)).toBe('n/a');
+		expect(perRun(0.000154)).toBe('$0.00015');
+		expect(perRun(0.05419)).toBe('$0.054');
+		expect(perRun(0.0075712)).toBe('$0.0076');
+		expect(perRun(null)).toBe('n/a');
 	});
 });
 

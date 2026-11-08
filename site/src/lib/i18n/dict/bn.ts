@@ -187,7 +187,7 @@ const bn: Messages = {
 		local: 'লোকাল',
 		arms: { baseline: 'WebMCP ছাড়া', webmcp: 'WebMCP দিয়ে' },
 		tokens: 'টোকেন',
-		stats: '{time} · {steps} ধাপ · প্রতি 1k-এ {cost}',
+		stats: '{time} · {steps} ধাপ · প্রতি টাস্কে {cost}',
 		na: 'তথ্য নেই',
 		solved: 'সমাধান {n}',
 		failed: 'ব্যর্থ {n}',
@@ -214,7 +214,7 @@ const bn: Messages = {
 			tokens: { label: 'টোকেন', unit: 'প্রতি রানে টোকেন', column: 'টোকেন' },
 			duration_ms: { label: 'সময়', unit: 'প্রতি রানে সেকেন্ড', column: 'সময়' },
 			steps: { label: 'ধাপ', unit: 'প্রতি রানে মডেলের টার্ন', column: 'ধাপ' },
-			cost_usd: { label: 'খরচ', unit: 'প্রতি 1,000 রানে USD', column: 'খরচ' }
+			cost_usd: { label: 'খরচ', unit: 'প্রতি টাস্কে USD', column: 'খরচ' }
 		},
 		chart: {
 			question: 'প্রশ্ন',

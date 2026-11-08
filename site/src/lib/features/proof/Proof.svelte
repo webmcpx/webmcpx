@@ -25,7 +25,7 @@
 	import {
 		compare,
 		METRICS,
-		perThousand,
+		perRun,
 		rows,
 		seconds,
 		tokens,
@@ -97,7 +97,7 @@
 			{fmt(m.stats, {
 				time: seconds(arm.duration_ms),
 				steps: arm.steps.toFixed(1),
-				cost: arm.cost_usd == null ? m.na : perThousand(arm.cost_usd)
+				cost: arm.cost_usd == null ? m.na : perRun(arm.cost_usd)
 			})}
 		</p>
 		<Stamp tone={ok ? 'good' : 'bad'} size="lg" class="mt-5"

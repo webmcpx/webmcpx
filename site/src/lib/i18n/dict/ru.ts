@@ -199,7 +199,7 @@ const ru: Messages = {
 		local: 'тест',
 		arms: { baseline: 'Без WebMCP', webmcp: 'С WebMCP' },
 		tokens: 'токенов',
-		stats: '{time} · шагов: {steps} · {cost} за 1 000',
+		stats: '{time} · шагов: {steps} · {cost} за задачу',
 		na: 'н/д',
 		solved: 'Решено {n}',
 		failed: 'Не решено {n}',
@@ -226,7 +226,7 @@ const ru: Messages = {
 			tokens: { label: 'Токены', unit: 'токенов за запуск', column: 'токены' },
 			duration_ms: { label: 'Время', unit: 'секунд за запуск', column: 'время' },
 			steps: { label: 'Шаги', unit: 'ходов модели за запуск', column: 'шаги' },
-			cost_usd: { label: 'Стоимость', unit: 'USD за 1 000 запусков', column: 'стоимость' }
+			cost_usd: { label: 'Стоимость', unit: 'USD за задачу', column: 'стоимость' }
 		},
 		chart: {
 			question: 'Вопрос',

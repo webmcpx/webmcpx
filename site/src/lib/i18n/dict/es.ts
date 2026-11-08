@@ -186,7 +186,7 @@ const es: Messages = {
 		local: 'local',
 		arms: { baseline: 'Sin WebMCP', webmcp: 'Con WebMCP' },
 		tokens: 'tokens',
-		stats: '{time} · {steps} pasos · {cost} por 1000',
+		stats: '{time} · {steps} pasos · {cost} por tarea',
 		na: 'n/d',
 		solved: 'Resuelta {n}',
 		failed: 'Fallida {n}',
@@ -213,7 +213,7 @@ const es: Messages = {
 			tokens: { label: 'Tokens', unit: 'tokens por ejecución', column: 'tokens' },
 			duration_ms: { label: 'Tiempo', unit: 'segundos por ejecución', column: 'tiempo' },
 			steps: { label: 'Pasos', unit: 'turnos del modelo por ejecución', column: 'pasos' },
-			cost_usd: { label: 'Costo', unit: 'USD por cada 1000 ejecuciones', column: 'costo' }
+			cost_usd: { label: 'Costo', unit: 'USD por tarea', column: 'costo' }
 		},
 		chart: {
 			question: 'Pregunta',

@@ -186,7 +186,7 @@ const hi: Messages = {
 		local: 'लोकल',
 		arms: { baseline: 'WebMCP के बिना', webmcp: 'WebMCP के साथ' },
 		tokens: 'टोकन',
-		stats: '{time} · {steps} स्टेप · {cost} प्रति 1k',
+		stats: '{time} · {steps} स्टेप · प्रति टास्क {cost}',
 		na: 'उपलब्ध नहीं',
 		solved: 'हल {n}',
 		failed: 'विफल {n}',
@@ -213,7 +213,7 @@ const hi: Messages = {
 			tokens: { label: 'टोकन', unit: 'प्रति रन टोकन', column: 'टोकन' },
 			duration_ms: { label: 'समय', unit: 'प्रति रन सेकंड', column: 'समय' },
 			steps: { label: 'स्टेप', unit: 'प्रति रन मॉडल टर्न', column: 'स्टेप' },
-			cost_usd: { label: 'लागत', unit: 'प्रति 1,000 रन USD', column: 'लागत' }
+			cost_usd: { label: 'लागत', unit: 'प्रति टास्क USD', column: 'लागत' }
 		},
 		chart: {
 			question: 'सवाल',

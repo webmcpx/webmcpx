@@ -185,7 +185,7 @@ const ptBr: Messages = {
 		local: 'local',
 		arms: { baseline: 'Sem WebMCP', webmcp: 'Com WebMCP' },
 		tokens: 'tokens',
-		stats: '{time} · {steps} passos · {cost} por 1 mil',
+		stats: '{time} · {steps} passos · {cost} por tarefa',
 		na: 'n/d',
 		solved: 'Resolveu {n}',
 		failed: 'Falhou {n}',
@@ -212,7 +212,7 @@ const ptBr: Messages = {
 			tokens: { label: 'Tokens', unit: 'tokens por execução', column: 'tokens' },
 			duration_ms: { label: 'Tempo', unit: 'segundos por execução', column: 'tempo' },
 			steps: { label: 'Passos', unit: 'turnos do modelo por execução', column: 'passos' },
-			cost_usd: { label: 'Custo', unit: 'USD por 1.000 execuções', column: 'custo' }
+			cost_usd: { label: 'Custo', unit: 'USD por tarefa', column: 'custo' }
 		},
 		chart: {
 			question: 'Pergunta',

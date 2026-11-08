@@ -72,7 +72,9 @@ export function compare(baseline: number, webmcp: number, better: string, worse:
 }
 
 /** Cost per 1,000 tasks, easier to read than fractions of a cent. */
-export const perThousand = (usd: number | null) => (usd == null ? 'n/a' : `$${(usd * 1000).toFixed(2)}`);
+/** Dollars for one run, to two significant digits ($0.054, $0.0076, $0.00031). */
+export const perRun = (usd: number | null) =>
+	usd == null ? 'n/a' : `$${usd >= 1 ? usd.toFixed(2) : Number(usd.toPrecision(2)).toString()}`;
 
 /** One model's published run as the landing gets it: runs stripped, sites selected (see sites.ts). */
 export interface ModelRun {
@@ -120,7 +122,7 @@ export const METRICS: Metric[] = [
 	{ id: 'tokens', format: tokens },
 	{ id: 'duration_ms', format: seconds },
 	{ id: 'steps', format: (x) => x.toFixed(1) },
-	{ id: 'cost_usd', format: (x) => perThousand(x) }
+	{ id: 'cost_usd', format: (x) => perRun(x) }
 ];
 
 export interface Row {
