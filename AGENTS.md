@@ -44,6 +44,20 @@
 - Don't use `#[allow]`; use `#[expect(lint, reason = "...")]`.
 - Don't add options or abstractions "for later": a safe default beats a setting; generalize on the third use.
 
+## Evidence (published claims and decisions are documented, with sources)
+Anything we publish as a result (benchmark numbers, rankings, "works in any browser") or decide that a skeptic
+could question must be traceable in the repo, so the argument stands on evidence, not on our word:
+- Benchmark method: `bench/METHODOLOGY.md` (design, tasks and how they were chosen, grading, metrics, ranking,
+  uncertainty, threats to validity, references). Change it in the same PR as the harness or task change.
+- Method versions: `bench/CHANGELOG.md`. Every change that can move a published number gets an entry: what
+  changed, why (link the finding or issue), and the measured impact per model (before → after). Never change
+  the method to improve a number without an entry; superseded results are named, not silently replaced.
+- Audits: `bench/audits/<date>-<topic>.md` keeps each independent review (e.g. Codex) in full, with what was
+  fixed (commit links), disclosed or rebutted, and why.
+- Product decisions with trade-offs: `docs/decisions/NNNN-<slug>.md` (context, options, decision, evidence,
+  consequences), citing primary sources (specs, W3C repos, vendor docs, measurements) with links and dates.
+- Claims on the site or README link to the file that backs them. A number without a source is not published.
+
 ## Review (required before every merge)
 - Work on a branch. Before merging, run `just review` (Codex, `gpt-6.1-sol`, high reasoning; prompt in
   `scripts/review.md`). Fix each finding, or rebut it with evidence via `just review-reply "<reply>"`.
