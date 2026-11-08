@@ -350,7 +350,10 @@ mod tests {
 
     #[test]
     fn a_query_counts_at_most_max_terms_words() {
-        let query: String = (0..5_000).map(|i| format!("w{i} ")).collect();
+        let mut query = String::new();
+        for i in 0..5_000 {
+            core::fmt::Write::write_fmt(&mut query, format_args!("w{i} ")).unwrap();
+        }
         let page = "p\u{1F}w0 here\u{1E}";
         let v = parse(&search(page, &query, 5));
         assert_eq!(v["data"]["results"][0]["snippet"], "w0 here");
