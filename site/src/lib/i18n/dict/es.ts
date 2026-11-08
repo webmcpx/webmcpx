@@ -607,7 +607,7 @@ const es: Messages = {
 			'Leyéndola como un agente…',
 			'Analizando con el linter…'
 		],
-		verdicts: { ready: 'Listo', issues: 'Casi', missing: 'Aún no' },
+		verdicts: { ready: 'Listo', issues: 'Casi', missing: 'No listo' },
 		failed: 'No se pudo escanear.',
 		result: {
 			missing:
@@ -702,10 +702,13 @@ const es: Messages = {
 			fix: 'Corregir WebMCP',
 			lint: 'Encuentra todos los problemas en tu código fuente, con su corrección:',
 			terminal: 'terminal',
-			badge: 'Muéstralo. Elige una insignia y pégala en tu sitio:',
+			badge: 'Tu sitio ganó la insignia agent-ready',
 			badgeNote:
 				'El SVG va dentro del código, así que no se carga nada desde nuestros servidores. Enlaza a un escaneo en vivo de tu sitio, para que cualquiera pueda comprobarlo.',
 			badgeStyle: 'Estilo de insignia',
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'O Markdown',
+			toolsTitle: 'Herramientas WebMCP en esta página',
 			badgeTitle: 'Listo para agentes: compruébalo en vivo con webmcpx',
 			share: 'Compartir',
 			shared: 'Enlace copiado',

@@ -608,7 +608,7 @@ const de: Messages = {
 			'Lesen wie ein Agent…',
 			'Tools werden gelintet…'
 		],
-		verdicts: { ready: 'Agentenfähig', issues: 'Fast', missing: 'Noch nicht' },
+		verdicts: { ready: 'Agentenfähig', issues: 'Fast', missing: 'Nicht agentenfähig' },
 		failed: 'Scan nicht möglich.',
 		result: {
 			missing: 'Keine WebMCP-Tools. Agenten müssen rund {tokens} dieser Seite lesen und raten.',
@@ -702,10 +702,13 @@ const de: Messages = {
 			fix: 'WebMCP beheben',
 			lint: 'Finden Sie alle Probleme im Quellcode, samt Korrekturen:',
 			terminal: 'Terminal',
-			badge: 'Zeigen Sie es. Wählen Sie ein Badge und binden Sie es auf Ihrer Website ein:',
+			badge: 'Ihre Website hat das Agent-ready-Badge verdient',
 			badgeNote:
 				'Das SVG steckt im Code, es wird also nichts von uns geladen. Es verlinkt auf einen Live-Scan Ihrer Website, damit jeder es nachprüfen kann.',
 			badgeStyle: 'Badge-Stil',
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'Oder Markdown',
+			toolsTitle: 'WebMCP-Tools auf dieser Seite',
 			badgeTitle: 'Agentenfähig: live mit webmcpx prüfen',
 			share: 'Teilen',
 			shared: 'Link kopiert',

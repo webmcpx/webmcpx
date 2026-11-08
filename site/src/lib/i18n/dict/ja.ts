@@ -591,7 +591,7 @@ const ja: Messages = {
 			'エージェントの目で読んでいます…',
 			'ツールを lint しています…'
 		],
-		verdicts: { ready: 'エージェント対応', issues: 'あと少し', missing: '未対応' },
+		verdicts: { ready: 'エージェント対応', issues: 'あと少し', missing: 'エージェント未対応' },
 		failed: 'スキャンできませんでした。',
 		result: {
 			missing:
@@ -683,10 +683,13 @@ const ja: Messages = {
 			fix: 'WebMCP を修正',
 			lint: 'ソース内の問題をすべて洗い出し、修正案も示します：',
 			terminal: 'ターミナル',
-			badge: '対応済みであることを示しましょう。バッジを選んで、サイトに貼り付けてください：',
+			badge: 'あなたのサイトは agent-ready バッジを獲得しました',
 			badgeNote:
 				'SVG はコードに直接埋め込まれるので、こちらからは何も読み込みません。リンク先はそのサイトのライブスキャンなので、誰でも確認できます。',
 			badgeStyle: 'バッジのスタイル',
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'または Markdown',
+			toolsTitle: 'このページの WebMCP ツール',
 			badgeTitle: 'エージェント対応：webmcpx でライブ確認',
 			share: '共有',
 			shared: 'リンクをコピー済み',

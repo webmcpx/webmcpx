@@ -436,10 +436,17 @@ impl Page {
 
     /// Renders `html` at `width`×`height` CSS pixels and returns a PNG. The page loads from a data: URL,
     /// so nothing is fetched from the network.
-    pub async fn render_png(&self, html: &str, width: u32, height: u32) -> Result<Vec<u8>> {
+    /// Renders `html` laid out at `width`×`height` CSS pixels, captured at `scale` device pixels each.
+    pub async fn render_png(
+        &self,
+        html: &str,
+        width: u32,
+        height: u32,
+        scale: f64,
+    ) -> Result<Vec<u8>> {
         self.send(
             "Emulation.setDeviceMetricsOverride",
-            json!({ "width": width, "height": height, "deviceScaleFactor": 1, "mobile": false }),
+            json!({ "width": width, "height": height, "deviceScaleFactor": scale, "mobile": false }),
         )
         .await?;
         let frame = self.send("Page.getFrameTree", json!({})).await?["frameTree"]["frame"]["id"]

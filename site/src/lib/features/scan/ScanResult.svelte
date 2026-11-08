@@ -57,7 +57,7 @@
 	/** A code sample that is not highlighted (built in the browser), shown in the same CodeBlock. */
 
 	let step = $state(0);
-	let badge: BadgeStyle = $state('card');
+	let badge: BadgeStyle = $state('flat');
 	/** The tool whose description shows in the tooltip, and where (page coordinates, so scrolling keeps it in place). */
 	let tip: { text: string; left: number; top: number; above: boolean } | null = $state(null);
 
@@ -322,6 +322,7 @@
 
 			{#if r.tools.length}
 				<div class="border-t-2 border-ink bg-paper-2 px-5 py-4 sm:px-7">
+					<p class="mb-3 font-mono text-[11px] tracking-wider text-ink-3 uppercase">{m.result.toolsTitle}</p>
 					<ul class="flex flex-wrap items-center gap-2" aria-label={m.result.tools}>
 						{#each r.tools.slice(0, 3) as t, i (i)}
 							<li>
@@ -392,18 +393,10 @@
 						{/each}
 					</fieldset>
 					<!-- HTML for sites (the SVG inline, nothing loaded from us); Markdown for READMEs (an image we serve). -->
-					<CodeBlock
-						snippet={highlightLite(embed, 'html')}
-						title="badge.html"
-						class="mt-4 shadow-none"
-						compact
-					/>
-					<CodeBlock
-						snippet={highlightLite(markdown, 'md')}
-						title="README.md"
-						class="mt-3 shadow-none"
-						compact
-					/>
+					<p class="mt-5 mb-2 text-sm font-medium">{m.result.badgeHtml}</p>
+					<CodeBlock snippet={highlightLite(embed, 'html')} title="badge.html" class="shadow-none" compact />
+					<p class="mt-4 mb-2 text-sm font-medium">{m.result.badgeMarkdown}</p>
+					<CodeBlock snippet={highlightLite(markdown, 'md')} title="README.md" class="shadow-none" compact />
 				</div>
 			{/if}
 
@@ -428,11 +421,11 @@
 				<Button variant="outline" size="sm" onclick={() => savePdf(host(r.final_url))}>
 					<FileDown aria-hidden="true" />{m.result.save}
 				</Button>
-				<!-- The share card the scanner renders (1200×630, same origin, so `download` names the file). -->
+				<!-- The scanner's post image (1600×900, 16:9 for X and other feeds; same origin, so `download` names the file). -->
 				<Button
 					variant="outline"
 					size="sm"
-					href={`/og/scan.png?url=${encodeURIComponent(r.url)}`}
+					href={`/og/scan.png?url=${encodeURIComponent(r.url)}&size=post`}
 					download={`webmcpx-scan-${host(r.final_url)}.png`}
 				>
 					<ImageDown aria-hidden="true" />{m.result.savePng}

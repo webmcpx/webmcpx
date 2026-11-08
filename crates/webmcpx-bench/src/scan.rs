@@ -78,6 +78,8 @@ pub struct Report {
     /// proxy), so the page showing the report never requests anything from the scanned site.
     pub favicon: Option<String>,
     pub elapsed_ms: u64,
+    /// The day the scan ran, `YYYY-MM-DD` (UTC): what the share card's date shows.
+    pub scanned_on: String,
     /// Set when this report comes from the cache (an earlier scan of the same URL), not a scan just now.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cached: Option<Cached>,
@@ -234,6 +236,23 @@ type SharedScan = Arc<OnceCell<Result<Report, ScanError>>>;
 /// Shared scans by URL, with how many callers are waiting on each.
 type Inflight = std::sync::Mutex<HashMap<String, (SharedScan, usize)>>;
 
+/// Today's date in UTC, `YYYY-MM-DD` (days to civil date, as in Howard Hinnant's `civil_from_days`).
+fn today() -> String {
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs());
+    let z = i64::try_from(secs / 86_400).unwrap_or(0) + 719_468;
+    let era = z.div_euclid(146_097);
+    let doe = z.rem_euclid(146_097);
+    let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let year = yoe + era * 400 + i64::from(month <= 2);
+    format!("{year:04}-{month:02}-{day:02}")
+}
+
 /// A site's latest scan in a few numbers, kept a week (a few dozen bytes per site): its badge, and its share
 /// card and link preview after the full report has left the cache.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -244,6 +263,7 @@ pub struct Kept {
     pub page_tokens: usize,
     pub score: u8,
     pub lint_errors: bool,
+    pub scanned_on: String,
     at: Instant,
 }
 
@@ -256,6 +276,7 @@ impl Kept {
             page_tokens: self.page_tokens,
             score: self.score,
             lint_errors: self.lint_errors,
+            scanned_on: &self.scanned_on,
         }
     }
 }
@@ -436,6 +457,7 @@ impl Scanner {
                 page_tokens: s.page_tokens,
                 score: s.score,
                 lint_errors: s.lint_errors,
+                scanned_on: s.scanned_on.to_owned(),
                 at: Instant::now(),
             };
             for url in [report.url.as_str(), report.final_url.as_str()] {
@@ -482,15 +504,17 @@ impl Scanner {
 
     /// The share card (1200×630 PNG) for a report, rendered by the scan browser and kept.
     pub async fn card(&self, report: &Report) -> Result<Arc<Vec<u8>>, ScanError> {
-        self.card_of(crate::card::Summary::of(report)).await
+        self.card_of(crate::card::Summary::of(report), crate::card::Format::Link)
+            .await
     }
 
     /// The share card for what a scan found (a report's summary, or a site's [`Kept`] one).
     pub async fn card_of(
         &self,
         summary: crate::card::Summary<'_>,
+        format: crate::card::Format,
     ) -> Result<Arc<Vec<u8>>, ScanError> {
-        let key = format!("{summary:?}");
+        let key = format!("{format:?} {summary:?}");
         if let Some(png) = lock(&self.cards).get(&key) {
             return Ok(Arc::clone(png));
         }
@@ -505,17 +529,25 @@ impl Scanner {
         if let Some(png) = lock(&self.cards).get(&key) {
             return Ok(Arc::clone(png));
         }
-        self.render(&key, &crate::card::html(summary)).await
+        self.render(&key, &crate::card::html(summary, format), format)
+            .await
     }
 
     /// Renders `html` as a 1200×630 PNG with the scan browser, kept under `key`.
-    async fn render(&self, key: &str, html: &str) -> Result<Arc<Vec<u8>>, ScanError> {
+    async fn render(
+        &self,
+        key: &str,
+        html: &str,
+        format: crate::card::Format,
+    ) -> Result<Arc<Vec<u8>>, ScanError> {
+        let (width, height, scale) = format.size();
         let _slot = tokio::time::timeout(QUEUE_WAIT, self.slots.acquire())
             .await
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let (_browser, page) = self.open_page(&[], self.deadline).await?;
-        let png = tokio::time::timeout(CLOSE_WAIT, page.render_png(html, 1200, 630)).await;
+        let png =
+            tokio::time::timeout(CLOSE_WAIT, page.render_png(html, width, height, scale)).await;
         let _ = tokio::time::timeout(CLOSE_WAIT, page.close()).await;
         let png = Arc::new(png.map_err(|_| ScanError::TimedOut)?.map_err(failed)?);
         let mut cards = lock(&self.cards);
@@ -528,12 +560,17 @@ impl Scanner {
 
     /// The site's generic preview image (see [`crate::card::generic_html`]).
     pub async fn generic_card(&self) -> Result<Arc<Vec<u8>>, ScanError> {
-        self.render("generic", &crate::card::generic_html()).await
+        self.render(
+            "generic",
+            &crate::card::generic_html(),
+            crate::card::Format::Link,
+        )
+        .await
     }
 
     /// Renders any card HTML (the build-time benchmark cards), cached under its own text.
     pub async fn render_html(&self, html: &str) -> Result<Arc<Vec<u8>>, ScanError> {
-        self.render(html, html).await
+        self.render(html, html, crate::card::Format::Link).await
     }
 
     /// One browser visit, after waiting in line for a slot.
@@ -1049,6 +1086,7 @@ pub fn report(
         score_items,
         favicon: None,
         elapsed_ms: 0,
+        scanned_on: today(),
         cached: None,
     }
 }

@@ -606,7 +606,7 @@ const ptBr: Messages = {
 			'Lendo como um agente…',
 			'Rodando o lint nas ferramentas…'
 		],
-		verdicts: { ready: 'Pronto', issues: 'Quase', missing: 'Ainda não' },
+		verdicts: { ready: 'Pronto', issues: 'Quase', missing: 'Não pronto' },
 		failed: 'Não foi possível escanear.',
 		result: {
 			missing:
@@ -701,10 +701,13 @@ const ptBr: Messages = {
 			fix: 'Corrigir WebMCP',
 			lint: 'Encontre todos os problemas no seu código-fonte, com as correções:',
 			terminal: 'terminal',
-			badge: 'Mostre isso. Escolha um badge e cole no seu site:',
+			badge: 'Seu site ganhou o selo agent-ready',
 			badgeNote:
 				'O SVG vai dentro do código, então nada é carregado de nós. Ele aponta para um scan ao vivo do seu site, e qualquer pessoa pode conferir.',
 			badgeStyle: 'Estilo do badge',
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'Ou Markdown',
+			toolsTitle: 'Ferramentas WebMCP nesta página',
 			badgeTitle: 'Pronto para agentes: confira ao vivo com o webmcpx',
 			share: 'Compartilhar',
 			shared: 'Link copiado',

@@ -613,7 +613,7 @@ const fr: Messages = {
 			'Lecture comme un agent…',
 			'Lint des outils…'
 		],
-		verdicts: { ready: 'Prêt', issues: 'Presque', missing: 'Pas encore' },
+		verdicts: { ready: 'Prêt', issues: 'Presque', missing: 'Pas prêt' },
 		failed: 'Impossible de scanner ce site.',
 		result: {
 			missing: 'Aucun outil WebMCP. Les agents doivent lire environ {tokens} de cette page et deviner.',
@@ -707,10 +707,13 @@ const fr: Messages = {
 			fix: 'Corriger WebMCP',
 			lint: 'Trouvez chaque problème dans votre code source, avec sa correction :',
 			terminal: 'terminal',
-			badge: 'Affichez-le. Choisissez un badge et collez-le sur votre site :',
+			badge: 'Votre site a gagné le badge agent-ready',
 			badgeNote:
 				'Le SVG est inclus dans le code : rien ne se charge depuis chez nous. Il renvoie vers un scan en direct de votre site, que chacun peut vérifier.',
 			badgeStyle: 'Style du badge',
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'Ou Markdown',
+			toolsTitle: 'Outils WebMCP sur cette page',
 			badgeTitle: 'Prêt pour les agents : vérifiez-le en direct avec webmcpx',
 			share: 'Partager',
 			shared: 'Lien copié',

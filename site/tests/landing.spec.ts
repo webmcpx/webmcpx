@@ -166,15 +166,17 @@ test('an agent-ready site picks one of three badges and gets it as HTML and as M
 	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	const styles = page.getByRole('group', { name: 'Badge style' }).getByRole('radio');
 	await expect(styles).toHaveCount(3);
+	// Flat first and picked: the classic README badge shape.
 	await expect(styles.first()).toBeChecked();
 	const embed = page.locator('#scan').getByRole('figure').filter({ hasText: 'badge.html' });
 	const readme = page.locator('#scan').getByRole('figure').filter({ hasText: 'README.md' });
-	const card = await embed.textContent();
-	await expect(readme).toContainText('/badge/docs.example.com.svg?style=card)](');
-	await page.locator('#scan label', { hasText: 'Flat' }).click();
-	await expect(styles.nth(1)).toBeChecked();
+	await expect(page.locator('#scan').getByText('Or Markdown', { exact: true })).toBeVisible();
 	await expect(embed).toContainText('width="158" height="20"');
-	expect(await embed.textContent()).not.toBe(card);
+	await expect(readme).toContainText('/badge/docs.example.com.svg?style=flat)](');
+	const flat = await embed.textContent();
+	await page.locator('#scan label', { hasText: 'Card' }).click();
+	await expect(styles.nth(1)).toBeChecked();
+	expect(await embed.textContent()).not.toBe(flat);
 	await page.locator('#scan label', { hasText: 'Dark' }).click();
 	await expect(embed).toContainText('#3d3c37');
 	await expect(embed).not.toContainText('<img');
@@ -262,7 +264,7 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('plain.example.com');
 	await page.keyboard.press('Enter');
-	await expect(page.locator('#scan').getByText('Not yet', { exact: true })).toBeVisible();
+	await expect(page.locator('#scan').getByText('Not agent-ready', { exact: true })).toBeVisible();
 	// The fix is one click away: the install steps.
 	await page.locator('#scan').getByRole('link', { name: 'Fix WebMCP' }).click();
 	await expect(page).toHaveURL(/#for-sites$/);
@@ -284,7 +286,7 @@ test('Save PDF prints the result card alone, named after the site', async ({ pag
 	await page.keyboard.press('Enter');
 	// Save PNG downloads the scanner's share card for this result, named after the site.
 	const png = page.locator('#scan').getByRole('link', { name: 'Save PNG' });
-	await expect(png).toHaveAttribute('href', `/og/scan.png?url=${encodeURIComponent(REPORT.url)}`);
+	await expect(png).toHaveAttribute('href', `/og/scan.png?url=${encodeURIComponent(REPORT.url)}&size=post`);
 	await expect(png).toHaveAttribute('download', 'webmcpx-scan-docs.example.com.png');
 	await page.locator('#scan').getByRole('button', { name: 'Save PDF' }).click();
 	expect(await page.evaluate(() => (window as unknown as { printed: object }).printed)).toEqual({
@@ -708,7 +710,7 @@ test('the verdicts page explains each stamp and is linked from every scan result
 	await page.locator('footer').getByRole('link', { name: 'How verdicts work' }).click();
 	await expect(page).toHaveURL(/\/verdicts\/$/);
 	await expect(page.getByRole('heading', { level: 1 })).toHaveText('How the scanner decides');
-	for (const name of ['Agent-ready', 'Almost', 'Not yet'])
+	for (const name of ['Agent-ready', 'Almost', 'Not agent-ready'])
 		await expect(page.getByText(name, { exact: true })).toBeVisible();
 	await expect(page.getByText('invalid-input-schema')).toBeVisible();
 	await expect(page.getByRole('link', { name: 'Open an issue with the scan link.' })).toHaveAttribute(

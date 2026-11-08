@@ -268,6 +268,8 @@ fn strip_social_tags(html: &str) -> String {
 #[derive(Deserialize)]
 struct CardQuery {
     url: String,
+    /// `post`: the 1600×900 image Save PNG downloads; otherwise the 1200×630 link preview.
+    size: Option<String>,
 }
 
 /// The share card of a site scanned in the last minutes; the generic card otherwise.
@@ -286,7 +288,12 @@ async fn scan_card(State(state): State<ScanState>, Query(q): Query<CardQuery>) -
     let Some(summary) = summary else {
         return axum::response::Redirect::temporary("/og.png").into_response();
     };
-    match state.scanner.card_of(summary).await {
+    let format = if q.size.as_deref() == Some("post") {
+        crate::card::Format::Post
+    } else {
+        crate::card::Format::Link
+    };
+    match state.scanner.card_of(summary, format).await {
         Ok(png) => (
             [
                 (axum::http::header::CONTENT_TYPE, "image/png"),

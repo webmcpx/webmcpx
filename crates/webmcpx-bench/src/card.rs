@@ -24,6 +24,26 @@ pub struct Summary<'a> {
     pub score: u8,
     /// Whether the linter found errors (an "almost" site with clean tools only misses agent basics).
     pub lint_errors: bool,
+    /// The scan's date, `YYYY-MM-DD` (UTC).
+    pub scanned_on: &'a str,
+}
+
+/// Which image: the link preview (`og:image`, 1200×630) or the post image Save PNG downloads (1600×900,
+/// 16:9, shown whole on X, Bluesky, Threads and `LinkedIn`; laid out at 1200×675 and rendered at 4/3).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Format {
+    Link,
+    Post,
+}
+
+impl Format {
+    /// CSS width and height of the layout, and the device scale it is captured at.
+    pub const fn size(self) -> (u32, u32, f64) {
+        match self {
+            Self::Link => (1200, 630, 1.0),
+            Self::Post => (1200, 675, 4.0 / 3.0),
+        }
+    }
 }
 
 impl<'a> Summary<'a> {
@@ -35,6 +55,7 @@ impl<'a> Summary<'a> {
             page_tokens: report.page_tokens,
             score: report.score,
             lint_errors: report.diagnostics.iter().any(|d| d.severity == "error"),
+            scanned_on: &report.scanned_on,
         }
     }
 }
@@ -64,11 +85,25 @@ fn short(n: usize) -> String {
     }
 }
 
-fn stamp(verdict: Verdict) -> (&'static str, &'static str) {
+/// The verdict's stamp: label, fill and text color (red for a site agents can't use through tools).
+fn stamp(verdict: Verdict) -> (&'static str, &'static str, &'static str) {
+    const INK: &str = "oklch(0.18 0.004 95)";
     match verdict {
-        Verdict::Ready => ("Agent-ready", "oklch(0.9 0.08 150)"),
-        Verdict::Issues => ("Almost", "oklch(0.89 0.16 95)"),
-        Verdict::Missing => ("Not yet", "oklch(0.92 0.05 28)"),
+        Verdict::Ready => ("Agent-ready", "oklch(0.9 0.08 150)", INK),
+        Verdict::Issues => ("Almost", "oklch(0.89 0.16 95)", INK),
+        Verdict::Missing => ("Not agent-ready", "oklch(0.58 0.21 27)", "#fff"),
+    }
+}
+
+/// `2026-11-09` as `Nov 9, 2026`; anything else as given.
+fn human_date(iso: &str) -> String {
+    const MONTHS: [&str; 12] = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    let mut parts = iso.splitn(3, '-').map(str::parse::<usize>);
+    match (parts.next(), parts.next(), parts.next()) {
+        (Some(Ok(y)), Some(Ok(m @ 1..=12)), Some(Ok(d))) => format!("{} {d}, {y}", MONTHS[m - 1]),
+        _ => iso.to_owned(),
     }
 }
 
@@ -97,7 +132,7 @@ fn what(s: Summary<'_>) -> String {
 }
 
 /// The card as a standalone HTML page, 1200×630.
-pub fn html(s: Summary<'_>) -> String {
+pub fn html(s: Summary<'_>, format: Format) -> String {
     // Long hosts shrink rather than wrap or overflow.
     let size = match s.host.chars().count() {
         0..=18 => 104,
@@ -105,27 +140,40 @@ pub fn html(s: Summary<'_>) -> String {
         27..=36 => 60,
         _ => 46,
     };
-    html_with(
-        s.host,
+    render(&Card {
+        title: s.host,
         size,
-        &what(s),
-        Some(stamp(s.verdict)),
-        Some(s.score),
-    )
+        line: &what(s),
+        stamp: Some(stamp(s.verdict)),
+        score: Some(s.score),
+        date: Some(human_date(s.scanned_on)),
+        height: format.size().1,
+    })
 }
 
-fn html_with(
-    title: &str,
+/// What one card shows; [`render`] lays it out.
+struct Card<'a> {
+    title: &'a str,
+    /// The title's font size (px).
     size: u32,
-    line: &str,
-    stamp: Option<(&str, &str)>,
+    line: &'a str,
+    /// Label, fill and text color of the verdict stamp.
+    stamp: Option<(&'a str, &'a str, &'a str)>,
     score: Option<u8>,
-) -> String {
-    let (label, fill) = stamp.unwrap_or(("", "transparent"));
-    let stamp_display = if stamp.is_some() { "block" } else { "none" };
-    let host = escape(title);
+    /// When the scan ran, shown small in the footer.
+    date: Option<String>,
+    /// Layout height in CSS px (630 for a link preview, 675 for a 16:9 post image).
+    height: u32,
+}
+
+fn render(c: &Card<'_>) -> String {
+    let (label, fill, stamp_ink) = c.stamp.unwrap_or(("", "transparent", "inherit"));
+    let stamp_display = if c.stamp.is_some() { "block" } else { "none" };
+    let host = escape(c.title);
+    let height = c.height;
+    let size = c.size;
     // The score, big at the bottom right; highlighted from the agent-ready bar up.
-    let score = score.map_or_else(String::new, |n| {
+    let score = c.score.map_or_else(String::new, |n| {
         let mark = if n >= crate::scan::READY_SCORE {
             " marked"
         } else {
@@ -135,16 +183,19 @@ fn html_with(
             r#"<div class="score"><div class="label">Agent-ready score</div><div class="num{mark}"><b>{n}</b><small>/100</small></div></div>"#
         )
     });
+    let date = c.date.as_deref().map_or_else(String::new, |d| {
+        format!(r#"<span class="date">Scanned {}</span>"#, escape(d))
+    });
     format!(
         r#"<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face{{font-family:B;src:url(data:font/woff2;base64,{font}) format("woff2");font-weight:200 800}}
 *{{margin:0;box-sizing:border-box}}
-html,body{{width:1200px;height:630px;background:oklch(0.958 0.006 95);font-family:B,sans-serif;color:oklch(0.18 0.004 95)}}
+html,body{{width:1200px;height:{height}px;background:oklch(0.958 0.006 95);font-family:B,sans-serif;color:oklch(0.18 0.004 95)}}
 .frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;padding:56px 64px;display:flex;flex-direction:column;overflow:hidden;
 background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.86 0.006 95) 1px,transparent 1px);background-size:64px 64px}}
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .lockup svg{{height:44px;width:auto}}
-.stamp{{display:{stamp_display};border:4px solid currentColor;border-radius:999px;padding:10px 28px;font-size:34px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};box-shadow:5px 5px 0 currentColor}}
+.stamp{{display:{stamp_display};border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:10px 28px;font-size:34px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
 .mark{{position:absolute;right:-110px;top:50%;width:600px;height:600px;transform:translateY(-50%) rotate(-12deg);opacity:.06}}
 .top,.main,.foot{{position:relative}}
 .main{{margin-top:auto}}
@@ -157,30 +208,33 @@ background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1
 .num b{{font-size:150px;font-weight:800;letter-spacing:-.05em;line-height:.85}}
 .num small{{font-size:46px;font-weight:700;color:oklch(0.38 0.006 95)}}
 .num.marked b{{background:linear-gradient(transparent 45%,oklch(0.89 0.16 95) 45%,oklch(0.89 0.16 95) 80%,transparent 80%)}}
-.foot{{margin-top:40px;font-size:30px;font-weight:700}}
-.foot span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
+.foot{{margin-top:40px;font-size:30px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}}
+.foot span.cta span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
+.date{{font-size:20px;font-weight:600;letter-spacing:.06em;color:oklch(0.38 0.006 95)}}
 </style></head><body><div class="frame">
 <div class="mark">{mark}</div>
 <div class="top"><div class="lockup">{lockup}</div><div class="stamp">{label}</div></div>
 <div class="main"><div class="host">{host}</div><div class="row"><div class="text line">{line}</div>{score}</div></div>
-<div class="foot">Scan yours at <span>webmcpx.dev</span></div>
+<div class="foot"><span class="cta">Scan yours at <span>webmcpx.dev</span></span>{date}</div>
 </div></body></html>"#,
         font = base64(FONT),
         lockup = LOCKUP,
         mark = MARK,
-        line = escape(line),
+        line = escape(c.line),
     )
 }
 
 /// The site's own preview image (`/og.png`): what webmcpx is, for links without a scan.
 pub fn generic_html() -> String {
-    html_with(
-        "Make your site agent-ready",
-        104,
-        "Scan any site for WebMCP tools. One line makes it agent\u{2011}ready.",
-        None,
-        None,
-    )
+    render(&Card {
+        title: "Make your site agent-ready",
+        size: 104,
+        line: "Scan any site for WebMCP tools. One line makes it agent\u{2011}ready.",
+        stamp: None,
+        score: None,
+        date: None,
+        height: 630,
+    })
 }
 
 /// A published run's preview image (`/og/benchmark-<model>.png`): its best case, the question with the
@@ -208,18 +262,22 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
         format!("{ratio:.1}")
     };
     let model = results["model"].as_str().unwrap_or("one model");
-    Some(html_with(
-        &format!("{saving}\u{d7} fewer tokens"),
-        104,
-        &format!(
-            "{model}, same question with and without WebMCP: best case, on {place}. Every question is published."
-        ),
-        None,
-        None,
-    ))
+    let title = format!("{saving}\u{d7} fewer tokens");
+    let line = format!(
+        "{model}, same question with and without WebMCP: best case, on {place}. Every question is published."
+    );
+    Some(render(&Card {
+        title: &title,
+        size: 104,
+        line: &line,
+        stamp: None,
+        score: None,
+        date: None,
+        height: 630,
+    }))
 }
 
-/// The README badge for a site: `webmcp | agent-ready` (or almost, not yet, unknown).
+/// The README badge for a site: `webmcp | agent-ready` (or almost, not agent-ready, scan).
 /// The site's own badge artwork (`site/src/lib/content/badges/`), by style: what a Markdown embed shows
 /// for an agent-ready site, the same picture the HTML embed carries inline.
 const STYLED: [(&str, &str); 3] = [
@@ -253,7 +311,7 @@ pub fn badge_styled(verdict: Option<Verdict>, style: Option<&str>) -> String {
 pub fn badge(verdict: Option<Verdict>) -> String {
     let (label, fill) = match verdict {
         Some(v) => {
-            let (label, fill) = stamp(v);
+            let (label, fill, _) = stamp(v);
             (label.to_lowercase(), fill)
         }
         None => ("scan".to_owned(), "oklch(0.988 0.004 95)"),
@@ -331,6 +389,7 @@ mod tests {
             page_tokens: 12_345,
             score: 20,
             lint_errors: false,
+            scanned_on: "2026-11-09",
         };
         assert_eq!(
             line(s),
@@ -375,15 +434,34 @@ mod tests {
             page_tokens: 1,
             score: 100,
             lint_errors: false,
+            scanned_on: "2026-11-09",
         };
-        let h = html(s);
+        let h = html(s, Format::Link);
         assert!(h.contains("&lt;x&gt;&amp;") && !h.contains("<x>&"));
         assert!(h.contains("AGENT-READY") || h.contains("Agent-ready"));
+        assert!(h.contains("Scanned Nov 9, 2026"));
+        assert!(h.contains("height:630px"));
+        // The post image is 16:9, laid out at 1200×675.
+        assert!(html(s, Format::Post).contains("height:675px"));
+        assert_eq!(Format::Post.size(), (1200, 675, 4.0 / 3.0));
+        // A site without tools gets the red "Not agent-ready" stamp.
+        let missing = html(
+            Summary {
+                verdict: Verdict::Missing,
+                ..s
+            },
+            Format::Link,
+        );
+        assert!(missing.contains(">Not agent-ready<"));
+        assert!(missing.contains("oklch(0.58 0.21 27)"));
+        assert_eq!(super::human_date("2026-01-31"), "Jan 31, 2026");
+        assert_eq!(super::human_date("soon"), "soon");
     }
 
     #[test]
     fn badges_say_the_verdict() {
         assert!(badge(Some(Verdict::Ready)).contains(">agent-ready</text>"));
+        assert!(badge(Some(Verdict::Missing)).contains(">not agent-ready</text>"));
         assert!(badge(None).contains(">scan</text>"));
         assert!(!badge(Some(Verdict::Missing)).contains("<script"));
     }

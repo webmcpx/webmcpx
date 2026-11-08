@@ -748,7 +748,7 @@ const en = {
 			'Linting the tools…'
 		],
 		// Verdict stamps: max 12 each. "Agent-ready" is the key term (see hero.title).
-		verdicts: { ready: 'Agent-ready', issues: 'Almost', missing: 'Not yet' },
+		verdicts: { ready: 'Agent-ready', issues: 'Almost', missing: 'Not agent-ready' },
 		failed: "Couldn't scan that.",
 		result: {
 			// {tokens} is the highlighted token count (the text below). Plural by the count; {n} is shown short (12k).
@@ -841,10 +841,14 @@ const en = {
 			lint: 'Find every issue in your source, with fixes:',
 			// A code block's title: max 12.
 			terminal: 'terminal',
-			badge: 'Show it. Pick a badge and paste it on your site:',
+			badge: 'Your site earned the agent-ready badge',
 			badgeNote:
 				'The SVG is in the code, so nothing loads from us. It links to a live scan of your site, so anyone can check it.',
 			badgeStyle: 'Badge style',
+			// Titles over the two embed codes (HTML for sites, Markdown for READMEs), and over the page's tools.
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'Or Markdown',
+			toolsTitle: 'WebMCP tools on this page',
 			// The badge's tooltip in the code people paste on their site: max 60.
 			badgeTitle: 'Agent-ready: check it live with webmcpx',
 			// Button: max 18.

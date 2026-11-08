@@ -596,7 +596,7 @@ const hi: Messages = {
 			'एजेंट की तरह पढ़ रहे हैं…',
 			'टूल्स को लिंट कर रहे हैं…'
 		],
-		verdicts: { ready: 'एजेंट-रेडी', issues: 'लगभग', missing: 'अभी नहीं' },
+		verdicts: { ready: 'एजेंट-रेडी', issues: 'लगभग', missing: 'एजेंट-रेडी नहीं' },
 		failed: 'इसे स्कैन नहीं कर पाए।',
 		result: {
 			missing: 'कोई WebMCP टूल नहीं। एजेंट को इस पेज के लगभग {tokens} पढ़कर अंदाज़ा लगाना पड़ता है।',
@@ -690,10 +690,13 @@ const hi: Messages = {
 			fix: 'WebMCP ठीक करें',
 			lint: 'अपने सोर्स की हर समस्या खोजें, सुधार के साथ:',
 			terminal: 'टर्मिनल',
-			badge: 'अब दिखाइए भी। एक बैज चुनें और अपनी साइट पर पेस्ट करें:',
+			badge: 'आपकी साइट ने agent-ready बैज जीत लिया',
 			badgeNote:
 				'SVG कोड में ही है, इसलिए हमारी तरफ़ से कुछ भी लोड नहीं होता। यह आपकी साइट के लाइव स्कैन से लिंक होता है, ताकि कोई भी इसे जाँच सके।',
 			badgeStyle: 'बैज स्टाइल',
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'या Markdown',
+			toolsTitle: 'इस पेज पर WebMCP टूल्स',
 			badgeTitle: 'एजेंट-रेडी: webmcpx पर लाइव जाँचें',
 			share: 'शेयर करें',
 			shared: 'लिंक कॉपी हो गया',

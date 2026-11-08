@@ -602,7 +602,7 @@ const id: Messages = {
 			'Membaca seperti agent…',
 			'Memeriksa tool dengan linter…'
 		],
-		verdicts: { ready: 'Siap agent', issues: 'Hampir', missing: 'Belum' },
+		verdicts: { ready: 'Siap agent', issues: 'Hampir', missing: 'Belum siap agent' },
 		failed: 'Situs itu tidak bisa di-scan.',
 		result: {
 			missing: 'Tidak ada tool WebMCP. Agent harus membaca sekitar {tokens} dari halaman ini lalu menebak.',
@@ -693,10 +693,13 @@ const id: Messages = {
 			fix: 'Perbaiki WebMCP',
 			lint: 'Temukan semua masalah di source Anda, lengkap dengan perbaikannya:',
 			terminal: 'terminal',
-			badge: 'Tunjukkan. Pilih badge, lalu tempel di situs Anda:',
+			badge: 'Situs Anda meraih badge agent-ready',
 			badgeNote:
 				'SVG-nya ada di dalam kode, jadi tidak ada yang dimuat dari server kami. Badge ini menautkan ke scan langsung situs Anda, jadi siapa pun bisa mengeceknya.',
 			badgeStyle: 'Gaya badge',
+			badgeHtml: 'HTML',
+			badgeMarkdown: 'Atau Markdown',
+			toolsTitle: 'Tool WebMCP di halaman ini',
 			badgeTitle: 'Siap agent: cek langsung dengan webmcpx',
 			share: 'Bagikan',
 			shared: 'Tautan disalin',

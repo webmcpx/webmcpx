@@ -186,8 +186,8 @@ export const shareLink = (origin: string, url: string, home = '/') =>
  * are in the dictionary (`scan.badges.<id>`); the artwork's own <title> stays English, like the logo.
  */
 export const BADGES = [
-	{ id: 'card', svg: cardSvg.trim() },
 	{ id: 'flat', svg: flatSvg.trim() },
+	{ id: 'card', svg: cardSvg.trim() },
 	{ id: 'dark', svg: darkSvg.trim() }
 ] as const;
 export type BadgeStyle = (typeof BADGES)[number]['id'];

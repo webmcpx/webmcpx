@@ -572,7 +572,7 @@ const zh: Messages = {
 		submit: '扫描我的网站',
 		scanning: '扫描中…',
 		steps: ['正在打开页面…', '正在查找 WebMCP 工具…', '正在像智能体一样阅读…', '正在检查工具规范…'],
-		verdicts: { ready: '智能体就绪', issues: '差一点', missing: '还没有' },
+		verdicts: { ready: '智能体就绪', issues: '差一点', missing: '智能体未就绪' },
 		failed: '无法扫描这个网站。',
 		result: {
 			missing: '没有 WebMCP 工具。智能体得读完这个页面约 {tokens}，然后靠猜。',
@@ -654,10 +654,13 @@ const zh: Messages = {
 			fix: '修复 WebMCP',
 			lint: '找出源码里的所有问题，并给出修复方案：',
 			terminal: '终端',
-			badge: '亮出来。选一个徽章，贴到你的网站上：',
+			badge: '你的网站获得了 agent-ready 徽章',
 			badgeNote:
 				'SVG 直接内嵌在代码里，不会从我们这里加载任何东西。徽章链接到对你网站的实时扫描，谁都可以验证。',
 			badgeStyle: '徽章样式',
+			badgeHtml: 'HTML',
+			badgeMarkdown: '或 Markdown',
+			toolsTitle: '此页面上的 WebMCP 工具',
 			badgeTitle: '智能体就绪：用 webmcpx 实时验证',
 			share: '分享',
 			shared: '链接已复制',

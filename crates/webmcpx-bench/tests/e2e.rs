@@ -989,7 +989,7 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
         .text()
         .await
         .unwrap();
-    assert!(badge.contains(">not yet</text>"), "{badge}");
+    assert!(badge.contains(">not agent-ready</text>"), "{badge}");
     let unknown = reqwest::get(format!("http://{addr}/badge/never.example.svg"))
         .await
         .unwrap()
