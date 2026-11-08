@@ -1,15 +1,7 @@
 // How the places benchmark tasks ran on are shown: name and logo (see logos.ts). Keys are live hosts
 // (without `www.`) and local fixture directories (`bench/sites/<dir>`). Unknown keys show the key.
 
-import {
-	CLOUDFLARE,
-	KILN,
-	NOTION,
-	ORBIT,
-	SPECIFICATION_WEBSITE,
-	WOOCOMMERCE,
-	type Logo
-} from './logos.ts';
+import { CLOUDFLARE, KILN, NOTION, ORBIT, SPECIFICATION_WEBSITE, WOOCOMMERCE, type Logo } from './logos.ts';
 
 export interface BenchSiteLook {
 	name: string;

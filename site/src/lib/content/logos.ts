@@ -52,8 +52,6 @@ export const OPENAI: Logo = {
 	wordmark: false
 };
 
-
-
 /** https://specification.website/favicon.svg (2026-11-07): the line is cut out of the tile. */
 export const SPECIFICATION_WEBSITE: Logo = {
 	viewBox: '0 0 64 64',
