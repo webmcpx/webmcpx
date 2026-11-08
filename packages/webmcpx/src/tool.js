@@ -215,7 +215,7 @@ export function tool({ name, description, input, inputSchema = schema(input), ru
 
 const TOOL_ATTRIBUTES = ["toolname", "tooldescription", "toolautosubmit"];
 // What a control contributes to the schema (option values included).
-const CONTROL_ATTRIBUTES = ["name", "type", "required", "disabled", "readonly", "min", "max", "multiple", "value", "toolparamdescription", "method"];
+const CONTROL_ATTRIBUTES = ["name", "type", "required", "disabled", "readonly", "min", "max", "multiple", "value", "toolparamdescription", "method", "formmethod"];
 const FORMATS = { email: "email", url: "uri", date: "date", "datetime-local": "date-time", time: "time" };
 const SKIPPED = /^(submit|button|reset|image|file|password|hidden)$/;
 
@@ -296,13 +296,21 @@ function runForm(form) {
     try {
       // With its default submit button, as a user's click: its name and value go along, and
       // event.submitter is set (HTML: requestSubmit(submitter)).
-      form.requestSubmit(form.querySelector(":is(button:not([type]), [type=submit]):not(:disabled)") ?? undefined);
+      form.requestSubmit(submitter(form) ?? undefined);
     } finally {
       removeEventListener("submit", mark, true);
     }
     return response ? await response : { submitted: true, next: "The page may navigate: read it for the result." };
   };
 }
+
+/** The form's default submit button: what an agent's submit clicks. */
+const submitter = (form) => form.querySelector(":is(button:not([type]), [type=submit]):not(:disabled)");
+/** How the form is sent: that button's formmethod overrides the form's method. */
+const method = (form) => {
+  const button = submitter(form);
+  return button?.hasAttribute("formmethod") ? button.formMethod : form.method;
+};
 
 /** Every `<form toolname>` as a tool, following DOM changes; not where the browser does it itself. */
 export function forms() {
@@ -313,7 +321,7 @@ export function forms() {
   const live = new Map();
   // A form's tool is its attributes plus the schema of its controls: re-registered when either changes.
   const key = (form) =>
-    JSON.stringify([...TOOL_ATTRIBUTES.map((a) => form.getAttribute(a)), form.method, formSchema(form)]);
+    JSON.stringify([...TOOL_ATTRIBUTES.map((a) => form.getAttribute(a)), method(form), formSchema(form)]);
   const sync = () => {
     for (const [form, entry] of live) {
       if (!form.isConnected || !form.hasAttribute("toolname") || entry.key !== key(form)) {
@@ -332,7 +340,7 @@ export function forms() {
           name: form.getAttribute("toolname").trim().replace(/[^A-Za-z0-9_.-]+/g, "_"),
           description: form.getAttribute("tooldescription") ?? "",
           inputSchema,
-          annotations: form.method === "get" ? { readOnlyHint: true } : { consequentialHint: true },
+          annotations: method(form) === "get" ? { readOnlyHint: true } : { consequentialHint: true },
           execute: contract(inputSchema, runForm(form)),
         },
         controller.signal,

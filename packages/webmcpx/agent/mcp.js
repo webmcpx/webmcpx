@@ -158,10 +158,23 @@ export async function serve(options = {}, { input = process.stdin, output = proc
     entries = named(tools, carry(entries), reserved, retired);
     if (initialized && JSON.stringify(entries.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
   };
-  const session = new Session({
-    ...options,
-    onChange: () => session.tools().then(update, () => {}),
-  });
+  // Page changes coalesce into one refresh at a time plus at most one after it: a page firing changes
+  // while its tool list hangs must not queue hours of refreshes ahead of the next open_page.
+  let refreshing = false;
+  let again = false;
+  const refresh = async () => {
+    if (refreshing) return void (again = true);
+    refreshing = true;
+    try {
+      do {
+        again = false;
+        await session.tools().then(update, () => {});
+      } while (again);
+    } finally {
+      refreshing = false;
+    }
+  };
+  const session = new Session({ ...options, onChange: refresh });
 
   const text = (t, isError = false) => ({ content: [{ type: "text", text: t }], ...(isError && { isError }) });
 

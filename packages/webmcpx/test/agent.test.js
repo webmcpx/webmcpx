@@ -67,6 +67,9 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <input name="limit" type="number" min="1" max="20" toolparamdescription="How many results.">
   <input name="cc" type="email" multiple toolparamdescription="Who else gets the results.">
 </form>
+<form toolname="save_note" tooldescription="Save a note." method="get" toolautosubmit>
+  <input name="note"><button formmethod="post" formaction="/save">Save</button>
+</form>
 <form toolname="Book a class" tooldescription="Book a pottery class." method="post" toolautosubmit>
   <input type="hidden" name="price" value="40">
   <input name="total" value="40" readonly>
@@ -289,6 +292,10 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     // The polyfill fills in every annotation; GET forms read, others act.
     assert.equal(search.annotations.readOnlyHint, true);
     assert.equal(book.annotations.consequentialHint, true);
+    // The default button's formmethod decides how the form is sent, so it decides the hint too.
+    const note = tools.find((t) => t.name === "save_note");
+    assert.equal(note.annotations.consequentialHint, true);
+    assert.notEqual(note.annotations.readOnlyHint, true);
     // Disabled choices (and those in a disabled optgroup) are not offered.
     assert.deepEqual(book.inputSchema.properties.day, { type: "string", enum: ["monday", "friday"] });
 
