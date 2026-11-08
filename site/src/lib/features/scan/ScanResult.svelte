@@ -14,7 +14,6 @@
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
-	import type { Highlighted } from '#lib/content/snippets.ts';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import { tokens as pageTokens } from '#lib/features/benchmark/bench.ts';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
