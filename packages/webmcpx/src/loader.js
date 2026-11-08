@@ -1,5 +1,5 @@
 // The standard tools: DOM and registerTool() here, text work in WebAssembly (loaded on first call).
-import { CODES, TOOLS } from "./generated.js";
+import { CODES, LIMITS, TOOLS } from "./generated.js";
 
 const DEFAULT_TOOLS = ["get_page_context", "search_page", "fetch_as_markdown"];
 
@@ -52,7 +52,7 @@ export function readPage(what, root) {
   const data = (n) => (css(n.parentNode).visibility == "hidden" ? "" : n.data);
   // Visible text; an element with no block inside is one block.
   const textOf = (el) =>
-    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeType === 1 && !skipped(n) ? textOf(n) : "")).join("");
+    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? textOf(n) : "")).join("");
   const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   let out = "";
   let anchor = "";
@@ -97,9 +97,14 @@ function executors(options) {
     fetch_as_markdown: withEngine((m, page, { cursor, max_chars }) => m.markdown(page, String(cursor ?? ""), max_chars ?? 0)),
     search_site: async ({ query, limit = 5 }, { signal } = {}) => {
       if (typeof query !== "string" || !query.trim()) return err("INVALID_INPUT", "`query` must be a non-empty string");
+      if (!Number.isInteger(limit) || limit < 1 || limit > 20) return err("INVALID_INPUT", "`limit` must be an integer from 1 to 20");
       const found = await options.searchSite(query, { limit, signal });
       if (!found?.length) return err("NOT_FOUND", "no page matches the query", "Try fewer or different words.");
-      return ok({ results: found.slice(0, limit).map(({ title, url, snippet }) => ({ title, url, snippet })) });
+      // The site's backend sets the sizes: cap each field, then drop the last results past the output budget.
+      const cap = (v, n) => String(v ?? "").slice(0, n);
+      const results = found.slice(0, limit).map((r) => ({ title: cap(r.title, 300), url: cap(r.url, 2000), snippet: cap(r.snippet, 1000) }));
+      while (results.length > 1 && ok({ results }).length > LIMITS.OUTPUT_MAX) results.pop();
+      return ok({ results });
     },
   };
 }

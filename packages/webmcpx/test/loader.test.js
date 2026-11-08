@@ -204,3 +204,27 @@ test("an explicit root inside boilerplate (an aside) is still read", async () =>
   await register({ wasm: WASM, root: "#content" });
   assert.match((await page.call("fetch_as_markdown", {})).data.markdown, /Return window: 30 days/);
 });
+
+test("a line break separates words", async () => {
+  const page = host();
+  document.body.innerHTML = "<main><p>Open<br>Monday<br>through Friday</p></main>";
+  await register({ wasm: WASM });
+  assert.equal((await page.call("search_page", { query: "Monday" })).ok, true);
+  assert.match((await page.call("fetch_as_markdown", {})).data.markdown, /Open Monday through Friday/);
+});
+
+test("search_site checks limit and keeps the result within the output budget", async () => {
+  const page = host();
+  let asked;
+  const big = { title: "Pricing", url: "https://pizza.test/pricing", snippet: "x".repeat(50_000) };
+  await register({
+    tools: ["search_site"],
+    searchSite: async (q, { limit }) => ((asked = limit), Array.from({ length: 10_000 }, () => big)),
+  });
+  assert.equal((await page.call("search_site", { query: "pricing", limit: 10_000 })).error.code, "INVALID_INPUT");
+  assert.equal(asked, undefined, "an invalid limit never reaches the backend");
+  const out = await page.call("search_site", { query: "pricing", limit: 20 });
+  assert.equal(out.ok, true);
+  assert.ok(JSON.stringify(out).length <= 20_000);
+  assert.ok(out.data.results.length >= 1 && out.data.results.length < 20);
+});
