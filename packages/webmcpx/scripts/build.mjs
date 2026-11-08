@@ -6,8 +6,10 @@ import { build, transform } from "esbuild";
 
 const common = { outdir: "dist", bundle: true, format: "esm", minify: true, target: "es2022", legalComments: "none", logLevel: "warning" };
 rmSync("dist", { recursive: true, force: true });
-// One request on load; forms (tool.js) and the WebAssembly glue stay lazy.
-await build({ ...common, entryPoints: ["src/auto.js"], external: ["./tool.js", "../wasm/*"] });
+// One request on load; the polyfill (polyfill.js), forms (tool.js) and the WebAssembly glue stay lazy.
+await build({ ...common, entryPoints: ["src/auto.js"], external: ["./polyfill.js", "./tool.js", "../wasm/*"] });
+// The W3C polyfill, fetched only by pages without WebMCP. It keeps its Apache-2.0 notice.
+await build({ ...common, entryPoints: ["src/polyfill.js"], legalComments: "inline" });
 await build({ ...common, entryPoints: ["src/tool.js"], external: ["../wasm/*"] });
 // The wasm-bindgen glue (from `just wasm`), minified in place: the drop-in script loads it as is.
 const glue = "wasm/webmcpx_wasm.js";

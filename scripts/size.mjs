@@ -10,6 +10,9 @@ const BUDGETS = [
   // input checker that keeps invalid input away from the site's own code (JSON Schema keywords and
   // combinators tool inputs use), so it is budgeted for correctness, not squeezed.
   { name: "own tools and forms (dist/tool.js)", files: ["dist/tool.js"], max: 5_700 },
+  // Loaded only where the page has no WebMCP (Firefox, Safari, Chromium without the flag): the W3C
+  // polyfill as published, so agents driving those browsers find the tools. Not ours to squeeze.
+  { name: "W3C polyfill, pages without WebMCP (dist/polyfill.js)", files: ["dist/polyfill.js"], max: 6_144 },
   // Loaded on the first tool call only (13 KB: output budgets in search_page cost ~30 B; correctness first).
   { name: "wasm module", files: ["wasm/webmcpx_wasm_bg.wasm"], max: 13_312 },
   { name: "wasm glue", files: ["wasm/webmcpx_wasm.js"], max: 2_200 },

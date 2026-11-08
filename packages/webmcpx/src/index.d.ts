@@ -24,7 +24,11 @@ export interface Registration {
   dispose(): void;
 }
 
-/** Registers webmcpx standard tools. A no-op (empty `registered`) where WebMCP is unavailable. */
+/**
+ * Registers webmcpx standard tools. A no-op (empty `registered`) where WebMCP is unavailable; to install
+ * the W3C polyfill there (Firefox, Safari, Chromium without the flag), `import "webmcpx/polyfill"` first.
+ * The script tag (`webmcpx/auto`) does that on its own.
+ */
 export function register(options?: Options): Promise<Registration>;
 
 /** The tool contracts (name, title, description, inputSchema, annotations). */

@@ -29,6 +29,10 @@
       "default": "./src/index.js"
     },
     "./auto": "./src/auto.js",
+    "./polyfill": {
+      "types": "./src/polyfill.d.ts",
+      "default": "./src/polyfill.js"
+    },
     "./react": {
       "types": "./src/react.d.ts",
       "default": "./src/react.js"
@@ -58,7 +62,9 @@
   ],
   "sideEffects": [
     "./dist/auto.js",
-    "./src/auto.js"
+    "./dist/polyfill.js",
+    "./src/auto.js",
+    "./src/polyfill.js"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
