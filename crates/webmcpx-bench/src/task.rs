@@ -120,8 +120,10 @@ fn has_term(text: &str, term: &str) -> bool {
     })
 }
 
+/// Case, whitespace and Markdown emphasis (`*`, `` ` ``) don't count: "keeps **25**" is "keeps 25".
 fn normalize(s: &str) -> String {
-    s.split_whitespace()
+    s.replace(['*', '`'], "")
+        .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ")
         .to_lowercase()
@@ -385,5 +387,21 @@ mod tests {
         ));
         assert!(!releases.answer_passes("Orbit keeps 25 releases; the old default was 10."));
         assert!(!releases.answer_passes("The default is 25 (it was 10 before 3.5)."));
+    }
+
+    #[test]
+    fn markdown_emphasis_does_not_hide_a_wrong_answer() {
+        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
+        let releases = &tasks
+            .iter()
+            .find(|t| t.id == "docs-retained-releases")
+            .unwrap()
+            .check;
+        assert!(
+            !releases.answer_passes("Orbit keeps **25** releases by default, increased from 10.")
+        );
+        assert!(releases.answer_passes(
+            "Orbit keeps **10** past releases. To keep more, set `retain_releases = 25`."
+        ));
     }
 }
