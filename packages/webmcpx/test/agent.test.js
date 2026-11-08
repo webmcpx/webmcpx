@@ -61,7 +61,7 @@ const FRAME = `<!doctype html><html><body><script>
 </script></body></html>`;
 // Declarative tools: forms with toolname, through the webmcpx script tag (served from this package).
 const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
-<script type="module" src="/pkg/src/auto.js"></script></head><body><main>
+<script type="module" src="/pkg/dist/auto.js"></script></head><body><main>
 <form toolname="search_mugs" tooldescription="Search the mug catalog." action="/search" method="get">
   <label>Glaze <input name="glaze" required></label>
   <input name="limit" type="number" min="1" max="20" toolparamdescription="How many results.">

@@ -226,7 +226,7 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await expect(page.getByText('Not yet')).toBeVisible();
 	// The fix is right there, ready to copy.
 	const fix = page.locator('#scan').getByRole('figure').filter({ hasText: 'index.html' });
-	await expect(fix).toContainText('cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js');
+	await expect(fix).toContainText('cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js');
 	await expect(fix.getByRole('button', { name: /Copy/ })).toBeVisible();
 });
 

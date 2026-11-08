@@ -1,15 +1,15 @@
 // Size gate: fails when a shipped file exceeds its brotli budget. Run via `just size`.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { brotliCompressSync, constants } from "node:zlib";
 
 const PKG = new URL("../packages/webmcpx/", import.meta.url);
 const BUDGETS = [
   // Loaded on every page: loader + tool contracts. 10 KB is still small for a page; correctness first.
-  { name: "on load (auto.js + loader.js + generated.js)", files: ["src/auto.js", "src/loader.js", "src/generated.js"], max: 10_240 },
+  { name: "on load (dist/auto.js)", files: ["dist/auto.js"], max: 10_240 },
   // Loaded only by pages with a <form toolname> and by sites that import tool(); most of it is the
   // input checker that keeps invalid input away from the site's own code (JSON Schema keywords and
   // combinators tool inputs use), so it is budgeted for correctness, not squeezed.
-  { name: "own tools and forms (tool.js)", files: ["src/tool.js"], max: 5_700 },
+  { name: "own tools and forms (dist/tool.js + its chunk)", files: ["dist/tool.js", ...readdirSync(new URL("dist/", PKG)).filter((f) => f.startsWith("chunk-")).map((f) => `dist/${f}`)], max: 5_700 },
   // Loaded on the first tool call only.
   { name: "wasm module", files: ["wasm/webmcpx_wasm_bg.wasm"], max: 12_288 },
   { name: "wasm glue", files: ["wasm/webmcpx_wasm.js"], max: 2_200 },

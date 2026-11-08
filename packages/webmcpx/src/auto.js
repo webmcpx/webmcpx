@@ -1,4 +1,4 @@
-// Drop-in: <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
+// Drop-in: <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js"></script>
 // Standard tools, plus <form toolname> as tools (that code loads only where such a form exists).
 import { register } from "./loader.js";
 

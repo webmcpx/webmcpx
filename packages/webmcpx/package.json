@@ -1,6 +1,6 @@
 {
   "name": "webmcpx",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Standard WebMCP tools for any website, and an MCP server that gives any agent the WebMCP tools of the pages it opens.",
   "type": "module",
   "license": "MIT",
@@ -26,20 +26,20 @@
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "default": "./src/index.js"
+      "default": "./dist/index.js"
     },
-    "./auto": "./src/auto.js",
+    "./auto": "./dist/auto.js",
     "./react": {
       "types": "./src/react.d.ts",
-      "default": "./src/react.js"
+      "default": "./dist/react.js"
     },
     "./vue": {
       "types": "./src/vue.d.ts",
-      "default": "./src/vue.js"
+      "default": "./dist/vue.js"
     },
     "./svelte": {
       "types": "./src/svelte.d.ts",
-      "default": "./src/svelte.js"
+      "default": "./dist/svelte.js"
     }
   },
   "types": "./src/index.d.ts",
@@ -47,6 +47,7 @@
     "webmcpx": "bin/webmcpx.js"
   },
   "files": [
+    "dist",
     "src",
     "agent",
     "bin",
@@ -56,9 +57,13 @@
     "LICENSE"
   ],
   "sideEffects": [
+    "./dist/auto.js",
     "./src/auto.js"
   ],
   "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepack": "node scripts/build.mjs",
+    "pretest": "node scripts/build.mjs",
     "test": "node --test --experimental-test-module-mocks"
   },
   "engines": {
@@ -68,6 +73,7 @@
     "@w3c/webmcp-polyfill": "0.1.0"
   },
   "devDependencies": {
+    "esbuild": "0.28.2",
     "linkedom": "0.18.15",
     "react": "19.3.1",
     "svelte": "5.57.3",
@@ -78,8 +84,8 @@
   },
   "peerDependencies": {
     "react": ">=16.8",
-    "vue": ">=2.7",
-    "svelte": ">=3"
+    "svelte": ">=3",
+    "vue": ">=2.7"
   },
   "peerDependenciesMeta": {
     "react": {

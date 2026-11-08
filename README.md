@@ -20,7 +20,7 @@ real tools on your pages instead of reading and clicking their way through.
 **Step 1, on your site.** Paste this before `</body>`:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js"></script>
 ```
 
 Your page now registers `search_page`, `fetch_as_markdown` and `get_page_context` with

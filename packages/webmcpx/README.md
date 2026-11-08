@@ -7,7 +7,7 @@ call a function instead of reading and clicking through the page.
 **Step 1, on your site.** Paste this before `</body>`:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/src/auto.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js"></script>
 ```
 
 **Step 2, in your agent.** Give your agent the WebMCP tools of every page it opens (the ChatGPT desktop

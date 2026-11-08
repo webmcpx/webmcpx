@@ -18,7 +18,7 @@ setup:
     cd site && npm ci
 
 # Everything CI checks.
-check: fmt-check lint wasm test js-test size site deny
+check: fmt-check lint wasm js-build test js-test size site deny
 
 fmt:
     cargo fmt --all
@@ -46,11 +46,15 @@ wasm:
     wasm-bindgen --target web --no-typescript --out-dir {{wasm_out}} {{wasm_target}}
     wasm-opt -Oz --strip-debug --strip-producers --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue {{wasm_out}}/webmcpx_wasm_bg.wasm -o {{wasm_out}}/webmcpx_wasm_bg.wasm
 
+# The minified dist/ that browsers and bundlers load (needs `just wasm`; e2e tests and the bench serve it).
+js-build:
+    cd packages/webmcpx && npm run build
+
 # Loader end-to-end tests (needs `just wasm`).
 js-test:
     cd packages/webmcpx && npm test
 
-# Brotli size budgets (needs `just wasm`).
+# Brotli size budgets (needs `just wasm js-build`).
 size:
     node scripts/size.mjs
 

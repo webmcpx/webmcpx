@@ -1,6 +1,7 @@
 /target
 node_modules/
 /packages/webmcpx/wasm/
+/packages/webmcpx/dist/
 *.snap.new
 /bench/results/*
 !/bench/results/.gitkeep
