@@ -9,6 +9,8 @@ import {
 	ratio,
 	rows,
 	tokens,
+	savingIsRange,
+	tokenSaving,
 	type ArmSummary,
 	type Results
 } from './bench.ts';
@@ -118,5 +120,33 @@ describe('leaderboard', () => {
 			run('e', 1, null)
 		]);
 		expect(order.map((r) => r.results.model)).toEqual(['d', 'a', 'b', 'e', 'c']);
+	});
+});
+
+describe('tokenSaving', () => {
+	const run = (baseline: number, webmcp: number) => ({
+		results: results({ baseline: arm(baseline, 1, null), webmcp: arm(webmcp, 1, null) })
+	});
+
+	it('spans the whole-run saving of every model with both arms', () => {
+		const half = { results: results({ baseline: arm(100, 1, null) }) };
+		expect(tokenSaving([run(300, 100), run(1000, 200), half])).toEqual({ low: 3, high: 5, models: 2 });
+	});
+
+	it('is null without a run, or when no model saved tokens', () => {
+		expect(tokenSaving([])).toBeNull();
+		expect(tokenSaving([run(100, 200)])).toBeNull();
+	});
+
+	it('keeps a model that used more tokens as the low end, and then says "up to"', () => {
+		const s = tokenSaving([run(100, 200), run(400, 100)]);
+		expect(s).toEqual({ low: 0.5, high: 4, models: 2 });
+		expect(savingIsRange(s!)).toBe(false);
+	});
+
+	it('is a range only across models whose ends read differently', () => {
+		expect(savingIsRange({ low: 2.4, high: 5.7, models: 6 })).toBe(true);
+		expect(savingIsRange({ low: 5.7, high: 5.7, models: 1 })).toBe(false);
+		expect(savingIsRange({ low: 12.2, high: 12.4, models: 2 })).toBe(false);
 	});
 });

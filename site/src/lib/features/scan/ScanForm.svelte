@@ -14,12 +14,14 @@
 		hint?: Snippet;
 		/** Focus the input on load, so visitors can type their site right away (the hero form). */
 		focusOnLoad?: boolean;
+		/** The input's id, for links that jump to it (the hero's "Scan your site"). */
+		inputId?: string;
 	}
 
-	let { fromQuery = false, size = 'lg', hint, focusOnLoad = false }: Props = $props();
+	const uid = $props.id();
+	let { fromQuery = false, size = 'lg', hint, focusOnLoad = false, inputId = `${uid}-url` }: Props = $props();
 	const i18n = useI18n();
 	const m = $derived(i18n.m.scan);
-	const uid = $props.id();
 	let input: HTMLInputElement | undefined = $state();
 
 	onMount(() => {
@@ -52,10 +54,10 @@
 	aria-label={m.form}
 	class="mx-auto grid w-full max-w-2xl gap-3 sm:grid-cols-[1fr_auto]"
 >
-	<label for="{uid}-url" class="sr-only">{m.address}</label>
+	<label for={inputId} class="sr-only">{m.address}</label>
 	<input
 		bind:this={input}
-		id="{uid}-url"
+		id={inputId}
 		name="scan"
 		bind:value={scanner.input}
 		type="text"

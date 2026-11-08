@@ -152,3 +152,28 @@ export function losses(r: Results, metric: Metric['id']): string[] {
 		})
 		.map((row) => row.task);
 }
+
+/** The whole-run token saving (baseline tokens / WebMCP tokens) across models: lowest, highest, count. */
+export interface TokenSaving {
+	low: number;
+	high: number;
+	models: number;
+}
+
+/**
+ * Each published model's token saving over its whole run (every question, never the showcase), as the
+ * lowest and highest across models. Null when no run has both arms, or when no model saved tokens.
+ */
+export function tokenSaving(runs: { results: Results }[]): TokenSaving | null {
+	const saving = runs.flatMap(({ results }) => {
+		const h = headline(results);
+		return h ? [h.baseline.tokens / Math.max(1, h.webmcp.tokens)] : [];
+	});
+	if (!saving.length) return null;
+	const high = Math.max(...saving);
+	return high > 1 ? { low: Math.min(...saving), high, models: saving.length } : null;
+}
+
+/** Say it as a range ("2.4× to 5.7×") only when every model saved and the ends read differently;
+ * otherwise as "up to" the best one. */
+export const savingIsRange = (s: TokenSaving) => s.models > 1 && s.low >= 1 && ratio(s.low) !== ratio(s.high);

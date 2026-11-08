@@ -44,7 +44,8 @@ const id: Messages = {
 			why: 'Mengapa',
 			proof: 'Peringkat',
 			vsMcp: 'vs MCP',
-			fix: 'Pasang',
+			sites: 'Untuk situs',
+			agents: 'Untuk agen',
 			issues: 'Masalah',
 			docs: 'Docs'
 		}
@@ -59,7 +60,8 @@ const id: Messages = {
 			scan: 'Scan situs Anda',
 			verdicts: 'Cara kerja verdik',
 			proof: 'Peringkat',
-			install: 'Pasang',
+			sites: 'Untuk situs',
+			agents: 'Untuk agen',
 			issues: 'Masalah yang diatasi',
 			brand: 'Merek dan desain',
 			trademark: 'Kebijakan merek dagang',
@@ -78,7 +80,8 @@ const id: Messages = {
 		draft: 'Mengikuti draf WebMCP per {date}',
 		title: { text: 'Jadikan situs Anda {mark}.', mark: 'siap agent' },
 		lead: 'Agent AI sudah membaca halaman Anda. Lihat apa yang mereka dapat, lalu beri mereka tool sungguhan dengan satu baris.',
-		try: 'Coba {sites}'
+		try: 'Coba {sites}',
+		entry: { scan: 'Scan situs Anda', agent: 'Siapkan agen Anda' }
 	},
 
 	logos: {
@@ -323,28 +326,29 @@ const id: Messages = {
 	},
 
 	fix: {
-		title: 'Dua langkah. Siap agent.',
-		lead: 'Langkah 1 memasang tool di situs Anda. Langkah 2 membuat agen Anda bisa memanggilnya.',
+		title: 'Jadikan situs Anda siap agent',
+		lead: 'Satu baris. Agen memanggil situs Anda, tanpa menebak.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 KB dimuat · Rust + WebAssembly · lisensi MIT',
-		steps: {
-			site: {
-				title: 'Di situs Anda',
-				lead: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, ia menambahkan polyfill W3C.'
+		html: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, ia menambahkan polyfill W3C.'
+	},
+
+	agents: {
+		title: 'Agen Anda lebih cepat di semua situs',
+		lead: 'Jawaban sama, token jauh lebih sedikit. Jalan di Codex, Claude Code, Cursor, dan skrip apa pun: Chrome, Firefox, Safari, Selenium, Playwright.',
+		saving: {
+			range: { other: '{low} hingga {high} lebih sedikit token di semua {n} model peringkat.' },
+			best: 'Hingga {high} lebih sedikit token di peringkat.'
+		},
+		prompt: 'Satu prompt: agen Anda menyiapkan dirinya sendiri, lalu membuktikannya di webmcpx.dev.',
+		ways: {
+			mcp: {
+				label: 'Agen dengan MCP',
+				text: 'Claude Code, Codex, Cursor: tambahkan {cmd}. Ia membuka halaman di Chromium-nya sendiri, tanpa flag.'
 			},
-			agent: {
-				title: 'Agen apa pun. Browser apa pun. Otomasi apa pun.',
-				lead: 'Satu prompt: agen Anda menyiapkan dirinya sendiri, lalu membuktikannya di webmcpx.dev.',
-				ways: {
-					mcp: {
-						label: 'Agen dengan MCP',
-						text: 'Claude Code, Codex, Cursor: tambahkan {cmd}. Ia membuka halaman di Chromium-nya sendiri, tanpa flag.'
-					},
-					browser: {
-						label: 'Agen yang mengendalikan browser',
-						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: panggil {api} di halaman. Setiap situs dengan langkah 1 memilikinya.'
-					}
-				}
+			browser: {
+				label: 'Agen yang mengendalikan browser',
+				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: panggil {api} di halaman. Setiap situs dengan webmcpx memilikinya.'
 			}
 		}
 	},

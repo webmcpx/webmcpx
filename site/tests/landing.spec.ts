@@ -74,7 +74,8 @@ test('the benchmark numbers are in the prerendered HTML', async ({ request }) =>
 test('content is visible without JavaScript', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'Two steps. Agent-ready.' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Make your site agent-ready', exact: true })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'Make your agent faster on every site' })).toBeVisible();
 	// Every tab panel is in the HTML: the best case first, then every other site, tools included.
 	await expect(page.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	const tools = page.getByRole('region', { name: 'WebMCP tools on Notion' });
@@ -178,9 +179,9 @@ test('the menu marks the section in view and opens on phones', async ({ page }) 
 
 	await page.setViewportSize({ width: 390, height: 844 });
 	await menu.locator('summary').filter({ hasText: 'Menu' }).click();
-	await menu.getByRole('link', { name: 'Install' }).last().click();
-	await expect(page).toHaveURL(/#fix$/);
-	await expect(menu.getByRole('link', { name: 'Install' }).last()).toBeHidden();
+	await menu.getByRole('link', { name: 'For sites' }).last().click();
+	await expect(page).toHaveURL(/#for-sites$/);
+	await expect(menu.getByRole('link', { name: 'For sites' }).last()).toBeHidden();
 });
 
 test('the language switcher links this page in every language, without JavaScript', async ({ browser }) => {
@@ -232,8 +233,8 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await expect(page.getByText('Not yet')).toBeVisible();
 	// The fix is one click away: the install steps.
 	await page.locator('#scan').getByRole('link', { name: 'Fix it' }).click();
-	await expect(page).toHaveURL(/#fix$/);
-	await expect(page.locator('#fix')).toBeInViewport();
+	await expect(page).toHaveURL(/#for-sites$/);
+	await expect(page.locator('#for-sites')).toBeInViewport();
 });
 
 test('scan errors are shown, not swallowed', async ({ page }) => {
@@ -533,19 +534,64 @@ test('without JavaScript every way to write a tool still shows', async ({ browse
 	await page.close();
 });
 
-test('step 1 opens on your coding agent; step 2 is one prompt', async ({ page }) => {
-	await page.goto('/#fix');
-	const fix = page.locator('#fix');
-	const install = fix.getByRole('tablist', { name: 'On your site' }).getByRole('tab');
+test('for sites: one line, as tabs that open on your coding agent', async ({ page }) => {
+	await page.goto('/#for-sites');
+	const sites = page.locator('#for-sites');
+	await expect(sites.getByRole('heading', { level: 2 })).toHaveText('Make your site agent-ready');
+	const install = sites.getByRole('tablist', { name: 'Make your site agent-ready' }).getByRole('tab');
 	await expect(install).toHaveText(['Agent', 'HTML', 'npm']);
 	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
-	await expect(fix.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
-	await expect(fix.getByRole('tablist')).toHaveCount(1);
-	const prompt = fix.getByRole('figure').filter({ hasText: 'prove it works: open https://webmcpx.dev' });
+	await expect(sites.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
+	await expect(sites.getByRole('tablist')).toHaveCount(1);
+	// Nothing for the agent side here: that is its own section.
+	await expect(sites.getByText('npx -y webmcpx mcp')).toHaveCount(0);
+});
+
+test('for agents: the measured saving, one prompt, then the two ways', async ({ page }) => {
+	await page.goto('/#for-agents');
+	const agents = page.locator('#for-agents');
+	await expect(agents.getByRole('heading', { level: 2 })).toHaveText('Make your agent faster on every site');
+	// Computed from the published runs, linked to them.
+	const saving = agents.getByRole('link', { name: /fewer tokens/ });
+	await expect(saving).toHaveText(
+		/^\d+(\.\d)?× to \d+(\.\d)?× fewer tokens across \d+ models on the leaderboard\.$/
+	);
+	await expect(saving).toHaveAttribute('href', '#leaderboard');
+	const prompt = agents.getByRole('figure').filter({ hasText: 'Use WebMCP first on every web page' });
 	await expect(prompt.getByRole('button', { name: /Copy/ })).toBeVisible();
-	// Both ways an agent can take, by name.
-	await expect(fix.getByRole('definition').filter({ hasText: 'npx -y webmcpx mcp' })).toBeVisible();
-	await expect(fix.getByRole('definition').filter({ hasText: 'document.modelContext' })).toBeVisible();
+	await expect(agents.getByRole('definition').filter({ hasText: 'npx -y webmcpx mcp' })).toBeVisible();
+	await expect(agents.getByRole('definition').filter({ hasText: 'document.modelContext' })).toBeVisible();
+	await expect(agents.getByRole('tablist')).toHaveCount(0);
+});
+
+test('the hero has a way in for each audience', async ({ page }) => {
+	await page.goto('/');
+	const hero = page.locator('#scan');
+	// Away from the input first, so the button is what gives it focus.
+	await hero.getByRole('link', { name: 'Set up your agent' }).focus();
+	await hero.getByRole('link', { name: 'Scan your site' }).click();
+	await expect(page.getByLabel("Your site's address").first()).toBeFocused();
+	await hero.getByRole('link', { name: 'Set up your agent' }).click();
+	await expect(page).toHaveURL(/#for-agents$/);
+	await expect(page.locator('#for-agents')).toBeInViewport();
+});
+
+test('the menus name both audiences, in page order', async ({ page }) => {
+	await page.goto('/');
+	const pill = page.getByRole('navigation', { name: 'Main' }).locator('ul').first();
+	await expect(pill.getByRole('link')).toHaveText([
+		'Why',
+		'Leaderboard',
+		'For sites',
+		'For agents',
+		'vs MCP',
+		'Issues',
+		'Docs'
+	]);
+	// tests/i18n.spec.ts checks that the pill fits one line at 1024 px in every language.
+	const footer = page.getByRole('contentinfo');
+	await expect(footer.getByRole('link', { name: 'For sites' })).toHaveAttribute('href', '/#for-sites');
+	await expect(footer.getByRole('link', { name: 'For agents' })).toHaveAttribute('href', '/#for-agents');
 });
 
 test('the verdicts page explains each stamp and is linked from every scan result and the footer', async ({

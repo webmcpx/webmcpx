@@ -48,7 +48,8 @@ const ru: Messages = {
 			why: 'Зачем',
 			proof: 'Рейтинг',
 			vsMcp: 'vs MCP',
-			fix: 'Установка',
+			sites: 'Сайтам',
+			agents: 'Агентам',
 			issues: 'Проблемы',
 			docs: 'Справка'
 		}
@@ -63,7 +64,8 @@ const ru: Messages = {
 			scan: 'Проверить сайт',
 			verdicts: 'Как выносится вердикт',
 			proof: 'Рейтинг',
-			install: 'Установка',
+			sites: 'Для сайтов',
+			agents: 'Для агентов',
 			issues: 'Какие проблемы решает',
 			brand: 'Бренд и дизайн',
 			trademark: 'Товарные знаки',
@@ -82,7 +84,8 @@ const ru: Messages = {
 		draft: 'По черновику WebMCP от {date}',
 		title: { text: 'Сделайте сайт готовым {mark}.', mark: 'для агентов' },
 		lead: 'ИИ-агенты уже читают ваши страницы. Посмотрите, что они видят, и дайте им настоящие инструменты одной строкой.',
-		try: 'Попробуйте: {sites}'
+		try: 'Попробуйте: {sites}',
+		entry: { scan: 'Проверить сайт', agent: 'Настроить агента' }
 	},
 
 	logos: {
@@ -349,28 +352,32 @@ const ru: Messages = {
 	},
 
 	fix: {
-		title: 'Два шага. Сайт готов для агентов.',
-		lead: 'Шаг 1 добавляет инструменты на ваш сайт. Шаг 2 позволяет агенту их вызывать.',
+		title: 'Сделайте сайт готовым для агентов',
+		lead: 'Одна строка. Агенты вызывают ваш сайт, а не гадают.',
 		alternatives: { npm: 'npm', agent: 'Агент' },
 		facts: '~2,7 КБ на загрузку · Rust + WebAssembly · MIT',
-		steps: {
-			site: {
-				title: 'На вашем сайте',
-				lead: 'Вставьте перед {tag}. В браузерах без WebMCP он добавит полифил W3C.'
+		html: 'Вставьте перед {tag}. В браузерах без WebMCP он добавит полифил W3C.'
+	},
+
+	agents: {
+		title: 'Ваш агент быстрее на любом сайте',
+		lead: 'Те же ответы — за долю токенов. Работает в Codex, Claude Code, Cursor и любом скрипте: Chrome, Firefox, Safari, Selenium, Playwright.',
+		saving: {
+			range: {
+				one: 'От {low} до {high} меньше токенов на каждой из {n} модели рейтинга.',
+				other: 'От {low} до {high} меньше токенов на каждой из {n} моделей рейтинга.'
 			},
-			agent: {
-				title: 'Любой агент. Любой браузер. Любая автоматизация.',
-				lead: 'Один промпт: агент настроится сам и докажет это на webmcpx.dev.',
-				ways: {
-					mcp: {
-						label: 'Агенты с MCP',
-						text: 'Claude Code, Codex, Cursor: добавьте {cmd}. Он открывает страницы в собственном Chromium, без флагов.'
-					},
-					browser: {
-						label: 'Агенты, которые управляют браузером',
-						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: вызовите {api} на странице. Он есть на каждом сайте с шагом 1.'
-					}
-				}
+			best: 'До {high} меньше токенов в рейтинге.'
+		},
+		prompt: 'Один промпт: агент настроится сам и докажет это на webmcpx.dev.',
+		ways: {
+			mcp: {
+				label: 'Агенты с MCP',
+				text: 'Claude Code, Codex, Cursor: добавьте {cmd}. Он открывает страницы в собственном Chromium, без флагов.'
+			},
+			browser: {
+				label: 'Агенты, которые управляют браузером',
+				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: вызовите {api} на странице. Он есть на каждом сайте с webmcpx.'
 			}
 		}
 	},

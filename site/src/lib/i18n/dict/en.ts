@@ -62,13 +62,15 @@ const en = {
 		menu: 'Menu',
 		/** Names the language switcher. */
 		language: 'Language',
-		// Nav labels: max 10 each, ideally one word. The desktop pill holds all six on one line at 1024 px.
+		// Nav labels: max 10 each, ideally one word. The desktop pill holds all seven on one line at 1024 px.
 		links: {
 			why: 'Why',
 			proof: 'Leaderboard',
+			// The two audiences: people who run a site, and people who use an agent (two sections).
+			sites: 'For sites',
+			agents: 'For agents',
 			// "vs" = versus: the section comparing WebMCP with MCP.
 			vsMcp: 'vs MCP',
-			fix: 'Install',
 			issues: 'Issues',
 			docs: 'Docs'
 		}
@@ -87,7 +89,8 @@ const en = {
 			scan: 'Scan your site',
 			verdicts: 'How verdicts work',
 			proof: 'Leaderboard',
-			install: 'Install',
+			sites: 'For sites',
+			agents: 'For agents',
 			issues: 'Issues it solves',
 			brand: 'Brand and design',
 			trademark: 'Trademark policy',
@@ -114,7 +117,9 @@ const en = {
 		// max 120: 3 lines on a phone.
 		lead: 'AI agents are already reading your pages. See what they get, then give them real tools with one line.',
 		// {sites} is a row of three site names (buttons that start a scan).
-		try: 'Try {sites}'
+		try: 'Try {sites}',
+		// The two ways in, side by side: max 20 each (one line in a button at 390 px).
+		entry: { scan: 'Scan your site', agent: 'Set up your agent' }
 	},
 
 	logos: {
@@ -429,35 +434,44 @@ const en = {
 			'MCP serves agents that never open your site. WebMCP serves agents working in your tab, beside your user. Run both on one backend: Shopify already does.'
 	},
 
+	// For people who run a site (the path after a scan): one line on the site. Product and library names
+	// (ChatGPT, Codex, Claude Code, Cursor, Playwright, Selenium, Puppeteer, browser-use, CDP, Chrome,
+	// Chromium, Firefox, Safari) stay as they are, here and in `agents`.
 	fix: {
-		// Two short beats; reuse your word for "agent-ready" (see hero.title).
-		title: 'Two steps. Agent-ready.',
-		lead: 'Step 1 puts tools on your site. Step 2 lets your agent call them.',
+		// max 40; reuse your word for "agent-ready" (see hero.title).
+		title: 'Make your site agent-ready',
+		// max 70
+		lead: 'One line. Agents call your site instead of guessing.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
 		facts: '~2.7 KB on load · Rust + WebAssembly · MIT license',
-		// {tag} is `</body>`, {cmd} and {api} are code: keep them. Product and library
-		// names (ChatGPT, Codex, Claude Code, Cursor, Playwright, Selenium, Puppeteer, browser-use, CDP,
-		// Chrome, Chromium, Firefox, Safari) stay as they are.
-		steps: {
-			site: {
-				title: 'On your site',
-				lead: 'Paste it before {tag}. In browsers without WebMCP, it adds the W3C polyfill.'
+		// The HTML tab's note. {tag} is `</body>`: keep it.
+		html: 'Paste it before {tag}. In browsers without WebMCP, it adds the W3C polyfill.'
+	},
+
+	// For people who use agents (no site, no scan needed): one prompt for the agent itself.
+	agents: {
+		// max 45
+		title: 'Make your agent faster on every site',
+		// max 160
+		lead: 'Same answers, a fraction of the tokens. Works in Codex, Claude Code, Cursor and any script: Chrome, Firefox, Safari, Selenium, Playwright.',
+		// One line, linked to the leaderboard. {low} and {high} are ratios (2.4×, 5.7×): each model's
+		// tokens without WebMCP over its tokens with WebMCP, over its whole run. {n} (2 or more) is how many
+		// models are on the leaderboard. `best` is used when there is one model, or one did not save.
+		saving: {
+			range: p({ other: '{low} to {high} fewer tokens across {n} models on the leaderboard.' }),
+			best: 'Up to {high} fewer tokens on the leaderboard.'
+		},
+		prompt: 'One prompt: your agent sets itself up, then proves it on webmcpx.dev.',
+		// {cmd} and {api} are code: keep them.
+		ways: {
+			mcp: {
+				label: 'Agents with MCP',
+				text: 'Claude Code, Codex, Cursor: add {cmd}. It opens pages in its own Chromium, no flag.'
 			},
-			agent: {
-				// Three short beats, max 45.
-				title: 'Any agent. Any browser. Any automation.',
-				lead: 'One prompt: your agent sets itself up, then proves it on webmcpx.dev.',
-				ways: {
-					mcp: {
-						label: 'Agents with MCP',
-						text: 'Claude Code, Codex, Cursor: add {cmd}. It opens pages in its own Chromium, no flag.'
-					},
-					browser: {
-						label: 'Agents that drive a browser',
-						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: call {api} in the page. Every site with step 1 has it.'
-					}
-				}
+			browser: {
+				label: 'Agents that drive a browser',
+				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: call {api} in the page. Every site with webmcpx has it.'
 			}
 		}
 	},

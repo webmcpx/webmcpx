@@ -42,7 +42,8 @@ const hi: Messages = {
 			why: 'क्यों',
 			proof: 'लीडरबोर्ड',
 			vsMcp: 'बनाम MCP',
-			fix: 'इंस्टॉल',
+			sites: 'साइट के लिए',
+			agents: 'एजेंट के लिए',
 			issues: 'समस्याएँ',
 			docs: 'डॉक्स'
 		}
@@ -57,7 +58,8 @@ const hi: Messages = {
 			scan: 'अपनी साइट स्कैन करें',
 			verdicts: 'फ़ैसले कैसे होते हैं',
 			proof: 'लीडरबोर्ड',
-			install: 'इंस्टॉल',
+			sites: 'साइट के लिए',
+			agents: 'एजेंट के लिए',
 			issues: 'कौन-सी समस्याएँ हल हुईं',
 			brand: 'ब्रैंड और डिज़ाइन',
 			trademark: 'ट्रेडमार्क नीति',
@@ -76,7 +78,8 @@ const hi: Messages = {
 		draft: 'WebMCP के {date} वाले ड्राफ़्ट के अनुरूप',
 		title: { text: 'अपनी साइट को {mark} बनाइए।', mark: 'एजेंट-रेडी' },
 		lead: 'AI एजेंट आपके पेज पहले से पढ़ रहे हैं। देखिए उन्हें क्या मिलता है, फिर एक लाइन से उन्हें असली टूल्स दीजिए।',
-		try: 'आज़माएँ: {sites}'
+		try: 'आज़माएँ: {sites}',
+		entry: { scan: 'अपनी साइट स्कैन करें', agent: 'अपना एजेंट सेट करें' }
 	},
 
 	logos: {
@@ -329,28 +332,29 @@ const hi: Messages = {
 	},
 
 	fix: {
-		title: 'दो कदम। एजेंट-रेडी।',
-		lead: 'कदम 1 आपकी साइट पर टूल लाता है। कदम 2 आपके एजेंट को उन्हें कॉल करने देता है।',
+		title: 'अपनी साइट को एजेंट-रेडी बनाइए',
+		lead: 'बस एक लाइन। एजेंट अंदाज़ा लगाने के बजाय आपकी साइट को कॉल करते हैं।',
 		alternatives: { npm: 'npm', agent: 'एजेंट' },
 		facts: 'लोड पर ~2.7 KB · Rust + WebAssembly · MIT लाइसेंस',
-		steps: {
-			site: {
-				title: 'आपकी साइट पर',
-				lead: 'इसे {tag} से पहले पेस्ट करें। जिन ब्राउज़र में WebMCP नहीं है, उनमें यह W3C पॉलीफ़िल जोड़ देता है।'
+		html: 'इसे {tag} से पहले पेस्ट करें। जिन ब्राउज़र में WebMCP नहीं है, उनमें यह W3C पॉलीफ़िल जोड़ देता है।'
+	},
+
+	agents: {
+		title: 'हर साइट पर आपका एजेंट और तेज़',
+		lead: 'वही जवाब, टोकन का छोटा-सा हिस्सा। Codex, Claude Code, Cursor और किसी भी स्क्रिप्ट में चलता है: Chrome, Firefox, Safari, Selenium, Playwright।',
+		saving: {
+			range: { other: 'लीडरबोर्ड के सभी {n} मॉडल पर {low} से {high} कम टोकन।' },
+			best: 'लीडरबोर्ड पर {high} तक कम टोकन।'
+		},
+		prompt: 'एक प्रॉम्प्ट: आपका एजेंट खुद को सेट करता है, फिर webmcpx.dev पर साबित करता है।',
+		ways: {
+			mcp: {
+				label: 'MCP वाले एजेंट',
+				text: 'Claude Code, Codex, Cursor: {cmd} जोड़ें। यह पेज अपने Chromium में खोलता है, बिना फ़्लैग के।'
 			},
-			agent: {
-				title: 'कोई भी एजेंट। कोई भी ब्राउज़र। कोई भी ऑटोमेशन।',
-				lead: 'एक प्रॉम्प्ट: आपका एजेंट खुद को सेट करता है, फिर webmcpx.dev पर साबित करता है।',
-				ways: {
-					mcp: {
-						label: 'MCP वाले एजेंट',
-						text: 'Claude Code, Codex, Cursor: {cmd} जोड़ें। यह पेज अपने Chromium में खोलता है, बिना फ़्लैग के।'
-					},
-					browser: {
-						label: 'ब्राउज़र चलाने वाले एजेंट',
-						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: पेज में {api} कॉल करें। कदम 1 वाली हर साइट पर यह मिलता है।'
-					}
-				}
+			browser: {
+				label: 'ब्राउज़र चलाने वाले एजेंट',
+				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: पेज में {api} कॉल करें। webmcpx वाली हर साइट पर यह मिलता है।'
 			}
 		}
 	},

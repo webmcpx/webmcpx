@@ -1,18 +1,15 @@
 <!--
-	The fix, in two steps: 1. on your site (tabs: coding agent, script tag, npm; the first one opens),
-	2. in your agent: one prompt, the two ways it can take (an MCP client, or document.modelContext from
-	any browser automation), and the note for agents with WebMCP built in.
+	For people who run a site (where a scan's "Fix it" lands): one line on the site, as tabs (coding agent,
+	script tag, npm; the first one opens). The agent side has its own section (features/agents).
 -->
 <script lang="ts">
 	import Bot from '@lucide/svelte/icons/bot';
 	import { siHtml5, siNpm } from 'simple-icons';
-	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import CodeTabs, { type CodeTab } from '#lib/components/ui/CodeTabs.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
 	import type { Highlighted, SnippetId } from '#lib/content/snippets.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
-	import Rich from '#lib/i18n/Rich.svelte';
 
 	let { code }: { code: Record<SnippetId, Highlighted> } = $props();
 
@@ -35,56 +32,15 @@
 			icon: siHtml5,
 			snippet: code.scriptTag,
 			title: 'index.html',
-			note: fmt(m.steps.site.lead, { tag: '</body>' })
+			note: fmt(m.html, { tag: '</body>' })
 		},
 		{ id: 'npm', label: 'npm', icon: siNpm, snippet: code.npmUsage, title: 'app.js' }
 	]);
-
-	// Step 2's two ways: an MCP client, or any browser automation calling the page's WebMCP itself.
-	const ways = $derived([
-		{ way: m.steps.agent.ways.mcp, inline: 'npx -y webmcpx mcp' },
-		{ way: m.steps.agent.ways.browser, inline: 'document.modelContext' }
-	]);
 </script>
 
-<!-- Code inside a sentence: breaks inside a word only when it cannot fit a line (code always wraps). -->
-{#snippet inlineCode(text: string)}<code class="font-mono text-xs wrap-break-word text-ink">{text}</code
-	>{/snippet}
-
-<Section id="fix" title={m.title} lead={m.lead} center>
-	<ol class="mx-auto grid max-w-3xl gap-6 text-left">
-		{#each [{ n: 1, step: m.steps.site }, { n: 2, step: m.steps.agent }] as { n, step } (n)}
-			<li>
-				<Reveal delay={(n - 1) * 90} class="rounded-card border-2 border-ink bg-card p-5 shadow-hard sm:p-6">
-					<div class="flex items-center gap-3">
-						<span
-							class="grid size-9 shrink-0 place-items-center rounded-full border-2 border-ink bg-marker font-display text-lg font-bold"
-							aria-hidden="true">{n}</span
-						>
-						<h3 class="font-display text-xl font-bold">{step.title}</h3>
-					</div>
-					{#if n === 1}
-						<div class="mt-4"><CodeTabs label={step.title} tabs={install} /></div>
-					{:else}
-						<p class="mt-2 mb-4 text-sm text-pretty text-ink-2">{m.steps.agent.lead}</p>
-						<CodeBlock snippet={code.mcpPrompt} title="prompt" />
-						<dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-							{#each ways as { way, inline } (inline)}
-								<div class="rounded-xl bg-paper px-3.5 py-2.5">
-									<dt class="font-display font-bold">{way.label}</dt>
-									<dd class="mt-1 text-pretty text-ink-2">
-										<Rich text={way.text}>
-											{#snippet cmd()}{@render inlineCode(inline)}{/snippet}
-											{#snippet api()}{@render inlineCode(inline)}{/snippet}
-										</Rich>
-									</dd>
-								</div>
-							{/each}
-						</dl>
-					{/if}
-				</Reveal>
-			</li>
-		{/each}
-	</ol>
+<Section id="for-sites" title={m.title} lead={m.lead} center>
+	<Reveal class="mx-auto max-w-3xl text-left">
+		<CodeTabs label={m.title} tabs={install} />
+	</Reveal>
 	<p class="mt-8 text-center font-mono text-xs tracking-wider text-ink-3 uppercase">{m.facts}</p>
 </Section>

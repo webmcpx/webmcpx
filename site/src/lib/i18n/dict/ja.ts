@@ -42,7 +42,8 @@ const ja: Messages = {
 			why: 'メリット',
 			proof: 'リーダーボード',
 			vsMcp: 'MCP 比較',
-			fix: '導入',
+			sites: 'サイト',
+			agents: 'エージェント',
 			issues: '課題',
 			docs: 'Docs'
 		}
@@ -57,7 +58,8 @@ const ja: Messages = {
 			scan: 'サイトをスキャン',
 			verdicts: '判定の仕組み',
 			proof: 'リーダーボード',
-			install: '導入方法',
+			sites: 'サイト向け',
+			agents: 'エージェント向け',
 			issues: '解決する課題',
 			brand: 'ブランドとデザイン',
 			trademark: '商標ポリシー',
@@ -76,7 +78,8 @@ const ja: Messages = {
 		draft: '{date} 版の WebMCP ドラフトに追従',
 		title: { text: 'そのサイトを、{mark}に。', mark: 'エージェント対応' },
 		lead: 'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',
-		try: 'お試し：{sites}'
+		try: 'お試し：{sites}',
+		entry: { scan: 'サイトをスキャン', agent: 'エージェントを設定' }
 	},
 
 	logos: {
@@ -320,28 +323,29 @@ const ja: Messages = {
 	},
 
 	fix: {
-		title: '2 ステップで、エージェント対応。',
-		lead: 'ステップ 1 でサイトにツールを置き、ステップ 2 でエージェントがそれを呼べるようにします。',
+		title: 'サイトを、エージェント対応に。',
+		lead: 'たった 1 行。エージェントは推測せず、サイトを直接呼び出します。',
 		alternatives: { npm: 'npm を使う場合', agent: 'エージェント' },
 		facts: '読込時 ~2.7 KB · Rust + WebAssembly · MIT License',
-		steps: {
-			site: {
-				title: 'サイト側',
-				lead: '{tag} の前に貼るだけ。WebMCP のないブラウザには W3C のポリフィルを追加します。'
+		html: '{tag} の前に貼るだけ。WebMCP のないブラウザには W3C のポリフィルを追加します。'
+	},
+
+	agents: {
+		title: 'どのサイトでも、エージェントをもっと速く。',
+		lead: '答えは同じ、トークンはごくわずか。Codex、Claude Code、Cursor、そしてあらゆるスクリプト（Chrome、Firefox、Safari、Selenium、Playwright）で動きます。',
+		saving: {
+			range: { other: 'リーダーボードの全 {n} モデルで、トークンを {low}〜{high} 削減。' },
+			best: 'リーダーボードで、トークンを最大 {high} 削減。'
+		},
+		prompt: 'プロンプトはひとつ。エージェントが自分でセットアップし、webmcpx.dev で動作を確かめます。',
+		ways: {
+			mcp: {
+				label: 'MCP 対応エージェント',
+				text: 'Claude Code、Codex、Cursor：{cmd} を追加。専用の Chromium でページを開くので、フラグは不要です。'
 			},
-			agent: {
-				title: 'どのエージェントでも。どのブラウザでも。どの自動化でも。',
-				lead: 'プロンプトはひとつ。エージェントが自分でセットアップし、webmcpx.dev で動作を確かめます。',
-				ways: {
-					mcp: {
-						label: 'MCP 対応エージェント',
-						text: 'Claude Code、Codex、Cursor：{cmd} を追加。専用の Chromium でページを開くので、フラグは不要です。'
-					},
-					browser: {
-						label: 'ブラウザを自分で操作するエージェント',
-						text: 'Playwright、Selenium、Puppeteer、browser-use、CDP。Chrome、Firefox、Safari：ページ内で {api} を呼ぶだけ。ステップ 1 を済ませたサイトならどこでも使えます。'
-					}
-				}
+			browser: {
+				label: 'ブラウザを自分で操作するエージェント',
+				text: 'Playwright、Selenium、Puppeteer、browser-use、CDP。Chrome、Firefox、Safari：ページ内で {api} を呼ぶだけ。webmcpx を入れたサイトならどこでも使えます。'
 			}
 		}
 	},

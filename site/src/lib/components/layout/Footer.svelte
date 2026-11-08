@@ -4,10 +4,11 @@
 -->
 <script lang="ts">
 	import { BADGES } from '#lib/features/scan/scan.ts';
+	import AppWindow from '@lucide/svelte/icons/app-window';
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
+	import Bot from '@lucide/svelte/icons/bot';
 	import Bug from '@lucide/svelte/icons/bug';
 	import ChartColumn from '@lucide/svelte/icons/chart-no-axes-column';
-	import Download from '@lucide/svelte/icons/download';
 	import FileText from '@lucide/svelte/icons/file-text';
 	import ListChecks from '@lucide/svelte/icons/list-checks';
 	import Package from '@lucide/svelte/icons/package';
@@ -39,8 +40,9 @@
 			title: m.columns.product,
 			links: [
 				{ label: m.links.scan, href: `${home}#scan`, icon: { lucide: ScanSearch } },
-				{ label: m.links.install, href: `${home}#fix`, icon: { lucide: Download } },
 				{ label: m.links.proof, href: `${home}#leaderboard`, icon: { lucide: ChartColumn } },
+				{ label: m.links.sites, href: `${home}#for-sites`, icon: { lucide: AppWindow } },
+				{ label: m.links.agents, href: `${home}#for-agents`, icon: { lucide: Bot } },
 				{ label: m.links.issues, href: `${home}#issues`, icon: { lucide: Bug } },
 				{ label: m.links.verdicts, href: i18n.href('/verdicts/'), icon: { lucide: ListChecks } }
 			]

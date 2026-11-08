@@ -1,6 +1,7 @@
 // Runs at build time only (the site is prerendered): highlight every code sample once and load the
 // published benchmark runs (see lib/server/bench.ts).
 import { OWN, SNIPPETS } from '#lib/content/snippets.ts';
+import { tokenSaving } from '#lib/features/benchmark/bench.ts';
 import { bestGain } from '#lib/features/benchmark/sites.ts';
 import { loadRuns } from '#lib/server/bench.ts';
 import { highlightAll } from '#lib/server/highlight.ts';
@@ -14,6 +15,8 @@ export const load: PageServerLoad = async () => {
 		code: await highlightAll(SNIPPETS),
 		own: await highlightAll(OWN),
 		runs,
+		// For "For agents": each model's whole-run token saving, lowest to highest (null: nothing published).
+		saving: tokenSaving(runs),
 		best: first ? { saving: bestGain(first.sites[0]), site: first.sites[0].name } : null
 	};
 };

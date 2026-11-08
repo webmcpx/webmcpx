@@ -17,7 +17,11 @@ real tools on your pages instead of reading and clicking their way through.
 
 </div>
 
-**Step 1, on your site.** Paste this before `</body>`:
+Two independent paths: pick yours.
+
+### For your site
+
+Make it agent-ready: one line, and agents call your site instead of guessing. Paste this before `</body>`:
 
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js"></script>
@@ -28,11 +32,16 @@ Your page now registers `search_page`, `fetch_as_markdown` and `get_page_context
 in the browser calls a function instead of guessing at buttons. Where the browser lacks WebMCP (Firefox,
 Safari, Chrome without the flag), the script first adds the
 [W3C WebMCP polyfill](https://github.com/w3c-oss/webmcp-polyfill), a separate ~5 KB file fetched only there.
+Check it, localhost included: `npx webmcpx tools localhost:3000`. Then add [your own tools](#your-own-tools).
 
-**Step 2, in your agent. Any agent, any browser, any automation.** Paste this into your agent:
+### For your agent
+
+Make your agent faster on every site: same answers, a fraction of the tokens (measured per model on the
+[leaderboard](https://webmcpx.dev/#leaderboard)). No site of your own needed. Paste this into Codex, Claude
+Code, Cursor or any agent:
 
 ```text
-Set up WebMCP for yourself with webmcpx (read https://webmcpx.dev/llms.txt), whatever browser or automation you use. Then prove it works: open https://webmcpx.dev, list its WebMCP tools and call one.
+Use WebMCP first on every web page you work with, before reading or clicking anything: in your own browser and in any script you write or run (Playwright, Selenium, Puppeteer, browser-use, CDP), even if you support WebMCP natively. Set it up with webmcpx (read https://webmcpx.dev/llms.txt) and add this rule to your agent instructions (AGENTS.md, CLAUDE.md or equivalent) so it applies to every future task. Then prove it works: open https://webmcpx.dev, list its WebMCP tools and call one.
 ```
 
 It takes one of two ways:
@@ -46,7 +55,7 @@ It takes one of two ways:
   ```
 
 - **Agents that drive their own browser** (Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome,
-  Firefox, Safari) call `document.modelContext` in the page, which every site with step 1 has:
+  Firefox, Safari) call `document.modelContext` in the page, which every site with webmcpx has:
 
   ```js
   const mc = document.modelContext;
@@ -57,9 +66,8 @@ It takes one of two ways:
   (`executeTool()` resolves with JSON text, and webmcpx tools return their envelope as JSON text: parse
   twice.) Tested in Chromium, Firefox and WebKit on every CI run (`site/tests/engines.spec.ts`).
 
-The ChatGPT desktop app and the Codex app skip this step: they
-[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp) natively. Check your own site, localhost
-included: `npx webmcpx tools localhost:3000`.
+The ChatGPT desktop app and the Codex app also [call WebMCP tools](https://learn.chatgpt.com/docs/webmcp)
+natively; the prompt still applies, since they may drive another browser from a script.
 
 ## Your own tools
 

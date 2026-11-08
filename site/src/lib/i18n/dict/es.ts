@@ -42,7 +42,8 @@ const es: Messages = {
 			why: 'Por qué',
 			proof: 'Ranking',
 			vsMcp: 'vs MCP',
-			fix: 'Instalar',
+			sites: 'Para sitios',
+			agents: 'Para agentes',
 			issues: 'Problemas',
 			docs: 'Docs'
 		}
@@ -57,7 +58,8 @@ const es: Messages = {
 			scan: 'Escanea tu sitio',
 			verdicts: 'Cómo funcionan los veredictos',
 			proof: 'Ranking',
-			install: 'Instalar',
+			sites: 'Para sitios',
+			agents: 'Para agentes',
 			issues: 'Problemas que resuelve',
 			brand: 'Marca y diseño',
 			trademark: 'Política de marca',
@@ -76,7 +78,8 @@ const es: Messages = {
 		draft: 'Sigue el borrador de WebMCP del {date}',
 		title: { text: 'Deja tu sitio {mark}.', mark: 'listo para agentes' },
 		lead: 'Los agentes de IA ya leen tus páginas. Mira qué obtienen y dales herramientas de verdad con una sola línea.',
-		try: 'Prueba {sites}'
+		try: 'Prueba {sites}',
+		entry: { scan: 'Escanea tu sitio', agent: 'Configura tu agente' }
 	},
 
 	logos: {
@@ -331,28 +334,29 @@ const es: Messages = {
 	},
 
 	fix: {
-		title: 'Dos pasos. Listo para agentes.',
-		lead: 'El paso 1 pone herramientas en tu sitio. El paso 2 deja que tu agente las llame.',
+		title: 'Deja tu sitio listo para agentes',
+		lead: 'Una línea. Los agentes llaman a tu sitio en vez de adivinar.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
 		facts: '~2,7 KB al cargar · Rust + WebAssembly · MIT',
-		steps: {
-			site: {
-				title: 'En tu sitio',
-				lead: 'Pégalo antes de {tag}. En navegadores sin WebMCP, añade el polyfill del W3C.'
+		html: 'Pégalo antes de {tag}. En navegadores sin WebMCP, añade el polyfill del W3C.'
+	},
+
+	agents: {
+		title: 'Tu agente, más rápido en cualquier sitio',
+		lead: 'Las mismas respuestas, con una fracción de los tokens. Funciona en Codex, Claude Code, Cursor y cualquier script: Chrome, Firefox, Safari, Selenium, Playwright.',
+		saving: {
+			range: { other: 'De {low} a {high} menos tokens en los {n} modelos del ranking.' },
+			best: 'Hasta {high} menos tokens en el ranking.'
+		},
+		prompt: 'Un prompt: tu agente se configura solo y lo demuestra en webmcpx.dev.',
+		ways: {
+			mcp: {
+				label: 'Agentes con MCP',
+				text: 'Claude Code, Codex, Cursor: añade {cmd}. Abre las páginas en su propio Chromium, sin flags.'
 			},
-			agent: {
-				title: 'Cualquier agente, navegador o automatización.',
-				lead: 'Un prompt: tu agente se configura solo y lo demuestra en webmcpx.dev.',
-				ways: {
-					mcp: {
-						label: 'Agentes con MCP',
-						text: 'Claude Code, Codex, Cursor: añade {cmd}. Abre las páginas en su propio Chromium, sin flags.'
-					},
-					browser: {
-						label: 'Agentes que controlan un navegador',
-						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: llama a {api} en la página. Todo sitio con el paso 1 lo tiene.'
-					}
-				}
+			browser: {
+				label: 'Agentes que controlan un navegador',
+				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: llama a {api} en la página. Todo sitio con webmcpx lo tiene.'
 			}
 		}
 	},

@@ -44,7 +44,8 @@ const zh: Messages = {
 			why: '为什么',
 			proof: '排行榜',
 			vsMcp: '对比 MCP',
-			fix: '安装',
+			sites: '网站接入',
+			agents: '智能体接入',
 			issues: '社区诉求',
 			docs: '文档'
 		}
@@ -59,7 +60,8 @@ const zh: Messages = {
 			scan: '扫描你的网站',
 			verdicts: '判定规则',
 			proof: '排行榜',
-			install: '安装',
+			sites: '网站接入',
+			agents: '智能体接入',
 			issues: '解决了哪些问题',
 			brand: '品牌与设计',
 			trademark: '商标政策',
@@ -79,7 +81,8 @@ const zh: Messages = {
 		// \u200b: where the headline may break (headings only break at punctuation and these).
 		title: { text: '让你的网站\u200b{mark}。', mark: '智能体就绪' },
 		lead: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
-		try: '试试 {sites}'
+		try: '试试 {sites}',
+		entry: { scan: '扫描你的网站', agent: '配置你的智能体' }
 	},
 
 	logos: {
@@ -318,28 +321,29 @@ const zh: Messages = {
 	},
 
 	fix: {
-		title: '两步，智能体就绪。',
-		lead: '第 1 步在你的网站上提供工具，第 2 步让你的智能体调用它们。',
+		title: '让你的网站\u200b智能体就绪',
+		lead: '一行代码。智能体直接调用你的网站，不再靠猜。',
 		alternatives: { npm: 'npm', agent: '智能体' },
 		facts: '加载约 2.7 KB · Rust + WebAssembly · MIT 许可证',
-		steps: {
-			site: {
-				title: '在你的网站上',
-				lead: '粘贴到 {tag} 之前。浏览器没有 WebMCP 时，它会补上 W3C polyfill。'
+		html: '粘贴到 {tag} 之前。浏览器没有 WebMCP 时，它会补上 W3C polyfill。'
+	},
+
+	agents: {
+		title: '让你的智能体\u200b在任何网站都更快',
+		lead: '答案不变，token 只需一小部分。适用于 Codex、Claude Code、Cursor 和任何脚本：Chrome、Firefox、Safari、Selenium、Playwright。',
+		saving: {
+			range: { other: '排行榜全部 {n} 个模型，token 减少 {low} 到 {high}。' },
+			best: '排行榜上，token 最多减少 {high}。'
+		},
+		prompt: '一个提示词：智能体自己完成配置，再到 webmcpx.dev 上验证。',
+		ways: {
+			mcp: {
+				label: '支持 MCP 的智能体',
+				text: 'Claude Code、Codex、Cursor：添加 {cmd}。它在自己的 Chromium 里打开页面，无需 flag。'
 			},
-			agent: {
-				title: '任何智能体，任何浏览器，任何自动化。',
-				lead: '一个提示词：智能体自己完成配置，再到 webmcpx.dev 上验证。',
-				ways: {
-					mcp: {
-						label: '支持 MCP 的智能体',
-						text: 'Claude Code、Codex、Cursor：添加 {cmd}。它在自己的 Chromium 里打开页面，无需 flag。'
-					},
-					browser: {
-						label: '自己驱动浏览器的智能体',
-						text: 'Playwright、Selenium、Puppeteer、browser-use、CDP；Chrome、Firefox、Safari：在页面里调用 {api}。完成第 1 步的网站都有它。'
-					}
-				}
+			browser: {
+				label: '自己驱动浏览器的智能体',
+				text: 'Playwright、Selenium、Puppeteer、browser-use、CDP；Chrome、Firefox、Safari：在页面里调用 {api}。装了 webmcpx 的网站都有它。'
 			}
 		}
 	},

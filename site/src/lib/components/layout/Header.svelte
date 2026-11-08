@@ -1,13 +1,17 @@
 <!--
 	The site header: logo, the section menu, the language switcher and GitHub. On wide screens the menu is a
-	framed pill with an icon per link, and the section in view is marked (`aria-current`). On phones a
+	framed pill with an icon per link, and the section in view is marked (`aria-current`). Seven links
+	must fit one line from 1024 px in every language, so between 1024 and 1280 px the pill drops its icons
+	and the version stamp steps aside until 1536 px (tests/i18n.spec.ts measures it). On phones a
 	<details> menu opens the same links, so it works before (and without) JavaScript. The language
 	switcher is a <details> list too, in the pill and in the phone menu: each language links to this page
 	in that language (a full page load, so <html lang> and fonts follow).
 -->
 <script lang="ts">
+	import AppWindow from '@lucide/svelte/icons/app-window';
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import BookOpen from '@lucide/svelte/icons/book-open';
+	import Bot from '@lucide/svelte/icons/bot';
 	import ChartColumn from '@lucide/svelte/icons/chart-column';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import CircleDot from '@lucide/svelte/icons/circle-dot';
@@ -15,7 +19,6 @@
 	import Lightbulb from '@lucide/svelte/icons/lightbulb';
 	import Menu from '@lucide/svelte/icons/menu';
 	import Scale from '@lucide/svelte/icons/scale';
-	import Terminal from '@lucide/svelte/icons/terminal';
 	import X from '@lucide/svelte/icons/x';
 	import { siGithub } from 'simple-icons';
 	import { afterNavigate } from '$app/navigation';
@@ -41,10 +44,11 @@
 	const m = $derived(i18n.m.header);
 	const home = $derived(i18n.href('/'));
 	const NAV: Item[] = $derived([
-		// In page order: the fix comes right after the logos.
-		{ label: m.links.fix, href: `${home}#fix`, icon: Terminal, section: 'fix' },
+		// In page order; then the two audiences: people who run a site, people who use an agent.
 		{ label: m.links.why, href: `${home}#why`, icon: Lightbulb, section: 'why' },
 		{ label: m.links.proof, href: `${home}#leaderboard`, icon: ChartColumn, section: 'leaderboard' },
+		{ label: m.links.sites, href: `${home}#for-sites`, icon: AppWindow, section: 'for-sites' },
+		{ label: m.links.agents, href: `${home}#for-agents`, icon: Bot, section: 'for-agents' },
 		{ label: m.links.vsMcp, href: `${home}#vs-mcp`, icon: Scale, section: 'vs-mcp' },
 		{ label: m.links.issues, href: `${home}#issues`, icon: CircleDot, section: 'issues' },
 		{ label: m.links.docs, href: `${REPO}#readme`, icon: BookOpen }
@@ -107,7 +111,7 @@
 	<nav aria-label={m.nav} class="mx-auto flex h-16 items-center justify-between gap-4 px-5 sm:h-20 sm:px-8">
 		<div class="flex items-center gap-3">
 			<a href={home} class="rounded-lg"><Logo /><span class="sr-only">{m.home}</span></a>
-			<Stamp size="sm" class="hidden sm:inline-flex">v{VERSION}</Stamp>
+			<Stamp size="sm" class="hidden sm:inline-flex lg:hidden 2xl:inline-flex">v{VERSION}</Stamp>
 		</div>
 
 		<ul
@@ -118,9 +122,9 @@
 					<a
 						href={item.href}
 						aria-current={item.section && current === item.section ? 'true' : undefined}
-						class="group flex h-9 items-center gap-1.5 rounded-full px-2.5 text-[15px] font-medium whitespace-nowrap text-ink-2 transition hover:bg-marker hover:text-ink aria-[current=true]:bg-ink aria-[current=true]:text-paper xl:px-3.5"
+						class="group flex h-9 items-center gap-1.5 rounded-full px-2 text-[15px] font-medium whitespace-nowrap text-ink-2 transition hover:bg-marker hover:text-ink aria-[current=true]:bg-ink aria-[current=true]:text-paper xl:px-3.5"
 					>
-						<item.icon size={16} strokeWidth={2.25} aria-hidden="true" />
+						<item.icon size={16} strokeWidth={2.25} class="hidden xl:block" aria-hidden="true" />
 						{item.label}
 						{#if !item.section}<ArrowUpRight
 								size={14}

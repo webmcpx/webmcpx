@@ -208,7 +208,7 @@
 			{/if}
 
 			{#if r.verdict === 'missing'}
-				<!-- The fix lives in one place, the #fix section; the result only points there. -->
+				<!-- The fix lives in one place, the #for-sites section; the result only points there. -->
 			{:else if r.verdict === 'issues'}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="mb-3 font-medium">{m.result.lint}</p>
@@ -258,7 +258,7 @@
 
 			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7">
 				{#if r.verdict === 'missing'}
-					<Button href="#fix" size="sm"><Wrench aria-hidden="true" />{m.result.fix}</Button>
+					<Button href="#for-sites" size="sm"><Wrench aria-hidden="true" />{m.result.fix}</Button>
 				{/if}
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
 					<Link aria-hidden="true" />{shared ? m.result.shared : m.result.share}

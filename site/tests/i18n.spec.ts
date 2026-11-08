@@ -42,6 +42,37 @@ for (const l of LOCALES) {
 			});
 		}
 
+		test('the menu pill fits between the logo and GitHub, from 1024 px (its smallest width)', async ({
+			page
+		}) => {
+			for (const width of [1024, 1280]) {
+				await page.setViewportSize({ width, height: 800 });
+				await page.goto(localized('/', l.code));
+				const fit = await page.evaluate(() => {
+					const nav = document.querySelector('header nav')!;
+					const links = [...nav.querySelectorAll('a')];
+					const box = (el: Element) => el.getBoundingClientRect();
+					const ul = nav.querySelector('ul')!;
+					const pill = box(ul);
+					const items = [...ul.children].map((li) => box(li).top);
+					return {
+						lines: new Set(items.map(Math.round)).size,
+						// Gaps in px: logo → pill, pill → GitHub (16 is the flex gap: more means nothing is squeezed),
+						// GitHub → the window’s edge.
+						left: pill.left - box(links[0]).right,
+						right: box(links.find((a) => a.textContent?.includes('GitHub'))!).left - pill.right,
+						edge: innerWidth - box(links.find((a) => a.textContent?.includes('GitHub'))!).right,
+						scroll: document.documentElement.scrollWidth - innerWidth
+					};
+				});
+				expect(fit.lines, `one line at ${width}px`).toBe(1);
+				expect(fit.left, `room after the logo at ${width}px`).toBeGreaterThan(16);
+				expect(fit.right, `room before GitHub at ${width}px`).toBeGreaterThan(16);
+				expect(fit.edge, `GitHub inside the frame at ${width}px`).toBeGreaterThan(16);
+				expect(fit.scroll, `no horizontal scroll at ${width}px`).toBeLessThanOrEqual(0);
+			}
+		});
+
 		test('links every language with hreflang', async ({ page }) => {
 			await page.goto(localized('/brand/', l.code));
 			const alternates = page.locator('link[rel="alternate"][hreflang]');

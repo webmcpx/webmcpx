@@ -12,14 +12,21 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 
 ## Page narrative (keep this order; cut before adding)
 
-Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → the fix (install tabs:
-coding agent, HTML, npm; step 2: one prompt, then the two ways: MCP, or `document.modelContext` from any
-browser automation) → your own tools (`tool()`, forms,
-React/Vue/Svelte as tabs) → why WebMCP (four pains it removes, each backed by the draft or the benchmark;
-the saving is computed) → proof (pick a site by logo; biggest savings first) → WebMCP vs MCP → what the
-community asked for → the footer (giant lockup, every link with its icon, notices).
+Scan your site (hero, with two entry buttons: "Scan your site" and "Set up your agent") → sites already on
+WebMCP (logos, each one scans live) → why WebMCP (four pains it removes, each backed by the draft or the
+benchmark; the saving is computed) → proof (`#leaderboard`: pick a site by logo; biggest savings first) →
+then one section per audience, each standing on its own (nobody has to do both):
+
+- For sites (`#for-sites`, `features/fix`, where a scan's "Fix it" lands): install tabs (coding agent,
+  HTML, npm), then your own tools (`#own`: `tool()`, forms, React/Vue/Svelte as tabs).
+- For agents (`#for-agents`, `features/agents`; no site or scan needed): the whole-run token saving across
+  models (`tokenSaving()`, computed from the published runs, left out when none is), one prompt with
+  Copy, then the two ways as small print: MCP, or `document.modelContext` from any browser automation.
+
+Then WebMCP vs MCP → what the community asked for → the footer (giant lockup, every link with its icon,
+notices). The header and footer menus name both audiences ("For sites", "For agents"), in page order.
 Tabs list "Agent" (the coding agent) first, always, then the most used options; the first opens by default
-(`CodeTabs`, built on `Tabs`). Step 2 is one prompt, not a list of clients.
+(`CodeTabs`, built on `Tabs`). The agent section is one prompt, not a list of clients.
 Few words per section; numbers over adjectives.
 
 ## Layout
