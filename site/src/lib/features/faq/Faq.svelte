@@ -12,9 +12,9 @@
 </script>
 
 <Section id="faq" kicker={m.kicker} title={m.title}>
-	<dl class="grid max-w-4xl gap-x-10 gap-y-8 md:grid-cols-2">
+	<dl class="grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
 		{#each Object.entries(m.items) as [id, item], i (id)}
-			<Reveal delay={(i % 2) * 70}>
+			<Reveal delay={(i % 3) * 70}>
 				<dt class="font-display text-lg leading-tight font-bold">{item.q}</dt>
 				<dd class="mt-2 text-pretty text-ink-2">{item.a}</dd>
 			</Reveal>

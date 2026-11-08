@@ -108,39 +108,45 @@
 </script>
 
 <Section id="for-agents" title={m.title} lead={m.lead}>
-	{#if saving}
-		<Reveal class="-mt-2 mb-10">
-			<a href="#leaderboard" class="inline-block font-display font-bold text-ink">
-				<span class="align-middle text-2xl sm:text-3xl">{m.hype.up}</span>
-				<span
-					class="px-1 text-7xl leading-none tracking-tight sm:text-8xl"
-					style="background: linear-gradient(transparent 62%, var(--color-marker) 62%)"
-					>{ratio(best?.saving ?? saving.high)}</span
-				>
-				<span class="align-middle text-2xl sm:text-3xl">{m.hype.fewer}</span>
-			</a>
-			{#if best}<p class="mt-3 font-mono text-xs tracking-wider text-ink-3 uppercase">
-					{fmt(m.hype.bestCase, { site: best.site, model: best.model })}
-				</p>{/if}
-			<p class="mt-4 max-w-xl text-pretty text-ink-2">
-				<span class="font-medium text-ink">{m.hype.same}</span>
-				<a
-					href="#leaderboard"
-					class="underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink">{range}</a
-				>
-			</p>
-			{#if losses}<p class="mt-1 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
+	<!-- The case on the left (the number, what it works with), the setup on the right; stacked on small screens. -->
+	<div class="grid gap-x-12 gap-y-10 lg:grid-cols-12">
+		<div class="lg:col-span-5">
+			{#if saving}
+				<Reveal class="mb-10">
+					<a href="#leaderboard" class="inline-block font-display font-bold text-ink">
+						<span class="align-middle text-2xl sm:text-3xl">{m.hype.up}</span>
+						<span
+							class="px-1 text-7xl leading-none tracking-tight sm:text-8xl"
+							style="background: linear-gradient(transparent 62%, var(--color-marker) 62%)"
+							>{ratio(best?.saving ?? saving.high)}</span
+						>
+						<span class="align-middle text-2xl whitespace-nowrap sm:text-3xl">{m.hype.fewer}</span>
+					</a>
+					{#if best}<p class="mt-3 font-mono text-xs tracking-wider text-ink-3 uppercase">
+							{fmt(m.hype.bestCase, { site: best.site, model: best.model })}
+						</p>{/if}
+					<p class="mt-4 max-w-xl text-pretty text-ink-2">
+						<span class="font-medium text-ink">{m.hype.same}</span>
+						<a
+							href="#leaderboard"
+							class="underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
+							>{range}</a
+						>
+					</p>
+					{#if losses}<p class="mt-1 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
+				</Reveal>
+			{/if}
+			<Reveal>
+				<p class="font-mono text-xs tracking-wider text-ink-3 uppercase">{m.worksWith}</p>
+				<ul class="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm text-ink-2">
+					{#each WORKS as w (w.name)}
+						<li class="inline-flex items-center gap-1.5"><SiteLogo logo={w.logo} size={16} />{w.name}</li>
+					{/each}
+				</ul>
+			</Reveal>
+		</div>
+		<Reveal class="min-w-0 lg:col-span-7">
+			<CodeTabs label={m.title} {tabs} />
 		</Reveal>
-	{/if}
-	<Reveal class="mb-8 max-w-3xl">
-		<p class="font-mono text-xs tracking-wider text-ink-3 uppercase">{m.worksWith}</p>
-		<ul class="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm text-ink-2">
-			{#each WORKS as w (w.name)}
-				<li class="inline-flex items-center gap-1.5"><SiteLogo logo={w.logo} size={16} />{w.name}</li>
-			{/each}
-		</ul>
-	</Reveal>
-	<Reveal class="max-w-3xl">
-		<CodeTabs label={m.title} {tabs} />
-	</Reveal>
+	</div>
 </Section>

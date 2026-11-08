@@ -52,12 +52,14 @@
 	]);
 </script>
 
-<div id="own" class="mt-14 max-w-3xl scroll-mt-20">
-	<Reveal>
-		<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
-			<span class="font-mono text-base text-ink-3" aria-hidden="true">2</span>{m.title}
-		</h3>
-		<p class="mt-2 mb-5 text-pretty text-ink-2">{m.lead}</p>
-		<CodeTabs label={m.title} {tabs} />
+<div id="own" class="mt-16 scroll-mt-20">
+	<Reveal class="grid gap-x-10 gap-y-5 lg:grid-cols-12">
+		<div class="lg:col-span-4">
+			<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
+				<span class="font-mono text-base text-ink-3" aria-hidden="true">2</span>{m.title}
+			</h3>
+			<p class="mt-2 text-pretty text-ink-2">{m.lead}</p>
+		</div>
+		<div class="min-w-0 lg:col-span-8"><CodeTabs label={m.title} {tabs} /></div>
 	</Reveal>
 </div>

@@ -72,6 +72,8 @@ tests/                       Playwright e2e against the prerendered build
 
 - Alignment: one rule. Section titles, leads and content are left-aligned (one left edge to scan, as long
   centered text reads worse); only the hero and the logo wall are centered.
+- Wide screens use the width: a section's explanation on the left (4 or 5 of 12 columns) and its code on the
+  right (`lg:grid-cols-12`), stacked below `lg`. No content block alone in a narrow left column.
 
 - Style: "paper and ink". Off-white paper, near-black ink, 2px outlines, short hard offset shadows, pill
   buttons, one highlighter yellow (`marker`) used sparingly. Serious and editorial: sentence-case headlines in

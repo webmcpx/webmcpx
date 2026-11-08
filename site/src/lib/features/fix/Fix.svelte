@@ -43,13 +43,16 @@
 <!-- The old anchor: published CLIs (npx webmcpx tools, 0.2.5 and before) still print webmcpx.dev/#fix. -->
 <div id="fix" class="scroll-mt-20" aria-hidden="true"></div>
 <Section id="for-sites" title={m.title} lead={m.lead}>
-	<Reveal class="max-w-3xl">
-		<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
-			<span class="font-mono text-base text-ink-3" aria-hidden="true">1</span>{m.standard.title}
-		</h3>
-		<p class="mt-2 mb-5 text-pretty text-ink-2">{m.standard.lead}</p>
-		<CodeTabs label={m.standard.title} tabs={install} />
-		<p class="mt-4 font-mono text-xs tracking-wider text-ink-3 uppercase">{m.facts}</p>
+	<!-- Each step: what it is on the left, its code on the right (stacked on small screens). -->
+	<Reveal class="grid gap-x-10 gap-y-5 lg:grid-cols-12">
+		<div class="lg:col-span-4">
+			<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
+				<span class="font-mono text-base text-ink-3" aria-hidden="true">1</span>{m.standard.title}
+			</h3>
+			<p class="mt-2 text-pretty text-ink-2">{m.standard.lead}</p>
+			<p class="mt-4 font-mono text-xs tracking-wider text-ink-3 uppercase">{m.facts}</p>
+		</div>
+		<div class="min-w-0 lg:col-span-8"><CodeTabs label={m.standard.title} tabs={install} /></div>
 	</Reveal>
 	<Own samples={own} />
 </Section>
