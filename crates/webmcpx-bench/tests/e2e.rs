@@ -1499,6 +1499,17 @@ async fn the_agent_checks_follow_robots_rules_and_ignore_the_page_csp() {
             5,
         ),
         (
+            "a ban past the 64 KiB cut is not missed",
+            text(Box::leak(
+                format!(
+                    "{}User-agent: GPTBot\nDisallow: /\n",
+                    "# padding\n".repeat(8_000)
+                )
+                .into_boxed_str(),
+            )),
+            0,
+        ),
+        (
             "an empty Disallow ends its group",
             text("User-agent: GPTBot\nDisallow:\n\nUser-agent: ExampleBot\nDisallow: /\n"),
             5,
@@ -1529,4 +1540,45 @@ async fn the_agent_checks_follow_robots_rules_and_ignore_the_page_csp() {
             "{name}: the CSP must not block the checks"
         );
     }
+}
+
+#[tokio::test]
+async fn the_agent_checks_keep_the_page_icon() {
+    use axum::http::header;
+    use axum::response::{Html, IntoResponse};
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::Scanner;
+
+    // A 1x1 PNG.
+    const PNG: &[u8] = &[
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0x0D, 0x49, 0x48, 0x44, 0x52, 0,
+        0, 0, 1, 0, 0, 0, 1, 8, 6, 0, 0, 0, 0x1F, 0x15, 0xC4, 0x89, 0, 0, 0, 0x0D, 0x49, 0x44,
+        0x41, 0x54, 0x78, 0x9C, 0x63, 0, 1, 0, 0, 5, 0, 1, 0x0D, 0x0A, 0x2D, 0xB4, 0, 0, 0, 0,
+        0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+    ];
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(
+        axum::Router::new()
+            .route(
+                "/",
+                get(|| async { Html(r#"<!doctype html><title>i</title><link rel="icon" href="/assets/icon.png">"#) }),
+            )
+            .route("/assets/icon.png", get(|| async { ([(header::CONTENT_TYPE, "image/png")], PNG).into_response() }))
+            .route("/robots.txt", get(|| async { "User-agent: *\nAllow: /\n" })),
+    )
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    assert!(
+        report
+            .favicon
+            .as_deref()
+            .is_some_and(|f| f.starts_with("data:image/png")),
+        "the icon the page declares, read before the checks leave the page"
+    );
 }

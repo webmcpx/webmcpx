@@ -556,6 +556,14 @@ impl Scanner {
             .ok()
             .and_then(|v| v.as_bool())
             .unwrap_or(false);
+        // Best effort: a site without a readable icon still gets its report. Read from the page itself,
+        // before the agent checks move this tab to robots.txt.
+        let favicon = tokio::time::timeout(FAVICON_WAIT, page.eval_isolated(FAVICON_JS))
+            .await
+            .ok()
+            .and_then(Result::ok)
+            .and_then(|v| v.as_str().map(str::to_owned))
+            .filter(|uri| is_icon_data_uri(uri));
         let mut checks = tokio::time::timeout(CHECKS_WAIT, agent_checks(page, &final_url))
             .await
             .ok()
@@ -570,13 +578,7 @@ impl Scanner {
             usize::try_from(snapshot_chars.as_u64().unwrap_or(0)).unwrap_or(usize::MAX),
             &checks,
         );
-        // Best effort: a site without a readable icon still gets its report.
-        report.favicon = tokio::time::timeout(FAVICON_WAIT, page.eval_isolated(FAVICON_JS))
-            .await
-            .ok()
-            .and_then(Result::ok)
-            .and_then(|v| v.as_str().map(str::to_owned))
-            .filter(|uri| is_icon_data_uri(uri));
+        report.favicon = favicon;
         Ok(report)
     }
 }
@@ -726,7 +728,7 @@ const AGENT_CHECKS_JS: &str = r#"(async () => {
     const timer = setTimeout(() => ctrl.abort(), 3000);
     try {
       const res = await fetch(new URL(path, location.origin).href, { credentials: 'omit', signal: ctrl.signal, ...init });
-      const out = { status: res.status, ok: res.ok, type: (res.headers.get('content-type') || '').toLowerCase(), link: res.headers.get('link') || '', text: '' };
+      const out = { status: res.status, ok: res.ok, type: (res.headers.get('content-type') || '').toLowerCase(), link: res.headers.get('link') || '', text: '', cut: false };
       if (res.ok && init.method !== 'HEAD' && res.body) {
         const reader = res.body.getReader();
         const dec = new TextDecoder();
@@ -736,7 +738,7 @@ const AGENT_CHECKS_JS: &str = r#"(async () => {
           if (done) break;
           size += value.length;
           out.text += dec.decode(value, { stream: true });
-          if (size > 65536) { ctrl.abort(); break; }
+          if (size > 65536) { out.cut = true; ctrl.abort(); break; }
         }
       }
       return out;
@@ -758,7 +760,9 @@ const AGENT_CHECKS_JS: &str = r#"(async () => {
   const good = (r) => !!r && r.ok;
   const html = (r) => r.type.includes('text/html');
   // robots.txt (RFC 9309): a 4xx means no rules (all allowed); a 5xx or no answer means we can't tell.
-  const robotsText = good(robots) && !html(robots) ? robots.text : '';
+  // A robots.txt cut at 64 KiB may hide a ban past the cut: unknown, so no points.
+  const robotsRead = good(robots) && !html(robots) && !robots.cut;
+  const robotsText = robotsRead ? robots.text : '';
   const groups = [];
   let group = null;
   for (const raw of robotsText.split(/\r?\n/)) {
@@ -796,7 +800,7 @@ const AGENT_CHECKS_JS: &str = r#"(async () => {
   return {
     llms_txt: good(llms) && !html(llms) && llms.text.trim().length > 0,
     markdown: good(md) && md.type.includes('markdown'),
-    robots_allows_agents: robotsMissing || (good(robots) && !AI.some(blocked)),
+    robots_allows_agents: robotsMissing || (robotsRead && !AI.some(blocked)),
     sitemap: (good(sitemap) && /<(urlset|sitemapindex)\b/i.test(sitemap.text)) || /^\s*sitemap\s*:/im.test(robotsText),
     link_headers: good(head) && /rel\s*=/i.test(head.link),
     agent_skills: good(skills) && /"skills"\s*:\s*\[/.test(skills.text),
