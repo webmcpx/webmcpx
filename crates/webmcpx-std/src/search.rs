@@ -81,11 +81,14 @@ pub fn search(stream: &str, query: &str, limit: usize) -> String {
 
 fn passages(stream: &str) -> Vec<Passage> {
     let mut heading = String::new();
+    let mut heading_tokens = Vec::new();
     let mut heading_anchor = "";
     let mut out = Vec::new();
     for block in blocks::parse(stream) {
         let text = clean(block.text);
         if let Kind::Heading(_) = block.kind {
+            // Searched in full; shown shortened.
+            heading_tokens = tokenize(&text);
             heading = shorten(text, HEADING_CHARS);
             heading_anchor = block.anchor;
             continue;
@@ -98,7 +101,7 @@ fn passages(stream: &str) -> Vec<Passage> {
         } else {
             block.anchor
         };
-        let mut tokens = tokenize(&heading);
+        let mut tokens = heading_tokens.clone();
         tokens.extend(tokenize(&text));
         out.push(Passage {
             tokens,
@@ -298,5 +301,15 @@ mod tests {
             parse(&search(&huge, "pricing", 5))["error"]["code"],
             "RESULT_TOO_LARGE"
         );
+    }
+
+    #[test]
+    fn a_long_heading_is_searched_in_full() {
+        let heading = format!("{} refunds", "Policy ".repeat(30));
+        let page = format!(
+            "h2\u{1F}{heading}\u{1F}https://x.test/#r\u{1E}p\u{1F}Contact support within 30 days.\u{1E}"
+        );
+        let v = parse(&search(&page, "refunds", 5));
+        assert_eq!(v["data"]["results"][0]["url"], "https://x.test/#r");
     }
 }

@@ -553,11 +553,24 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
         execute() {},
       });
     </script>"#;
+    // Inherited toJSON hooks run inside the captured JSON.stringify too: the overflow error itself must
+    // not be one of them.
+    let to_json = r#"<!doctype html><title>j</title><script>
+      Object.prototype.toJSON = function () { return this.error ? "x".repeat(7e7) : this; };
+      for (let i = 0; i < 200; i++) document.modelContext.registerTool({
+        name: "t" + i, description: "d".repeat(2000),
+        inputSchema: { type: "object", properties: { v: { enum: Array(4000).fill(0) } } }, execute() {},
+      });
+    </script>"#;
     let site = serve_html(
         axum::Router::new()
             .route(
                 "/tampered",
                 axum::routing::get(move || std::future::ready(axum::response::Html(tampered))),
+            )
+            .route(
+                "/tojson",
+                axum::routing::get(move || std::future::ready(axum::response::Html(to_json))),
             )
             .route(
                 "/schemas",
@@ -587,10 +600,15 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
         report
             .tools
             .iter()
-            .all(|t| t.description.chars().count() <= 10_000)
+            .all(|t| t.description.chars().count() <= 2_000)
     );
     let err = scanner
         .scan(&format!("http://{site}/schemas"))
+        .await
+        .unwrap_err();
+    assert!(format!("{err:?}").contains("over 1000000 chars"), "{err:?}");
+    let err = scanner
+        .scan(&format!("http://{site}/tojson"))
         .await
         .unwrap_err();
     assert!(format!("{err:?}").contains("over 1000000 chars"), "{err:?}");
@@ -933,7 +951,7 @@ async fn a_page_cannot_send_the_scanner_megabytes() {
         report
             .tools
             .iter()
-            .all(|t| t.description.chars().count() <= 10_000)
+            .all(|t| t.description.chars().count() <= 2_000)
     );
 }
 

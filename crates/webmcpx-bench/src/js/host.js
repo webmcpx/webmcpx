@@ -12,6 +12,8 @@
   const cut = (v, n) => apply(slice, toString(v ?? ""), [0, n]);
   // The whole list as sent: room for the 200 tools a real page has, never megabytes per scan.
   const LIST_MAX = 1_000_000;
+  // Built now, while JSON and Object.prototype.toJSON are still the browser's own.
+  const TOO_BIG = stringify({ error: `the tool list is over ${LIST_MAX} chars` });
   const tools = new Map();
   const provided = new Set();
   const NAME = /^[A-Za-z0-9_.-]{1,128}$/;
@@ -103,10 +105,10 @@
           }
           const annotations = {};
           for (const [k, v] of Object.entries(t.annotations ?? {}).slice(0, 20)) annotations[cap(k, 64)] = v === true;
-          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations, schemaError, document: cap(doc, 64) };
+          return { name: cap(t.name, 256), description: cap(t.description, 2_000), inputSchema, annotations, schemaError, document: cap(doc, 64) };
         });
         const out = cut(stringify(list), LIST_MAX + 1);
-        return out.length > LIST_MAX ? stringify({ error: `the tool list is over ${LIST_MAX} chars` }) : out;
+        return out.length > LIST_MAX ? TOO_BIG : out;
       },
       async call(name, input) {
         const tool = all().get(name);
