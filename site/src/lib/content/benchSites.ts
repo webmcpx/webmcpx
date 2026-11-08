@@ -2,7 +2,6 @@
 // (without `www.`) and local fixture directories (`bench/sites/<dir>`). Unknown keys show the key.
 
 import {
-	ALLBIRDS,
 	CLOUDFLARE,
 	KILN,
 	NOTION,
@@ -20,7 +19,6 @@ export interface BenchSiteLook {
 export const BENCH_SITES: Record<string, BenchSiteLook> = {
 	'developers.notion.com': { name: 'Notion', logo: NOTION },
 	'developers.cloudflare.com': { name: 'Cloudflare', logo: CLOUDFLARE },
-	'allbirds.com': { name: 'Allbirds', logo: ALLBIRDS },
 	'demo.openforagents.com': { name: 'WooCommerce', logo: WOOCOMMERCE },
 	'specification.website': { name: 'specification.website', logo: SPECIFICATION_WEBSITE },
 	docs: { name: 'Orbit docs', logo: ORBIT },

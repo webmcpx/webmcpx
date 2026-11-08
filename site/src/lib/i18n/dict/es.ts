@@ -241,7 +241,7 @@ const es: Messages = {
 			live: 'Un sitio real: publica sus propias herramientas WebMCP.',
 			local: 'Un sitio de prueba local: sus herramientas vienen de webmcpx.',
 			scope:
-				'35 preguntas en 7 sitios, 32 de solo lectura; los mayores ahorros vienen de las herramientas de búsqueda de los propios sitios.',
+				'30 preguntas en 6 sitios, 27 de solo lectura; los mayores ahorros vienen de las herramientas de búsqueda de los propios sitios.',
 			runs: '3 ejecuciones por pregunta y brazo: 3 de 3 es evidencia, no prueba del 100%.',
 			measures:
 				'El tiempo es el bucle del agente tras cargar la página; el coste es el uso de API del modelo a precios de lista fechados, con caché.',

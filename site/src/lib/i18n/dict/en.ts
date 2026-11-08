@@ -332,7 +332,7 @@ const en = {
 			// The code block's title: max 20.
 			// What the numbers can and can't say (a skeptic's questions, answered up front).
 			scope:
-				"35 questions on 7 sites, 32 of them read-only; the biggest savings come from the sites' own search tools.",
+				"30 questions on 6 sites, 27 of them read-only; the biggest savings come from the sites' own search tools.",
 			runs: '3 runs per question and arm: 3 of 3 solved is evidence, not proof of 100%.',
 			measures:
 				"Time is the agent loop after the page loaded; cost is the model's API usage at dated list prices, cache included.",

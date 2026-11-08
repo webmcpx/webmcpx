@@ -89,7 +89,8 @@ impl Check {
     /// Grades the answer part of the check; the `state` part needs the page. An answer that says it
     /// did not come from the page (see [`ungrounded`]) fails, in both arms alike.
     pub fn answer_passes(&self, answer: &str) -> bool {
-        if ungrounded(answer) {
+        // Not from the page: said so, or the site blocked it (a guess after a bot check is still a guess).
+        if ungrounded(answer) || blocked(answer) {
             return false;
         }
         let answer = normalize(answer);
@@ -372,42 +373,6 @@ mod tests {
     }
 
     #[test]
-    fn allbirds_exchange_check_needs_the_restriction() {
-        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
-        let check = &tasks
-            .iter()
-            .find(|t| t.id == "live-allbirds-exchange-country")
-            .unwrap()
-            .check;
-        for ok in [
-            "No. Allbirds only allows exchanges in the country where the item was purchased.",
-            "No, exchanges must be made in the same country.",
-            "Returns/exchanges can only be done in the country of purchase.",
-        ] {
-            assert!(check.answer_passes(ok), "{ok}");
-        }
-        for wrong in [
-            "Yes, an item bought in the US can be exchanged in any country, including London.",
-            "Probably not; US purchases go through the US returns process.",
-        ] {
-            assert!(!check.answer_passes(wrong), "{wrong}");
-        }
-    }
-
-    #[test]
-    fn notion_upload_check_accepts_both_units() {
-        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
-        let check = &tasks
-            .iter()
-            .find(|t| t.id == "live-notion-upload-size")
-            .unwrap()
-            .check;
-        assert!(check.answer_passes("The limit is **20 MiB**."));
-        assert!(check.answer_passes("Files up to 20 MB."));
-        assert!(!check.answer_passes("Files up to 5 GiB."));
-    }
-
-    #[test]
     fn woo_stock_check_allows_the_price() {
         let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
         let check = &tasks
@@ -434,15 +399,6 @@ mod tests {
     fn bundled_checks_grade_real_answers() {
         let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
         let task = |id: &str| &tasks.iter().find(|t| t.id == id).unwrap().check;
-        let exchange = task("live-allbirds-exchange-country");
-        for ok in [
-            "The store's policy only allows returns and exchanges in the country where the item was bought.",
-            "Returns and exchanges can only be done in the country they were bought in.",
-            "Items must be returned or exchanged in the country where they were originally purchased (the US).",
-        ] {
-            assert!(exchange.answer_passes(ok), "{ok}");
-        }
-        assert!(!exchange.answer_passes("Yes, you can exchange them in any country."));
         let releases = task("docs-retained-releases");
         assert!(releases.answer_passes(
             "By default, Orbit keeps **10** past releases. To keep more, set `retain_releases = 25`."

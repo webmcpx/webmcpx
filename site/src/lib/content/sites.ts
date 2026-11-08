@@ -3,7 +3,7 @@
 // Logos belong to their owners and only state a fact: the site ships WebMCP. No affiliation.
 
 import { siMintlify, siPerplexity, siResend } from 'simple-icons';
-import { ALLBIRDS, CLOUDFLARE, KITH, NOTION, fromSimpleIcon, type Logo } from './logos.ts';
+import { CLOUDFLARE, NOTION, fromSimpleIcon, type Logo } from './logos.ts';
 
 export interface Site {
 	name: string;
@@ -28,7 +28,5 @@ export const SITES: Site[] = [
 	{ name: 'Notion', url: 'https://developers.notion.com/', logo: NOTION },
 	{ name: 'Perplexity', url: 'https://docs.perplexity.ai/', logo: fromSimpleIcon(siPerplexity) },
 	{ name: 'Mintlify', url: 'https://mintlify.com/docs', logo: fromSimpleIcon(siMintlify) },
-	{ name: 'Resend', url: 'https://resend.com/docs', logo: fromSimpleIcon(siResend) },
-	{ name: 'Allbirds', url: 'https://www.allbirds.com/', logo: ALLBIRDS },
-	{ name: 'Kith', url: 'https://kith.com/', logo: KITH }
+	{ name: 'Resend', url: 'https://resend.com/docs', logo: fromSimpleIcon(siResend) }
 ];

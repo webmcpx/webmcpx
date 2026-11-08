@@ -106,30 +106,29 @@ registers it while the component is mounted. Then see it, no browser flag: `npx 
 
 ## Benchmark
 
-Same model, prompt and step limit; one arm reads the page through DOM snapshots, the other only calls the
-WebMCP tools the page registers. 35 questions on 7 sites (Cloudflare, Notion and Allbirds use their own
-tools), 3 runs each, graded by facts in the answer, never by an LLM.
+Same model, prompt and step limit; one arm is a competent DOM browser agent (reads the page in parts, opens
+links and URLs, clicks and fills), the other only calls the WebMCP tools the page registers. 30 questions on 6
+sites, 3 runs each per arm, six models, graded by facts in the answer, never by an LLM. Method, changes and
+audits: [bench/METHODOLOGY.md](bench/METHODOLOGY.md), [bench/CHANGELOG.md](bench/CHANGELOG.md),
+[bench/audits/](bench/audits).
+
+Both arms solve almost every question; WebMCP gets the same answers for **2.7× to 6× fewer tokens** per run
+across the six models (method v2).
 
 Per site, never averaged (GPT-6.1 Sol; tokens per run on that site's best and worst question):
 
 | Site | Best question | Worst question | Fully solved (of 5) |
 |---|---|---|---|
-| Notion | 25.2k → **1.1k** (24×) | 1.8× fewer | 5 → 5 |
-| Cloudflare docs | 20.7k → **1.0k** (20×) | 2.1× fewer | 5 → 5 |
-| specification.website | 39.8k → **3.9k** (10×) | 3.0× fewer | 5 → 5 |
-| Kiln & Co (demo store) | 12.1k → **2.4k** (5×) | 1.8× fewer | 5 → 5 |
-| Allbirds | 20.4k → **6.0k** (3.4×) | 1.1× fewer | 3 → **5**¹ |
-| Orbit docs (demo) | 2.5k → **1.0k** (2.5×) | 1.5× fewer | 5 → 5 |
-| WooCommerce demo | 3.1k → 3.2k (0.9×) | 2.4× **more** | 5 → 5 |
+| Cloudflare docs | 34.2k → **1.0k** (34×) | 3.6× fewer | 5 → 5 |
+| Notion | 19.1k → **1.1k** (18×) | 4.3× fewer | 5 → 5 |
+| Kiln & Co (demo store) | 13.5k → **2.2k** (6.1×) | 2.1× fewer | 5 → 5 |
+| specification.website | 20.2k → **3.7k** (5.5×) | 2.4× fewer | 5 → 5 |
+| Orbit docs (demo) | 2.9k → **1.0k** (2.8×) | 1.5× fewer | 5 → 5 |
+| WooCommerce demo | 3.8k → **3.2k** (1.2×) | 2× **more** | 5 → 5 |
 
-¹ Every failed baseline run there hit Allbirds' bot check ("verify your connection") on the returns page;
-the WebMCP arm reached the same policy through the store's own tool. That is a real difference between the
-two routes, not better reasoning. Each failed run in the results files says why it failed (`failure`:
-`blocked`, `ungrounded`, `abstained`, `step_limit`, `wrong`, `harness`).
-
-With GPT-6 Luna the best case is 97× fewer tokens (113k → 1.2k on a Cloudflare docs question). Not every
-case wins: the WooCommerce demo store's tools return more than a page snapshot, so WebMCP used the same or
-more tokens there, with both models.
+With GPT-6 Luna the best case is 62× fewer tokens (64.7k → 1.0k on a Notion docs question). Not every case
+wins: the WooCommerce demo store's tools return more than a page snapshot, so WebMCP used more tokens on some
+of its questions.
 [Every question, both arms, every model.](site/src/lib/content/bench)
 
 ## More ways in

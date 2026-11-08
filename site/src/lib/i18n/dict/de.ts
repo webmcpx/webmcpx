@@ -242,7 +242,7 @@ const de: Messages = {
 			live: 'Eine Live-Website: Sie liefert eigene WebMCP-Tools mit.',
 			local: 'Eine lokale Test-Website: Ihre Tools stammen von webmcpx.',
 			scope:
-				'35 Fragen auf 7 Websites, 32 davon nur lesend; die größten Einsparungen kommen von den Suchwerkzeugen der Websites selbst.',
+				'30 Fragen auf 6 Websites, 27 davon nur lesend; die größten Einsparungen kommen von den Suchwerkzeugen der Websites selbst.',
 			runs: '3 Läufe pro Frage und Arm: 3 von 3 ist ein Hinweis, kein Beweis für 100 %.',
 			measures:
 				'Zeit ist die Agentenschleife nach dem Laden der Seite; Kosten sind die API-Nutzung des Modells zu datierten Listenpreisen, inklusive Cache.',
