@@ -1,5 +1,7 @@
 # Crawlers and agents are welcome. Agents: start at /llms.txt (or /index.md for this page as Markdown).
 User-agent: *
+# Content Signals (contentsignals.org): search, answering in AI tools and training are all welcome.
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Disallow:
 
 Sitemap: https://webmcpx.dev/sitemap.xml

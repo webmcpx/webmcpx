@@ -166,7 +166,7 @@
 			{#if r.tools.length}
 				<div class="border-t-2 border-ink bg-paper-2 px-5 py-4 sm:px-7">
 					<ul class="flex flex-wrap gap-2" aria-label={m.result.tools}>
-						{#each r.tools.slice(0, 10) as t, i (i)}
+						{#each r.tools.slice(0, 3) as t, i (i)}
 							<li>
 								<!-- Hover, focus or tap shows the description; screen readers get it as part of the name. -->
 								<button
@@ -180,8 +180,8 @@
 								>
 							</li>
 						{/each}
-						{#if r.tools.length > 10}<li class="px-1 py-0.5 text-xs text-ink-3">
-								{fmt(m.result.more, { n: i18n.number(r.tools.length - 10) })}
+						{#if r.tools.length > 3}<li class="px-1 py-0.5 text-xs text-ink-3">
+								{fmt(m.result.more, { n: i18n.number(r.tools.length - 3) })}
 							</li>{/if}
 					</ul>
 					{#if r.diagnostics.length}

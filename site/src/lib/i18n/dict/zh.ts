@@ -174,7 +174,7 @@ const zh: Messages = {
 					label: '值不值得的证据',
 					hand: '全凭猜测。',
 					webmcpx:
-						'同样的答案，token 最多少用 {best}（最佳情况：{site}，{model}）。每次运行都已公开：一条命令即可复现。',
+						'WebMCP 与读取页面对比的公开基准测试：同样的答案，token 最多少用 {best}（最佳案例：{site}，{model}）。一条命令即可复现。',
 					webmcpxPlain: '每个问题、每次运行都已公开：一条命令即可复现。'
 				},
 				cost: {

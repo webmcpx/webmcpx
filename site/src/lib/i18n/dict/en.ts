@@ -230,7 +230,7 @@ const en = {
 					// The leaderboard's best case, always named as one: {best} is a ratio (62×), {site} and {model}
 					// where it was measured; all from the published runs.
 					webmcpx:
-						'Up to {best} fewer tokens for the same answers (best case: {site}, {model}). Every run is public: rerun it with one command.',
+						'A public benchmark of WebMCP vs reading the page: up to {best} fewer tokens for the same answers (best case: {site}, {model}). Rerun it with one command.',
 					// Without a published run (no numbers to quote).
 					webmcpxPlain: 'Every question and every run is public: rerun it with one command.'
 				},

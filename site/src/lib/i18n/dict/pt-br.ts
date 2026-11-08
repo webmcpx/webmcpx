@@ -177,7 +177,7 @@ const ptBr: Messages = {
 					label: 'Prova de que vale a pena',
 					hand: 'Seu palpite.',
 					webmcpx:
-						'Até {best} menos tokens para as mesmas respostas (melhor caso: {site}, {model}). Toda execução é pública: refaça com um comando.',
+						'Um benchmark público de WebMCP vs ler a página: até {best} menos tokens para as mesmas respostas (melhor caso: {site}, {model}). Refaça com um comando.',
 					webmcpxPlain: 'Cada pergunta e cada execução são públicas: refaça com um comando.'
 				},
 				cost: {

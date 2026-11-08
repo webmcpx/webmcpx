@@ -178,7 +178,7 @@ const id: Messages = {
 					label: 'Bukti bahwa ini sepadan',
 					hand: 'Tebakan Anda.',
 					webmcpx:
-						'Hingga {best} lebih sedikit token untuk jawaban yang sama (kasus terbaik: {site}, {model}). Setiap eksekusi terbuka untuk publik: jalankan ulang dengan satu perintah.',
+						'Benchmark publik WebMCP vs membaca halaman: hingga {best} lebih sedikit token untuk jawaban yang sama (kasus terbaik: {site}, {model}). Jalankan ulang dengan satu perintah.',
 					webmcpxPlain:
 						'Setiap pertanyaan dan setiap eksekusi terbuka untuk publik: jalankan ulang dengan satu perintah.'
 				},

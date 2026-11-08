@@ -275,4 +275,10 @@
 	.cta-glow {
 		animation: cta-glow 2.4s ease-in-out infinite;
 	}
+	/* Under the pointer or keyboard focus it stays fully lit: the pulse invites, the hover confirms. */
+	.cta-glow:hover,
+	.cta-glow:focus-visible {
+		animation: none;
+		background-color: var(--marker);
+	}
 }

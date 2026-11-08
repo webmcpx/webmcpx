@@ -178,7 +178,7 @@ const es: Messages = {
 					label: 'Pruebas de que compensa',
 					hand: 'Tu intuición.',
 					webmcpx:
-						'Hasta {best} menos tokens para las mismas respuestas (mejor caso: {site}, {model}). Cada ejecución es pública: repítela con un comando.',
+						'Un benchmark público de WebMCP frente a leer la página: hasta {best} menos tokens para las mismas respuestas (mejor caso: {site}, {model}). Repítelo con un comando.',
 					webmcpxPlain: 'Cada pregunta y cada ejecución son públicas: repítelas con un comando.'
 				},
 				cost: {

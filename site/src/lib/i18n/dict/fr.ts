@@ -182,7 +182,7 @@ const fr: Messages = {
 					label: 'La preuve que ça paie',
 					hand: 'Votre intuition.',
 					webmcpx:
-						'Jusqu’à {best} moins de tokens pour les mêmes réponses (meilleur cas : {site}, {model}). Chaque exécution est publique : relancez-la en une commande.',
+						'Un benchmark public de WebMCP face à la lecture de la page : jusqu’à {best} moins de tokens pour les mêmes réponses (meilleur cas : {site}, {model}). Relancez-le en une commande.',
 					webmcpxPlain: 'Chaque question et chaque exécution sont publiques : relancez-les en une commande.'
 				},
 				cost: {

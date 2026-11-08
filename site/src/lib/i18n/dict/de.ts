@@ -178,7 +178,7 @@ const de: Messages = {
 					label: 'Beleg, dass es sich lohnt',
 					hand: 'Ihr Bauchgefühl.',
 					webmcpx:
-						'Bis zu {best} weniger Tokens für dieselben Antworten (bester Fall: {site}, {model}). Jeder Lauf ist öffentlich: Wiederholen Sie ihn mit einem Befehl.',
+						'Ein öffentlicher Benchmark von WebMCP gegen das Lesen der Seite: bis zu {best} weniger Tokens für dieselben Antworten (bester Fall: {site}, {model}). Mit einem Befehl nachprüfbar.',
 					webmcpxPlain: 'Jede Frage und jeder Lauf ist öffentlich: Wiederholen Sie sie mit einem Befehl.'
 				},
 				cost: {
