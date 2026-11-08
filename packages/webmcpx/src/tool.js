@@ -247,6 +247,7 @@ export function formSchema(form) {
       const items = properties[name]?.items;
       if (items) {
         if (items.enum) items.enum = [...new Set([...items.enum, ...(p.enum ?? [])])];
+        if (items.items?.enum) items.items.enum = [...new Set([...items.items.enum, ...(p.items?.enum ?? [])])];
         for (const [k, pick] of [["minimum", Math.min], ["maximum", Math.max]]) {
           if (k in items && k in p) items[k] = pick(items[k], p[k]);
           else delete items[k];
@@ -288,13 +289,14 @@ function fill(form, args) {
         continue;
       }
       // Only a select has options: <input type="email" multiple> takes "a@x.com,b@x.com" as text.
-      if (el.tagName === "SELECT" && el.multiple) for (const o of el.options) o.selected = !o.matches(":disabled") && [].concat(value).includes(o.value);
-      else {
-        Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
-        // A select keeps no value it doesn't offer (a repeated field's joined options may include one).
-        if (el.tagName === "SELECT" && el.value !== String(value)) {
-          throw Object.assign(new Error(`\`${name}\`: "${value}" is not an option there`), { code: "INVALID_INPUT" });
-        }
+      const wanted = [].concat(value).map(String);
+      if (el.tagName === "SELECT" && el.multiple) for (const o of el.options) o.selected = !o.matches(":disabled") && wanted.includes(o.value);
+      else Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
+      // The field must now hold what was asked: a select keeps no value it doesn't offer, a range clamps
+      // to its bounds (a repeated field's joined schema may allow either).
+      const got = el.tagName === "SELECT" && el.multiple ? [...el.selectedOptions].map((o) => o.value) : [el.value];
+      if (got.length !== wanted.length || got.some((v) => !wanted.includes(v))) {
+        throw Object.assign(new Error(`\`${name}\`: ${JSON.stringify(value)} is not a value this field takes`), { code: "INVALID_INPUT" });
       }
       // Frameworks listen for these, not for property writes.
       el.dispatchEvent(new Event("input", { bubbles: true }));

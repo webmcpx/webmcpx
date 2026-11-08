@@ -90,6 +90,8 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
 <form id="cart" toolname="update_cart" tooldescription="Set each row's quantity." method="post" toolautosubmit>
   <input name="quantity[]" type="number" value="1" max="5"><input name="quantity[]" type="number" value="3" max="10">
   <select name="variant[]"><option>red</option><option>blue</option></select><select name="variant[]"><option>large</option></select>
+  <input type="range" name="tip[]" max="5" value="0"><input type="range" name="tip[]" max="10" value="0">
+  <select multiple name="extras[]"><option>gift-wrap</option></select><select multiple name="extras[]"><option>engraving</option></select>
   <button>Update</button>
 </form>
 <script>
@@ -113,7 +115,7 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   document.getElementById("cart").addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(event.target);
-    event.respondWith?.(Promise.resolve({ quantities: data.getAll("quantity[]"), variants: data.getAll("variant[]") }));
+    event.respondWith?.(Promise.resolve({ quantities: data.getAll("quantity[]"), variants: data.getAll("variant[]"), tips: data.getAll("tip[]"), extras: data.getAll("extras[]") }));
   });
   document.querySelector('form[method=post]').addEventListener("submit", (event) => {
     event.preventDefault();
@@ -349,7 +351,14 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.deepEqual(cart.inputSchema.properties["quantity[]"], { type: "array", items: { type: "number", maximum: 10 }, minItems: 2, maxItems: 2 });
     assert.deepEqual(cart.inputSchema.properties["variant[]"].items.enum, ["red", "blue", "large"]);
     const updatedCart = JSON.parse(await session.call(cart, { "quantity[]": [2, 3], "variant[]": ["blue", "large"] }));
-    assert.deepEqual(updatedCart.data, { quantities: ["2", "3"], variants: ["blue", "large"] });
+    assert.deepEqual(updatedCart.data, { quantities: ["2", "3"], variants: ["blue", "large"], tips: ["0", "0"], extras: [] });
+    // A range clamps out-of-bounds values and a multiselect drops options it lacks: refused, not sent.
+    const clamped = JSON.parse(await session.call(cart, { "quantity[]": [1, 1], "variant[]": ["red", "large"], "tip[]": [7, 3] }));
+    assert.equal(clamped.error.code, "INVALID_INPUT");
+    const extras = JSON.parse(await session.call(cart, { "quantity[]": [1, 1], "variant[]": ["red", "large"], "tip[]": [3, 7], "extras[]": [["gift-wrap"], ["engraving"]] }));
+    assert.deepEqual([extras.data.tips, extras.data.extras], [["3", "7"], ["gift-wrap", "engraving"]]);
+    const swappedExtras = JSON.parse(await session.call(cart, { "quantity[]": [1, 1], "variant[]": ["red", "large"], "extras[]": [["engraving"], ["gift-wrap"]] }));
+    assert.equal(swappedExtras.error.code, "INVALID_INPUT");
     const overStock = JSON.parse(await session.call(cart, { "quantity[]": [7, 3], "variant[]": ["red", "large"] }));
     assert.equal(overStock.error.code, "INVALID_INPUT");
     const swapped = JSON.parse(await session.call(cart, { "quantity[]": [1, 1], "variant[]": ["large", "red"] }));
