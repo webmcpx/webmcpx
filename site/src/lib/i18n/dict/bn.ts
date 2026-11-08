@@ -333,16 +333,25 @@ const bn: Messages = {
 		title: 'দুই ধাপ। এজেন্ট-রেডি।',
 		lead: 'ধাপ ১ আপনার সাইটে টুল যোগ করে। ধাপ ২ আপনার এজেন্টকে সেগুলো কল করতে দেয়।',
 		alternatives: { npm: 'npm', agent: 'এজেন্ট' },
-		facts: 'লোডে ~2.4 KB · Rust + WebAssembly · MIT লাইসেন্স',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: 'লোডে ~2.7 KB · Rust + WebAssembly · MIT লাইসেন্স',
 		steps: {
 			site: {
 				title: 'আপনার সাইটে',
-				lead: '{tag}-এর আগে পেস্ট করুন। যেখানে WebMCP নেই, সেখানে এটি কিছুই করে না।'
+				lead: '{tag}-এর আগে পেস্ট করুন। যে ব্রাউজারে WebMCP নেই, সেখানে এটি W3C-র পলিফিল যোগ করে।'
 			},
 			agent: {
-				title: 'আপনার এজেন্টে',
-				lead: 'আপনার এজেন্ট যে পেজই খুলুক তার WebMCP টুল পায়, যেকোনো Chromium-এ এবং ব্রাউজার ফ্ল্যাগ ছাড়াই: পেজের আগেই W3C-র পলিফিল লোড হয়।',
+				title: 'যেকোনো এজেন্ট। যেকোনো ব্রাউজার। যেকোনো অটোমেশন।',
+				lead: 'একটি প্রম্পট: আপনার এজেন্ট নিজেই সেটআপ করে, তারপর webmcpx.dev-এ প্রমাণ করে।',
+				ways: {
+					mcp: {
+						label: 'MCP-সহ এজেন্ট',
+						text: 'Claude Code, Codex, Cursor: {cmd} যোগ করুন। এটি নিজের Chromium-এ পেজ খোলে, ফ্ল্যাগ ছাড়াই।'
+					},
+					browser: {
+						label: 'যে এজেন্ট নিজে ব্রাউজার চালায়',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: পেজে {api} কল করুন। ধাপ ১ করা প্রতিটি সাইটে এটি আছে।'
+					}
+				},
 				skip: 'ChatGPT ডেস্কটপ অ্যাপ বা Codex অ্যাপ ব্যবহার করেন? এই ধাপ বাদ দিন: তারা নেটিভভাবে WebMCP টুল কল করে ({docs})।'
 			}
 		},

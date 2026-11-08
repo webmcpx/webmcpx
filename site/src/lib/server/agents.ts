@@ -45,7 +45,18 @@ function benchmarkLines(model?: string): string[] {
 		]);
 }
 
-const SEE_IT_WORK = `- Any agent, today: \`claude mcp add webmcpx -- npx -y webmcpx mcp\` (Codex, Cursor or any MCP client: \`npx -y webmcpx mcp\`). It opens pages in a local Chromium with the W3C WebMCP polyfill injected before page scripts (no browser flag), and gives the agent each page's WebMCP tools as MCP tools: the site's own plus search_page, fetch_as_markdown and get_page_context.
+const SEE_IT_WORK = `Any agent, any browser, any automation. Two ways:
+
+- Agents with MCP (Claude Code, Codex, Cursor, any MCP client): run the MCP server \`npx -y webmcpx mcp\` (Claude Code: \`claude mcp add webmcpx -- npx -y webmcpx mcp\`; Codex: \`codex mcp add webmcpx -- npx -y webmcpx mcp\`; needs Node 22+ and Chrome, Chromium, Edge or Brave). It opens pages in a local Chromium with the W3C WebMCP polyfill injected before page scripts (no browser flag), and gives the agent each page's WebMCP tools as MCP tools: the site's own plus search_page, fetch_as_markdown and get_page_context.
+- Agents that drive their own browser (Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari/WebKit): call \`document.modelContext\` in the page. Every page with the webmcpx script tag has it, in every browser (over HTTPS or on localhost, where WebMCP exists): the script adds the W3C polyfill where the browser lacks WebMCP. A browser with WebMCP of its own (Chrome with the flag or an origin-trial token) keeps it; if that one has no getTools()/executeTool(), use the MCP way. Run this in the page (Playwright or Puppeteer: \`page.evaluate\`; Selenium: \`execute_async_script\`; CDP: \`Runtime.evaluate\` with \`awaitPromise\`):
+  \`\`\`js
+  const mc = document.modelContext;
+  const tools = await mc.getTools(); // [{ name, description, inputSchema, annotations, ... }]; empty until the page's scripts ran: retry after load
+  const tool = tools.find((t) => t.name === "search_page");
+  let result = JSON.parse(await mc.executeTool(tool, { query: "pricing" })); // executeTool() resolves with JSON text
+  if (typeof result === "string") result = JSON.parse(result); // webmcpx tools return their envelope as JSON text
+  \`\`\`
+  A webmcpx envelope is \`{ ok: true, data, truncated?, next_cursor?, hint? }\` or \`{ ok: false, error: { code, message, retryable }, hint? }\`. The site's own tools are in getTools() too.
 - Check a site's tools, localhost included: \`npx webmcpx tools localhost:3000\`; call one: \`npx webmcpx call <url> <tool> '<json>'\`.
 - Native: the ChatGPT desktop app's browser and Codex call a site's WebMCP tools (https://learn.chatgpt.com/docs/webmcp). Chrome: chrome://flags/#enable-webmcp-testing, or an origin-trial token in a <meta http-equiv="origin-trial"> tag.`;
 
@@ -67,8 +78,8 @@ WebMCP (${SPEC}) is a W3C Community Group draft, not a W3C standard: a page regi
 
 ## Install
 
-- Script tag: \`<script type="module" src="${LOADER_URL}"></script>\` before </body>. A no-op where WebMCP is missing.
-- npm: \`npm i webmcpx\`, then \`import { register } from "webmcpx"; await register();\`
+- Script tag: \`<script type="module" src="${LOADER_URL}"></script>\` before </body>. Where the browser lacks WebMCP, it adds the W3C polyfill (a separate file, fetched only there), so document.modelContext exists in Chrome, Firefox and Safari alike.
+- npm: \`npm i webmcpx\`, then \`import "webmcpx/polyfill"; import { register } from "webmcpx"; await register();\` (without the polyfill import, register() is a no-op where the browser lacks WebMCP).
 - MCP server for your agent: \`npx -y webmcpx mcp\` (Claude Code: \`claude mcp add webmcpx -- npx -y webmcpx mcp\`).
 - Coding agent: \`npx skills add webmcpx/webmcpx -y\` installs the webmcpx skill.
 - Linter: \`cargo install webmcpx\` (needs Rust), then \`webmcpx lint src/\` (\`--format json\` for machines).

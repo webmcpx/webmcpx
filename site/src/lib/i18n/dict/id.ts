@@ -326,16 +326,25 @@ const id: Messages = {
 		title: 'Dua langkah. Siap agent.',
 		lead: 'Langkah 1 memasang tool di situs Anda. Langkah 2 membuat agen Anda bisa memanggilnya.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
-		facts: '~2,4 KB dimuat · Rust + WebAssembly · lisensi MIT',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: '~2,7 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		steps: {
 			site: {
 				title: 'Di situs Anda',
-				lead: 'Tempel sebelum {tag}. Di tempat tanpa WebMCP, ia tidak melakukan apa-apa.'
+				lead: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, ia menambahkan polyfill W3C.'
 			},
 			agent: {
-				title: 'Di agen Anda',
-				lead: 'Agen Anda mendapat tool WebMCP dari setiap halaman yang dibukanya, di Chromium mana pun dan tanpa flag browser: polyfill W3C dimuat sebelum halaman.',
+				title: 'Agen apa pun. Browser apa pun. Otomasi apa pun.',
+				lead: 'Satu prompt: agen Anda menyiapkan dirinya sendiri, lalu membuktikannya di webmcpx.dev.',
+				ways: {
+					mcp: {
+						label: 'Agen dengan MCP',
+						text: 'Claude Code, Codex, Cursor: tambahkan {cmd}. Ia membuka halaman di Chromium-nya sendiri, tanpa flag.'
+					},
+					browser: {
+						label: 'Agen yang mengendalikan browser',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: panggil {api} di halaman. Setiap situs dengan langkah 1 memilikinya.'
+					}
+				},
 				skip: 'Pakai aplikasi desktop ChatGPT atau aplikasi Codex? Lewati langkah ini: keduanya memanggil tool WebMCP secara native ({docs}).'
 			}
 		},

@@ -352,13 +352,25 @@ const ru: Messages = {
 		title: 'Два шага. Сайт готов для агентов.',
 		lead: 'Шаг 1 добавляет инструменты на ваш сайт. Шаг 2 позволяет агенту их вызывать.',
 		alternatives: { npm: 'npm', agent: 'Агент' },
-		facts: '~2,4 КБ на загрузку · Rust + WebAssembly · MIT',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: '~2,7 КБ на загрузку · Rust + WebAssembly · MIT',
 		steps: {
-			site: { title: 'На вашем сайте', lead: 'Вставьте перед {tag}. Где нет WebMCP, он ничего не делает.' },
+			site: {
+				title: 'На вашем сайте',
+				lead: 'Вставьте перед {tag}. В браузерах без WebMCP он добавит полифил W3C.'
+			},
 			agent: {
-				title: 'В вашем агенте',
-				lead: 'Агент получает WebMCP-инструменты каждой открытой страницы — в любом Chromium и без флагов: полифил W3C загружается раньше страницы.',
+				title: 'Любой агент. Любой браузер. Любая автоматизация.',
+				lead: 'Один промпт: агент настроится сам и докажет это на webmcpx.dev.',
+				ways: {
+					mcp: {
+						label: 'Агенты с MCP',
+						text: 'Claude Code, Codex, Cursor: добавьте {cmd}. Он открывает страницы в собственном Chromium, без флагов.'
+					},
+					browser: {
+						label: 'Агенты, которые управляют браузером',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: вызовите {api} на странице. Он есть на каждом сайте с шагом 1.'
+					}
+				},
 				skip: 'Пользуетесь десктопным ChatGPT или приложением Codex? Пропустите этот шаг: они вызывают WebMCP-инструменты нативно ({docs}).'
 			}
 		},

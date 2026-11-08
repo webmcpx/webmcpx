@@ -15,9 +15,14 @@ If the site has none yet, add the drop-in. It registers `get_page_context`, `sea
 <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js"></script>
 ```
 
-In a bundled app use `npm install webmcpx`, then call `register()` once on startup:
+The script adds the W3C WebMCP polyfill where the browser lacks WebMCP, so agents driving Firefox, Safari
+or Chrome without the flag still find the tools at `document.modelContext`.
+
+In a bundled app use `npm install webmcpx`, then call `register()` once on startup (import
+`webmcpx/polyfill` first, or the tools exist only in browsers with WebMCP):
 
 ```js
+import "webmcpx/polyfill";
 import { register } from "webmcpx";
 const { dispose } = await register({ searchSite }); // searchSite optional: (query, {limit}) => [{title, url, snippet}]
 ```
@@ -55,4 +60,10 @@ A server-rendered form needs no JavaScript: add `toolname`, `tooldescription` an
    `npx webmcpx tools <local URL>` (e.g. `localhost:5173`): it lists the page's tools, no browser flag.
    Then call one: `npx webmcpx call <local URL> <tool> '<json input>'` (exit 1 means the tool returned an error).
    For production in Chrome, the site needs an origin-trial token in a `<meta http-equiv="origin-trial">` tag.
-3. **Scan the live site.** Once deployed, `https://webmcpx.dev/?scan=<site>` (or `GET https://webmcpx.dev/api/scan?url=<site>` for JSON) should say agent-ready.
+3. **Call them like any agent would.** With MCP: `npx -y webmcpx mcp` gives the agent each page's
+   tools (its own Chromium, polyfill first). Driving a browser yourself (Playwright, Selenium, Puppeteer,
+   CDP; Chrome, Firefox, Safari): in the page, `const mc = document.modelContext; const t = (await
+   mc.getTools()).find((t) => t.name === "search_page"); JSON.parse(JSON.parse(await mc.executeTool(t,
+   { query: "pricing" })))`. `executeTool()` resolves with JSON text and webmcpx tools return their
+   envelope as JSON text, so parse twice; a tool returning an object needs one parse.
+4. **Scan the live site.** Once deployed, `https://webmcpx.dev/?scan=<site>` (or `GET https://webmcpx.dev/api/scan?url=<site>` for JSON) should say agent-ready.

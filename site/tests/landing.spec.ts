@@ -542,8 +542,11 @@ test('step 1 opens on your coding agent; step 2 is one prompt', async ({ page })
 	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
 	await expect(fix.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
 	await expect(fix.getByRole('tablist')).toHaveCount(1);
-	const prompt = fix.getByRole('figure').filter({ hasText: 'webmcpx MCP server' });
+	const prompt = fix.getByRole('figure').filter({ hasText: 'prove it works: open https://webmcpx.dev' });
 	await expect(prompt.getByRole('button', { name: /Copy/ })).toBeVisible();
+	// Both ways an agent can take, by name.
+	await expect(fix.getByRole('definition').filter({ hasText: 'npx -y webmcpx mcp' })).toBeVisible();
+	await expect(fix.getByRole('definition').filter({ hasText: 'document.modelContext' })).toBeVisible();
 });
 
 test('the verdicts page explains each stamp and is linked from every scan result and the footer', async ({

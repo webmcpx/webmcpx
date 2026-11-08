@@ -435,16 +435,29 @@ const en = {
 		lead: 'Step 1 puts tools on your site. Step 2 lets your agent call them.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
-		facts: '~2.4 KB on load · Rust + WebAssembly · MIT license',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: '~2.7 KB on load · Rust + WebAssembly · MIT license',
+		// {tag} is `</body>`, {cmd} and {api} are code and {docs} a link: keep them. Product and library
+		// names (ChatGPT, Codex, Claude Code, Cursor, Playwright, Selenium, Puppeteer, browser-use, CDP,
+		// Chrome, Chromium, Firefox, Safari) stay as they are.
 		steps: {
 			site: {
 				title: 'On your site',
-				lead: 'Paste it before {tag}. Where WebMCP is missing, it does nothing.'
+				lead: 'Paste it before {tag}. In browsers without WebMCP, it adds the W3C polyfill.'
 			},
 			agent: {
-				title: 'In your agent',
-				lead: 'Your agent gets the WebMCP tools of every page it opens, in any Chromium and with no browser flag: the W3C polyfill loads before the page.',
+				// Three short beats, max 45.
+				title: 'Any agent. Any browser. Any automation.',
+				lead: 'One prompt: your agent sets itself up, then proves it on webmcpx.dev.',
+				ways: {
+					mcp: {
+						label: 'Agents with MCP',
+						text: 'Claude Code, Codex, Cursor: add {cmd}. It opens pages in its own Chromium, no flag.'
+					},
+					browser: {
+						label: 'Agents that drive a browser',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: call {api} in the page. Every site with step 1 has it.'
+					}
+				},
 				skip: 'Using the ChatGPT desktop app or the Codex app? Skip this step: they call WebMCP tools natively ({docs}).'
 			}
 		},

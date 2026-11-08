@@ -336,13 +336,25 @@ const de: Messages = {
 		title: 'Zwei Schritte. Agentenfähig.',
 		lead: 'Schritt 1 bringt Tools auf deine Website. Schritt 2 lässt deinen Agenten sie aufrufen.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
-		facts: '~2,4 KB geladen · Rust + WebAssembly · MIT-Lizenz',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: '~2,7 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		steps: {
-			site: { title: 'Auf deiner Website', lead: 'Vor {tag} einfügen. Wo WebMCP fehlt, tut es nichts.' },
+			site: {
+				title: 'Auf deiner Website',
+				lead: 'Vor {tag} einfügen. In Browsern ohne WebMCP ergänzt es das W3C-Polyfill.'
+			},
 			agent: {
-				title: 'In deinem Agenten',
-				lead: 'Dein Agent bekommt die WebMCP-Tools jeder Seite, die er öffnet, in jedem Chromium und ohne Browser-Flag: Das W3C-Polyfill lädt vor der Seite.',
+				title: 'Jeder Agent. Jeder Browser. Jede Automation.',
+				lead: 'Ein Prompt: Dein Agent richtet sich selbst ein und beweist es auf webmcpx.dev.',
+				ways: {
+					mcp: {
+						label: 'Agenten mit MCP',
+						text: 'Claude Code, Codex, Cursor: {cmd} hinzufügen. Er öffnet Seiten in seinem eigenen Chromium, ohne Flag.'
+					},
+					browser: {
+						label: 'Agenten, die einen Browser steuern',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: {api} in der Seite aufrufen. Jede Website mit Schritt 1 hat es.'
+					}
+				},
 				skip: 'Du nutzt die ChatGPT-Desktop-App oder die Codex-App? Überspring diesen Schritt: Sie rufen WebMCP-Tools nativ auf ({docs}).'
 			}
 		},

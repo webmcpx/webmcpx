@@ -1,6 +1,7 @@
 <!--
-	The fix, in two steps: 1. on your site (tabs: script tag, npm, coding agent), 2. in your agent
-	(skipped by agents with WebMCP built in; tabs, one per client, then your coding agent).  Tabs list the most used first; the first one opens.
+	The fix, in two steps: 1. on your site (tabs: coding agent, script tag, npm; the first one opens),
+	2. in your agent: one prompt, the two ways it can take (an MCP client, or document.modelContext from
+	any browser automation), and the note for agents with WebMCP built in.
 -->
 <script lang="ts">
 	import Bot from '@lucide/svelte/icons/bot';
@@ -39,7 +40,17 @@
 		},
 		{ id: 'npm', label: 'npm', icon: siNpm, snippet: code.npmUsage, title: 'app.js' }
 	]);
+
+	// Step 2's two ways: an MCP client, or any browser automation calling the page's WebMCP itself.
+	const ways = $derived([
+		{ way: m.steps.agent.ways.mcp, inline: 'npx -y webmcpx mcp' },
+		{ way: m.steps.agent.ways.browser, inline: 'document.modelContext' }
+	]);
 </script>
+
+<!-- Code inside a sentence: breaks inside a word only when it cannot fit a line (code always wraps). -->
+{#snippet inlineCode(text: string)}<code class="font-mono text-xs wrap-break-word text-ink">{text}</code
+	>{/snippet}
 
 <Section id="fix" title={m.title} lead={m.lead} center>
 	<ol class="mx-auto grid max-w-3xl gap-6 text-left">
@@ -56,8 +67,22 @@
 					{#if n === 1}
 						<div class="mt-4"><CodeTabs label={step.title} tabs={install} /></div>
 					{:else}
-						<p class="mt-2 text-sm text-pretty text-ink-2">{m.steps.agent.lead}</p>
-						<p class="mt-3 mb-4 rounded-xl bg-paper-2 px-3.5 py-2.5 text-sm text-pretty text-ink">
+						<p class="mt-2 mb-4 text-sm text-pretty text-ink-2">{m.steps.agent.lead}</p>
+						<CodeBlock snippet={code.mcpPrompt} title="prompt" />
+						<dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+							{#each ways as { way, inline } (inline)}
+								<div class="rounded-xl bg-paper px-3.5 py-2.5">
+									<dt class="font-display font-bold">{way.label}</dt>
+									<dd class="mt-1 text-pretty text-ink-2">
+										<Rich text={way.text}>
+											{#snippet cmd()}{@render inlineCode(inline)}{/snippet}
+											{#snippet api()}{@render inlineCode(inline)}{/snippet}
+										</Rich>
+									</dd>
+								</div>
+							{/each}
+						</dl>
+						<p class="mt-4 rounded-xl bg-paper-2 px-3.5 py-2.5 text-sm text-pretty text-ink">
 							<Rich text={m.steps.agent.skip}
 								>{#snippet docs()}<a
 										class="font-medium underline decoration-marker decoration-2 underline-offset-4"
@@ -65,7 +90,6 @@
 									>{/snippet}</Rich
 							>
 						</p>
-						<CodeBlock snippet={code.mcpPrompt} title="prompt" />
 					{/if}
 				</Reveal>
 			</li>

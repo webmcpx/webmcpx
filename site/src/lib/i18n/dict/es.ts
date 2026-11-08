@@ -334,13 +334,25 @@ const es: Messages = {
 		title: 'Dos pasos. Listo para agentes.',
 		lead: 'El paso 1 pone herramientas en tu sitio. El paso 2 deja que tu agente las llame.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
-		facts: '~2,4 KB al cargar · Rust + WebAssembly · MIT',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: '~2,7 KB al cargar · Rust + WebAssembly · MIT',
 		steps: {
-			site: { title: 'En tu sitio', lead: 'Pégalo antes de {tag}. Donde no hay WebMCP, no hace nada.' },
+			site: {
+				title: 'En tu sitio',
+				lead: 'Pégalo antes de {tag}. En navegadores sin WebMCP, añade el polyfill del W3C.'
+			},
 			agent: {
-				title: 'En tu agente',
-				lead: 'Tu agente recibe las herramientas WebMCP de cada página que abre, en cualquier Chromium y sin flags en el navegador: el polyfill del W3C carga antes que la página.',
+				title: 'Cualquier agente, navegador o automatización.',
+				lead: 'Un prompt: tu agente se configura solo y lo demuestra en webmcpx.dev.',
+				ways: {
+					mcp: {
+						label: 'Agentes con MCP',
+						text: 'Claude Code, Codex, Cursor: añade {cmd}. Abre las páginas en su propio Chromium, sin flags.'
+					},
+					browser: {
+						label: 'Agentes que controlan un navegador',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: llama a {api} en la página. Todo sitio con el paso 1 lo tiene.'
+					}
+				},
 				skip: '¿Usas la app de escritorio de ChatGPT o la app de Codex? Sáltate este paso: llaman a herramientas WebMCP de forma nativa ({docs}).'
 			}
 		},

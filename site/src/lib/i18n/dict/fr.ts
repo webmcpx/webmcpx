@@ -337,13 +337,25 @@ const fr: Messages = {
 		title: 'Deux étapes. Prêt pour les agents.',
 		lead: 'L’étape 1 met des outils sur votre site. L’étape 2 permet à votre agent de les appeler.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
-		facts: '~2,4 Ko chargés · Rust + WebAssembly · licence MIT',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: '~2,7 Ko chargés · Rust + WebAssembly · licence MIT',
 		steps: {
-			site: { title: 'Sur votre site', lead: 'Collez-le avant {tag}. Là où WebMCP manque, il ne fait rien.' },
+			site: {
+				title: 'Sur votre site',
+				lead: 'Collez-le avant {tag}. Dans les navigateurs sans WebMCP, il ajoute le polyfill du W3C.'
+			},
 			agent: {
-				title: 'Dans votre agent',
-				lead: 'Votre agent reçoit les outils WebMCP de chaque page qu’il ouvre, dans n’importe quel Chromium et sans flag : le polyfill du W3C se charge avant la page.',
+				title: 'Tout agent. Tout navigateur. Toute automatisation.',
+				lead: 'Un prompt : votre agent se configure seul, puis le prouve sur webmcpx.dev.',
+				ways: {
+					mcp: {
+						label: 'Agents avec MCP',
+						text: 'Claude Code, Codex, Cursor : ajoutez {cmd}. Il ouvre les pages dans son propre Chromium, sans flag.'
+					},
+					browser: {
+						label: 'Agents qui pilotent un navigateur',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP ; Chrome, Firefox, Safari : appelez {api} dans la page. Tout site doté de l’étape 1 l’expose.'
+					}
+				},
 				skip: 'Vous utilisez l’app de bureau ChatGPT ou l’app Codex ? Sautez cette étape : elles appellent les outils WebMCP nativement ({docs}).'
 			}
 		},

@@ -26,14 +26,16 @@ export const SNIPPETS = {
 	npmUsage: {
 		lang: 'js',
 		code: `// npm i webmcpx
+import "webmcpx/polyfill"; // WebMCP where the browser lacks it
 import { register } from "webmcpx";
 
 register(); // the standard tools; tool() adds your own`
 	},
-	// Step 2 for any coding agent: it adds the MCP server to its own config.
+	// Step 2 for any agent: llms.txt gives it both ways (MCP, or document.modelContext from its own
+	// browser automation); it proves the setup on this site, which runs the loader itself.
 	mcpPrompt: {
 		lang: 'text',
-		code: 'Add the webmcpx MCP server to your MCP config (command: `npx`, args: `["-y", "webmcpx", "mcp"]`), so you can call the WebMCP tools of any page you open.'
+		code: 'Set up WebMCP for yourself with webmcpx (read https://webmcpx.dev/llms.txt), whatever browser or automation you use. Then prove it works: open https://webmcpx.dev, list its WebMCP tools and call one.'
 	},
 	reproduce: reproduceFor('gpt-6-luna')
 } satisfies Record<string, CodeSample>;

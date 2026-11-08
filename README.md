@@ -25,21 +25,41 @@ real tools on your pages instead of reading and clicking their way through.
 
 Your page now registers `search_page`, `fetch_as_markdown` and `get_page_context` with
 [WebMCP](https://webmachinelearning.github.io/webmcp/) (`document.modelContext.registerTool()`), so an agent
-in the browser calls a function instead of guessing at buttons. Where WebMCP is missing, the script does
-nothing.
+in the browser calls a function instead of guessing at buttons. Where the browser lacks WebMCP (Firefox,
+Safari, Chrome without the flag), the script first adds the
+[W3C WebMCP polyfill](https://github.com/w3c-oss/webmcp-polyfill), a separate ~5 KB file fetched only there.
 
-**Step 2, in your agent.** Give your agent the WebMCP tools of every page it opens (the ChatGPT desktop
-app and the Codex app skip this step: they call WebMCP tools natively):
+**Step 2, in your agent. Any agent, any browser, any automation.** Paste this into your agent:
 
-```sh
-claude mcp add webmcpx -- npx -y webmcpx mcp     # Codex: codex mcp add webmcpx -- npx -y webmcpx mcp
+```text
+Set up WebMCP for yourself with webmcpx (read https://webmcpx.dev/llms.txt), whatever browser or automation you use. Then prove it works: open https://webmcpx.dev, list its WebMCP tools and call one.
 ```
 
-Ask it about any site. No browser flag: the agent's browser gets the
-[W3C WebMCP polyfill](https://github.com/w3c-oss/webmcp-polyfill) before the page loads, so the site's own
-tools work (try a Shopify store), and every page gets the standard ones. Check yours, localhost included:
-`npx webmcpx tools localhost:3000`. The ChatGPT desktop app's browser and Codex also
-[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp) natively.
+It takes one of two ways:
+
+- **Agents with MCP** (Claude Code, Codex, Cursor...) add the MCP server. It opens pages in its own
+  Chromium with the W3C polyfill loaded before the page, no browser flag, so the site's own tools work too
+  (try a Shopify store), and every page gets the standard ones:
+
+  ```sh
+  claude mcp add webmcpx -- npx -y webmcpx mcp     # Codex: codex mcp add webmcpx -- npx -y webmcpx mcp
+  ```
+
+- **Agents that drive their own browser** (Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome,
+  Firefox, Safari) call `document.modelContext` in the page, which every site with step 1 has:
+
+  ```js
+  const mc = document.modelContext;
+  const tool = (await mc.getTools()).find((t) => t.name === "search_page");
+  const envelope = JSON.parse(JSON.parse(await mc.executeTool(tool, { query: "pricing" })));
+  ```
+
+  (`executeTool()` resolves with JSON text, and webmcpx tools return their envelope as JSON text: parse
+  twice.) Tested in Chromium, Firefox and WebKit on every CI run (`site/tests/engines.spec.ts`).
+
+The ChatGPT desktop app and the Codex app skip this step: they
+[call WebMCP tools](https://learn.chatgpt.com/docs/webmcp) natively. Check your own site, localhost
+included: `npx webmcpx tools localhost:3000`.
 
 ## Your own tools
 
@@ -78,7 +98,7 @@ registers it while the component is mounted. Then see it, no browser flag: `npx 
 
 | | |
 |---|---|
-| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped. About 2.4 KB on load. |
+| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped; the W3C polyfill where the browser lacks WebMCP. About 2.7 KB on load. |
 | **[Agent bridge](packages/webmcpx/agent)** · `npx webmcpx mcp` | An MCP server for Claude Code, Codex, Cursor and others: it opens pages in a local Chromium and hands the agent their WebMCP tools as typed tools. Also `npx webmcpx tools <url>` to check yours. |
 | **[Linter](crates/webmcpx)** · [crates.io](https://crates.io/crates/webmcpx) | `webmcpx lint` checks your own `registerTool()` calls. It catches the silent failures: too many tools, the removed `provideContext`, the legacy `navigator.modelContext`, hidden characters. |
 | **[Scanner](https://webmcpx.dev)** | Paste a URL: which tools a site registers, what the linter thinks, what an agent would read instead. Shareable result, README badge. |

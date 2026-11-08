@@ -13,7 +13,8 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 ## Page narrative (keep this order; cut before adding)
 
 Scan your site (hero) → sites already on WebMCP (logos, each one scans live) → the fix (install tabs:
-HTML, npm, coding agent; "see it work" with the MCP setup per client) → your own tools (`tool()`, forms,
+coding agent, HTML, npm; step 2: one prompt, then the two ways: MCP, or `document.modelContext` from any
+browser automation) → your own tools (`tool()`, forms,
 React/Vue/Svelte as tabs) → why WebMCP (four pains it removes, each backed by the draft or the benchmark;
 the saving is computed) → proof (pick a site by logo; biggest savings first) → WebMCP vs MCP → what the
 community asked for → the footer (giant lockup, every link with its icon, notices).

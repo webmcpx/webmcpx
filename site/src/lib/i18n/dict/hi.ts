@@ -332,16 +332,25 @@ const hi: Messages = {
 		title: 'दो कदम। एजेंट-रेडी।',
 		lead: 'कदम 1 आपकी साइट पर टूल लाता है। कदम 2 आपके एजेंट को उन्हें कॉल करने देता है।',
 		alternatives: { npm: 'npm', agent: 'एजेंट' },
-		facts: 'लोड पर ~2.4 KB · Rust + WebAssembly · MIT लाइसेंस',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: 'लोड पर ~2.7 KB · Rust + WebAssembly · MIT लाइसेंस',
 		steps: {
 			site: {
 				title: 'आपकी साइट पर',
-				lead: 'इसे {tag} से पहले पेस्ट करें। जहाँ WebMCP नहीं है, वहाँ यह कुछ नहीं करता।'
+				lead: 'इसे {tag} से पहले पेस्ट करें। जिन ब्राउज़र में WebMCP नहीं है, उनमें यह W3C पॉलीफ़िल जोड़ देता है।'
 			},
 			agent: {
-				title: 'आपके एजेंट में',
-				lead: 'आपके एजेंट को हर खुलने वाले पेज के WebMCP टूल मिलते हैं, किसी भी Chromium में और बिना ब्राउज़र फ़्लैग के: W3C पॉलीफ़िल पेज से पहले लोड होता है।',
+				title: 'कोई भी एजेंट। कोई भी ब्राउज़र। कोई भी ऑटोमेशन।',
+				lead: 'एक प्रॉम्प्ट: आपका एजेंट खुद को सेट करता है, फिर webmcpx.dev पर साबित करता है।',
+				ways: {
+					mcp: {
+						label: 'MCP वाले एजेंट',
+						text: 'Claude Code, Codex, Cursor: {cmd} जोड़ें। यह पेज अपने Chromium में खोलता है, बिना फ़्लैग के।'
+					},
+					browser: {
+						label: 'ब्राउज़र चलाने वाले एजेंट',
+						text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: पेज में {api} कॉल करें। कदम 1 वाली हर साइट पर यह मिलता है।'
+					}
+				},
 				skip: 'ChatGPT डेस्कटॉप ऐप या Codex ऐप इस्तेमाल करते हैं? यह कदम छोड़ दें: वे WebMCP टूल नेटिव रूप से कॉल करते हैं ({docs})।'
 			}
 		},

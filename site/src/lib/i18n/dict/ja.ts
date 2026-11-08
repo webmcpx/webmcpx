@@ -323,13 +323,25 @@ const ja: Messages = {
 		title: '2 ステップで、エージェント対応。',
 		lead: 'ステップ 1 でサイトにツールを置き、ステップ 2 でエージェントがそれを呼べるようにします。',
 		alternatives: { npm: 'npm を使う場合', agent: 'エージェント' },
-		facts: '読込時 ~2.4 KB · Rust + WebAssembly · MIT License',
-		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
+		facts: '読込時 ~2.7 KB · Rust + WebAssembly · MIT License',
 		steps: {
-			site: { title: 'サイト側', lead: '{tag} の前に貼るだけ。WebMCP がない環境では何もしません。' },
+			site: {
+				title: 'サイト側',
+				lead: '{tag} の前に貼るだけ。WebMCP のないブラウザには W3C のポリフィルを追加します。'
+			},
 			agent: {
-				title: 'エージェント側',
-				lead: 'エージェントは開いたページすべての WebMCP ツールを使えます。どの Chromium でもフラグ不要：ページより先に W3C のポリフィルが読み込まれます。',
+				title: 'どのエージェントでも。どのブラウザでも。どの自動化でも。',
+				lead: 'プロンプトはひとつ。エージェントが自分でセットアップし、webmcpx.dev で動作を確かめます。',
+				ways: {
+					mcp: {
+						label: 'MCP 対応エージェント',
+						text: 'Claude Code、Codex、Cursor：{cmd} を追加。専用の Chromium でページを開くので、フラグは不要です。'
+					},
+					browser: {
+						label: 'ブラウザを自分で操作するエージェント',
+						text: 'Playwright、Selenium、Puppeteer、browser-use、CDP。Chrome、Firefox、Safari：ページ内で {api} を呼ぶだけ。ステップ 1 を済ませたサイトならどこでも使えます。'
+					}
+				},
 				skip: 'ChatGPT デスクトップアプリや Codex アプリなら、このステップは不要です。WebMCP ツールをネイティブに呼び出します（{docs}）。'
 			}
 		},

@@ -13,7 +13,9 @@
 - `crates/webmcpx-std` — standard tool contracts (`tools.rs`) + pure `&str -> envelope JSON` implementations. `no_std`.
 - `crates/webmcpx-wasm` — `#[wasm_bindgen]` exports of webmcpx-std. See its AGENTS.md.
 - `crates/webmcpx-lint` — rules, one file each in `src/rules/`. `crates/webmcpx` — the CLI.
-- `packages/webmcpx` — npm loader: the public browser API. Owns the DOM and `registerTool()`.
+- `packages/webmcpx` — npm loader: the public browser API. Owns the DOM and `registerTool()`. Where a page
+  has no WebMCP, the drop-in (`auto.js`) lazily loads `polyfill.js` (`@w3c/webmcp-polyfill`; npm: opt-in
+  `import "webmcpx/polyfill"`); `site/tests/engines.spec.ts` proves it in Chromium, Firefox and WebKit.
   `agent/` + `bin/` are the Node side (`npx webmcpx mcp|tools|call`): a CDP-driven Chromium that injects
   `@w3c/webmcp-polyfill` before page scripts and talks to tools only via the spec's `getTools()`/`executeTool()`.
   Never ship removed APIs (`provideContext`, `navigator.modelContext`) there.
