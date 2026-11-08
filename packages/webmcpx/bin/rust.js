@@ -2,7 +2,7 @@
 // Node, so `npx webmcpx lint` works anywhere Node does: no Rust toolchain, one file for every OS. Output,
 // --fix and exit codes (0 clean, 1 lint errors, 2 usage or I/O) are the native CLI's own.
 import { readFile } from "node:fs/promises";
-import { isAbsolute, parse, sep } from "node:path";
+import path from "node:path";
 
 /** Commands the Rust CLI answers. */
 export const RUST_COMMANDS = new Set(["lint", "rules", "rule", "explain"]);
@@ -18,18 +18,36 @@ export async function runRust(args) {
     console.error("This copy of webmcpx has no linter build (wasm/webmcpx_cli.wasm). In the repository, run `just wasm`.");
     return 2;
   }
-  // The CLI gets the file system at "/" and starts in the working directory (PWD), so relative, "../" and
-  // absolute paths mean what they mean to the native CLI, with the same access.
-  const root = parse(process.cwd()).root;
-  const env = { ...process.env, PWD: toPosix(process.cwd()) };
+  const mapped = mapArgs(args, process.cwd());
+  if (mapped.error) {
+    console.error(`error: ${mapped.error} (INVALID_INPUT)\nhint: Run webmcpx from that drive, or pass a path on this one.`);
+    return 2;
+  }
   const { WASI } = await quietly(() => import("node:wasi"));
-  const wasi = new WASI({ version: "preview1", args: ["webmcpx", ...args.map((a) => (isAbsolute(a) ? toPosix(a) : a))], env, preopens: { "/": root }, returnOnExit: true });
+  const wasi = new WASI({ version: "preview1", args: ["webmcpx", ...mapped.args], env: { ...process.env, PWD: mapped.pwd }, preopens: { "/": mapped.root }, returnOnExit: true });
   const instance = await WebAssembly.instantiate(await WebAssembly.compile(bytes), wasi.getImportObject());
   return wasi.start(instance);
 }
 
-/** A host path as the CLI sees it under "/" (on Windows, `C:\\a\\b` is `/a/b` on that drive). */
-const toPosix = (path) => "/" + path.slice(parse(path).root.length).split(sep).filter(Boolean).join("/");
+/**
+ * The CLI's view of the host: the file system root of the working directory's drive mapped at "/", the working
+ * directory as PWD, and absolute path arguments rewritten under "/". Relative, "../" and absolute paths then
+ * mean what they mean natively, with the same access. A path on another root (on Windows, another drive or a
+ * UNC share; also a drive-relative `D:src`) would land on the wrong file, so it is refused instead.
+ * `p` is node:path (tests pass path.win32).
+ */
+export function mapArgs(args, cwd, p = path) {
+  const root = p.parse(cwd).root;
+  const same = (r) => (p.sep === "\\" ? r.toLowerCase() === root.toLowerCase() : r === root);
+  const posix = (abs) => "/" + abs.slice(p.parse(abs).root.length).split(p.sep).filter(Boolean).join("/");
+  const out = [];
+  for (const arg of args) {
+    const argRoot = p.parse(arg).root;
+    if (argRoot && !same(argRoot)) return { error: `${arg} is not on the same drive as the working directory (${root})` };
+    out.push(p.isAbsolute(arg) ? posix(arg) : arg);
+  }
+  return { args: out, root, pwd: posix(cwd) };
+}
 
 /** Node flags node:wasi as experimental on every run; users of the linter don't need that line. */
 async function quietly(load) {

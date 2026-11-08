@@ -57,3 +57,18 @@ test("usage and I/O failures exit 2; rules, rule and explain answer", () => {
   assert.match(execFileSync(process.execPath, [BIN, "rule", "invalid-name"], { encoding: "utf8" }), /invalid-name \(error\)/);
   assert.match(execFileSync(process.execPath, [BIN, "explain", "RATE_LIMITED"], { encoding: "utf8" }), /RATE_LIMITED/);
 });
+
+test("Windows: a path on another drive or share is refused, never mapped onto this drive", async () => {
+  const { win32 } = await import("node:path");
+  const { mapArgs } = await import("../bin/rust.js");
+  const cwd = "C:\\repo";
+  assert.deepEqual(mapArgs(["lint", "C:\\repo\\src", "src", "..\\x"], cwd, win32), {
+    args: ["lint", "/repo/src", "src", "..\\x"],
+    root: "C:\\",
+    pwd: "/repo"
+  });
+  assert.equal(mapArgs(["lint", "c:\\Repo\\a.js"], cwd, win32).args[1], "/Repo/a.js", "drive letters ignore case");
+  for (const other of ["D:\\repo\\src\\tools.js", "D:src", "\\\\server\\share\\a.js"]) {
+    assert.match(mapArgs(["lint", other, "--fix"], cwd, win32).error, /not on the same drive/, other);
+  }
+});
