@@ -3,22 +3,16 @@
 // made (the full traces stay out of the page). Every published model is kept, even one with no question in
 // the showcase: the selection is of questions, never of models.
 import snapshot from '#lib/content/tools.json';
-import { MODELS } from '#lib/content/models.ts';
-import { parse, type ModelRun } from '#lib/features/benchmark/bench.ts';
+import { leaderboard, parse, type ModelRun } from '#lib/features/benchmark/bench.ts';
 import { bySite, showcase } from '#lib/features/benchmark/sites.ts';
 import { toolsFor } from '#lib/features/benchmark/tools.ts';
 
 const FILES = import.meta.glob<unknown>('../content/bench/*.json', { eager: true, import: 'default' });
 
-/** Known models in switcher order, then any other published run by id. */
-const rank = (id: string) => {
-	const i = MODELS.findIndex((m) => m.id === id);
-	return i < 0 ? MODELS.length : i;
-};
-
+/** Every published run, in leaderboard order (best first). */
 export function loadRuns(): ModelRun[] {
-	return Object.values(FILES)
-		.map((data) => {
+	return leaderboard(
+		Object.values(FILES).map((data) => {
 			const full = parse(data);
 			const results = { ...full, runs: [] };
 			return {
@@ -29,8 +23,5 @@ export function loadRuns(): ModelRun[] {
 				totalQuestions: Object.keys(results.summary.tasks).length
 			};
 		})
-		.sort(
-			(a, b) =>
-				rank(a.results.model) - rank(b.results.model) || a.results.model.localeCompare(b.results.model)
-		);
+	);
 }

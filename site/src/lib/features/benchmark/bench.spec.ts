@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+	leaderboard,
 	compare,
 	headline,
 	losses,
@@ -100,5 +101,22 @@ describe('rows and losses', () => {
 		expect(losses(r, 'tokens')).toEqual(['tiny']);
 		expect(losses(r, 'duration_ms')).toEqual([]);
 		expect(losses(r, 'cost_usd')).toEqual(['tiny']);
+	});
+});
+
+describe('leaderboard', () => {
+	const run = (model: string, success_rate: number, cost_usd: number | null) =>
+		({
+			results: { model, summary: { arms: { webmcp: { success_rate, cost_usd } } } }
+		}) as unknown as Parameters<typeof leaderboard>[0][number];
+	it('ranks by success with WebMCP, then by lower cost, then by id', () => {
+		const order = leaderboard([
+			run('b', 1, 0.02),
+			run('a', 1, 0.02),
+			run('c', 0.9, 0.001),
+			run('d', 1, 0.01),
+			run('e', 1, null)
+		]);
+		expect(order.map((r) => r.results.model)).toEqual(['d', 'a', 'b', 'e', 'c']);
 	});
 });

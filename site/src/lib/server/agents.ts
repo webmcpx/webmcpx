@@ -29,8 +29,9 @@ function benchmarkLines(model?: string): string[] {
 		a ? `${tok(a.tokens)} tokens, ${pct(a.success_rate)} solved` : 'not run';
 	return loadRuns()
 		.filter(({ results }) => !model || results.model === model)
-		.flatMap(({ results }) => [
-			`### ${results.model} (reasoning ${results.reasoning_effort ?? 'default'})`,
+		.flatMap(({ results }, i) => [
+			// On the leaderboard (every model), each one with its place.
+			`### ${model ? '' : `${i + 1}. `}${results.model} (reasoning ${results.reasoning_effort ?? 'default'})`,
 			'',
 			...bySite(results).flatMap((site) => [
 				`- ${site.name}`,
@@ -82,7 +83,7 @@ ${OWN_TOOLS}
 
 ## Docs
 
-- [This page as Markdown](${ORIGIN}/index.md): what webmcpx is, why, the benchmark, WebMCP vs MCP.
+- [This page as Markdown](${ORIGIN}/index.md): what webmcpx is, why, the leaderboard, WebMCP vs MCP.
 - [README](${REPO}#readme): tools, result shape, linter rules.
 - [Agent skill](${REPO}/blob/main/skills/webmcpx/SKILL.md): step-by-step for coding agents.
 - [Scan API](${ORIGIN}/api/scan?url=https://webmcpx.dev): ${SCAN_API}
@@ -141,7 +142,7 @@ ${reasons}
 
 ${m.why.status}
 
-## Benchmark (same agent, same question, with and without WebMCP)
+## Leaderboard (same agent, same question, with and without WebMCP; ranked by success with WebMCP, then cost per run)
 
 ${benchmarkLines().join('\n')}
 

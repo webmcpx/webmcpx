@@ -92,6 +92,21 @@ export function parse(data: unknown): Results {
 	return data as Results;
 }
 
+/**
+ * The leaderboard order, as agent leaderboards rank (HAL, Aider): task success with WebMCP first, then
+ * the lower cost per run (a run without a recorded cost ranks after those with one), then the id.
+ */
+export function leaderboard<T extends { results: Results }>(runs: T[]): T[] {
+	// A run without a WebMCP arm ranks last.
+	const key = (r: T) => r.results.summary.arms.webmcp ?? { success_rate: -1, cost_usd: null };
+	return [...runs].sort(
+		(a, b) =>
+			key(b).success_rate - key(a).success_rate ||
+			(key(a).cost_usd ?? Infinity) - (key(b).cost_usd ?? Infinity) ||
+			a.results.model.localeCompare(b.results.model)
+	);
+}
+
 /** A per-task metric the chart can show. Every one is "lower is better". Its name and unit are in the
  * dictionary (`proof.metrics.<id>`). */
 export interface Metric {

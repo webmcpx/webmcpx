@@ -19,7 +19,7 @@
 
 <div class="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
 	<a
-		href="{i18n.href('/')}#proof"
+		href="{i18n.href('/')}#leaderboard"
 		class="inline-flex items-center gap-1.5 text-sm font-medium text-ink-2 hover:text-ink"
 	>
 		<ArrowLeft size={16} aria-hidden="true" />{i18n.m.benchmarkPage.back}

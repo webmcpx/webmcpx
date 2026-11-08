@@ -42,7 +42,7 @@ const id: Messages = {
 		language: 'Bahasa',
 		links: {
 			why: 'Mengapa',
-			proof: 'Benchmark',
+			proof: 'Peringkat',
 			vsMcp: 'vs MCP',
 			fix: 'Pasang',
 			issues: 'Masalah',
@@ -58,7 +58,7 @@ const id: Messages = {
 		links: {
 			scan: 'Scan situs Anda',
 			verdicts: 'Cara kerja verdik',
-			proof: 'Benchmark',
+			proof: 'Peringkat',
 			install: 'Pasang',
 			issues: 'Masalah yang diatasi',
 			brand: 'Merek dan desain',
@@ -155,14 +155,15 @@ const id: Messages = {
 	},
 
 	proof: {
-		kicker: 'Benchmark',
+		kicker: 'Peringkat',
 		title: 'Agent sama. Pertanyaan sama.',
 		lead: 'Satu agent membaca, mengeklik, dan mengisi lewat snapshot halaman; yang lain memanggil tool WebMCP milik situs. Pilih model; penghematan terbesar ditampilkan lebih dulu.',
 		byModel: 'Benchmark per model',
 		models: 'Model',
 		model: 'Model',
 		site: 'Situs',
-		tiers: { cheap: 'murah', frontier: 'frontier' },
+		rank: 'Peringkat {n}',
+		ranking: 'Diurutkan menurut keberhasilan dengan WebMCP, lalu biaya per eksekusi.',
 		modelHeading: '{name} ({provider})',
 		empty: {
 			title: 'Belum ada run yang dipublikasikan.',

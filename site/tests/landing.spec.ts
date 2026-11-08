@@ -46,7 +46,7 @@ test('no axe violations', async ({ page }) => {
 			await page.getByRole('button', { name: 'Scan it' }).first().click();
 			await expect(page.getByText('Agent-ready').first()).toBeVisible();
 			// Audit the tools table too.
-			await page.locator('#proof').getByRole('tab', { name: 'Tools' }).first().click();
+			await page.locator('#leaderboard').getByRole('tab', { name: 'Tools' }).first().click();
 		}
 		await scrollThrough(page);
 		const { violations } = await new AxeBuilder({ page })
@@ -166,8 +166,11 @@ test('an agent-ready site can pick one of four badge styles, inline or a README 
 test('the menu marks the section in view and opens on phones', async ({ page }) => {
 	await page.goto('/');
 	const menu = page.getByRole('navigation', { name: 'Main' });
-	await menu.getByRole('link', { name: 'Benchmark' }).first().click();
-	await expect(menu.getByRole('link', { name: 'Benchmark' }).first()).toHaveAttribute('aria-current', 'true');
+	await menu.getByRole('link', { name: 'Leaderboard' }).first().click();
+	await expect(menu.getByRole('link', { name: 'Leaderboard' }).first()).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
 	await menu.getByRole('link', { name: 'vs MCP' }).first().click();
 	await expect(menu.getByRole('link', { name: 'vs MCP' }).first()).toHaveAttribute('aria-current', 'true');
 	// One section marked at a time (the language switcher marks the current language separately).
@@ -203,9 +206,12 @@ test('the menu still marks sections after coming from another page', async ({ pa
 	await page.goto('/brand/');
 	await expect(page.locator('html[data-hydrated]')).toHaveCount(1);
 	const menu = page.getByRole('navigation', { name: 'Main' });
-	await menu.getByRole('link', { name: 'Benchmark' }).first().click();
-	await expect(page).toHaveURL(/\/#proof$/);
-	await expect(menu.getByRole('link', { name: 'Benchmark' }).first()).toHaveAttribute('aria-current', 'true');
+	await menu.getByRole('link', { name: 'Leaderboard' }).first().click();
+	await expect(page).toHaveURL(/\/#leaderboard$/);
+	await expect(menu.getByRole('link', { name: 'Leaderboard' }).first()).toHaveAttribute(
+		'aria-current',
+		'true'
+	);
 });
 
 test('scanning a site shows the verdict and its tools', async ({ page }) => {
@@ -250,7 +256,7 @@ test('logos scan their site, and shared links rerun a scan', async ({ page }) =>
 
 test('the detail tabs switch metrics and only show the selected site', async ({ page }) => {
 	await page.goto('/');
-	const proof = page.locator('#proof');
+	const proof = page.locator('#leaderboard');
 	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	const details = proof.getByRole('tablist', { name: 'Details for specification.website' });
 	await expect(details.getByRole('tab')).toHaveText(['Tokens', 'Time', 'Steps', 'Cost', 'Tools', 'Method']);
@@ -266,8 +272,8 @@ test('the detail tabs switch metrics and only show the selected site', async ({ 
 });
 
 test('the site filter shows each site and each question on its own, never averaged', async ({ page }) => {
-	await page.goto('/#proof');
-	const proof = page.locator('#proof');
+	await page.goto('/#leaderboard');
+	const proof = page.locator('#leaderboard');
 	const sites = proof.getByRole('tablist', { name: 'Site' });
 	// Sites are ordered by their biggest saving: Cloudflare first in this run.
 	await expect(sites.getByRole('tab').first()).toHaveAttribute('aria-selected', 'true');
@@ -282,8 +288,8 @@ test('the site filter shows each site and each question on its own, never averag
 });
 
 test('the model switcher shows each model on its own run', async ({ page }) => {
-	await page.goto('/#proof');
-	const proof = page.locator('#proof');
+	await page.goto('/#leaderboard');
+	const proof = page.locator('#leaderboard');
 	const models = proof.getByRole('tablist', { name: 'Model' }).getByRole('tab');
 	await expect(models.first()).toHaveAttribute('aria-selected', 'true');
 	await expect(models.first()).toContainText('GPT-6 Luna');
@@ -305,8 +311,8 @@ test('the model switcher shows each model on its own run', async ({ page }) => {
 
 test('a site with several questions rotates them, and the rotation can be paused', async ({ page }) => {
 	await page.clock.install();
-	await page.goto('/#proof');
-	const proof = page.locator('#proof');
+	await page.goto('/#leaderboard');
+	const proof = page.locator('#leaderboard');
 	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	const dots = proof.getByRole('button', { name: /^Question \d of 5$/ });
 	await expect(dots).toHaveCount(5);
@@ -348,8 +354,8 @@ test('a site with several questions rotates them, and the rotation can be paused
 test('no automatic rotation for people who prefer reduced motion', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await page.clock.install();
-	await page.goto('/#proof');
-	const proof = page.locator('#proof');
+	await page.goto('/#leaderboard');
+	const proof = page.locator('#leaderboard');
 	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(12000);
@@ -361,8 +367,8 @@ test('no automatic rotation for people who prefer reduced motion', async ({ page
 
 test('switching sites starts the question rotation over', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
-	await page.goto('/#proof');
-	const proof = page.locator('#proof');
+	await page.goto('/#leaderboard');
+	const proof = page.locator('#leaderboard');
 	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	await proof.getByRole('button', { name: 'Question 4 of 5' }).click();
 	await proof.getByRole('tab', { name: /Kiln/ }).click();
@@ -373,8 +379,8 @@ test('switching sites starts the question rotation over', async ({ page }) => {
 });
 
 test('the page says its benchmark shows selected cases and links to all results', async ({ page }) => {
-	await page.goto('/#proof');
-	const proof = page.locator('#proof');
+	await page.goto('/#leaderboard');
+	const proof = page.locator('#leaderboard');
 	await expect(proof.getByText(/Selected cases: \d+ of \d+ questions/)).toBeVisible();
 	// One model's run at a time: the others render when picked.
 	await expect(proof.getByText(/Selected cases:/)).toHaveCount(1);
@@ -387,17 +393,17 @@ test('the page says its benchmark shows selected cases and links to all results'
 });
 
 test('the Tools tab shows the site tools, their descriptions and what the agent called', async ({ page }) => {
-	await page.goto('/#proof');
+	await page.goto('/#leaderboard');
 	await page
-		.locator('#proof')
+		.locator('#leaderboard')
 		.getByRole('tab', { name: /Notion/ })
 		.click();
 	await page
-		.locator('#proof')
+		.locator('#leaderboard')
 		.getByRole('tablist', { name: 'Details for Notion' })
 		.getByRole('tab', { name: 'Tools' })
 		.click();
-	const tools = page.locator('#proof').getByRole('region', { name: 'WebMCP tools on Notion' });
+	const tools = page.locator('#leaderboard').getByRole('region', { name: 'WebMCP tools on Notion' });
 	await expect(tools.getByRole('heading', { name: /WebMCP tools Notion registers/ })).toBeVisible();
 	await expect(tools.locator('tbody tr')).toHaveCount(5);
 	await expect(tools.locator('tbody tr').first()).toContainText('search_docs');

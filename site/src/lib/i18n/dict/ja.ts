@@ -40,7 +40,7 @@ const ja: Messages = {
 		language: '言語',
 		links: {
 			why: 'メリット',
-			proof: '計測結果',
+			proof: 'リーダーボード',
 			vsMcp: 'MCP 比較',
 			fix: '導入',
 			issues: '課題',
@@ -56,7 +56,7 @@ const ja: Messages = {
 		links: {
 			scan: 'サイトをスキャン',
 			verdicts: '判定の仕組み',
-			proof: 'ベンチマーク',
+			proof: 'リーダーボード',
 			install: '導入方法',
 			issues: '解決する課題',
 			brand: 'ブランドとデザイン',
@@ -153,14 +153,15 @@ const ja: Messages = {
 	},
 
 	proof: {
-		kicker: 'ベンチマーク',
+		kicker: 'リーダーボード',
 		title: '同じエージェント。同じ質問。',
 		lead: '一方のエージェントはページのスナップショットを見ながら読み、クリックし、入力します。もう一方はサイトの WebMCP ツールを呼び出します。モデルを選んでください。削減効果の大きい順に並んでいます。',
 		byModel: 'モデル別のベンチマーク',
 		models: 'モデル',
 		model: 'モデル',
 		site: 'サイト',
-		tiers: { cheap: '低価格', frontier: '最先端' },
+		rank: '{n} 位',
+		ranking: 'WebMCP での成功率、同率なら 1 回あたりのコストで順位付け。',
 		modelHeading: '{name}（{provider}）',
 		empty: {
 			title: '公開済みの実行結果はまだありません。',

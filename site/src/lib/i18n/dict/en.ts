@@ -65,7 +65,7 @@ const en = {
 		// Nav labels: max 10 each, ideally one word. The desktop pill holds all six on one line at 1024 px.
 		links: {
 			why: 'Why',
-			proof: 'Benchmark',
+			proof: 'Leaderboard',
 			// "vs" = versus: the section comparing WebMCP with MCP.
 			vsMcp: 'vs MCP',
 			fix: 'Install',
@@ -86,7 +86,7 @@ const en = {
 		links: {
 			scan: 'Scan your site',
 			verdicts: 'How verdicts work',
-			proof: 'Benchmark',
+			proof: 'Leaderboard',
 			install: 'Install',
 			issues: 'Issues it solves',
 			brand: 'Brand and design',
@@ -210,7 +210,7 @@ const en = {
 
 	proof: {
 		// Kicker: max 20.
-		kicker: 'Benchmark',
+		kicker: 'Leaderboard',
 		// "Same X. Same Y.": a parallel phrase, keep it short and parallel.
 		title: 'Same agent. Same question.',
 		lead: "One agent reads, clicks and fills using page snapshots; the other calls the site's WebMCP tools. Pick a model; biggest savings first.",
@@ -222,8 +222,10 @@ const en = {
 		model: 'Model',
 		/** Names the site tabs. */
 		site: 'Site',
-		// Model tiers, next to the model name in its tab: max 9, small capitals.
-		tiers: { cheap: 'cheap', frontier: 'frontier' },
+		// The model's place on the leaderboard, read aloud on its badge.
+		rank: 'Rank {n}',
+		// Under the model tabs.
+		ranking: 'Ranked by success with WebMCP, then by cost per run.',
 		/** A heading for screen readers: the model and who makes it. */
 		modelHeading: '{name} ({provider})',
 		empty: {

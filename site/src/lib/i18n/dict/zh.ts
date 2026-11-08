@@ -42,7 +42,7 @@ const zh: Messages = {
 		language: '语言',
 		links: {
 			why: '为什么',
-			proof: '基准测试',
+			proof: '排行榜',
 			vsMcp: '对比 MCP',
 			fix: '安装',
 			issues: '社区诉求',
@@ -58,7 +58,7 @@ const zh: Messages = {
 		links: {
 			scan: '扫描你的网站',
 			verdicts: '判定规则',
-			proof: '基准测试',
+			proof: '排行榜',
 			install: '安装',
 			issues: '解决了哪些问题',
 			brand: '品牌与设计',
@@ -156,14 +156,15 @@ const zh: Messages = {
 	},
 
 	proof: {
-		kicker: '基准测试',
+		kicker: '排行榜',
 		title: '同一个智能体，同一个问题。',
 		lead: '一个智能体靠页面快照来读、点、填；另一个调用网站的 WebMCP 工具。选一个模型看看，节省最多的排在最前。',
 		byModel: '按模型查看基准测试',
 		models: '模型',
 		model: '模型',
 		site: '网站',
-		tiers: { cheap: '低价', frontier: '前沿' },
+		rank: '第 {n} 名',
+		ranking: '按使用 WebMCP 的成功率排序，相同时按每次运行成本排序。',
 		modelHeading: '{name}（{provider}）',
 		empty: {
 			title: '还没有发布任何运行结果。',

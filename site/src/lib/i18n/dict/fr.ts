@@ -42,7 +42,7 @@ const fr: Messages = {
 		language: 'Langue',
 		links: {
 			why: 'Pourquoi',
-			proof: 'Benchmark',
+			proof: 'Classement',
 			vsMcp: 'vs MCP',
 			fix: 'Installer',
 			issues: 'Issues',
@@ -58,7 +58,7 @@ const fr: Messages = {
 		links: {
 			scan: 'Scanner votre site',
 			verdicts: 'Comment fonctionnent les verdicts',
-			proof: 'Benchmark',
+			proof: 'Classement',
 			install: 'Installer',
 			issues: 'Issues résolues',
 			brand: 'Marque et design',
@@ -158,14 +158,15 @@ const fr: Messages = {
 	},
 
 	proof: {
-		kicker: 'Benchmark',
+		kicker: 'Classement',
 		title: 'Même agent. Même question.',
 		lead: 'Un agent lit, clique et remplit à partir de snapshots de la page ; l’autre appelle les outils WebMCP du site. Choisissez un modèle ; les plus fortes économies d’abord.',
 		byModel: 'Benchmark par modèle',
 		models: 'Modèles',
 		model: 'Modèle',
 		site: 'Site',
-		tiers: { cheap: 'éco', frontier: 'de pointe' },
+		rank: 'Rang {n}',
+		ranking: 'Classé par taux de réussite avec WebMCP, puis par coût par exécution.',
 		modelHeading: '{name} ({provider})',
 		empty: {
 			title: 'Aucune exécution publiée pour l’instant.',

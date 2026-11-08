@@ -54,7 +54,13 @@
 	const pages = $derived((published ?? runs.map((r) => r.results.model)).map(modelLook));
 
 	const models = $derived(
-		runs.map((run) => ({ ...run, ...modelLook(run.results.model), id: run.results.model, label: '' }))
+		runs.map((run, i) => ({
+			...run,
+			...modelLook(run.results.model),
+			id: run.results.model,
+			label: '',
+			rank: i + 1
+		}))
 	);
 	// Initial values only: the tabs own the state after that.
 	const initial = () => ({ model: runs[0]?.results.model, site: runs[0]?.sites[0]?.id });
@@ -148,7 +154,7 @@
 	{/if}
 {/snippet}
 
-<Section id="proof" kicker={m.kicker} title={m.title} lead={m.lead}>
+<Section id="leaderboard" kicker={m.kicker} title={m.title} lead={m.lead}>
 	{#if pages.length > 1}
 		<!-- Without JavaScript the switcher cannot switch: each model has its own prerendered page. -->
 		<nav aria-label={m.byModel} class="no-js-only mb-8">
@@ -172,15 +178,19 @@
 			bind:value={modelId}
 			label={m.model}
 			lazy
-			listClass="-mx-4 mb-8 gap-2 px-4 pt-1 pb-3 sm:mx-0 sm:flex-wrap sm:px-0"
+			listClass="-mx-4 mb-3 gap-2 px-4 pt-1 pb-3 sm:mx-0 sm:px-0"
 			tabClass="h-10 border-ink/0 px-3.5 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-card aria-selected:text-ink aria-selected:shadow-hard-sm [&_svg]:size-4"
 		>
 			{#snippet tab(model)}
+				<span
+					class="grid size-5 place-items-center rounded-full border border-ink bg-marker font-mono text-[10px] font-bold text-ink"
+					aria-label={fmt(m.rank, { n: model.rank })}>{model.rank}</span
+				>
 				{#if model.logo}<SiteLogo logo={model.logo} size={16} />{/if}
 				{model.name}
-				<span class="font-mono text-[10px] tracking-wider text-ink-3 uppercase">{m.tiers[model.tier]}</span>
 			{/snippet}
 			{#snippet panel(model)}
+				<p class="-mt-1 mb-8 text-xs text-ink-3">{m.ranking}</p>
 				<h3 class="sr-only">
 					{model.provider ? fmt(m.modelHeading, { name: model.name, provider: model.provider }) : model.name}
 				</h3>

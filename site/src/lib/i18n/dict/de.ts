@@ -41,7 +41,7 @@ const de: Messages = {
 		language: 'Sprache',
 		links: {
 			why: 'Warum',
-			proof: 'Benchmark',
+			proof: 'Rangliste',
 			vsMcp: 'vs. MCP',
 			fix: 'Einbinden',
 			issues: 'Issues',
@@ -57,7 +57,7 @@ const de: Messages = {
 		links: {
 			scan: 'Website scannen',
 			verdicts: 'So entstehen die Urteile',
-			proof: 'Benchmark',
+			proof: 'Rangliste',
 			install: 'Installation',
 			issues: 'Gelöste Issues',
 			brand: 'Marke und Design',
@@ -157,14 +157,15 @@ const de: Messages = {
 	},
 
 	proof: {
-		kicker: 'Benchmark',
+		kicker: 'Rangliste',
 		title: 'Gleicher Agent. Gleiche Frage.',
 		lead: 'Ein Agent liest, klickt und füllt Formulare anhand von Seiten-Snapshots aus; der andere ruft die WebMCP-Tools der Website auf. Wählen Sie ein Modell; größte Einsparungen zuerst.',
 		byModel: 'Benchmark nach Modell',
 		models: 'Modelle',
 		model: 'Modell',
 		site: 'Website',
-		tiers: { cheap: 'günstig', frontier: 'Frontier' },
+		rank: 'Platz {n}',
+		ranking: 'Sortiert nach Erfolg mit WebMCP, dann nach Kosten pro Lauf.',
 		modelHeading: '{name} ({provider})',
 		empty: {
 			title: 'Noch kein Lauf veröffentlicht.',

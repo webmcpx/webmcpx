@@ -44,7 +44,7 @@
 		// In page order: the fix comes right after the logos.
 		{ label: m.links.fix, href: `${home}#fix`, icon: Terminal, section: 'fix' },
 		{ label: m.links.why, href: `${home}#why`, icon: Lightbulb, section: 'why' },
-		{ label: m.links.proof, href: `${home}#proof`, icon: ChartColumn, section: 'proof' },
+		{ label: m.links.proof, href: `${home}#leaderboard`, icon: ChartColumn, section: 'leaderboard' },
 		{ label: m.links.vsMcp, href: `${home}#vs-mcp`, icon: Scale, section: 'vs-mcp' },
 		{ label: m.links.issues, href: `${home}#issues`, icon: CircleDot, section: 'issues' },
 		{ label: m.links.docs, href: `${REPO}#readme`, icon: BookOpen }

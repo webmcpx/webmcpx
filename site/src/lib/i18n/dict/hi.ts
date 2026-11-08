@@ -40,7 +40,7 @@ const hi: Messages = {
 		language: 'भाषा',
 		links: {
 			why: 'क्यों',
-			proof: 'बेंचमार्क',
+			proof: 'लीडरबोर्ड',
 			vsMcp: 'बनाम MCP',
 			fix: 'इंस्टॉल',
 			issues: 'समस्याएँ',
@@ -56,7 +56,7 @@ const hi: Messages = {
 		links: {
 			scan: 'अपनी साइट स्कैन करें',
 			verdicts: 'फ़ैसले कैसे होते हैं',
-			proof: 'बेंचमार्क',
+			proof: 'लीडरबोर्ड',
 			install: 'इंस्टॉल',
 			issues: 'कौन-सी समस्याएँ हल हुईं',
 			brand: 'ब्रैंड और डिज़ाइन',
@@ -156,14 +156,15 @@ const hi: Messages = {
 	},
 
 	proof: {
-		kicker: 'बेंचमार्क',
+		kicker: 'लीडरबोर्ड',
 		title: 'वही एजेंट। वही सवाल।',
 		lead: 'एक एजेंट पेज स्नैपशॉट के सहारे पढ़ता, क्लिक करता और फ़ॉर्म भरता है; दूसरा साइट के WebMCP टूल्स कॉल करता है। मॉडल चुनिए; सबसे बड़ी बचत सबसे पहले।',
 		byModel: 'मॉडल के हिसाब से बेंचमार्क',
 		models: 'मॉडल',
 		model: 'मॉडल',
 		site: 'साइट',
-		tiers: { cheap: 'सस्ता', frontier: 'फ़्रंटियर' },
+		rank: 'स्थान {n}',
+		ranking: 'WebMCP के साथ सफलता से, फिर प्रति रन लागत से क्रमित।',
 		modelHeading: '{name} ({provider})',
 		empty: {
 			title: 'अभी तक कोई रन पब्लिश नहीं हुआ।',

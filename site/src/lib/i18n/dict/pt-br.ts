@@ -42,7 +42,7 @@ const ptBr: Messages = {
 		language: 'Idioma',
 		links: {
 			why: 'Por quê',
-			proof: 'Benchmark',
+			proof: 'Leaderboard',
 			vsMcp: 'vs MCP',
 			fix: 'Instalar',
 			issues: 'Issues',
@@ -58,7 +58,7 @@ const ptBr: Messages = {
 		links: {
 			scan: 'Escaneie seu site',
 			verdicts: 'Como funcionam os vereditos',
-			proof: 'Benchmark',
+			proof: 'Leaderboard',
 			install: 'Instalar',
 			issues: 'Issues resolvidas',
 			brand: 'Marca e design',
@@ -155,14 +155,15 @@ const ptBr: Messages = {
 	},
 
 	proof: {
-		kicker: 'Benchmark',
+		kicker: 'Leaderboard',
 		title: 'Mesmo agente. Mesma pergunta.',
 		lead: 'Um agente lê, clica e preenche a partir de snapshots da página; o outro chama as ferramentas WebMCP do site. Escolha um modelo; as maiores economias vêm primeiro.',
 		byModel: 'Benchmark por modelo',
 		models: 'Modelos',
 		model: 'Modelo',
 		site: 'Site',
-		tiers: { cheap: 'barato', frontier: 'fronteira' },
+		rank: 'Posição {n}',
+		ranking: 'Ordenado pelo acerto com WebMCP e, no empate, pelo custo por execução.',
 		modelHeading: '{name} ({provider})',
 		empty: {
 			title: 'Nenhuma execução publicada ainda.',

@@ -40,7 +40,7 @@
 			links: [
 				{ label: m.links.scan, href: `${home}#scan`, icon: { lucide: ScanSearch } },
 				{ label: m.links.install, href: `${home}#fix`, icon: { lucide: Download } },
-				{ label: m.links.proof, href: `${home}#proof`, icon: { lucide: ChartColumn } },
+				{ label: m.links.proof, href: `${home}#leaderboard`, icon: { lucide: ChartColumn } },
 				{ label: m.links.issues, href: `${home}#issues`, icon: { lucide: Bug } },
 				{ label: m.links.verdicts, href: i18n.href('/verdicts/'), icon: { lucide: ListChecks } }
 			]

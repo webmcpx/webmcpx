@@ -23,7 +23,7 @@ const SPEC: Source = { key: 'draft', href: 'https://webmachinelearning.github.io
 const EXPLAINER: Source = { key: 'explainer', href: 'https://github.com/webmachinelearning/webmcp' };
 const MIND2WEB: Source = { name: 'Online-Mind2Web, 2025', href: 'https://arxiv.org/abs/2504.01382' };
 const WINDTUNNEL: Source = { name: 'WindTunnel (nekuda)', href: 'https://webmcp.com/benchmark' };
-const OURS: Source = { key: 'ours', href: '#proof' };
+const OURS: Source = { key: 'ours', href: '#leaderboard' };
 const SHOPIFY: Source = { name: 'Shopify', href: 'https://shopify.dev/changelog/webmcp-liquid-hydrogen' };
 
 /** Strongest evidence first: the first four carry the section, the rest support it. */
