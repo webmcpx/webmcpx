@@ -82,6 +82,6 @@ fn syntax_errors_are_reported() {
 /// tool is unresolved, never reported as missing its name or description.
 #[test]
 fn spread_tools_are_unresolved_not_missing() {
-    let source = r#"document.modelContext.registerTool({ ...TOOLS[name], execute: run });"#;
+    let source = "document.modelContext.registerTool({ ...TOOLS[name], execute: run });";
     assert_eq!(render("loader.js", source), "tools=0 unresolved=1\n");
 }
