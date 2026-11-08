@@ -38,7 +38,7 @@ fn render() -> String {
     let class = |keep: fn(char) -> bool| {
         let mut out = String::new();
         let mut run: Option<(u32, u32)> = None;
-        let mut flush = |run: Option<(u32, u32)>, out: &mut String| {
+        let flush = |run: Option<(u32, u32)>, out: &mut String| {
             if let Some((a, b)) = run {
                 out.push_str(&format!("\\u{{{a:X}}}"));
                 if b > a {

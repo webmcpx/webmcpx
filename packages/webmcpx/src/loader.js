@@ -49,6 +49,14 @@ export function readPage(what, root) {
   const css = (el) => globalThis.getComputedStyle?.(el) ?? {};
   const hidden = (el) => el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" || css(el).display == "none";
   const shown = (el) => !el || !hidden(el) && shown(el.parentElement);
+  // Boilerplate (nav, footer, aside...) is skipped inside a root, but a root may sit in one.
+  const skipped = (el) => SKIP.has(el.tagName) || hidden(el);
+  // visibility is inherited and a child can undo it, so it is checked per text node.
+  const data = (n) => (css(n.parentNode).visibility == "hidden" ? "" : n.data);
+  // Visible text; an element with no block inside is one block.
+  const textOf = (el) =>
+    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? (n.matches(BLOCKS) ? ` ${textOf(n)} ` : textOf(n)) : "")).join("");
+  const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   if (what === "context") {
     // Page-set fields are cut to size; URLs never are (a heading with a giant id gets no URL), and a
     // context still past the output budget (20,000 chars) comes back as { tooLarge: true }.
@@ -58,23 +66,16 @@ export function readPage(what, root) {
       lang: document.documentElement.lang.slice(0, 35) || undefined,
       description: text(document.querySelector('meta[name="description"]')?.getAttribute("content")).slice(0, 500) || undefined,
       // Only headings a reader can see: never hidden or aria-hidden ones (agents get what humans get).
-      headings: [...document.querySelectorAll("h1, h2, h3")].filter((h) => shown(h)).slice(0, 30).map((h) => ({
+      // (textOf: the same visible-text reader the other tools use, so hidden parts of a heading stay out).
+      headings: [...document.querySelectorAll("h1, h2, h3")].filter((h) => shown(h) && text(textOf(h))).slice(0, 30).map((h) => ({
         level: Number(h.tagName[1]),
-        text: text(h.textContent).slice(0, 120),
+        text: text(textOf(h)).slice(0, 120),
         url: h.id && h.id.length <= 200 ? `${base}#${h.id}` : undefined,
       })),
       selection: text(globalThis.getSelection?.()?.toString()).slice(0, 1000) || undefined,
     };
     return JSON.stringify(context).length > 20_000 ? { tooLarge: true } : context;
   }
-  // Boilerplate (nav, footer, aside...) is skipped inside a root, but a root may sit in one.
-  const skipped = (el) => SKIP.has(el.tagName) || hidden(el);
-  // visibility is inherited and a child can undo it, so it is checked per text node.
-  const data = (n) => (css(n.parentNode).visibility == "hidden" ? "" : n.data);
-  // Visible text; an element with no block inside is one block.
-  const textOf = (el) =>
-    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? (n.matches(BLOCKS) ? ` ${textOf(n)} ` : textOf(n)) : "")).join("");
-  const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   let out = "";
   let anchor = "";
   const add = (kind, s) => text(s) && (out += kind + FIELD + s + FIELD + anchor + RECORD);

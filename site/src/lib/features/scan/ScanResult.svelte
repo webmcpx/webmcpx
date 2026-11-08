@@ -217,18 +217,19 @@
 				{@const embed = badgeEmbed(location.origin, r.url, badge, m.result.badgeTitle, i18n.href('/'))}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="font-medium">{m.result.badge}</p>
-					<p class="mt-1 text-sm text-ink-3">{m.result.badgeNote}</p>
-					<fieldset class="mt-4 grid gap-3 sm:grid-cols-2">
+					<!-- The styles as one slim row of small tiles: the badge, then its name (what it fits is the tile's title). -->
+					<fieldset class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
 						<legend class="sr-only">{m.result.badgeStyle}</legend>
 						{#each BADGES as b (b.id)}
 							<label
-								class="flex cursor-pointer flex-col overflow-hidden rounded-card border-2 border-hairline transition hover:border-ink has-checked:border-ink has-checked:shadow-hard-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink"
+								title={m.badges[b.id].fits}
+								class="flex cursor-pointer flex-col overflow-hidden rounded-xl border-2 border-hairline transition hover:border-ink has-checked:border-ink has-checked:shadow-hard-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink"
 							>
 								<input type="radio" name="badge-style" value={b.id} bind:group={badge} class="sr-only" />
 								<!-- Our own artwork (content/badges/), the same markup the embed code carries. -->
 								<span
 									class={[
-										'grid h-20 place-items-center px-3 [&_svg]:max-w-full',
+										'grid h-14 place-items-center px-2 [&_svg]:h-auto [&_svg]:max-w-[85%]',
 										b.id === 'dark' ? 'bg-ink' : 'bg-paper'
 									]}
 									aria-hidden="true"
@@ -236,9 +237,8 @@
 									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 									{@html b.svg}
 								</span>
-								<span class="flex items-baseline justify-between gap-2 border-t-2 border-inherit px-3 py-2">
-									<span class="font-medium">{m.badges[b.id].name}</span>
-									<span class="text-xs text-ink-3">{m.badges[b.id].fits}</span>
+								<span class="border-t-2 border-inherit px-2.5 py-1.5 text-sm font-medium">
+									{m.badges[b.id].name}<span class="sr-only">: {m.badges[b.id].fits}</span>
 								</span>
 							</label>
 						{/each}
@@ -247,6 +247,7 @@
 						snippet={highlightLite(embed, badge === 'readme' ? 'md' : 'html')}
 						title={badge === 'readme' ? 'README.md' : 'badge.html'}
 						class="mt-4 shadow-none"
+						compact
 					/>
 				</div>
 			{/if}

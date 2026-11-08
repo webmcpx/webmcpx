@@ -100,7 +100,9 @@ tests/                       Playwright e2e against the prerendered build
   respect `prefers-reduced-motion` (base.css has the global switch) and stay readable without JavaScript.
 - No count-up numbers: figures are prerendered text, so crawlers and agents read them.
 - Code samples live in `content/snippets.ts` and are highlighted at build time. Code always wraps and shows
-  whole (`CodeBlock`, `code.css`): never a sideways scroll that hides part of a command (owner's rule).
+  whole (`CodeBlock`, `code.css`): never a sideways scroll that hides part of a command (owner's rule). The one
+  exception is a long one-off a reader copies, not reads (a badge's markup): `CodeBlock compact` shows two
+  wrapped lines and scrolls down; Copy takes it whole.
 
 ## Data and copy
 

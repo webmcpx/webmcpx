@@ -152,15 +152,15 @@ test('an agent-ready site can pick one of four badge styles, inline or a README 
 	await expect(styles.first()).toBeChecked();
 	const embed = page.locator('#scan').getByRole('figure').filter({ hasText: 'badge.html' });
 	const card = await embed.textContent();
-	await page.getByText('Flat', { exact: true }).click();
+	await page.locator('#scan label', { hasText: 'Flat' }).click();
 	await expect(styles.nth(1)).toBeChecked();
 	await expect(embed).toContainText('width="158" height="20"');
 	expect(await embed.textContent()).not.toBe(card);
-	await page.getByText('Dark', { exact: true }).click();
+	await page.locator('#scan label', { hasText: 'Dark' }).click();
 	await expect(embed).toContainText('#3d3c37');
 	await expect(embed).not.toContainText('<img');
 	// READMEs can't hold inline SVG: Markdown for an image of the latest verdict, linking to a live scan.
-	await page.getByText('README', { exact: true }).click();
+	await page.locator('#scan label', { hasText: 'README' }).click();
 	const readme = page.locator('#scan').getByRole('figure').filter({ hasText: 'README.md' });
 	await expect(readme).toContainText('[![');
 	await expect(readme).toContainText('/badge/docs.example.com.svg)](');
@@ -233,7 +233,7 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('plain.example.com');
 	await page.keyboard.press('Enter');
-	await expect(page.getByText('Not yet')).toBeVisible();
+	await expect(page.locator('#scan').getByText('Not yet', { exact: true })).toBeVisible();
 	// The fix is one click away: the install steps.
 	await page.locator('#scan').getByRole('link', { name: 'Fix it' }).click();
 	await expect(page).toHaveURL(/#for-sites$/);
