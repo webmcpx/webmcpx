@@ -292,10 +292,12 @@ function fill(form, args) {
       const wanted = [].concat(value).map(String);
       if (el.tagName === "SELECT" && el.multiple) for (const o of el.options) o.selected = !o.matches(":disabled") && wanted.includes(o.value);
       else Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
-      // The field must now hold what was asked: a select keeps no value it doesn't offer, a range clamps
-      // to its bounds (a repeated field's joined schema may allow either).
-      const got = el.tagName === "SELECT" && el.multiple ? [...el.selectedOptions].map((o) => o.value) : [el.value];
-      if (got.length !== wanted.length || got.some((v) => !wanted.includes(v))) {
+      // A select keeps no value it doesn't offer and a range clamps to its bounds (a repeated field's
+      // joined schema may allow either): those must now hold what was asked. Other fields may normalize
+      // a value losslessly (a datetime drops zero seconds) and are checked by the browser's validation.
+      const got = el.tagName === "SELECT" ? [...el.selectedOptions].map((o) => o.value) : [el.value];
+      const exact = el.tagName === "SELECT" || el.type === "range";
+      if (exact && (got.length !== wanted.length || got.some((v) => !wanted.includes(v)))) {
         throw Object.assign(new Error(`\`${name}\`: ${JSON.stringify(value)} is not a value this field takes`), { code: "INVALID_INPUT" });
       }
       // Frameworks listen for these, not for property writes.
