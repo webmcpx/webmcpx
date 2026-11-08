@@ -161,5 +161,7 @@ tests/                       Playwright e2e against the prerendered build
   copy. The wordmark (`font-brand`) is artwork and never changes font.
 - Must work at 390 px wide without horizontal scroll, and with keyboard only. Anything that moves on its own
   (the leaderboard carousel: it moves site by site, each by its best question, and the selected logo is its
-  only position; the site's other questions are in the tabs below) pauses on hover, focus and off screen, has
-  a pause control before the logos, and stays still for reduced motion.
+  only position; the site's other questions are in the tabs below) pauses on hover, focus and off screen,
+  stops for good once a site is picked (by click or keyboard: the WCAG 2.2.2 "stop" mechanism; no separate
+  pause button, owner's decision 2026-11-08), and stays still for reduced motion. The decorative loops (the
+  highlighter sweep, `PenCircle`) carry no information and stop entirely for reduced motion.
