@@ -28,7 +28,7 @@
 		errorText,
 		host,
 		READY_SCORE,
-		SCORE_GROUPS,
+		SCORE_COLUMNS,
 		shareLink,
 		type BadgeStyle
 	} from './scan.ts';
@@ -233,46 +233,63 @@
 							{fmt(m.result.score.need, { min: i18n.number(READY_SCORE) })}
 						</p>
 					</div>
+					<!-- Two columns that stack their groups (no gap beside the one-check Agent cost group). -->
 					<div class="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-						{#each SCORE_GROUPS as g (g.id)}
-							<div>
-								<p class="font-mono text-[11px] tracking-wider text-ink-3 uppercase">
-									{m.result.score.groups[g.id]}
-								</p>
-								<ul class="mt-2 space-y-2">
-									{#each g.items as id (id)}
-										{@const it = items.get(id)}
-										{#if it}
-											{@const ok = it.points === it.max}
-											<li class="flex gap-2.5 text-sm">
-												<span
-													class={[
-														'mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 border-ink',
-														ok ? 'bg-marker' : 'bg-card'
-													]}
-													aria-hidden="true"
-													>{#if ok}<Check size={11} strokeWidth={3} />{:else}<X
-															size={11}
-															strokeWidth={3}
-														/>{/if}</span
-												>
-												<span class="min-w-0 flex-1">
-													<span class="flex items-baseline justify-between gap-3">
-														<span class={ok ? 'font-medium' : 'font-medium text-ink-2'}
-															>{m.result.score.items[id].label}</span
+						{#each SCORE_COLUMNS as column, c (c)}
+							<div class="space-y-5">
+								{#each column as g (g.id)}
+									<div>
+										<p class="font-mono text-[11px] tracking-wider text-ink-3 uppercase">
+											{m.result.score.groups[g.id]}
+										</p>
+										<ul class="mt-2 space-y-2">
+											{#each g.items as id (id)}
+												{@const it = items.get(id)}
+												{#if it}
+													{@const ok = it.points === it.max}
+													<li class="flex gap-2.5 text-sm">
+														<span
+															class={[
+																'mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 border-ink',
+																ok ? 'bg-marker' : 'bg-card'
+															]}
+															aria-hidden="true"
+															>{#if ok}<Check size={11} strokeWidth={3} />{:else}<X
+																	size={11}
+																	strokeWidth={3}
+																/>{/if}</span
 														>
-														<span class="font-mono text-xs text-ink-3 tabular-nums"
-															>{i18n.number(it.points)}/{i18n.number(it.max)}</span
-														>
-													</span>
-													{#if !ok}<span class="mt-0.5 block text-xs text-pretty text-ink-3"
-															>{m.result.score.items[id].fix}</span
-														>{/if}
-												</span>
-											</li>
-										{/if}
-									{/each}
-								</ul>
+														<span class="min-w-0 flex-1">
+															<span class="flex items-baseline justify-between gap-3">
+																<span class={ok ? 'font-medium' : 'font-medium text-ink-2'}
+																	>{m.result.score.items[id].label}</span
+																>
+																<span class="font-mono text-xs text-ink-3 tabular-nums"
+																	>{i18n.number(it.points)}/{i18n.number(it.max)}</span
+																>
+															</span>
+															{#if id === 'cost'}
+																<!-- What the cost check measured: the tokens to read the page, or that tools spare it. -->
+																<span class="mt-0.5 block text-xs text-pretty text-ink-3"
+																	>{r.tools.length
+																		? m.result.score.items.cost.tools
+																		: fmt(m.result.score.items.cost.read, {
+																				tokens: i18n.plural(r.page_tokens, m.result.tokens, {
+																					n: pageTokens(r.page_tokens, i18n.intl)
+																				})
+																			})}</span
+																>
+															{/if}
+															{#if !ok}<span class="mt-0.5 block text-xs text-pretty text-ink-3"
+																	>{m.result.score.items[id].fix}</span
+																>{/if}
+														</span>
+													</li>
+												{/if}
+											{/each}
+										</ul>
+									</div>
+								{/each}
 							</div>
 						{/each}
 					</div>

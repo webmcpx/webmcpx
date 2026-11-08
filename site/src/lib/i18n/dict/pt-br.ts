@@ -653,7 +653,9 @@ const ptBr: Messages = {
 					},
 					cost: {
 						label: 'Barato para agentes',
-						fix: 'Os agentes leem a página inteira: com ferramentas, pedem só o que precisam.'
+						fix: 'Os agentes leem a página inteira: com ferramentas, pedem só o que precisam.',
+						read: 'Cerca de {tokens} para ler esta página.',
+						tools: 'Os agentes chamam as ferramentas em vez de ler a página.'
 					},
 					llms_txt: {
 						label: 'llms.txt',

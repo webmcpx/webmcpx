@@ -47,6 +47,11 @@ export const SCORE_GROUPS: { id: 'webmcp' | 'cost' | 'readable' | 'discoverable'
 	{ id: 'readable', items: ['llms_txt', 'markdown', 'robots', 'sitemap'] },
 	{ id: 'discoverable', items: ['link_headers', 'agent_skills', 'api_catalog'] }
 ];
+/** The groups in two columns from sm up, balanced by item count (5 and 7); one column on phones, in order. */
+export const SCORE_COLUMNS = [
+	SCORE_GROUPS.filter((g) => g.id === 'webmcp' || g.id === 'cost'),
+	SCORE_GROUPS.filter((g) => g.id === 'readable' || g.id === 'discoverable')
+];
 /** The lowest score of an agent-ready site (scan.rs READY_SCORE). */
 export const READY_SCORE = 70;
 

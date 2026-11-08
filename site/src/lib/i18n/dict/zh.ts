@@ -610,7 +610,9 @@ const zh: Messages = {
 					},
 					cost: {
 						label: '对智能体成本低',
-						fix: '智能体会读完整个页面：有了工具，它们只需请求所需内容。'
+						fix: '智能体会读完整个页面：有了工具，它们只需请求所需内容。',
+						read: '读完这个页面约需 {tokens}。',
+						tools: '智能体直接调用它的工具，不必读整个页面。'
 					},
 					llms_txt: {
 						label: 'llms.txt',

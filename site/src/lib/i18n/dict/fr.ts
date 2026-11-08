@@ -659,7 +659,9 @@ const fr: Messages = {
 					},
 					cost: {
 						label: 'Économe pour les agents',
-						fix: 'Les agents lisent toute la page : les outils leur permettent de demander juste ce qu’il faut.'
+						fix: 'Les agents lisent toute la page : les outils leur permettent de demander juste ce qu’il faut.',
+						read: 'Environ {tokens} pour lire cette page.',
+						tools: 'Les agents appellent ses outils au lieu de lire la page.'
 					},
 					llms_txt: {
 						label: 'llms.txt',

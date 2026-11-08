@@ -654,7 +654,9 @@ const es: Messages = {
 					},
 					cost: {
 						label: 'Barato para agentes',
-						fix: 'Los agentes leen la página entera: con herramientas piden solo lo que necesitan.'
+						fix: 'Los agentes leen la página entera: con herramientas piden solo lo que necesitan.',
+						read: 'Unos {tokens} para leer esta página.',
+						tools: 'Los agentes llaman a sus herramientas en vez de leer la página.'
 					},
 					llms_txt: {
 						label: 'llms.txt',

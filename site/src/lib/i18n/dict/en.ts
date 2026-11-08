@@ -795,7 +795,10 @@ const en = {
 					},
 					cost: {
 						label: 'Cheap for agents',
-						fix: 'Agents read the whole page: tools let them ask for just what they need.'
+						fix: 'Agents read the whole page: tools let them ask for just what they need.',
+						// What was measured: {tokens} is the token count ("324 tokens"); `tools` when the page has tools.
+						read: 'About {tokens} to read this page.',
+						tools: 'Agents call its tools instead of reading the page.'
 					},
 					llms_txt: {
 						label: 'llms.txt',

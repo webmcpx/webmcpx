@@ -654,7 +654,9 @@ const de: Messages = {
 					},
 					cost: {
 						label: 'Günstig für Agenten',
-						fix: 'Agenten lesen die ganze Seite: Mit Tools fragen sie nur nach dem, was sie brauchen.'
+						fix: 'Agenten lesen die ganze Seite: Mit Tools fragen sie nur nach dem, was sie brauchen.',
+						read: 'Etwa {tokens}, um diese Seite zu lesen.',
+						tools: 'Agenten rufen ihre Tools auf, statt die Seite zu lesen.'
 					},
 					llms_txt: {
 						label: 'llms.txt',

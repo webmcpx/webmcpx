@@ -647,7 +647,9 @@ const id: Messages = {
 					},
 					cost: {
 						label: 'Hemat untuk agent',
-						fix: 'Agent membaca seluruh halaman: dengan tool, mereka cukup meminta yang dibutuhkan.'
+						fix: 'Agent membaca seluruh halaman: dengan tool, mereka cukup meminta yang dibutuhkan.',
+						read: 'Sekitar {tokens} untuk membaca halaman ini.',
+						tools: 'Agent memanggil tool-nya alih-alih membaca halaman.'
 					},
 					llms_txt: {
 						label: 'llms.txt',
