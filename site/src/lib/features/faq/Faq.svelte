@@ -29,35 +29,38 @@
 </script>
 
 <Section id="faq" kicker={m.kicker} title={m.title}>
-	<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+	<ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		{#each ORDER as id, i (id)}
 			{@const item = m.items[id]}
 			{@const Icon = ICONS[id]}
-			<Reveal delay={(i % 3) * 70} class={['h-full min-w-0', id === 'agent' && 'lg:col-span-2']}>
-				<div class="flex h-full flex-col gap-3 rounded-card border-2 border-ink bg-card p-6 shadow-hard-sm">
-					<span class="flex items-center justify-between">
-						<span class="grid size-9 place-items-center rounded-full border-2 border-ink bg-marker">
-							<Icon size={18} strokeWidth={2} aria-hidden="true" />
+			<li class={['min-w-0', id === 'agent' && 'lg:col-span-2']}>
+				<Reveal delay={(i % 3) * 70} class="h-full">
+					<div class="flex h-full flex-col gap-3 rounded-card border-2 border-ink bg-card p-6 shadow-hard-sm">
+						<span class="flex items-center justify-between">
+							<span class="grid size-9 place-items-center rounded-full border-2 border-ink bg-marker">
+								<Icon size={18} strokeWidth={2} aria-hidden="true" />
+							</span>
+							<span class="font-mono text-xs text-ink-3" aria-hidden="true">Q{i + 1}</span>
 						</span>
-						<span class="font-mono text-xs text-ink-3" aria-hidden="true">Q{i + 1}</span>
-					</span>
-					<dt
-						class={[
-							'font-display text-xl leading-tight font-bold tracking-tight',
-							id === 'agent' && 'lg:text-2xl'
-						]}
-					>
-						{item.q}
-					</dt>
-					<dd
-						class={['text-pretty text-ink-2', id === 'agent' && 'lg:text-lg lg:[&_code]:whitespace-nowrap']}
-					>
-						{#each codeParts(item.a) as part, j (j)}{#if part.code}<code
-									class="rounded bg-ink/[0.06] px-1 py-0.5 font-mono text-[0.88em] text-ink">{part.text}</code
-								>{:else}{part.text}{/if}{/each}
-					</dd>
-				</div>
-			</Reveal>
+						<h3
+							class={[
+								'font-display text-xl leading-tight font-bold tracking-tight',
+								id === 'agent' && 'lg:text-2xl'
+							]}
+						>
+							{item.q}
+						</h3>
+						<p
+							class={['text-pretty text-ink-2', id === 'agent' && 'lg:text-lg lg:[&_code]:whitespace-nowrap']}
+						>
+							{#each codeParts(item.a) as part, j (j)}{#if part.code}<code
+										class="rounded bg-ink/[0.06] px-1 py-0.5 font-mono text-[0.88em] text-ink"
+										>{part.text}</code
+									>{:else}{part.text}{/if}{/each}
+						</p>
+					</div>
+				</Reveal>
+			</li>
 		{/each}
-	</dl>
+	</ul>
 </Section>
