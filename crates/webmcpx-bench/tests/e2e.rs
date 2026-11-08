@@ -80,11 +80,8 @@ async fn run_one<F: Fn(usize, &[Message]) -> Reply + Send + Sync + 'static>(
         return None;
     }
     let root = repo_root();
-    if !root
-        .join("packages/webmcpx/wasm/webmcpx_wasm_bg.wasm")
-        .is_file()
-    {
-        eprintln!("skipping: run `just wasm` first");
+    if !built(&root) {
+        eprintln!("skipping: run `just wasm js-build` first");
         return None;
     }
     let task = task::load_dir(&root.join("bench/tasks"))
@@ -115,6 +112,12 @@ async fn run_one<F: Fn(usize, &[Message]) -> Reply + Send + Sync + 'static>(
     )
     .await;
     Some((runs.into_iter().next().unwrap(), model))
+}
+
+/// The npm package as the pages load it: the wasm module and the minified dist/.
+fn built(root: &std::path::Path) -> bool {
+    let package = root.join("packages/webmcpx");
+    package.join("wasm/webmcpx_wasm_bg.wasm").is_file() && package.join("dist/index.js").is_file()
 }
 
 #[tokio::test]
@@ -238,12 +241,8 @@ async fn store_tools_answer_malformed_input_with_an_envelope() {
 #[tokio::test]
 async fn scan_api_reports_the_tools_of_a_page() {
     let root = repo_root();
-    if find_chrome().is_none()
-        || !root
-            .join("packages/webmcpx/wasm/webmcpx_wasm_bg.wasm")
-            .is_file()
-    {
-        eprintln!("skipping: needs Chrome and `just wasm`");
+    if find_chrome().is_none() || !built(&root) {
+        eprintln!("skipping: needs Chrome and `just wasm js-build`");
         return;
     }
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
@@ -294,8 +293,8 @@ fn free_port() -> u16 {
 #[tokio::test]
 async fn scans_with_a_remote_chrome_through_the_shared_proxy() {
     let root = repo_root();
-    if find_chrome().is_none() || !root.join("packages/webmcpx/wasm").exists() {
-        eprintln!("skipping: needs Chrome and `just wasm`");
+    if find_chrome().is_none() || !built(&root) {
+        eprintln!("skipping: needs Chrome and `just wasm js-build`");
         return;
     }
     let (devtools, proxy) = (free_port(), free_port());

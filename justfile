@@ -74,7 +74,7 @@ review-reply reply:
     codex exec resume --last -m gpt-6.1-sol -c model_reasoning_effort='"high"' -o target/review.md "$1 Re-review the branch (git diff main...HEAD) and end with the VERDICT line."
 
 # Benchmark both arms (needs OPENAI_API_KEY and Chrome), e.g. `just bench --repeat 1 --task docs-exit-code`.
-bench *args: wasm
+bench *args: wasm js-build
     cargo run -q --release -p webmcpx-bench -- run {{args}}
     cp bench/results/latest.json "site/src/lib/content/bench/$(jq -r .model bench/results/latest.json).json"
     # The run's preview card; a run without both arms has no comparison: drop any stale card instead.
@@ -85,11 +85,11 @@ bench-regrade:
     cargo run -q --release -p webmcpx-bench -- regrade site/src/lib/content/bench/*.json
 
 # Snapshot today's tool names and descriptions per task for the landing (runs older than schema 4 lack them).
-bench-tools: wasm
+bench-tools: wasm js-build
     cargo run -q --release -p webmcpx-bench -- tools > site/src/lib/content/tools.json
 
 # Landing: types, lint + format, unit tests, prerendered build, then e2e + axe in Chrome against the build.
-site: wasm
+site: wasm js-build
     cd site && npm run check && npm run lint && npm test && npm run build && npm run test:e2e
 
 # Format the landing (Prettier with the Svelte and Tailwind plugins).
@@ -97,9 +97,9 @@ site-fmt:
     cd site && npm run format
 
 # Landing dev server with hot reload on http://localhost:5173.
-site-dev: wasm
+site-dev: wasm js-build
     cd site && npm run dev
 
 # Serve the benchmark sites and the built landing on http://127.0.0.1:4173.
-serve: wasm
+serve: wasm js-build
     cargo run -q -p webmcpx-bench -- serve
