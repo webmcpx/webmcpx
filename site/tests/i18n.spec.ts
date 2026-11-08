@@ -12,8 +12,10 @@ async function overflowing(page: Page): Promise<string[]> {
 		const width = document.documentElement.clientWidth;
 		const out: string[] = [];
 		for (const el of document.querySelectorAll<HTMLElement>('main *, header *, footer *')) {
-			// Horizontally scrollable regions (code, tables, tab lists) may hold wider content on purpose.
-			if (el.closest('[role="tablist"], pre, table, [role="region"], .overflow-x-auto')) continue;
+			// Horizontally scrollable regions (code, tables, tab lists) may hold wider content on purpose, and
+			// the sections' watermark runs past the edge on purpose, clipped by its section (the scroll check
+			// above still catches any real overflow).
+			if (el.closest('[role="tablist"], pre, table, [role="region"], .overflow-x-auto, .watermark')) continue;
 			const r = el.getBoundingClientRect();
 			if (r.width && (r.right > width + 1 || r.left < -1)) {
 				out.push(

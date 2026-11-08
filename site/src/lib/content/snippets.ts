@@ -48,6 +48,17 @@ register(); // the standard tools; tool() adds your own`
   }
 }`
 	},
+	// "What is WebMCP?": the smallest real tool, in the draft's own API (2026-11-02).
+	registerTool: {
+		lang: 'js',
+		code: `document.modelContext.registerTool({
+  name: "search_products",
+  description: "Search the catalog by keyword.",
+  inputSchema: { type: "object", properties: { query: { type: "string" } } },
+  annotations: { readOnlyHint: true },
+  execute: async ({ query }) => JSON.stringify(await searchCatalog(query))
+});`
+	},
 	pageScript: {
 		lang: 'js',
 		code: `// In the page: Playwright or Puppeteer page.evaluate, Selenium execute_async_script, CDP Runtime.evaluate

@@ -212,7 +212,7 @@
 	Motion that makes the page feel alive, never in the way; all of it off for reduced motion.
 	1. The highlighter draws in from the left, holds, lifts off to the right and draws again, in a loop.
 	2. A tab's panel fades in when it is picked.
-	3. The main CTA (Scan my site) glows on and off.
+	3. The main CTA's yellow (Scan my site) lights up and dims, on and off.
 */
 @keyframes marker-sweep {
 	0% {
@@ -238,16 +238,20 @@
 	}
 }
 @keyframes cta-glow {
-	0%,
-	100% {
-		box-shadow:
-			var(--shadow-hard),
-			0 0 0 0 color-mix(in oklch, var(--marker) 0%, transparent);
-	}
 	50% {
-		box-shadow:
-			var(--shadow-hard),
-			0 0 22px 6px color-mix(in oklch, var(--marker) 85%, transparent);
+		background-color: color-mix(in oklch, var(--marker), white 45%);
+	}
+}
+/* The sections' Junction watermark: faint, centered on its spot, turning very slowly back and forth. */
+.watermark {
+	aspect-ratio: 1;
+	opacity: 0.045;
+	translate: -50% -50%;
+	rotate: var(--r);
+}
+@keyframes watermark-drift {
+	to {
+		rotate: calc(var(--r) + 6deg);
 	}
 }
 @keyframes panel-in {
@@ -264,7 +268,10 @@
 	[data-js] [role='tabpanel']:not([data-inactive]) {
 		animation: panel-in 0.35s var(--ease-out-expo);
 	}
-	/* The main CTA glows softly, on and off, to draw the eye. */
+	.watermark {
+		animation: watermark-drift 24s ease-in-out infinite alternate;
+	}
+	/* The main CTA's yellow lights up and dims, on and off, to draw the eye (its color only). */
 	.cta-glow {
 		animation: cta-glow 2.4s ease-in-out infinite;
 	}

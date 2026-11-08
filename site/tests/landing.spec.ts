@@ -690,3 +690,16 @@ test('a logo takes you up to the scan first, then scans', async ({ page }) => {
 	release();
 	await expect(page.getByText('Agent-ready').first()).toBeVisible();
 });
+
+test('the sections carry the Junction as a faint watermark that never blocks a click', async ({ page }) => {
+	await page.goto('/');
+	const mark = page.locator('#why').locator('xpath=..').locator('svg.watermark');
+	await expect(mark).toHaveCount(1);
+	const style = await mark.evaluate((el) => {
+		const s = getComputedStyle(el);
+		return { opacity: Number(s.opacity), events: s.pointerEvents, hidden: el.getAttribute('aria-hidden') };
+	});
+	expect(style.opacity).toBeLessThan(0.1);
+	expect(style.events).toBe('none');
+	expect(style.hidden).toBe('true');
+});

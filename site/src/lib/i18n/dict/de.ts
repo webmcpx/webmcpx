@@ -111,6 +111,86 @@ const de: Messages = {
 		shopifyBoth: 'Shopify nutzt beides'
 	},
 
+	what: {
+		kicker: 'Was ist WebMCP?',
+		title: 'WebMCP wird zum Webstandard für KI-Agenten. Wir setzen voll darauf',
+		lead: 'Ingenieure von Google und Microsoft entwerfen es beim W3C, dem Gremium hinter den Webstandards, und Chrome und Edge testen es bereits. Heute nutzen Claude Code, Codex und alle anderen Agenten Ihre Website wie einen Screenshot: Sie schauen, raten, welchen Button sie drücken sollen, und versuchen es erneut. Langsam, teuer, fehleranfällig. Mit WebMCP sagt Ihre Website den Agenten genau, was sie tun können, etwa suchen, lesen oder in den Warenkorb legen, und sie fragen einfach danach. Wir glauben, dass jede Website WebMCP sprechen wird, deshalb haben wir webmcpx gebaut, damit Ihre es schon heute kann.',
+		steps: {
+			register: {
+				title: 'Ihre Seite registriert Tools',
+				text: 'Name, Beschreibung, Eingabeschema und eine Funktion: die Aktionen, die Ihre Buttons schon ausführen.'
+			},
+			list: {
+				title: 'Der Browser listet sie auf',
+				text: 'Ein Agent fragt die Seite, was sie kann, mit typisierten Eingaben und Hinweisen wie „nur lesend“.'
+			},
+			call: {
+				title: 'Der Agent ruft sie auf',
+				text: 'Im eigenen Tab des Nutzers, mit seiner Sitzung: kein neuer Server, kein OAuth.'
+			}
+		},
+		webmcpx: {
+			// Who we are and why webmcpx exists, right under the logo (facts only: see the footer notices).
+			about:
+				'Ein unabhängiges Open-Source-Community-Projekt, nicht mit dem W3C oder einem Browserhersteller verbunden. Wir bauen webmcpx, damit sich WebMCP schon heute lohnt: Websites bekommen gute Tools, ohne sie zu schreiben, Agenten kommen mit weniger Tokens zu denselben Antworten, und jede veröffentlichte Zahl lässt sich nachrechnen.',
+			title: 'Starten Sie heute mit webmcpx, auf Ihrer Website und in Ihrem Agenten',
+			lead: 'Alles, was WebMCP heute von den meisten Websites fernhält, gelöst: eine Zeile auf Ihrer Website, ein Befehl in Ihrem Agenten, sonst müssen Sie sich um nichts kümmern.',
+			compare: {
+				caption: 'WebMCP von Hand im Vergleich zu webmcpx',
+				hand: 'WebMCP von Hand',
+				webmcpx: 'Mit webmcpx'
+			},
+			items: {
+				support: {
+					label: 'Browser-Unterstützung',
+					hand: 'Nur Chrome, hinter einem Flag oder als Origin Trial. Firefox und Safari: noch nichts.',
+					webmcpx:
+						'Das offizielle Polyfill des W3C, wo WebMCP fehlt: Ihre Tools sind schon heute in Chrome, Firefox und Safari da.'
+				},
+				tools: {
+					label: 'Tools auf jeder Seite',
+					hand: 'Sie entwerfen und schreiben jedes einzelne, Seite für Seite.',
+					webmcpx: 'Suche, Lesen und Seitenkontext auf jeder Seite, mit einem einzigen Script-Tag. Ohne Code.'
+				},
+				actions: {
+					label: 'Ihre eigenen Aktionen',
+					hand: 'Schemas, Annotationen und Fehlerbehandlung, für jede von Hand geschrieben.',
+					webmcpx: 'Ein tool()-Aufruf, ein Hook für React, Vue oder Svelte, oder Ihre vorhandenen Formulare.'
+				},
+				agents: {
+					label: 'In Claude Code, Codex, Cursor',
+					hand: 'Eine eigene Bridge bauen oder warten, bis jeder Agent es unterstützt.',
+					webmcpx:
+						'npx webmcpx mcp: die Tools jeder Seite, dazu die Standard-Tools auf jeder Website, auch ohne webmcpx.'
+				},
+				draft: {
+					label: 'Änderungen an der Spec',
+					hand: 'Jede Änderung am Entwurf verfolgen und Ihre Tools umschreiben.',
+					webmcpx: 'Wir verfolgen den W3C-Entwurf und gehen mit: Sie aktualisieren ein Paket.'
+				},
+				correct: {
+					label: 'Alles richtig machen',
+					hand: 'Ergebnisformen, Fehlercodes, Ausgabebudgets, Paging, Annotationen, versteckter Text: alles Ihre Sache.',
+					webmcpx:
+						'Von Haus aus richtig, unsichtbare Zeichen entfernt, dazu ein Linter und ein Scanner zur Prüfung.'
+				},
+				proof: {
+					label: 'Beleg, dass es sich lohnt',
+					hand: 'Ihr Bauchgefühl.',
+					webmcpx:
+						'Bis zu {best} weniger Tokens für dieselben Antworten (bester Fall: {site}, {model}). Jeder Lauf ist öffentlich: Wiederholen Sie ihn mit einem Befehl.',
+					webmcpxPlain: 'Jede Frage und jeder Lauf ist öffentlich: Wiederholen Sie sie mit einem Befehl.'
+				},
+				cost: {
+					label: 'Kosten',
+					hand: 'Ihre Zeit, auf jeder Seite und bei jeder Änderung.',
+					webmcpx: 'Kostenlos und Open Source (MIT), rund 2,7 KB beim Laden, kein Konto, kein Server.'
+				}
+			},
+			sites: 'Auf Ihrer Website einbinden',
+			agents: 'In Ihrem Agenten einbinden'
+		}
+	},
 	why: {
 		kicker: 'Warum WebMCP?',
 		title: 'Was Ihre Website mit WebMCP gewinnt',
@@ -339,7 +419,7 @@ const de: Messages = {
 
 	fix: {
 		title: 'Für deine Website',
-		lead: 'Zwei Teile. Bitte deinen Coding-Agenten (Claude Code, Codex, Cursor) darum oder mach es von Hand.',
+		lead: 'KI-Agenten lesen deine Seiten schon heute. Gib ihnen echte Tools, in zwei Schritten: Bitte deinen Coding-Agenten (Claude Code, Codex, Cursor) darum oder mach es von Hand.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		html: 'Vor {tag} einfügen. In Browsern ohne WebMCP ergänzt es das W3C-Polyfill.',
@@ -351,7 +431,7 @@ const de: Messages = {
 
 	agents: {
 		title: 'Für deinen Agenten',
-		lead: 'Funktioniert auf jeder Website. Auf den gemessenen Websites: dieselben Antworten, für einen Bruchteil der Tokens. Der MCP, der in jedes Claude-Code- und Codex-Setup gehört.',
+		lead: 'Dein Agent liest jede Seite auf die teure Art. Gib ihm stattdessen die Tools der Seite: Auf den gemessenen Websites gab es dieselben Antworten für einen Bruchteil der Tokens. Funktioniert auf jeder Website und ist der MCP, der in jedes Claude-Code- und Codex-Setup gehört.',
 		saving: {
 			range: { other: '{low} bis {high} weniger Tokens bei allen {n} Modellen der Rangliste.' },
 			best: 'Bis zu {high} weniger Tokens in der Rangliste.',
@@ -479,6 +559,14 @@ const de: Messages = {
 			browsers: {
 				q: 'Funktioniert das in Firefox und Safari?',
 				a: 'Ja. Wo ein Browser kein eigenes WebMCP mitbringt, lädt webmcpx auf HTTPS-Seiten das WebMCP-Polyfill des W3C. Chrome, Firefox und Safari sehen dieselben Tools.'
+			},
+			standard: {
+				q: 'Ist WebMCP ein W3C-Standard?',
+				a: 'Noch nicht. Es ist ein Entwurf der W3C Web Machine Learning Community Group (2. November 2026). Chrome und Edge bieten es als Origin Trial an, Mozilla ist neutral, und WebKit hat Einwände. webmcpx verfolgt den Entwurf und lädt das Polyfill des W3C, damit Ihre Tools schon jetzt funktionieren und mit der Spezifikation mitgehen.'
+			},
+			safe: {
+				q: 'Ist es sicher, Agenten die Tools meiner Website aufrufen zu lassen?',
+				a: 'Die Tools laufen im eigenen Tab des Nutzers, mit seinen eigenen Berechtigungen, und können nichts tun, was die Seite nicht ohnehin schon könnte. Die Standard-Tools von webmcpx lesen nur, was die Seite anzeigt, ohne unsichtbare Zeichen. Markieren Sie Ihre eigenen Tools, die etwas ändern, mit consequentialHint, damit Agenten zuerst beim Nutzer nachfragen können, und lassen Sie den Linter versteckte Anweisungen in Tool-Beschreibungen melden.'
 			},
 			mcp: {
 				q: 'Ist WebMCP dasselbe wie MCP?',

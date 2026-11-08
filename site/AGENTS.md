@@ -13,7 +13,8 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 ## Page narrative (keep this order; cut before adding)
 
 Scan your site (hero: the scan is its one action; under it, a quiet link for people with no site: "Set up your agent") → sites already on
-WebMCP (logos, each one scans live) → why WebMCP (four pains it removes, each backed by the draft or the
+WebMCP (logos, each one scans live) → what WebMCP is (`#what`: the draft's definition, register → list →
+call, the smallest real `registerTool()`) → why WebMCP (four pains it removes, each backed by the draft or the
 benchmark; the saving is computed) → proof (`#leaderboard`: pick a site by logo; biggest savings first) →
 then one section per audience, each standing on its own (nobody has to do both), agents first (it works on
 any site today, one command, the larger audience; their use is what pulls sites in):

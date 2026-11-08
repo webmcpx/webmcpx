@@ -10,6 +10,8 @@
 	import Globe from '@lucide/svelte/icons/globe';
 	import Lightbulb from '@lucide/svelte/icons/lightbulb';
 	import Scale from '@lucide/svelte/icons/scale';
+	import ShieldCheck from '@lucide/svelte/icons/shield-check';
+	import Landmark from '@lucide/svelte/icons/landmark';
 	import type { Component } from 'svelte';
 	import Section from '#lib/components/ui/Section.svelte';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
@@ -23,9 +25,11 @@
 		agent: Bot,
 		site: AppWindow,
 		browsers: Globe,
+		standard: Landmark,
+		safe: ShieldCheck,
 		mcp: Scale
 	};
-	const ORDER = ['what', 'agent', 'site', 'browsers', 'mcp'] as const;
+	const ORDER = ['what', 'agent', 'site', 'browsers', 'standard', 'safe', 'mcp'] as const;
 </script>
 
 <Section id="faq" kicker={m.kicker} title={m.title}>
@@ -33,7 +37,7 @@
 		{#each ORDER as id, i (id)}
 			{@const item = m.items[id]}
 			{@const Icon = ICONS[id]}
-			<li class={['min-w-0', id === 'agent' && 'lg:col-span-2']}>
+			<li class={['min-w-0', (id === 'agent' || id === 'safe') && 'lg:col-span-2']}>
 				<Reveal delay={(i % 3) * 70} class="h-full">
 					<div
 						class="flex h-full flex-col gap-3 rounded-card border-2 border-ink bg-card p-6 shadow-hard-sm transition-[translate,box-shadow] duration-200 ease-out-expo hover:-translate-y-1 hover:shadow-hard"

@@ -153,6 +153,97 @@ const en = {
 		shopifyBoth: 'Shopify on both'
 	},
 
+	what: {
+		// Kicker: max 20, small capitals.
+		kicker: 'What is WebMCP?',
+		// For people who use agents but don't build browsers: who is behind it (the spec's editors are from
+		// Google and Microsoft), what it fixes and why now. Only sourced facts: it is a W3C Community Group
+		// draft, not a W3C Recommendation. No final period.
+		title: 'WebMCP is becoming the web’s standard for AI agents. We’re all in',
+		lead: 'Engineers from Google and Microsoft are drafting it at the W3C, the body behind the web’s standards, and Chrome and Edge are already testing it. Today Claude Code, Codex and every other agent use your site like a screenshot: they look, guess which button to press and try again. Slow, costly, easy to break. With WebMCP your site tells agents exactly what they can do, like search, read or add to cart, and they just ask. We believe every site will speak it, so we built webmcpx to let yours do it today.',
+		// Three steps, each a short title (max 32) and one sentence.
+		steps: {
+			register: {
+				title: 'Your page registers tools',
+				text: 'A name, a description, an input schema and a function: the actions your buttons already run.'
+			},
+			list: {
+				title: 'The browser lists them',
+				text: 'An agent asks the page what it can do, with typed inputs and hints such as read-only.'
+			},
+			call: {
+				title: 'The agent calls them',
+				text: 'In the user’s own tab, with their session: no new server and no OAuth.'
+			}
+		},
+		// The bridge from the hand-written tool above to webmcpx: what it takes off your plate. Each claim
+		// is what the loader does today (README, "Loader"). No final period on titles.
+		webmcpx: {
+			// Who we are and why webmcpx exists, right under the logo (facts only: see the footer notices).
+			about:
+				'An independent, open-source community project, not affiliated with the W3C or any browser maker. We build webmcpx so WebMCP pays off today: sites get good tools without writing them, agents get the same answers for fewer tokens, and every number we publish can be rerun.',
+			title: 'Start with webmcpx today, on your site and in your agent',
+			lead: 'Everything that keeps WebMCP off most sites today, solved: one line on your site, one command in your agent, and nothing else to worry about.',
+			// The side-by-side that decides it: WebMCP by hand vs with webmcpx, one row per objection people
+			// raise. Each claim is what webmcpx does today (README, the loader and the bridge). Labels max 32.
+			compare: {
+				caption: 'WebMCP by hand compared with webmcpx',
+				hand: 'WebMCP by hand',
+				webmcpx: 'With webmcpx'
+			},
+			items: {
+				support: {
+					label: 'Browser support',
+					hand: 'Chrome only, behind a flag or an origin trial. Firefox and Safari: nothing yet.',
+					webmcpx:
+						'The official W3C polyfill wherever WebMCP is missing: your tools are there today in Chrome, Firefox and Safari.'
+				},
+				tools: {
+					label: 'Tools on every page',
+					hand: 'You design and write each one, page by page.',
+					webmcpx: 'Search, read and page context on every page from one script tag. No code.'
+				},
+				actions: {
+					label: 'Your own actions',
+					hand: 'Schemas, annotations and error handling, written by hand for each one.',
+					webmcpx: 'One tool() call, a hook for React, Vue or Svelte, or the forms you already have.'
+				},
+				agents: {
+					label: 'Reaching Claude Code, Codex, Cursor',
+					hand: 'Build your own bridge, or wait for each agent to support it.',
+					webmcpx:
+						'npx webmcpx mcp: each page’s tools, plus the standard ones on any site, even without webmcpx.'
+				},
+				draft: {
+					label: 'Spec changes',
+					hand: 'Follow every change to the draft and rewrite your tools.',
+					webmcpx: 'We track the W3C draft and move with it: you update one package.'
+				},
+				correct: {
+					label: 'Getting it right',
+					hand: 'Result shapes, error codes, output budgets, paging, annotations, hidden text: all yours to get right.',
+					webmcpx: 'Right by default, invisible characters stripped, plus a linter and a scanner to check.'
+				},
+				proof: {
+					label: 'Proof it pays off',
+					hand: 'Your guess.',
+					// The leaderboard's best case, always named as one: {best} is a ratio (62×), {site} and {model}
+					// where it was measured; all from the published runs.
+					webmcpx:
+						'Up to {best} fewer tokens for the same answers (best case: {site}, {model}). Every run is public: rerun it with one command.',
+					// Without a published run (no numbers to quote).
+					webmcpxPlain: 'Every question and every run is public: rerun it with one command.'
+				},
+				cost: {
+					label: 'Cost',
+					hand: 'Your time, on every page and every change.',
+					webmcpx: 'Free and open source (MIT), about 2.7 KB on load, no account, no server.'
+				}
+			},
+			sites: 'Add it to your site',
+			agents: 'Add it to your agent'
+		}
+	},
 	why: {
 		// Kicker: max 20, small capitals.
 		kicker: 'Why WebMCP?',
@@ -441,8 +532,8 @@ const en = {
 	fix: {
 		// max 40: names the audience, as the nav's "For sites" does.
 		title: 'For your site',
-		// max 70
-		lead: 'Two parts. Ask your coding agent (Claude Code, Codex, Cursor), or do it by hand.',
+		// max 170 (it runs the full content width)
+		lead: 'AI agents are already reading your pages. Give them real tools in two steps: ask your coding agent (Claude Code, Codex, Cursor), or do it by hand.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
 		facts: '~2.7 KB on load · Rust + WebAssembly · MIT license',
@@ -458,8 +549,8 @@ const en = {
 	agents: {
 		// max 45
 		title: 'For your agent',
-		// max 160
-		lead: 'Works on any site. On the sites we measured: the same answers, for a fraction of the tokens. The one MCP every Claude Code and Codex setup should have.',
+		// max 260 (it runs the full content width)
+		lead: 'Your agent reads every page the expensive way. Give it the page’s tools instead: on the sites we measured, the same answers for a fraction of the tokens. Works on any site, and it is the one MCP every Claude Code and Codex setup should have.',
 		// One line, linked to the leaderboard. {low} and {high} are ratios (2.4×, 5.7×): each model's
 		// tokens without WebMCP over its tokens with WebMCP, over its whole run. {n} (2 or more) is how many
 		// models are on the leaderboard. `best` is used when there is one model, or one did not save.
@@ -599,6 +690,14 @@ const en = {
 			browsers: {
 				q: 'Does it work in Firefox and Safari?',
 				a: 'Yes. Where a browser has no WebMCP of its own, webmcpx loads the W3C WebMCP polyfill, on HTTPS pages. Chrome, Firefox and Safari all see the same tools.'
+			},
+			standard: {
+				q: 'Is WebMCP a W3C standard?',
+				a: 'Not yet. It is a draft of the W3C Web Machine Learning Community Group (2 November 2026). Chrome and Edge run it in origin trials, Mozilla is neutral and WebKit has objections. webmcpx tracks the draft and loads the W3C polyfill, so your tools work now and move with the spec.'
+			},
+			safe: {
+				q: 'Is it safe to let agents call my site’s tools?',
+				a: 'The tools run in the user’s own tab, with the user’s own permissions, and can do nothing the page could not already do. webmcpx’s standard tools only read what the page shows, with invisible characters stripped. Mark your own tools that change things with consequentialHint so agents can ask the user first, and let the linter flag hidden instructions in tool descriptions.'
 			},
 			mcp: {
 				q: 'Is WebMCP the same as MCP?',

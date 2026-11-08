@@ -109,6 +109,89 @@ const id: Messages = {
 		shopifyBoth: 'Shopify di keduanya'
 	},
 
+	what: {
+		kicker: 'Apa itu WebMCP?',
+		title: 'WebMCP sedang menjadi standar web untuk agen AI. Kami all in',
+		lead: 'Para engineer dari Google dan Microsoft sedang menyusunnya di W3C, lembaga di balik standar-standar web, dan Chrome serta Edge sudah mengujinya. Saat ini, Claude Code, Codex, dan semua agen lain memakai situs Anda seperti screenshot: melihat, menebak tombol mana yang harus ditekan, lalu mencoba lagi. Lambat, mahal, gampang rusak. Dengan WebMCP, situs Anda memberi tahu agen dengan tepat apa yang bisa mereka lakukan, seperti mencari, membaca, atau menambahkan ke keranjang, dan mereka tinggal meminta. Kami yakin setiap situs akan berbicara WebMCP, jadi kami membuat webmcpx agar situs Anda bisa melakukannya hari ini.',
+		steps: {
+			register: {
+				title: 'Halaman Anda mendaftarkan tool',
+				text: 'Nama, deskripsi, input schema, dan sebuah fungsi: aksi yang selama ini sudah dijalankan tombol Anda.'
+			},
+			list: {
+				title: 'Browser menampilkan daftarnya',
+				text: 'Agent bertanya kepada halaman apa saja yang bisa dilakukannya, lengkap dengan input bertipe dan petunjuk seperti read-only.'
+			},
+			call: {
+				title: 'Agent memanggilnya',
+				text: 'Di tab milik pengguna sendiri, dengan sesinya: tanpa server baru dan tanpa OAuth.'
+			}
+		},
+		webmcpx: {
+			// Who we are and why webmcpx exists, right under the logo (facts only: see the footer notices).
+			about:
+				'Proyek komunitas independen dan open source, tidak berafiliasi dengan W3C maupun pembuat browser mana pun. Kami membuat webmcpx agar WebMCP bermanfaat hari ini: situs mendapat tool yang baik tanpa menulisnya, agen mendapat jawaban yang sama dengan lebih sedikit token, dan setiap angka yang kami terbitkan bisa diuji ulang.',
+			title: 'Mulai pakai webmcpx hari ini, di situs dan agen Anda',
+			lead: 'Semua yang hari ini membuat WebMCP belum ada di kebanyakan situs, beres: satu baris di situs Anda, satu perintah di agen Anda, dan tak ada lagi yang perlu dipikirkan.',
+			compare: {
+				caption: 'WebMCP manual dibandingkan dengan webmcpx',
+				hand: 'WebMCP manual',
+				webmcpx: 'Dengan webmcpx'
+			},
+			items: {
+				support: {
+					label: 'Dukungan browser',
+					hand: 'Hanya Chrome, lewat flag atau origin trial. Firefox dan Safari: belum ada.',
+					webmcpx:
+						'Polyfill resmi W3C di mana pun WebMCP belum ada: tool Anda sudah tersedia hari ini di Chrome, Firefox, dan Safari.'
+				},
+				tools: {
+					label: 'Tool di setiap halaman',
+					hand: 'Anda merancang dan menulis setiap tool, halaman demi halaman.',
+					webmcpx:
+						'Pencarian, pembacaan, dan konteks halaman di setiap halaman dari satu tag script. Tanpa kode.'
+				},
+				actions: {
+					label: 'Aksi Anda sendiri',
+					hand: 'Skema, anotasi, dan penanganan error, ditulis manual untuk masing-masing.',
+					webmcpx:
+						'Satu panggilan tool(), hook untuk React, Vue, atau Svelte, atau formulir yang sudah Anda punya.'
+				},
+				agents: {
+					label: 'Di Claude Code, Codex, Cursor',
+					hand: 'Membangun bridge sendiri, atau menunggu tiap agen mendukungnya.',
+					webmcpx:
+						'npx webmcpx mcp: tool tiap halaman, plus tool standar di situs mana pun, bahkan tanpa webmcpx.'
+				},
+				draft: {
+					label: 'Perubahan spesifikasi',
+					hand: 'Mengikuti setiap perubahan draf dan menulis ulang tool Anda.',
+					webmcpx: 'Kami mengikuti draf W3C dan bergerak bersamanya: Anda cukup memperbarui satu paket.'
+				},
+				correct: {
+					label: 'Membuatnya benar',
+					hand: 'Bentuk hasil, kode error, batas output, paginasi, anotasi, teks tersembunyi: semuanya tanggung jawab Anda.',
+					webmcpx:
+						'Benar sejak awal, karakter tak terlihat dibuang, plus linter dan scanner untuk mengeceknya.'
+				},
+				proof: {
+					label: 'Bukti bahwa ini sepadan',
+					hand: 'Tebakan Anda.',
+					webmcpx:
+						'Hingga {best} lebih sedikit token untuk jawaban yang sama (kasus terbaik: {site}, {model}). Setiap eksekusi terbuka untuk publik: jalankan ulang dengan satu perintah.',
+					webmcpxPlain:
+						'Setiap pertanyaan dan setiap eksekusi terbuka untuk publik: jalankan ulang dengan satu perintah.'
+				},
+				cost: {
+					label: 'Biaya',
+					hand: 'Waktu Anda, di setiap halaman dan setiap perubahan.',
+					webmcpx: 'Gratis dan open source (MIT), sekitar 2,7 KB saat dimuat, tanpa akun, tanpa server.'
+				}
+			},
+			sites: 'Pasang di situs Anda',
+			agents: 'Pasang di agent Anda'
+		}
+	},
 	why: {
 		kicker: 'Mengapa WebMCP?',
 		title: 'Apa yang didapat situs Anda dengan WebMCP',
@@ -329,7 +412,7 @@ const id: Messages = {
 
 	fix: {
 		title: 'Untuk situs Anda',
-		lead: 'Dua bagian. Minta agen coding Anda (Claude Code, Codex, Cursor), atau lakukan manual.',
+		lead: 'Agen AI sudah membaca halaman Anda. Beri mereka tool sungguhan dalam dua langkah: minta agen coding Anda (Claude Code, Codex, Cursor), atau lakukan manual.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		html: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, ia menambahkan polyfill W3C.',
@@ -341,7 +424,7 @@ const id: Messages = {
 
 	agents: {
 		title: 'Untuk agen Anda',
-		lead: 'Bekerja di situs mana pun. Di situs yang kami ukur: jawaban yang sama, dengan sebagian kecil token. MCP yang wajib ada di setiap setup Claude Code dan Codex.',
+		lead: 'Agen Anda membaca setiap halaman dengan cara yang mahal. Berikan saja tool milik halaman itu: di situs yang kami ukur, jawabannya sama dengan sebagian kecil token. Bekerja di situs mana pun, dan inilah MCP yang wajib ada di setiap setup Claude Code dan Codex.',
 		saving: {
 			range: { other: '{low} hingga {high} lebih sedikit token di semua {n} model peringkat.' },
 			best: 'Hingga {high} lebih sedikit token di peringkat.',
@@ -470,6 +553,14 @@ const id: Messages = {
 			browsers: {
 				q: 'Apakah bisa di Firefox dan Safari?',
 				a: 'Bisa. Jika browser belum punya WebMCP sendiri, webmcpx memuat polyfill WebMCP dari W3C di halaman HTTPS. Chrome, Firefox, dan Safari melihat tool yang sama.'
+			},
+			standard: {
+				q: 'Apakah WebMCP standar W3C?',
+				a: 'Belum. WebMCP adalah draf dari W3C Web Machine Learning Community Group (2 November 2026). Chrome dan Edge menjalankannya lewat origin trial, Mozilla bersikap netral, dan WebKit punya keberatan. webmcpx mengikuti draf itu dan memuat polyfill W3C, jadi tool Anda berfungsi sekarang dan ikut berubah bersama spesifikasinya.'
+			},
+			safe: {
+				q: 'Amankah membiarkan agen memanggil tool di situs saya?',
+				a: 'Tool berjalan di tab milik pengguna sendiri, dengan izin pengguna itu sendiri, dan tidak bisa melakukan apa pun yang memang tidak bisa dilakukan halaman. Tool standar webmcpx hanya membaca apa yang ditampilkan halaman, dengan karakter tak terlihat dibuang. Tandai tool Anda yang mengubah sesuatu dengan consequentialHint agar agen bisa bertanya dulu kepada pengguna, dan biarkan linter menandai instruksi tersembunyi di deskripsi tool.'
 			},
 			mcp: {
 				q: 'Apakah WebMCP sama dengan MCP?',

@@ -110,6 +110,87 @@ const es: Messages = {
 		shopifyBoth: 'Shopify con ambos'
 	},
 
+	what: {
+		kicker: '¿Qué es WebMCP?',
+		title: 'WebMCP se está convirtiendo en el estándar de la web para agentes de IA. Vamos con todo',
+		lead: 'Ingenieros de Google y Microsoft lo están redactando en el W3C, el organismo detrás de los estándares de la web, y Chrome y Edge ya lo están probando. Hoy, Claude Code, Codex y todos los demás agentes usan tu sitio como si fuera una captura de pantalla: miran, adivinan qué botón pulsar y vuelven a intentarlo. Lento, caro y fácil de romper. Con WebMCP, tu sitio les dice a los agentes exactamente qué pueden hacer, como buscar, leer o añadir al carrito, y ellos simplemente lo piden. Creemos que todos los sitios lo hablarán, así que creamos webmcpx para que el tuyo lo haga hoy mismo.',
+		steps: {
+			register: {
+				title: 'Tu página registra herramientas',
+				text: 'Un nombre, una descripción, un schema de entrada y una función: las acciones que tus botones ya ejecutan.'
+			},
+			list: {
+				title: 'El navegador las lista',
+				text: 'El agente le pregunta a la página qué puede hacer, con entradas tipadas e indicaciones como solo lectura.'
+			},
+			call: {
+				title: 'El agente las llama',
+				text: 'En la propia pestaña del usuario, con su sesión: sin servidor nuevo y sin OAuth.'
+			}
+		},
+		webmcpx: {
+			// Who we are and why webmcpx exists, right under the logo (facts only: see the footer notices).
+			about:
+				'Un proyecto comunitario independiente y de código abierto, sin vínculo con el W3C ni con ningún fabricante de navegadores. Hacemos webmcpx para que WebMCP valga la pena hoy: los sitios obtienen buenas herramientas sin escribirlas, los agentes llegan a las mismas respuestas con menos tokens, y cada número que publicamos se puede volver a ejecutar.',
+			title: 'Empieza hoy con webmcpx, en tu sitio y en tu agente',
+			lead: 'Todo lo que hoy deja a WebMCP fuera de la mayoría de los sitios, resuelto: una línea en tu sitio, un comando en tu agente y nada más de qué preocuparte.',
+			compare: {
+				caption: 'WebMCP a mano frente a webmcpx',
+				hand: 'WebMCP a mano',
+				webmcpx: 'Con webmcpx'
+			},
+			items: {
+				support: {
+					label: 'Soporte en navegadores',
+					hand: 'Solo Chrome, detrás de un flag o en origin trial. Firefox y Safari: nada todavía.',
+					webmcpx:
+						'El polyfill oficial del W3C donde falte WebMCP: tus herramientas ya están hoy en Chrome, Firefox y Safari.'
+				},
+				tools: {
+					label: 'Herramientas en cada página',
+					hand: 'Diseñas y escribes cada una, página a página.',
+					webmcpx:
+						'Búsqueda, lectura y contexto de la página en cada página, con una sola etiqueta script. Sin código.'
+				},
+				actions: {
+					label: 'Tus propias acciones',
+					hand: 'Esquemas, anotaciones y manejo de errores, escritos a mano para cada una.',
+					webmcpx: 'Una llamada a tool(), un hook para React, Vue o Svelte, o los formularios que ya tienes.'
+				},
+				agents: {
+					label: 'En Claude Code, Codex y Cursor',
+					hand: 'Construir tu propio puente o esperar a que cada agente lo soporte.',
+					webmcpx:
+						'npx webmcpx mcp: las herramientas de cada página, más las estándar en cualquier sitio, incluso sin webmcpx.'
+				},
+				draft: {
+					label: 'Cambios en la spec',
+					hand: 'Seguir cada cambio del borrador y reescribir tus herramientas.',
+					webmcpx: 'Seguimos el borrador del W3C y nos movemos con él: tú actualizas un paquete.'
+				},
+				correct: {
+					label: 'Hacerlo bien',
+					hand: 'Formas de resultado, códigos de error, presupuestos de salida, paginación, anotaciones, texto oculto: todo depende de ti.',
+					webmcpx:
+						'Correcto de serie, sin caracteres invisibles, y con un linter y un escáner para comprobarlo.'
+				},
+				proof: {
+					label: 'Pruebas de que compensa',
+					hand: 'Tu intuición.',
+					webmcpx:
+						'Hasta {best} menos tokens para las mismas respuestas (mejor caso: {site}, {model}). Cada ejecución es pública: repítela con un comando.',
+					webmcpxPlain: 'Cada pregunta y cada ejecución son públicas: repítelas con un comando.'
+				},
+				cost: {
+					label: 'Coste',
+					hand: 'Tu tiempo, en cada página y en cada cambio.',
+					webmcpx: 'Gratis y de código abierto (MIT), unos 2,7 KB al cargar, sin cuenta y sin servidor.'
+				}
+			},
+			sites: 'Añádelo a tu sitio',
+			agents: 'Añádelo a tu agente'
+		}
+	},
 	why: {
 		kicker: '¿Por qué WebMCP?',
 		title: 'Lo que gana tu sitio con WebMCP',
@@ -337,7 +418,7 @@ const es: Messages = {
 
 	fix: {
 		title: 'Para tu sitio',
-		lead: 'Dos partes. Pídeselo a tu agente de código (Claude Code, Codex, Cursor) o hazlo a mano.',
+		lead: 'Los agentes de IA ya están leyendo tus páginas. Dales herramientas de verdad en dos pasos: pídeselo a tu agente de código (Claude Code, Codex, Cursor) o hazlo a mano.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
 		facts: '~2,7 KB al cargar · Rust + WebAssembly · MIT',
 		html: 'Pégalo antes de {tag}. En navegadores sin WebMCP, añade el polyfill del W3C.',
@@ -349,7 +430,7 @@ const es: Messages = {
 
 	agents: {
 		title: 'Para tu agente',
-		lead: 'Funciona en cualquier sitio. En los sitios que medimos: las mismas respuestas, con una fracción de los tokens. El MCP que todo setup de Claude Code y Codex debería tener.',
+		lead: 'Tu agente lee cada página de la forma cara. Dale en su lugar las herramientas de la página: en los sitios que medimos, las mismas respuestas con una fracción de los tokens. Funciona en cualquier sitio, y es el MCP que todo setup de Claude Code y Codex debería tener.',
 		saving: {
 			range: { other: 'De {low} a {high} menos tokens en los {n} modelos del ranking.' },
 			best: 'Hasta {high} menos tokens en el ranking.',
@@ -476,6 +557,14 @@ const es: Messages = {
 			browsers: {
 				q: '¿Funciona en Firefox y Safari?',
 				a: 'Sí. Cuando el navegador no trae WebMCP propio, webmcpx carga el polyfill de WebMCP del W3C, en páginas HTTPS. Chrome, Firefox y Safari ven las mismas herramientas.'
+			},
+			standard: {
+				q: '¿WebMCP es un estándar del W3C?',
+				a: 'Todavía no. Es un borrador del W3C Web Machine Learning Community Group (2 de noviembre de 2026). Chrome y Edge lo ofrecen en origin trials, Mozilla se mantiene neutral y WebKit tiene objeciones. webmcpx sigue el borrador y carga el polyfill del W3C, así que tus herramientas funcionan ya y evolucionan con la spec.'
+			},
+			safe: {
+				q: '¿Es seguro dejar que los agentes llamen a las herramientas de mi sitio?',
+				a: 'Las herramientas se ejecutan en la propia pestaña del usuario, con sus propios permisos, y no pueden hacer nada que la página no pudiera hacer ya. Las herramientas estándar de webmcpx solo leen lo que muestra la página, sin caracteres invisibles. Marca con consequentialHint tus herramientas que cambian algo, para que los agentes puedan preguntar antes al usuario, y deja que el linter detecte instrucciones ocultas en las descripciones de las herramientas.'
 			},
 			mcp: {
 				q: '¿WebMCP es lo mismo que MCP?',

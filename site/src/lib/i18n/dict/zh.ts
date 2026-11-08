@@ -109,6 +109,84 @@ const zh: Messages = {
 		shopifyBoth: 'Shopify 两者并用'
 	},
 
+	what: {
+		kicker: 'WebMCP 是什么？',
+		title: 'WebMCP 正在成为\u200b面向 AI 智能体的 Web 标准。我们全力投入',
+		lead: 'Google 和 Microsoft 的工程师正在 W3C（制定 Web 标准的组织）起草它，Chrome 和 Edge 已经在测试。如今，Claude Code、Codex 以及其他所有智能体使用你的网站，就像在看一张截图：看一看，猜该点哪个按钮，不行再试。又慢又贵，还容易出错。有了 WebMCP，你的网站会直接告诉智能体它们能做什么，比如搜索、读取或加入购物车，智能体只需开口请求。我们相信每个网站都会支持 WebMCP，所以做了 webmcpx，让你的网站今天就能做到。',
+		steps: {
+			register: {
+				title: '页面注册工具',
+				text: '名称、描述、输入 schema 和一个函数：就是你的按钮已经在执行的那些操作。'
+			},
+			list: {
+				title: '浏览器列出工具',
+				text: '智能体询问页面能做什么，输入带类型，还附有“只读”等提示。'
+			},
+			call: {
+				title: '智能体调用工具',
+				text: '就在用户自己的标签页里，沿用用户的会话：无需新服务器，也无需 OAuth。'
+			}
+		},
+		webmcpx: {
+			// Who we are and why webmcpx exists, right under the logo (facts only: see the footer notices).
+			about:
+				'一个独立的开源社区项目，与 W3C 和任何浏览器厂商都没有关联。我们做 webmcpx，是为了让 WebMCP 今天就有用：网站无需自己编写就能拥有好工具，智能体用更少的 token 得到同样的答案，我们发布的每个数字都可以复现。',
+			title: '今天就用 webmcpx，\u200b用在网站上，\u200b也用在智能体里',
+			lead: '今天让 WebMCP 难以进入大多数网站的问题，都已解决：网站上加一行代码，智能体里运行一条命令，其余都不用操心。',
+			compare: {
+				caption: '手写 WebMCP 与 webmcpx 对比',
+				hand: '手写 WebMCP',
+				webmcpx: '用 webmcpx'
+			},
+			items: {
+				support: {
+					label: '浏览器支持',
+					hand: '只有 Chrome，而且要开 flag 或加入 origin trial。Firefox 和 Safari：暂无。',
+					webmcpx:
+						'缺少 WebMCP 时加载 W3C 官方 polyfill：你的工具今天就能在 Chrome、Firefox 和 Safari 中使用。'
+				},
+				tools: {
+					label: '每个页面都有工具',
+					hand: '你要逐页设计、逐个编写。',
+					webmcpx: '一个 script 标签，每个页面都有搜索、读取和页面上下文工具。无需写代码。'
+				},
+				actions: {
+					label: '你自己的操作',
+					hand: 'schema、注解和错误处理，每个都要手写。',
+					webmcpx: '一次 tool() 调用、一个 React、Vue 或 Svelte 的 hook，或者直接用你现有的表单。'
+				},
+				agents: {
+					label: '接入 Claude Code、Codex、Cursor',
+					hand: '自己搭桥接，或者等每个智能体分别支持。',
+					webmcpx: 'npx webmcpx mcp：每个页面的工具，外加任何网站上的标准工具，即使网站没装 webmcpx。'
+				},
+				draft: {
+					label: '规范变更',
+					hand: '跟进草案的每次变更，再重写你的工具。',
+					webmcpx: '我们跟踪 W3C 草案并随之更新：你只需升级一个包。'
+				},
+				correct: {
+					label: '做对细节',
+					hand: '结果结构、错误码、输出预算、分页、注解、隐藏文本：全靠你自己做对。',
+					webmcpx: '默认就正确，去除不可见字符，还有 linter 和扫描器帮你检查。'
+				},
+				proof: {
+					label: '值不值得的证据',
+					hand: '全凭猜测。',
+					webmcpx:
+						'同样的答案，token 最多少用 {best}（最佳情况：{site}，{model}）。每次运行都已公开：一条命令即可复现。',
+					webmcpxPlain: '每个问题、每次运行都已公开：一条命令即可复现。'
+				},
+				cost: {
+					label: '成本',
+					hand: '你的时间，每个页面、每次变更都要花。',
+					webmcpx: '免费开源（MIT），加载时约 2.7 KB，无需账号，无需服务器。'
+				}
+			},
+			sites: '添加到你的网站',
+			agents: '添加到你的智能体'
+		}
+	},
 	why: {
 		kicker: '为什么用 WebMCP？',
 		title: '你的网站从 WebMCP 获得什么',
@@ -323,7 +401,7 @@ const zh: Messages = {
 
 	fix: {
 		title: '给你的网站',
-		lead: '两部分。让你的编程智能体（Claude Code、Codex、Cursor）来做，或手动完成。',
+		lead: 'AI 智能体已经在读你的页面了。分两步给它们真正的工具：让你的编程智能体（Claude Code、Codex、Cursor）来做，或手动完成。',
 		alternatives: { npm: 'npm', agent: '智能体' },
 		facts: '加载约 2.7 KB · Rust + WebAssembly · MIT 许可证',
 		html: '粘贴到 {tag} 之前。浏览器没有 WebMCP 时，它会补上 W3C polyfill。',
@@ -332,7 +410,7 @@ const zh: Messages = {
 
 	agents: {
 		title: '给你的智能体',
-		lead: '适用于任何网站。在我们测量的网站上：答案相同，token 只需一小部分。每个 Claude Code 和 Codex 环境都该装的 MCP。',
+		lead: '你的智能体在用最费钱的方式读每个页面。不如把页面的工具交给它：在我们测量的网站上，答案相同，token 只需一小部分。适用于任何网站，是每个 Claude Code 和 Codex 环境都该装的 MCP。',
 		saving: {
 			range: { other: '排行榜全部 {n} 个模型，token 减少 {low} 到 {high}。' },
 			best: '排行榜上，token 最多减少 {high}。',
@@ -448,6 +526,14 @@ const zh: Messages = {
 			browsers: {
 				q: '能在 Firefox 和 Safari 中用吗？',
 				a: '能。浏览器本身没有 WebMCP 时，webmcpx 会在 HTTPS 页面上加载 W3C 的 WebMCP polyfill。Chrome、Firefox 和 Safari 看到的都是同一套工具。'
+			},
+			standard: {
+				q: 'WebMCP 是 W3C 标准吗？',
+				a: '还不是。它是 W3C Web Machine Learning 社区组的草案（2026 年 11 月 2 日）。Chrome 和 Edge 以 origin trial 形式提供，Mozilla 持中立态度，WebKit 提出了异议。webmcpx 跟踪草案并加载 W3C 的 polyfill，所以你的工具现在就能用，并随规范一起演进。'
+			},
+			safe: {
+				q: '让智能体调用我网站的工具安全吗？',
+				a: '工具在用户自己的标签页中运行，使用用户自己的权限，做不了页面本来就做不了的事。webmcpx 的标准工具只读取页面显示的内容，并去除不可见字符。给会改动内容的自有工具标注 consequentialHint，智能体就能先征询用户；再让 linter 标出工具描述中的隐藏指令。'
 			},
 			mcp: {
 				q: 'WebMCP 和 MCP 是一回事吗？',

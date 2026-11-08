@@ -107,6 +107,84 @@ const ja: Messages = {
 		shopifyBoth: 'Shopify は両方を採用'
 	},
 
+	what: {
+		kicker: 'WebMCP とは',
+		title: 'WebMCP は AI エージェントのための Web 標準になりつつある。私たちは全力で賭ける',
+		lead: 'Google と Microsoft のエンジニアが、Web 標準を策定する団体である W3C でドラフトを書いており、Chrome と Edge ではすでにテストが始まっています。今、Claude Code や Codex をはじめとするあらゆるエージェントは、あなたのサイトをスクリーンショットのように扱っています。眺めて、押すべきボタンを推測し、また試す。遅く、コストがかかり、壊れやすい。WebMCP があれば、サイトが「検索」「読み取り」「カートに追加」など、できることをエージェントに正確に伝え、エージェントはそれを頼むだけです。私たちは、すべてのサイトが WebMCP を話すようになると信じています。だから、あなたのサイトが今日からそうできるよう webmcpx を作りました。',
+		steps: {
+			register: {
+				title: 'ページがツールを登録',
+				text: '名前、説明、入力スキーマ、そして関数。ボタンがすでに実行しているアクションそのものです。'
+			},
+			list: {
+				title: 'ブラウザーが一覧にする',
+				text: 'エージェントはページに何ができるかを尋ねます。入力は型付きで、読み取り専用などのヒントも付きます。'
+			},
+			call: {
+				title: 'エージェントが呼び出す',
+				text: 'ユーザー自身のタブで、そのセッションのまま動きます。新しいサーバーも OAuth も不要です。'
+			}
+		},
+		webmcpx: {
+			// Who we are and why webmcpx exists, right under the logo (facts only: see the footer notices).
+			about:
+				'W3C やブラウザベンダーとは無関係の、独立したオープンソースのコミュニティプロジェクトです。webmcpx は、WebMCP を今日から役立つものにするために作っています。サイトは自分で書かずに良いツールを持て、エージェントは少ないトークンで同じ答えにたどり着き、公開する数値はすべて再現できます。',
+			title: '今日から webmcpx を、サイトにもエージェントにも',
+			lead: '今日、WebMCP がほとんどのサイトに載らない理由を、まとめて解決。サイトに 1 行、エージェントにコマンドを 1 つ。ほかに気にすることはありません。',
+			compare: {
+				caption: '手書きの WebMCP と webmcpx の比較',
+				hand: '手書きの WebMCP',
+				webmcpx: 'webmcpx なら'
+			},
+			items: {
+				support: {
+					label: 'ブラウザー対応',
+					hand: 'Chrome のみ、それもフラグかオリジントライアル経由。Firefox と Safari はまだ未対応。',
+					webmcpx:
+						'WebMCP がない環境では W3C 公式のポリフィルを読み込むので、Chrome、Firefox、Safari で今日からツールが使えます。'
+				},
+				tools: {
+					label: '全ページにツール',
+					hand: 'ページごとに、1 つずつ設計して書く。',
+					webmcpx: 'script タグ 1 つで、全ページに検索・読み取り・ページコンテキストのツール。コード不要。'
+				},
+				actions: {
+					label: '独自のアクション',
+					hand: 'スキーマ、アノテーション、エラー処理を 1 つずつ手書き。',
+					webmcpx: 'tool() の呼び出し 1 回、React・Vue・Svelte 用のフック、または既存のフォームで。'
+				},
+				agents: {
+					label: 'Claude Code、Codex、Cursor から',
+					hand: 'ブリッジを自作するか、各エージェントの対応を待つ。',
+					webmcpx: 'npx webmcpx mcp：各ページのツールに加え、webmcpx のないサイトでも標準ツールが使えます。'
+				},
+				draft: {
+					label: '仕様の変更',
+					hand: 'ドラフトの変更をすべて追い、ツールを書き直す。',
+					webmcpx: 'W3C のドラフトを追いかけて追従します。あなたはパッケージを 1 つ更新するだけ。'
+				},
+				correct: {
+					label: '正しく作る',
+					hand: '結果の形式、エラーコード、出力の上限、ページング、アノテーション、隠しテキスト。すべて自分で正しく。',
+					webmcpx: '最初から正しく、不可視文字も除去。確認用のリンターとスキャナー付き。'
+				},
+				proof: {
+					label: '効果の裏付け',
+					hand: '勘に頼るだけ。',
+					webmcpx:
+						'同じ答えに使うトークンが最大 {best} 少なく済みます（最良のケース：{site}、{model}）。実行はすべて公開済みで、コマンド 1 つで再実行できます。',
+					webmcpxPlain: '質問も実行もすべて公開しています。コマンド 1 つで再実行できます。'
+				},
+				cost: {
+					label: 'コスト',
+					hand: 'ページごと、変更のたびにかかるあなたの時間。',
+					webmcpx: '無料のオープンソース（MIT）。読み込み時は約 2.7 KB、アカウントもサーバーも不要。'
+				}
+			},
+			sites: 'サイトに導入する',
+			agents: 'エージェントに導入する'
+		}
+	},
 	why: {
 		kicker: 'なぜ WebMCP なのか',
 		title: 'WebMCPでサイトが得るもの',
@@ -326,7 +404,7 @@ const ja: Messages = {
 
 	fix: {
 		title: 'あなたのサイトに',
-		lead: '2 つのパート。コーディングエージェント (Claude Code、Codex、Cursor) に頼むか、手で追加。',
+		lead: 'AI エージェントは、すでにあなたのページを読んでいます。2 つのステップで本物のツールを渡しましょう。コーディングエージェント（Claude Code、Codex、Cursor）に頼むか、手で追加します。',
 		alternatives: { npm: 'npm を使う場合', agent: 'エージェント' },
 		facts: '読込時 ~2.7 KB · Rust + WebAssembly · MIT License',
 		html: '{tag} の前に貼るだけ。WebMCP のないブラウザには W3C のポリフィルを追加します。',
@@ -335,7 +413,7 @@ const ja: Messages = {
 
 	agents: {
 		title: 'あなたのエージェントに',
-		lead: 'どのサイトでも動作。計測したサイトでは、同じ回答をわずかなトークンで。Claude CodeとCodexのすべての環境に入れるべきMCPです。',
+		lead: 'エージェントは、いちばんコストのかかる方法でページを読んでいます。代わりにページのツールを渡しましょう。計測したサイトでは、同じ回答をわずかなトークンで得られました。どのサイトでも動作し、すべての Claude Code と Codex の環境に入れるべき MCP です。',
 		saving: {
 			range: { other: 'リーダーボードの全 {n} モデルで、トークンを {low}〜{high} 削減。' },
 			best: 'リーダーボードで、トークンを最大 {high} 削減。',
@@ -463,6 +541,14 @@ const ja: Messages = {
 			browsers: {
 				q: 'Firefox や Safari でも動きますか？',
 				a: 'はい。ブラウザ自体に WebMCP がない場合は、webmcpx が HTTPS ページで W3C の WebMCP ポリフィルを読み込みます。Chrome、Firefox、Safari のどれでも同じツールが見えます。'
+			},
+			standard: {
+				q: 'WebMCP は W3C 標準？',
+				a: 'まだです。W3C の Web Machine Learning Community Group のドラフト（2026 年 11 月 2 日）です。Chrome と Edge はオリジントライアルで提供し、Mozilla は中立、WebKit は異議を唱えています。webmcpx はドラフトに追従し、W3C のポリフィルを読み込むので、ツールは今すぐ動き、仕様の変更にもついていきます。'
+			},
+			safe: {
+				q: 'エージェントにサイトのツールを呼ばせても安全？',
+				a: 'ツールはユーザー自身のタブで、ユーザー自身の権限のもとで動き、ページがもともとできないことは何もできません。webmcpx の標準ツールはページに表示されている内容を読むだけで、不可視文字は除去されます。何かを変更する独自ツールに consequentialHint を付ければ、エージェントは先にユーザーに確認できます。ツールの説明に隠された指示は、リンターで検出しましょう。'
 			},
 			mcp: {
 				q: 'WebMCP と MCP は同じもの？',
