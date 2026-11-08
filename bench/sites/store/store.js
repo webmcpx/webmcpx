@@ -1,5 +1,5 @@
 // Kiln & Co: a small store whose UI and WebMCP tools call the same functions.
-import { register } from "/webmcpx/dist/index.js";
+import { register } from "/webmcpx/src/index.js";
 
 const PRODUCTS = [
   ["MUG-01", "Speckled Mug", "mug", "white", 24, 12, ""],

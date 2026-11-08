@@ -114,10 +114,10 @@ async fn run_one<F: Fn(usize, &[Message]) -> Reply + Send + Sync + 'static>(
     Some((runs.into_iter().next().unwrap(), model))
 }
 
-/// The npm package as the pages load it: the wasm module and the minified dist/.
+/// The npm package as the pages load it: the wasm module and the minified drop-in script.
 fn built(root: &std::path::Path) -> bool {
     let package = root.join("packages/webmcpx");
-    package.join("wasm/webmcpx_wasm_bg.wasm").is_file() && package.join("dist/index.js").is_file()
+    package.join("wasm/webmcpx_wasm_bg.wasm").is_file() && package.join("dist/auto.js").is_file()
 }
 
 #[tokio::test]

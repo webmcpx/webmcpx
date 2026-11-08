@@ -2,7 +2,8 @@
 //! the scan API.
 //!
 //! - `/sites/<name>/`  → `bench/sites/<name>/`
-//! - `/webmcpx/dist/*`, `/webmcpx/wasm/*` → the npm package as shipped (the code under test, minified)
+//! - `/webmcpx/src/*`, `/webmcpx/dist/*`, `/webmcpx/wasm/*` → the npm package as shipped (the code under
+//!   test: what npm imports resolve to, and the minified drop-in script)
 //! - `/api/scan?url=`  → [`scan::Report`] as JSON (when a scanner is given)
 //! - `/`               → `site/build/` (the landing, after `just site`)
 
@@ -49,6 +50,7 @@ pub fn router_with(
     let site = root.join("site/build");
     let app = Router::new()
         .nest_service("/sites", ServeDir::new(root.join("bench/sites")))
+        .nest_service("/webmcpx/src", ServeDir::new(package.join("src")))
         .nest_service("/webmcpx/dist", ServeDir::new(package.join("dist")))
         .nest_service("/webmcpx/wasm", ServeDir::new(package.join("wasm")));
     let Some(scanner) = scanner else {

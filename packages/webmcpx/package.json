@@ -26,20 +26,20 @@
   "exports": {
     ".": {
       "types": "./src/index.d.ts",
-      "default": "./dist/index.js"
+      "default": "./src/index.js"
     },
-    "./auto": "./dist/auto.js",
+    "./auto": "./src/auto.js",
     "./react": {
       "types": "./src/react.d.ts",
-      "default": "./dist/react.js"
+      "default": "./src/react.js"
     },
     "./vue": {
       "types": "./src/vue.d.ts",
-      "default": "./dist/vue.js"
+      "default": "./src/vue.js"
     },
     "./svelte": {
       "types": "./src/svelte.d.ts",
-      "default": "./dist/svelte.js"
+      "default": "./src/svelte.js"
     }
   },
   "types": "./src/index.d.ts",

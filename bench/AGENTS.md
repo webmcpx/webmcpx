@@ -3,7 +3,7 @@
 The harness is `crates/webmcpx-bench`; this directory holds what it runs.
 
 - `sites/<name>/index.html` — a fixture site served at `/sites/<name>/`. Sites import the loader from
-  `/webmcpx/dist/index.js` (the code under test). Custom tools follow the webmcpx envelope contract and
+  `/webmcpx/src/index.js` (the code under test). Custom tools follow the webmcpx envelope contract and
   call the same functions as the UI.
 - `tasks/<id>.toml` — one task: `site` (a fixture) or `url` (a live page), `prompt`, optional `max_steps`, and a `[check]` with
   `answer_contains` (all), `answer_any` (at least one), `answer_excludes` (none) and/or `state` (a JS expression that must be truthy after the run).
