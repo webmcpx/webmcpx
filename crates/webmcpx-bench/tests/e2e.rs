@@ -857,6 +857,48 @@ fn the_generic_preview_image_ships_with_the_site() {
     assert_eq!((w, h), (1200, 630));
 }
 
+/// WebMCP exists only in secure contexts: the same page has tools on loopback (secure) and none over
+/// plain http on another host, as in the browsers.
+#[tokio::test]
+async fn an_insecure_page_has_no_model_context() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(|| {
+            std::future::ready(axum::response::Html(
+                r#"<!doctype html><script>document.modelContext?.registerTool({ name: "t", description: "d", execute() {} });</script>"#,
+            ))
+        }),
+    ))
+    .await;
+    let browser = Browser::launch_with(
+        None,
+        &["--host-resolver-rules=MAP insecure.test 127.0.0.1".to_owned()],
+    )
+    .await
+    .unwrap();
+    let page = browser
+        .page(&webmcpx_bench::arm::INIT_SCRIPTS)
+        .await
+        .unwrap();
+    let wait = std::time::Duration::from_millis(500);
+    page.goto(&format!("http://{site}/")).await.unwrap();
+    let secure = webmcpx_bench::arm::registered_tools(&page, wait)
+        .await
+        .unwrap();
+    assert_eq!(secure.len(), 1);
+    page.goto(&format!("http://insecure.test:{}/", site.port()))
+        .await
+        .unwrap();
+    let insecure = webmcpx_bench::arm::registered_tools(&page, wait)
+        .await
+        .unwrap();
+    assert!(insecure.is_empty(), "{insecure:?}");
+}
+
 #[tokio::test]
 async fn scan_api_refuses_private_hosts_by_default() {
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));

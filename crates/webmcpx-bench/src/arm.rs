@@ -169,7 +169,8 @@ pub async fn registered_tools(page: &Page, wait: Duration) -> Result<Vec<Value>>
     let deadline = tokio::time::Instant::now() + wait;
     while tokio::time::Instant::now() < deadline {
         // One bounded JSON string (host.js): parsed here, never trusted to be small by shape alone.
-        let now = page.eval("__webmcpHost.list()").await?;
+        // No host on an insecure page (host.js): that page has no tools.
+        let now = page.eval("globalThis.__webmcpHost?.list() ?? null").await?;
         let now: Value = match now.as_str() {
             Some(text) => serde_json::from_str(text).context("the tool list is not JSON")?,
             None if now.is_null() => Value::Null,

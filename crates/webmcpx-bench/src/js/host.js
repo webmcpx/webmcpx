@@ -3,6 +3,9 @@
 // Real sites still use origin-trial APIs, so the same object is also `navigator.modelContext` and
 // accepts the removed `provideContext`/`clearContext` (they replace the provided set).
 (() => {
+  // Like the browsers (and the W3C polyfill), WebMCP exists only in secure contexts: an http:// page
+  // gets no modelContext, so it can't look agent-ready to the scanner when it isn't to an agent.
+  if (!globalThis.isSecureContext) return;
   // Captured before any page script runs: list() must stay bounded even if the page redefines
   // JSON.stringify or String.prototype.slice.
   const { apply } = Reflect;
