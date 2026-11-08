@@ -98,9 +98,17 @@ async fn page(
     {
         let origin = origin(&headers);
         let report = state.scanner.recent(&target);
+        let kept = report
+            .is_none()
+            .then(|| state.scanner.latest(&target))
+            .flatten();
+        let summary = report
+            .as_ref()
+            .map(crate::card::Summary::of)
+            .or_else(|| kept.as_ref().map(crate::scan::Kept::summary));
         return (
             [(axum::http::header::CONTENT_TYPE, "text/html; charset=utf-8")],
-            share_page(&html, &origin, &target, report.as_ref()),
+            share_page(&html, &origin, &target, summary),
         )
             .into_response();
     }
@@ -197,13 +205,12 @@ pub fn share_page(
     html: &str,
     origin: &str,
     target: &str,
-    report: Option<&crate::scan::Report>,
+    summary: Option<crate::card::Summary<'_>>,
 ) -> String {
     let host = crate::card::host_of(target);
-    let (title, description) = match report {
-        Some(r) => {
-            let s = crate::card::Summary::of(r);
-            let verdict = match r.verdict {
+    let (title, description) = match summary {
+        Some(s) => {
+            let verdict = match s.verdict {
                 crate::scan::Verdict::Ready => "Agent-ready",
                 crate::scan::Verdict::Issues => "Almost agent-ready",
                 crate::scan::Verdict::Missing => "Not agent-ready yet",
@@ -219,7 +226,7 @@ pub fn share_page(
     let encoded: String = reqwest::Url::parse_with_params("http://x/", [("url", target)])
         .map(|u| u.query().unwrap_or_default().to_owned())
         .unwrap_or_default();
-    let image = if report.is_some() {
+    let image = if summary.is_some() {
         format!("{origin}/og/scan.png?{encoded}")
     } else {
         format!("{origin}/og.png")
@@ -265,10 +272,21 @@ struct CardQuery {
 
 /// The share card of a site scanned in the last minutes; the generic card otherwise.
 async fn scan_card(State(state): State<ScanState>, Query(q): Query<CardQuery>) -> Response {
-    let Some(report) = state.scanner.recent(&q.url) else {
+    // The report while it is cached, else what the site's latest scan this week found (Save PNG on a result
+    // left open, a link shared later): the generic image only for a site never scanned.
+    let report = state.scanner.recent(&q.url);
+    let kept = report
+        .is_none()
+        .then(|| state.scanner.latest(&q.url))
+        .flatten();
+    let summary = report
+        .as_ref()
+        .map(crate::card::Summary::of)
+        .or_else(|| kept.as_ref().map(crate::scan::Kept::summary));
+    let Some(summary) = summary else {
         return axum::response::Redirect::temporary("/og.png").into_response();
     };
-    match state.scanner.card(&report).await {
+    match state.scanner.card_of(summary).await {
         Ok(png) => (
             [
                 (axum::http::header::CONTENT_TYPE, "image/png"),

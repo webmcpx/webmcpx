@@ -234,6 +234,32 @@ type SharedScan = Arc<OnceCell<Result<Report, ScanError>>>;
 /// Shared scans by URL, with how many callers are waiting on each.
 type Inflight = std::sync::Mutex<HashMap<String, (SharedScan, usize)>>;
 
+/// A site's latest scan in a few numbers, kept a week (a few dozen bytes per site): its badge, and its share
+/// card and link preview after the full report has left the cache.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Kept {
+    pub host: String,
+    pub verdict: Verdict,
+    pub tools: usize,
+    pub page_tokens: usize,
+    pub score: u8,
+    pub lint_errors: bool,
+    at: Instant,
+}
+
+impl Kept {
+    pub fn summary(&self) -> crate::card::Summary<'_> {
+        crate::card::Summary {
+            host: &self.host,
+            verdict: self.verdict,
+            tools: self.tools,
+            page_tokens: self.page_tokens,
+            score: self.score,
+            lint_errors: self.lint_errors,
+        }
+    }
+}
+
 /// Shares one headless Chrome (behind the egress proxy) between scans.
 pub struct Scanner {
     chrome: Option<PathBuf>,
@@ -253,7 +279,9 @@ pub struct Scanner {
     /// Scans in flight by URL: callers asking for the same URL meanwhile share the one result.
     inflight: Inflight,
     /// Each site's latest verdict, by host, for its badge.
-    verdicts: std::sync::Mutex<HashMap<String, (Verdict, Instant)>>,
+    verdicts: std::sync::Mutex<HashMap<String, Kept>>,
+    /// Each scanned URL's latest summary, for its share card and link preview after the report expires.
+    summaries: std::sync::Mutex<HashMap<String, Kept>>,
     /// Rendered share cards, by what they show.
     cards: std::sync::Mutex<HashMap<String, Arc<Vec<u8>>>>,
     /// Cards render one at a time; a few more requests may wait (the rest get the generic image).
@@ -294,6 +322,7 @@ impl Scanner {
             cache: std::sync::Mutex::default(),
             inflight: std::sync::Mutex::default(),
             verdicts: std::sync::Mutex::default(),
+            summaries: std::sync::Mutex::default(),
             cards: std::sync::Mutex::default(),
             card_turn: Mutex::new(()),
             card_waiting: Semaphore::new(CARD_WAITERS),
@@ -367,28 +396,60 @@ impl Scanner {
 
     /// The latest verdict for `host` (without `www.`), if it was scanned this week.
     pub fn verdict_for(&self, host: &str) -> Option<Verdict> {
+        self.kept(host).map(|k| k.verdict)
+    }
+
+    /// What the latest scan of the URL `raw` found, if it was scanned this week: what its share card and
+    /// link preview show once the report itself has left the cache (per URL: another page of the same site
+    /// is another scan).
+    pub fn latest(&self, raw: &str) -> Option<Kept> {
+        let key = parse_url(raw).ok()?;
+        let summaries = lock(&self.summaries);
+        let kept = summaries.get(key.as_str())?;
+        (kept.at.elapsed() < VERDICT_FOR).then(|| kept.clone())
+    }
+
+    fn kept(&self, host: &str) -> Option<Kept> {
         let host = host
             .strip_prefix("www.")
             .unwrap_or(host)
             .to_ascii_lowercase();
         let verdicts = lock(&self.verdicts);
-        let (verdict, at) = verdicts.get(&host)?;
-        (at.elapsed() < VERDICT_FOR).then_some(*verdict)
+        let kept = verdicts.get(&host)?;
+        (kept.at.elapsed() < VERDICT_FOR).then(|| kept.clone())
     }
 
     fn remember(&self, key: String, report: Report) {
         {
             let mut verdicts = lock(&self.verdicts);
             if verdicts.len() >= VERDICTS_MAX {
-                verdicts.retain(|_, (_, at)| at.elapsed() < VERDICT_FOR);
+                verdicts.retain(|_, k| k.at.elapsed() < VERDICT_FOR);
                 if verdicts.len() >= VERDICTS_MAX {
                     verdicts.clear();
                 }
             }
+            let s = crate::card::Summary::of(&report);
+            let kept = Kept {
+                host: s.host.to_owned(),
+                verdict: s.verdict,
+                tools: s.tools,
+                page_tokens: s.page_tokens,
+                score: s.score,
+                lint_errors: s.lint_errors,
+                at: Instant::now(),
+            };
             for url in [report.url.as_str(), report.final_url.as_str()] {
                 let host = crate::card::host_of(url).to_ascii_lowercase();
-                verdicts.insert(host, (report.verdict, Instant::now()));
+                verdicts.insert(host, kept.clone());
             }
+            let mut summaries = lock(&self.summaries);
+            if summaries.len() >= VERDICTS_MAX {
+                summaries.retain(|_, k| k.at.elapsed() < VERDICT_FOR);
+                if summaries.len() >= VERDICTS_MAX {
+                    summaries.clear();
+                }
+            }
+            summaries.insert(key.clone(), kept);
         }
         lock(&self.cache).put(key, report, CACHE_BYTES);
     }
@@ -421,7 +482,14 @@ impl Scanner {
 
     /// The share card (1200×630 PNG) for a report, rendered by the scan browser and kept.
     pub async fn card(&self, report: &Report) -> Result<Arc<Vec<u8>>, ScanError> {
-        let summary = crate::card::Summary::of(report);
+        self.card_of(crate::card::Summary::of(report)).await
+    }
+
+    /// The share card for what a scan found (a report's summary, or a site's [`Kept`] one).
+    pub async fn card_of(
+        &self,
+        summary: crate::card::Summary<'_>,
+    ) -> Result<Arc<Vec<u8>>, ScanError> {
         let key = format!("{summary:?}");
         if let Some(png) = lock(&self.cards).get(&key) {
             return Ok(Arc::clone(png));
@@ -1224,6 +1292,31 @@ mod tests {
             &json!({ "readOnlyHint": true }),
         )];
         report(url, url.to_owned(), "", &tools, 0, &Checks::default())
+    }
+
+    /// After the report leaves the cache, its site's card still shows that scan (not the generic image).
+    #[test]
+    fn a_site_keeps_its_summary_after_the_report_expires() {
+        let scanner = Scanner::new(None, false);
+        let docs = sized_report("https://a.example/docs", 10);
+        // Another page of the same site, scanned later, with a different result.
+        let mut login = sized_report("https://a.example/login", 10);
+        login.tools.clear();
+        login.score = 20;
+        login.verdict = Verdict::Missing;
+        scanner.remember("https://a.example/docs".into(), docs.clone());
+        scanner.remember("https://a.example/login".into(), login.clone());
+        lock(&scanner.cache).entries.clear();
+        assert!(scanner.recent("https://a.example/docs").is_none());
+        let kept = scanner
+            .latest("https://a.example/docs")
+            .expect("kept a week");
+        assert_eq!(kept.summary(), crate::card::Summary::of(&docs));
+        assert_eq!(
+            scanner.latest("https://a.example/login").unwrap().summary(),
+            crate::card::Summary::of(&login)
+        );
+        assert!(scanner.latest("https://a.example/other").is_none());
     }
 
     #[test]
