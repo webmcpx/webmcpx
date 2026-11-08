@@ -70,6 +70,8 @@ tests/                       Playwright e2e against the prerendered build
 
 ## Design system rules
 
+- Title punctuation: one rule. Section titles (h2, h3) are labels, with no final period, in every
+  language; only a page's own h1 statement (the hero, the brand page) ends with one.
 - Alignment: one rule. Section titles, leads and content are left-aligned (one left edge to scan, as long
   centered text reads worse); only the hero and the logo wall are centered.
 - Wide screens use the width: a section's explanation on the left (4 or 5 of 12 columns) and its code on the

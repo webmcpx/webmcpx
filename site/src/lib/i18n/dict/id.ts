@@ -88,7 +88,7 @@ const id: Messages = {
 	},
 
 	logos: {
-		title: { text: '{count} sudah fasih WebMCP.', count: { other: '{n}+ situs' } },
+		title: { text: '{count} sudah fasih WebMCP', count: { other: '{n}+ situs' } },
 		lead: 'Klik salah satunya untuk scan langsung.',
 		scan: '{site}: scan situs ini',
 		note: 'Jumlah: situs live di {directory} ({date}). Menurut {knownGood} yang lebih ketat, {n} situs mendaftarkan tool saat halamannya dijalankan ({verifiedDate}). Logo dicek dengan scanner pada {checked}; semua logo milik pemiliknya masing-masing, tanpa afiliasi.',
@@ -109,7 +109,7 @@ const id: Messages = {
 
 	why: {
 		kicker: 'Mengapa WebMCP?',
-		title: 'Apa yang didapat situs Anda dengan WebMCP.',
+		title: 'Apa yang didapat situs Anda dengan WebMCP',
 		lead: 'Dengan WebMCP, halaman Anda menyerahkan tool bertipe kepada agent AI, dan tool itu berjalan di tab milik pengguna sendiri. Inilah yang berubah, dimulai dari bukti terkuat.',
 		today: 'Saat ini',
 		with: 'Dengan WebMCP',
@@ -162,7 +162,7 @@ const id: Messages = {
 
 	proof: {
 		kicker: 'Peringkat',
-		title: 'Seberapa banyak WebMCP menghemat, per model.',
+		title: 'Seberapa banyak WebMCP menghemat, per model',
 		lead: 'Satu agent membaca, mengeklik, dan mengisi lewat snapshot halaman; yang lain memanggil tool WebMCP milik situs. Pilih model; penghematan terbesar ditampilkan lebih dulu.',
 		byModel: 'Benchmark per model',
 		models: 'Model',
@@ -265,7 +265,7 @@ const id: Messages = {
 
 	versus: {
 		kicker: 'WebMCP vs MCP',
-		title: 'Beda WebMCP dan MCP, dan mengapa Anda butuh keduanya.',
+		title: 'Beda WebMCP dan MCP, dan mengapa Anda butuh keduanya',
 		lead: 'WebMCP meminjam model tool dari MCP, tetapi WebMCP adalah API browser, bukan protokol MCP. Keduanya saling melengkapi.',
 		caption: 'Perbandingan WebMCP dan MCP',
 		aspect: 'Aspek',
@@ -420,7 +420,7 @@ const id: Messages = {
 
 	issues: {
 		kicker: 'Dari tracker spesifikasi',
-		title: 'Permintaan spec yang sudah ditangani webmcpx.',
+		title: 'Permintaan spec yang sudah ditangani webmcpx',
 		items: {
 			shared: {
 				title: 'Tool bersama',

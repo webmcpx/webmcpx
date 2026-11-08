@@ -127,7 +127,7 @@ const en = {
 
 	logos: {
 		// max 50. {count} is the highlighted "8,500+ sites".
-		title: { text: '{count} already speak WebMCP.', count: p({ one: '{n}+ site', other: '{n}+ sites' }) },
+		title: { text: '{count} already speak WebMCP', count: p({ one: '{n}+ site', other: '{n}+ sites' }) },
 		lead: 'Click any of them to scan it live.',
 		/** A logo button's name for screen readers. */
 		scan: '{site}: scan this site',
@@ -155,7 +155,7 @@ const en = {
 		// Kicker: max 20, small capitals.
 		kicker: 'Why WebMCP?',
 		// Says plainly what the section shows (the benefits); no slogans.
-		title: 'What your site gains with WebMCP.',
+		title: 'What your site gains with WebMCP',
 		lead: 'WebMCP lets your page hand AI agents typed tools that run in the user’s own tab. Here is what that changes, strongest evidence first.',
 		// Card labels: max 14, small capitals.
 		today: 'Today',
@@ -220,7 +220,7 @@ const en = {
 		// Kicker: max 20.
 		kicker: 'Leaderboard',
 		// Says plainly what the section shows (the saving per model); no slogans.
-		title: 'How much WebMCP saves, model by model.',
+		title: 'How much WebMCP saves, model by model',
 		lead: "One agent reads, clicks and fills using page snapshots; the other calls the site's WebMCP tools. Pick a model; biggest savings first.",
 		/** Names the list of per-model pages (shown without JavaScript). */
 		byModel: 'Benchmark by model',
@@ -369,7 +369,7 @@ const en = {
 	versus: {
 		kicker: 'WebMCP vs MCP',
 		// Says plainly what the section shows (the difference, and that both are needed).
-		title: 'How WebMCP differs from MCP, and why you need both.',
+		title: 'How WebMCP differs from MCP, and why you need both',
 		lead: 'WebMCP borrows MCP’s tool model, but it is a browser API, not the MCP protocol. They complement each other.',
 		caption: 'WebMCP compared with MCP',
 		/** The (hidden) head of the row labels column. */
@@ -544,7 +544,7 @@ const en = {
 
 	issues: {
 		kicker: 'From the spec tracker',
-		title: 'Spec requests webmcpx already handles.',
+		title: 'Spec requests webmcpx already handles',
 		// Each card: a title (max 28) and what webmcpx does about it. Keep code (search_page, registerTool(),
 		// --fix, modelContext...) as it is; "our policy" marks our own rule, not the draft's.
 		items: {

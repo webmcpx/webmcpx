@@ -89,7 +89,7 @@ const fr: Messages = {
 
 	logos: {
 		title: {
-			text: '{count} parlent déjà WebMCP.',
+			text: '{count} parlent déjà WebMCP',
 			count: { one: '{n}+ site', other: '{n}+ sites' }
 		},
 		lead: 'Cliquez sur l’un d’eux pour le scanner en direct.',
@@ -112,7 +112,7 @@ const fr: Messages = {
 
 	why: {
 		kicker: 'Pourquoi WebMCP ?',
-		title: 'Ce que WebMCP apporte à votre site.',
+		title: 'Ce que WebMCP apporte à votre site',
 		lead: 'WebMCP permet à votre page de confier aux agents IA des outils typés, exécutés dans l’onglet même de l’utilisateur. Voici ce que cela change, en commençant par les preuves les plus solides.',
 		today: 'Aujourd’hui',
 		with: 'Avec WebMCP',
@@ -165,7 +165,7 @@ const fr: Messages = {
 
 	proof: {
 		kicker: 'Classement',
-		title: 'Ce que WebMCP fait économiser, modèle par modèle.',
+		title: 'Ce que WebMCP fait économiser, modèle par modèle',
 		lead: 'Un agent lit, clique et remplit à partir de snapshots de la page ; l’autre appelle les outils WebMCP du site. Choisissez un modèle ; les plus fortes économies d’abord.',
 		byModel: 'Benchmark par modèle',
 		models: 'Modèles',
@@ -275,7 +275,7 @@ const fr: Messages = {
 
 	versus: {
 		kicker: 'WebMCP vs MCP',
-		title: 'Ce qui distingue WebMCP de MCP, et pourquoi il vous faut les deux.',
+		title: 'Ce qui distingue WebMCP de MCP, et pourquoi il vous faut les deux',
 		lead: 'WebMCP reprend le modèle d’outils de MCP, mais c’est une API du navigateur, pas le protocole MCP. Les deux se complètent.',
 		caption: 'WebMCP comparé à MCP',
 		aspect: 'Critère',
@@ -431,7 +431,7 @@ const fr: Messages = {
 
 	issues: {
 		kicker: 'Issues de la spec',
-		title: 'Les demandes de la spec que webmcpx gère déjà.',
+		title: 'Les demandes de la spec que webmcpx gère déjà',
 		items: {
 			shared: {
 				title: 'Outils partagés',

@@ -88,7 +88,7 @@ const de: Messages = {
 
 	logos: {
 		title: {
-			text: '{count} sprechen schon WebMCP.',
+			text: '{count} sprechen schon WebMCP',
 			count: { one: '{n}+ Website', other: '{n}+ Websites' }
 		},
 		lead: 'Klicken Sie auf ein Logo, um die Website live zu scannen.',
@@ -111,7 +111,7 @@ const de: Messages = {
 
 	why: {
 		kicker: 'Warum WebMCP?',
-		title: 'Was Ihre Website mit WebMCP gewinnt.',
+		title: 'Was Ihre Website mit WebMCP gewinnt',
 		lead: 'Mit WebMCP übergibt Ihre Seite KI-Agenten typisierte Tools, die im eigenen Tab des Nutzers laufen. Was sich dadurch ändert, die stärksten Belege zuerst.',
 		today: 'Heute',
 		with: 'Mit WebMCP',
@@ -164,7 +164,7 @@ const de: Messages = {
 
 	proof: {
 		kicker: 'Rangliste',
-		title: 'Wie viel WebMCP spart, Modell für Modell.',
+		title: 'Wie viel WebMCP spart, Modell für Modell',
 		lead: 'Ein Agent liest, klickt und füllt Formulare anhand von Seiten-Snapshots aus; der andere ruft die WebMCP-Tools der Website auf. Wählen Sie ein Modell; größte Einsparungen zuerst.',
 		byModel: 'Benchmark nach Modell',
 		models: 'Modelle',
@@ -273,7 +273,7 @@ const de: Messages = {
 
 	versus: {
 		kicker: 'WebMCP vs. MCP',
-		title: 'Wie sich WebMCP von MCP unterscheidet und warum Sie beides brauchen.',
+		title: 'Wie sich WebMCP von MCP unterscheidet und warum Sie beides brauchen',
 		lead: 'WebMCP übernimmt das Tool-Modell von MCP, ist aber eine Browser-API und nicht das MCP-Protokoll. Beide ergänzen sich.',
 		caption: 'WebMCP im Vergleich mit MCP',
 		aspect: 'Aspekt',
@@ -429,7 +429,7 @@ const de: Messages = {
 
 	issues: {
 		kicker: 'Aus dem Spec-Tracker',
-		title: 'Spec-Wünsche, die webmcpx schon erfüllt.',
+		title: 'Spec-Wünsche, die webmcpx schon erfüllt',
 		items: {
 			shared: {
 				title: 'Gemeinsame Tools',

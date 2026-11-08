@@ -88,7 +88,7 @@ const ptBr: Messages = {
 	},
 
 	logos: {
-		title: { text: '{count} já falam WebMCP.', count: { one: '{n}+ site', other: '{n}+ sites' } },
+		title: { text: '{count} já falam WebMCP', count: { one: '{n}+ site', other: '{n}+ sites' } },
 		lead: 'Clique em qualquer um para escaneá-lo ao vivo.',
 		scan: '{site}: escanear este site',
 		note: 'Contagem: sites no ar no {directory} ({date}). O {knownGood}, mais rigoroso, viu {n} sites registrarem ferramentas ao executar suas páginas ({verifiedDate}). Logos verificados com o scanner em {checked}; pertencem aos seus donos, sem nenhum vínculo.',
@@ -109,7 +109,7 @@ const ptBr: Messages = {
 
 	why: {
 		kicker: 'Por que WebMCP?',
-		title: 'O que seu site ganha com WebMCP.',
+		title: 'O que seu site ganha com WebMCP',
 		lead: 'Com WebMCP, sua página entrega aos agentes de IA ferramentas tipadas que rodam na própria aba do usuário. Veja o que muda, começando pela evidência mais forte.',
 		today: 'Hoje',
 		with: 'Com WebMCP',
@@ -162,7 +162,7 @@ const ptBr: Messages = {
 
 	proof: {
 		kicker: 'Leaderboard',
-		title: 'Quanto o WebMCP economiza, modelo a modelo.',
+		title: 'Quanto o WebMCP economiza, modelo a modelo',
 		lead: 'Um agente lê, clica e preenche a partir de snapshots da página; o outro chama as ferramentas WebMCP do site. Escolha um modelo; as maiores economias vêm primeiro.',
 		byModel: 'Benchmark por modelo',
 		models: 'Modelos',
@@ -271,7 +271,7 @@ const ptBr: Messages = {
 
 	versus: {
 		kicker: 'WebMCP vs MCP',
-		title: 'Como o WebMCP difere do MCP, e por que você precisa dos dois.',
+		title: 'Como o WebMCP difere do MCP, e por que você precisa dos dois',
 		lead: 'O WebMCP pega emprestado o modelo de ferramentas do MCP, mas é uma API do navegador, não o protocolo MCP. Os dois se complementam.',
 		caption: 'WebMCP comparado ao MCP',
 		aspect: 'Aspecto',
@@ -425,7 +425,7 @@ const ptBr: Messages = {
 
 	issues: {
 		kicker: 'Das issues da spec',
-		title: 'Pedidos da spec que o webmcpx já resolve.',
+		title: 'Pedidos da spec que o webmcpx já resolve',
 		items: {
 			shared: {
 				title: 'Ferramentas compartilhadas',

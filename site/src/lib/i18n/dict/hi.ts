@@ -87,7 +87,7 @@ const hi: Messages = {
 
 	logos: {
 		title: {
-			text: '{count} पर WebMCP पहले से चालू है।',
+			text: '{count} पर WebMCP पहले से चालू है',
 			count: { one: '{n}+ साइट', other: '{n}+ साइटों' }
 		},
 		lead: 'किसी पर भी क्लिक करें और उसे लाइव स्कैन करें।',
@@ -110,7 +110,7 @@ const hi: Messages = {
 
 	why: {
 		kicker: 'WebMCP क्यों?',
-		title: 'WebMCP से आपकी साइट को क्या मिलता है।',
+		title: 'WebMCP से आपकी साइट को क्या मिलता है',
 		lead: 'WebMCP से आपका पेज AI एजेंट को टाइप्ड टूल्स दे सकता है, जो यूज़र के अपने टैब में चलते हैं। इससे क्या बदलता है, नीचे देखिए: सबसे मज़बूत सबूत पहले।',
 		today: 'आज',
 		with: 'WebMCP के साथ',
@@ -163,7 +163,7 @@ const hi: Messages = {
 
 	proof: {
 		kicker: 'लीडरबोर्ड',
-		title: 'WebMCP कितना बचाता है, हर मॉडल पर।',
+		title: 'WebMCP कितना बचाता है, हर मॉडल पर',
 		lead: 'एक एजेंट पेज स्नैपशॉट के सहारे पढ़ता, क्लिक करता और फ़ॉर्म भरता है; दूसरा साइट के WebMCP टूल्स कॉल करता है। मॉडल चुनिए; सबसे बड़ी बचत सबसे पहले।',
 		byModel: 'मॉडल के हिसाब से बेंचमार्क',
 		models: 'मॉडल',
@@ -271,7 +271,7 @@ const hi: Messages = {
 
 	versus: {
 		kicker: 'WebMCP बनाम MCP',
-		title: 'WebMCP, MCP से कैसे अलग है, और आपको दोनों क्यों चाहिए।',
+		title: 'WebMCP, MCP से कैसे अलग है, और आपको दोनों क्यों चाहिए',
 		lead: 'WebMCP, MCP का टूल मॉडल अपनाता है, लेकिन यह एक ब्राउज़र API है, MCP प्रोटोकॉल नहीं। दोनों एक-दूसरे के पूरक हैं।',
 		caption: 'WebMCP और MCP की तुलना',
 		aspect: 'पहलू',
@@ -417,7 +417,7 @@ const hi: Messages = {
 
 	issues: {
 		kicker: 'स्पेक ट्रैकर से',
-		title: 'स्पेक की माँगें जो webmcpx पहले से पूरी करता है।',
+		title: 'स्पेक की माँगें जो webmcpx पहले से पूरी करता है',
 		items: {
 			shared: {
 				title: 'साझा टूल्स',
