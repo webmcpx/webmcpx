@@ -1213,6 +1213,7 @@
       "attempt": 2,
       "success": false,
       "harness_error": null,
+      "failure": "blocked",
       "cost_usd": 0.015274,
       "answer": "I couldn't confirm this. When I opened the Allbirds Returns/Exchanges page, it stopped at a \"verify your connection\" security check, which I can't complete for you. I didn't get to read the policy.\n\nThe site does have separate stores for each country, including the UK. From what I know in general (not checked on the site), exchanges usually have to go through the store you bought from. That would mean a US order is handled by the US store and shipped to and from a US address, not London. Allbirds is also known for a 30-day return and exchange window, so if you need a different size, it may be safer to exchange before you move.\n\nTo get a firm answer, open allbirds.com/pages/returns-exchanges yourself and complete the check, or email help@allbirds.com and ask whether a US purchase can be exchanged through the UK store.",
       "stop": "answered",

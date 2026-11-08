@@ -3,4 +3,5 @@ prompt = "Which environment variable makes Orbit read its config file from a dif
 
 [check]
 answer_contains = ["ORBIT_CONFIG"]
-answer_excludes = ["ORBIT_HOME"]
+# ORBIT_HOME is the distractor: wrong only when offered as the answer, not when told apart (2026-11-08).
+answer_excludes = ["set ORBIT_HOME", "use ORBIT_HOME", "ORBIT_HOME="]

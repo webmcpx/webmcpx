@@ -86,8 +86,12 @@ impl Check {
             || !self.answer_excludes.is_empty()
     }
 
-    /// Grades the answer part of the check; the `state` part needs the page.
+    /// Grades the answer part of the check; the `state` part needs the page. An answer that says it
+    /// did not come from the page (see [`ungrounded`]) fails, in both arms alike.
     pub fn answer_passes(&self, answer: &str) -> bool {
+        if ungrounded(answer) {
+            return false;
+        }
         let answer = normalize(answer);
         self.answer_contains
             .iter()
@@ -102,6 +106,63 @@ impl Check {
                 .iter()
                 .any(|s| has_term(&answer, &normalize(s)))
     }
+}
+
+/// The benchmark measures finding the answer on the page: an answer that says it comes from the
+/// model's own knowledge, or that it could not get or confirm the answer there, is not a solve even
+/// when its guess is right. Phrases seen in stored answers; specific, so a grounded answer that only
+/// can't confirm a side detail still passes.
+const UNGROUNDED: [&str; 10] = [
+    "own knowledge",
+    "general knowledge",
+    "not verified",
+    "haven't verified",
+    "couldn't get the answer",
+    "could not get the answer",
+    "couldn't confirm this",
+    "could not confirm this",
+    "couldn't confirm the",
+    "could not confirm the",
+];
+
+/// The site showed a bot or connection check instead of its content.
+const BLOCKED: [&str; 9] = [
+    "verify your connection",
+    "verifying your connection",
+    "connection needs to be verified",
+    "connection check",
+    "connection-verification",
+    "just a moment",
+    "verification check",
+    "page is currently blocked",
+    "captcha",
+];
+
+/// The agent says it did not find the answer (no guess offered).
+const ABSTAINED: [&str; 5] = [
+    "couldn't find the answer",
+    "couldn't find this",
+    "couldn't find it",
+    "can't give you a reliable",
+    "could not find the answer",
+];
+
+/// The answer says it did not come from the page.
+pub fn ungrounded(answer: &str) -> bool {
+    let answer = normalize(answer);
+    UNGROUNDED.iter().any(|p| answer.contains(p))
+}
+
+/// The agent says it did not find the answer.
+pub fn abstained(answer: &str) -> bool {
+    let answer = normalize(answer);
+    ABSTAINED.iter().any(|p| answer.contains(p))
+}
+
+/// The answer reports that the site blocked the agent.
+pub fn blocked(answer: &str) -> bool {
+    let answer = normalize(answer);
+    BLOCKED.iter().any(|p| answer.contains(p))
 }
 
 /// Whether `term` occurs in `text`. A numeric term must equal a number in the text by value
@@ -123,6 +184,7 @@ fn has_term(text: &str, term: &str) -> bool {
 /// Case, whitespace and Markdown emphasis (`*`, `` ` ``) don't count: "keeps **25**" is "keeps 25".
 fn normalize(s: &str) -> String {
     s.replace(['*', '`'], "")
+        .replace('\u{2019}', "'")
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ")
@@ -404,4 +466,20 @@ mod tests {
             "Orbit keeps **10** past releases. To keep more, set `retain_releases = 25`."
         ));
     }
+
+    /// An answer that says it came from the model's own knowledge, or that it could not get the
+    /// answer from the page, is not a solve even when its guess is right (stored Haiku answers).
+    #[test]
+    fn ungrounded_answers_fail_even_when_right() {
+        let c = check(&["2000"], &[]);
+        assert!(c.answer_passes("The limit is 2,000 characters per rich text object."));
+        assert!(!c.answer_passes(
+            "The page doesn't cover this, so this answer is from my own knowledge: 2,000 characters."
+        ));
+        assert!(!c.answer_passes("I couldn’t confirm this on the docs page. It is probably 2000."));
+        // Not confirming a side detail is fine.
+        assert!(c.answer_passes("The limit is 2000. I can't confirm whether it changed recently."));
+        assert!(blocked("The page is stuck on a \"Just a moment...\" check."));
+    }
+
 }

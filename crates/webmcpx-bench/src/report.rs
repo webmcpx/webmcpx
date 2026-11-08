@@ -40,6 +40,11 @@ pub struct Run {
     pub success: bool,
     /// Set when the harness itself failed (not the agent); such runs count as failures.
     pub harness_error: Option<String>,
+    /// Why a failed run failed: `harness`, `step_limit`, `model_error`, `blocked` (the site showed a
+    /// bot or connection check), `ungrounded` (the answer says it did not come from the page),
+    /// `abstained` (the agent says it did not find the answer) or `wrong`. None when the run succeeded.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub failure: Option<String>,
     pub cost_usd: Option<f64>,
     /// The tools the agent was given, as the page registered them (`webmcp` arm only).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -192,6 +197,7 @@ mod tests {
             attempt: 1,
             success,
             harness_error: None,
+            failure: None,
             tools: Vec::new(),
             cost_usd: cost(
                 Usage {
@@ -257,4 +263,28 @@ mod tests {
         WebMCP vs baseline: 10.0x fewer tokens, 2.5x faster.
         ");
     }
+}
+
+/// Sets `run.failure` from what the run recorded (see [`Run::failure`]).
+pub fn classify(run: &mut Run) {
+    use crate::agent::Stop;
+    let answer = run.outcome.answer.as_deref().unwrap_or_default();
+    run.failure = (!run.success).then(|| {
+        if run.harness_error.is_some() {
+            "harness"
+        } else if run.outcome.stop == Stop::MaxSteps {
+            "step_limit"
+        } else if run.outcome.stop == Stop::ModelError {
+            "model_error"
+        } else if crate::task::blocked(answer) {
+            "blocked"
+        } else if crate::task::ungrounded(answer) {
+            "ungrounded"
+        } else if crate::task::abstained(answer) {
+            "abstained"
+        } else {
+            "wrong"
+        }
+        .to_owned()
+    });
 }

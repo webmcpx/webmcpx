@@ -3,4 +3,5 @@ url = "https://specification.website/"
 prompt = "What INP value does this spec set as the target for good responsiveness?"
 
 [check]
-answer_any = ["200", "0.2"]
+# With its unit: "200 seconds" is not the answer (tightened 2026-11-08).
+answer_any = ["200 ms", "200ms", "200 milliseconds", "0.2 s", "0.2 seconds"]

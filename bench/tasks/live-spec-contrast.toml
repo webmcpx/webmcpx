@@ -4,4 +4,5 @@ url = "https://specification.website/"
 prompt = "What minimum contrast ratio does this site's spec require for normal-size body text?"
 
 [check]
-answer_contains = ["4.5"]
+# The ratio itself, not a stray 4.5 (tightened 2026-11-08).
+answer_contains = ["4.5:1"]

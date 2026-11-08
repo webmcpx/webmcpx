@@ -98,9 +98,14 @@ Per site, never averaged (GPT-6.1 Sol; tokens per run on that site's best and wo
 | Cloudflare docs | 20.7k → **1.0k** (20×) | 2.1× fewer | 5 → 5 |
 | specification.website | 39.8k → **3.9k** (10×) | 3.0× fewer | 5 → 5 |
 | Kiln & Co (demo store) | 12.1k → **2.4k** (5×) | 1.8× fewer | 5 → 5 |
-| Allbirds | 20.4k → **6.0k** (3.4×) | 1.1× fewer | 3 → **5** |
+| Allbirds | 20.4k → **6.0k** (3.4×) | 1.1× fewer | 3 → **5**¹ |
 | Orbit docs (demo) | 2.5k → **1.0k** (2.5×) | 1.5× fewer | 5 → 5 |
 | WooCommerce demo | 3.1k → 3.2k (0.9×) | 2.4× **more** | 5 → 5 |
+
+¹ Every failed baseline run there hit Allbirds' bot check ("verify your connection") on the returns page;
+the WebMCP arm reached the same policy through the store's own tool. That is a real difference between the
+two routes, not better reasoning. Each failed run in the results files says why it failed (`failure`:
+`blocked`, `ungrounded`, `abstained`, `step_limit`, `wrong`, `harness`).
 
 With GPT-6 Luna the best case is 97× fewer tokens (113k → 1.2k on a Cloudflare docs question). Not every
 case wins: the WooCommerce demo store's tools return more than a page snapshot, so WebMCP used the same or

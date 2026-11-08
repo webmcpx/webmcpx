@@ -89,6 +89,7 @@ async fn run_job(
         attempt: job.attempt,
         success: false,
         harness_error: None,
+        failure: None,
         cost_usd: None,
         tools: Vec::new(),
         outcome: agent::Outcome::default(),
@@ -97,6 +98,7 @@ async fn run_job(
         run.harness_error = Some(format!("{e:#}"));
         run.success = false;
     }
+    report::classify(&mut run);
     run.cost_usd = report::cost(run.outcome.usage, price);
     run
 }
@@ -190,6 +192,8 @@ pub fn regrade(results: &mut report::Results, tasks: &[Task]) -> Regraded {
             out.changed += 1;
         }
     }
+    // Every run's failure category, also for runs whose grade regrading leaves alone.
+    results.runs.iter_mut().for_each(report::classify);
     results.summary = report::Summary::of(&results.runs);
     out
 }
@@ -215,6 +219,7 @@ mod tests {
             attempt: 1,
             success,
             harness_error: None,
+            failure: None,
             cost_usd: None,
             tools: Vec::new(),
             outcome: agent::Outcome {
