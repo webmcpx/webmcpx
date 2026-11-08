@@ -10,7 +10,7 @@ use crate::text::clean;
 const DEFAULT_LIMIT: usize = 5;
 const MAX_LIMIT: usize = 20;
 const MAX_TERMS: usize = 32;
-const MAX_QUERY_BYTES: usize = 1_000;
+const MAX_QUERY_CHARS: usize = 1_000;
 const SNIPPET_CHARS: usize = 240;
 /// A heading is context for a snippet, not content: a page must not fill the answer with one.
 const HEADING_CHARS: usize = 120;
@@ -48,8 +48,10 @@ fn counts(text: &str, terms: &[String]) -> (Vec<u32>, usize) {
 pub fn search(stream: &str, query: &str, limit: usize) -> String {
     // A query is a few words: a long one is refused before any work, and past MAX_TERMS distinct
     // words the rest are ignored, so memory stays passages × 32.
-    if query.len() > MAX_QUERY_BYTES {
-        return Envelope::new().err(Code::InvalidInput, "query is over 1,000 bytes");
+    // Chars as the schema's maxLength counts them (code points); the byte check rejects huge input
+    // before counting.
+    if query.len() > 4 * MAX_QUERY_CHARS || query.chars().count() > MAX_QUERY_CHARS {
+        return Envelope::new().err(Code::InvalidInput, "query is over 1,000 chars");
     }
     let mut terms: Vec<String> = Vec::new();
     for word in tokenize(query) {
@@ -354,13 +356,19 @@ mod tests {
         for i in 0..150 {
             core::fmt::Write::write_fmt(&mut query, format_args!("w{i} ")).unwrap();
         }
-        assert!(query.len() <= MAX_QUERY_BYTES);
+        assert!(query.len() <= MAX_QUERY_CHARS);
         let v = parse(&search("p\u{1F}w0 here\u{1E}", &query, 5));
         assert_eq!(v["data"]["results"][0]["snippet"], "w0 here");
         // Words past the 32nd distinct one are not searched.
         assert_eq!(
             parse(&search("p\u{1F}w100 here\u{1E}", &query, 5))["error"]["code"],
             "NOT_FOUND"
+        );
+        // 1,000 chars is the limit in code points, whatever their bytes.
+        let wide = "界".repeat(1_000);
+        assert_eq!(
+            parse(&search(&format!("p\u{1F}{wide}\u{1E}"), &wide, 5))["ok"],
+            true
         );
         let long = "word ".repeat(201);
         assert_eq!(
