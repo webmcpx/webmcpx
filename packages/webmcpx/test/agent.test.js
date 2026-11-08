@@ -558,3 +558,14 @@ test("a tool keeps its name across an empty refresh, with the session's naming s
   const again = named(tools, carry(empty), reserved, retired, naming).map((e) => e.name);
   assert.deepEqual(again, first);
 });
+
+test("same-named tools whose count keeps changing don't grow the naming history", async () => {
+  const { carry, named } = await import("../agent/mcp.js");
+  const [reserved, retired, naming] = [new Map(), new Set(), { suffixes: new Map(), owned: new Map() }];
+  let previous = new Map();
+  for (let round = 0; round < 100; round++) {
+    const tools = Array.from({ length: round % 2 ? 199 : 200 }, () => ({ name: "dup", origin: "o" }));
+    previous = carry(named(tools, previous, reserved, retired, naming));
+  }
+  for (const names of naming.owned.values()) assert.ok(names.size <= 200, `${names.size} names kept`);
+});

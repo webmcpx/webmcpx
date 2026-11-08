@@ -62,7 +62,13 @@ export function named(tools, previous = new Map(), reserved = new Map(), retired
   // Same-named tools whose number changed can't be matched to their old names: retire those names for
   // good. A lone tool that leaves and comes back is the same tool (same origin and name): it keeps its name.
   for (const [id, names] of previous) {
-    if (names.length !== count(id) && Math.max(names.length, count(id)) > 1) for (const n of names) retired.add(n);
+    if (names.length !== count(id) && Math.max(names.length, count(id)) > 1) {
+      for (const n of names) {
+        retired.add(n);
+        // Never handed out again, so not worth keeping as this tool's: its history stays small.
+        owned.get(id)?.delete(n);
+      }
+    }
   }
   const used = new Set([OPEN.name, CALL.name]);
   const free = (name, id) => !used.has(name) && !retired.has(name) && (reserved.get(name) ?? id) === id;
