@@ -24,7 +24,11 @@
   const describe = (el, n) => {
     const tag = el.tagName.toLowerCase();
     if (tag === "select") {
-      const options = [...el.options].slice(0, 50).map((o) => squash(o.textContent) + (o.disabled ? " (disabled)" : ""));
+      // Each option as seen, with its value when it differs (fill takes either).
+      const options = [...el.options].slice(0, 50).map((o) => {
+        const text = squash(o.textContent);
+        return text + (o.value !== text ? ` (value=${o.value})` : "") + (o.disabled ? " (disabled)" : "");
+      });
       return `[${n}] select "${label(el)}" value="${el.value}" options: ${options.join(" | ")}`;
     }
     if (tag === "input" || tag === "textarea") {
@@ -108,7 +112,9 @@
     const el = target(n);
     if (!el) return `Error: ref ${n} not found. Call read_page for fresh refs.`;
     el.focus();
-    el.value = String(value);
+    // A select takes an option's value or its visible label, like choosing it in the UI.
+    const option = el.tagName === "SELECT" && [...el.options].find((o) => o.value === String(value) || squash(o.textContent) === squash(String(value)));
+    el.value = option ? option.value : String(value);
     el.dispatchEvent(new Event("input", { bubbles: true }));
     el.dispatchEvent(new Event("change", { bubbles: true }));
     await settle();

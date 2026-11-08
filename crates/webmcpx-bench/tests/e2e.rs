@@ -178,6 +178,48 @@ async fn baseline_arm_navigates_and_sees_link_destinations() {
     assert!(last_tool_result(&seen[3].0).contains("ORBIT_CONFIG"));
 }
 
+/// A select is chosen by the label a user sees ("Price: low to high"), its value shown alongside.
+#[tokio::test]
+async fn baseline_selects_an_option_by_its_label() {
+    let sort = |messages: &[Message]| {
+        let page = last_tool_result(messages);
+        let line = page
+            .lines()
+            .find(|l| l.contains("select") && l.contains("Price: low to high"))
+            .unwrap_or_else(|| panic!("no sort select in snapshot:\n{page}"));
+        assert!(line.contains("(value=price_asc)"), "{line}");
+        line[1..line.find(']').unwrap()].parse::<u32>().unwrap()
+    };
+    let Some((_, model)) = run_one(
+        "store-cheapest-blue-mug",
+        Arm::Baseline,
+        move |step, messages| match step {
+            0 => call("read_page", "{}"),
+            1 => call(
+                "fill",
+                &format!(
+                    r#"{{"ref":{},"value":"Price: low to high"}}"#,
+                    sort(messages)
+                ),
+            ),
+            2 => call("read_page", "{}"),
+            _ => answer("Sorted."),
+        },
+    )
+    .await
+    else {
+        return;
+    };
+    let seen = model.seen.lock().unwrap();
+    let after = last_tool_result(&seen[3].0);
+    assert!(
+        after
+            .lines()
+            .any(|l| l.contains("select") && l.contains("value=\"price_asc\"")),
+        "{after}"
+    );
+}
+
 #[tokio::test]
 async fn baseline_arm_drives_the_dom() {
     // Read the page, find the refs next to "Harbor Mug", set quantity 2, click add.

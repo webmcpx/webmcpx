@@ -214,7 +214,10 @@ fn baseline_tools() -> Vec<ToolSpec> {
         },
         ToolSpec {
             name: "fill".into(),
-            description: "Set the value of the input, select or textarea [ref].".into(),
+            description:
+                "Set the value of the input or textarea [ref], or choose an option of the \
+                          select [ref] by its label or value."
+                    .into(),
             parameters: json!({
                 "type": "object",
                 "properties": { "ref": reference, "value": { "type": "string" } },
