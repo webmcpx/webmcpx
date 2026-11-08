@@ -146,7 +146,7 @@
 	}
 </script>
 
-<div bind:this={box} aria-live="polite" class="mx-auto w-full max-w-2xl scroll-mt-24">
+<div bind:this={box} aria-live="polite" class="mx-auto w-full max-w-3xl scroll-mt-24">
 	{#if scanner.status === 'loading'}
 		<Card padding="lg" class="flex items-center gap-5 text-left">
 			<span class="grid size-12 shrink-0 place-items-center rounded-xl border-2 border-ink bg-paper-2">
