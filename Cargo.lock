@@ -2375,7 +2375,7 @@ dependencies = [
 
 [[package]]
 name = "webmcpx"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "clap",
  "insta-cmd",
@@ -2386,7 +2386,7 @@ dependencies = [
 
 [[package]]
 name = "webmcpx-bench"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "axum",
@@ -2406,14 +2406,14 @@ dependencies = [
 
 [[package]]
 name = "webmcpx-core"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "thiserror",
 ]
 
 [[package]]
 name = "webmcpx-lint"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "insta",
  "oxc_allocator",
@@ -2427,7 +2427,7 @@ dependencies = [
 
 [[package]]
 name = "webmcpx-std"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "insta",
  "libm",
@@ -2437,7 +2437,7 @@ dependencies = [
 
 [[package]]
 name = "webmcpx-wasm"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "dlmalloc",
  "wasm-bindgen",

@@ -3,7 +3,7 @@ members = ["crates/*"]
 resolver = "3"
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 rust-version = "1.97"
 license = "MIT"
@@ -11,9 +11,9 @@ repository = "https://github.com/webmcpx/webmcpx"
 homepage = "https://webmcpx.dev"
 
 [workspace.dependencies]
-webmcpx-core = { path = "crates/webmcpx-core", version = "0.1.0" }
-webmcpx-std = { path = "crates/webmcpx-std", version = "0.1.0" }
-webmcpx-lint = { path = "crates/webmcpx-lint", version = "0.1.0" }
+webmcpx-core = { path = "crates/webmcpx-core", version = "0.1.1" }
+webmcpx-std = { path = "crates/webmcpx-std", version = "0.1.1" }
+webmcpx-lint = { path = "crates/webmcpx-lint", version = "0.1.1" }
 
 anyhow = "1.0.104"
 axum = { version = "0.8.9", default-features = false, features = ["http1", "tokio", "json", "query"] }
