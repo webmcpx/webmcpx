@@ -334,13 +334,22 @@ impl Scanner {
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let started = Instant::now();
-        let browser = self.browser().await.map_err(failed)?;
-        let page = match browser.browser.page(&INIT_SCRIPTS).await {
-            Ok(page) => page,
-            Err(e) => {
-                // The browser is unusable (crashed, killed): start a fresh one next time.
+        // Getting a browser and a tab counts against the time too: a Chrome that accepts connections but
+        // never answers must not hold the browser lock (and every slot) forever.
+        let opened = tokio::time::timeout(self.deadline, async {
+            let browser = self.browser().await.map_err(failed)?;
+            browser.browser.page(&INIT_SCRIPTS).await.map_err(failed)
+        })
+        .await;
+        let page = match opened {
+            Ok(Ok(page)) => page,
+            failure => {
+                // The browser is unusable (crashed, killed, stuck): start a fresh one next time.
                 self.browser.lock().await.take();
-                return Err(failed(e));
+                return Err(match failure {
+                    Ok(Err(e)) => e,
+                    _ => ScanError::TimedOut,
+                });
             }
         };
         let outcome = tokio::time::timeout(self.deadline, self.inspect(&page, &url)).await;

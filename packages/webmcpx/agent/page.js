@@ -84,16 +84,24 @@ function summarize() {
   };
   // What each tool's frame showed when listed: a call refuses a frame that has navigated since.
   this.__webmcpxDocs = this.map((t) => (t.window ? docOf(t.window) : null));
-  // At most MAX_TOOLS cross over (the linter's error is past 100 per page); Node checks again.
-  return this.slice(0, 200).map((t, index) => ({
-    index,
-    name: t.name,
-    description: t.description ?? "",
-    inputSchema: parse(t.inputSchema),
-    annotations: { ...(t.annotations ?? {}) },
-    origin: t.origin,
-    owner: owner(t.window),
-  }));
+  // At most 200 tools, each within the limits Node checks again (the linter's are far lower): a tool
+  // past them is left out, never cut, and the list stops at 1,000,000 chars in all.
+  let total = 0;
+  return this.slice(0, 200)
+    .map((t, index) => ({
+      index,
+      name: t.name,
+      description: t.description ?? "",
+      inputSchema: parse(t.inputSchema),
+      annotations: { ...(t.annotations ?? {}) },
+      origin: t.origin,
+      owner: owner(t.window),
+    }))
+    .filter((t) => {
+      const size = JSON.stringify(t).length;
+      if (String(t.description).length > 10_000 || JSON.stringify(t.inputSchema ?? null).length > 50_000) return false;
+      return (total += size) <= 1_000_000;
+    });
 }
 
 // Called on the same array: runs one descriptor, cancellable through `cancel` below. executeTool() returns
@@ -287,7 +295,15 @@ export class Page {
     }
     // The page wrote these (it may have replaced getTools): keep only well-formed summaries.
     const valid = (t) =>
-      t && typeof t.name === "string" && t.name && typeof t.description === "string" && t.annotations && typeof t.annotations === "object";
+      t &&
+      typeof t.name === "string" &&
+      t.name &&
+      t.name.length <= 128 &&
+      typeof t.description === "string" &&
+      t.description.length <= 10_000 &&
+      t.annotations &&
+      typeof t.annotations === "object" &&
+      JSON.stringify(t.inputSchema ?? null).length <= 50_000;
     const tools = Array.isArray(list?.value) ? list.value.slice(0, MAX_TOOLS) : [];
     return tools.filter(valid).map((tool) => ({ ...tool, list: result.objectId }));
   }

@@ -326,6 +326,58 @@ async fn scans_with_a_remote_chrome_through_the_shared_proxy() {
     assert_eq!(report["verdict"], "ready", "{report}");
 }
 
+/// A Chrome that answers /json/version but never its DevTools socket must not hold the browser lock: each
+/// scan gives up within its deadline, and so does the next one.
+#[tokio::test]
+async fn a_chrome_that_never_answers_times_out_each_scan() {
+    use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let port = listener.local_addr().unwrap().port();
+    tokio::spawn(async move {
+        loop {
+            let Ok((mut socket, _)) = listener.accept().await else {
+                return;
+            };
+            tokio::spawn(async move {
+                let mut buf = [0u8; 2048];
+                let n = socket.read(&mut buf).await.unwrap_or(0);
+                if String::from_utf8_lossy(&buf[..n]).starts_with("GET /json/version") {
+                    let body = format!(
+                        r#"{{"webSocketDebuggerUrl":"ws://127.0.0.1:{port}/devtools/browser/x"}}"#
+                    );
+                    let reply = format!(
+                        "HTTP/1.1 200 OK\r\ncontent-type: application/json\r\ncontent-length: {}\r\n\r\n{body}",
+                        body.len()
+                    );
+                    let _ = socket.write_all(reply.as_bytes()).await;
+                } else {
+                    // The WebSocket upgrade: never answered.
+                    tokio::time::sleep(std::time::Duration::from_secs(600)).await;
+                }
+            });
+        }
+    });
+    let scanner = webmcpx_bench::scan::Scanner::new(None, true)
+        .remote(webmcpx_bench::scan::Remote {
+            chrome: format!("127.0.0.1:{port}"),
+            proxy: ([127, 0, 0, 1], free_port()).into(),
+        })
+        .deadline(std::time::Duration::from_secs(2));
+    for url in ["http://127.0.0.1:9/a", "http://127.0.0.1:9/b"] {
+        let start = std::time::Instant::now();
+        let r = scanner.scan(url).await;
+        assert!(
+            matches!(r, Err(webmcpx_bench::scan::ScanError::TimedOut)),
+            "{r:?}"
+        );
+        assert!(
+            start.elapsed() < std::time::Duration::from_secs(8),
+            "{:?}",
+            start.elapsed()
+        );
+    }
+}
+
 /// A remote Chrome outlives our connection to it: the pages we opened must not.
 #[tokio::test]
 async fn a_dropped_connection_closes_its_pages_in_a_remote_chrome() {

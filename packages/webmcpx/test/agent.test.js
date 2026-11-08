@@ -506,3 +506,19 @@ test("a browser that stops answering fails the command instead of hanging", asyn
   assert.equal(settled, false);
   cdp.close();
 });
+
+test("naming stays fast when a page churns names: suffixes only grow per base", async () => {
+  const { carry, named } = await import("../agent/mcp.js");
+  const reserved = new Map();
+  const retired = new Set();
+  const suffixes = new Map();
+  const base = "x".repeat(64);
+  let previous = new Map();
+  const start = Date.now();
+  for (let round = 0; round < 200; round++) {
+    const tools = Array.from({ length: 200 }, (_, i) => ({ name: `${base}${round}_${i}`, origin: "o" }));
+    previous = carry(named(tools, previous, reserved, retired, suffixes));
+  }
+  assert.ok(Date.now() - start < 3_000, `${Date.now() - start} ms`);
+  assert.equal(new Set([...reserved.keys()]).size, reserved.size);
+});

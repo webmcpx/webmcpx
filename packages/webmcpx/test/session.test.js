@@ -48,3 +48,19 @@ test("a page listing thousands of tools gives at most 200", async () => {
   );
   assert.equal((await page.tools()).length, 200);
 });
+
+test("tools past the size limits are left out, not cut", async () => {
+  const ok = { index: 0, name: "ok", description: "fine", annotations: {} };
+  const long = { index: 1, name: "long", description: "d".repeat(10_001), annotations: {} };
+  const schema = { index: 2, name: "schema", description: "", annotations: {}, inputSchema: { enum: Array(30_000).fill(0) } };
+  const page = await Page.create(
+    fakeCdp((method) => {
+      if (method === "Target.createTarget") return { targetId: "t" };
+      if (method === "Target.attachToTarget") return { sessionId: "s" };
+      if (method === "Runtime.evaluate") return { result: { objectId: "list" } };
+      if (method === "Runtime.callFunctionOn") return { result: { value: [ok, long, schema] } };
+      return {};
+    }),
+  );
+  assert.deepEqual((await page.tools()).map((t) => t.name), ["ok"]);
+});

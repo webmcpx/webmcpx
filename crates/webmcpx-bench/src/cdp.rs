@@ -27,9 +27,13 @@ struct Conn {
 
 impl Conn {
     async fn connect(url: &str) -> Result<Self> {
-        let (socket, _) = tokio_tungstenite::connect_async(url)
-            .await
-            .with_context(|| format!("connecting to {url}"))?;
+        let (socket, _) = tokio::time::timeout(
+            Duration::from_secs(10),
+            tokio_tungstenite::connect_async(url),
+        )
+        .await
+        .with_context(|| format!("connecting to {url}: timed out"))?
+        .with_context(|| format!("connecting to {url}"))?;
         let (mut sink, mut stream) = socket.split();
         let (tx, mut rx) = mpsc::unbounded_channel::<Ws>();
         tokio::spawn(async move {
@@ -183,7 +187,11 @@ impl Browser {
             .next()
             .with_context(|| format!("{endpoint} has no address"))?;
         // Chrome only answers DevTools requests whose Host is an IP address or localhost.
-        let version: Value = reqwest::get(format!("http://{addr}/json/version"))
+        let version: Value = reqwest::Client::builder()
+            .timeout(Duration::from_secs(10))
+            .build()?
+            .get(format!("http://{addr}/json/version"))
+            .send()
             .await
             .with_context(|| format!("reaching Chrome at {endpoint}"))?
             .error_for_status()?

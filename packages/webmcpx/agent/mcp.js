@@ -55,7 +55,7 @@ const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t
  * name come back only to the same key: a name a client already has never runs a different tool.
  * @returns {{name: string, id: string, tool: import("./session.js").Tool}[]}
  */
-export function named(tools, previous = new Map(), reserved = new Map(), retired = new Set()) {
+export function named(tools, previous = new Map(), reserved = new Map(), retired = new Set(), suffixes = new Map()) {
   const ids = tools.map(keyOf);
   const count = (id) => ids.filter((x) => x === id).length;
   // Same-named tools whose number changed can't be matched to their old names: retire those names for
@@ -79,7 +79,11 @@ export function named(tools, previous = new Map(), reserved = new Map(), retired
     if (!name) {
       const base = tool.name.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64) || "tool";
       name = base;
-      for (let n = 2; !free(name, ids[i]); n++) name = `${base.slice(0, 64 - String(n).length - 1)}_${n}`;
+      // Suffixes only grow per base (`suffixes`, kept for the session), so a page that churns names can't
+      // make each allocation rescan every name handed out before.
+      let n = suffixes.get(base) ?? 2;
+      while (!free(name, ids[i])) name = `${base.slice(0, 64 - String(n).length - 1)}_${n++}`;
+      if (name !== base) suffixes.set(base, n);
       used.add(name);
     }
     return { name, id: ids[i], tool };
@@ -150,12 +154,13 @@ export async function serve(options = {}, { input = process.stdin, output = proc
   let entries = [];
   const reserved = new Map();
   const retired = new Set();
+  const suffixes = new Map();
   let initialized = false;
   const write = (msg) => output.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
   // Replaces the tool list and tells the client when what it would see changed.
   const update = (tools) => {
     const before = JSON.stringify(entries.map(asMcp));
-    entries = named(tools, carry(entries), reserved, retired);
+    entries = named(tools, carry(entries), reserved, retired, suffixes);
     if (initialized && JSON.stringify(entries.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
   };
   // Page changes coalesce into one refresh at a time plus at most one after it: a page firing changes
