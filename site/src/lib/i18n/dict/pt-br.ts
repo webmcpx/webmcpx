@@ -81,7 +81,7 @@ const ptBr: Messages = {
 		title: { text: 'Deixe seu site {mark}.', mark: 'pronto para agentes' },
 		lead: 'Agentes de IA já leem suas páginas. Veja o que eles recebem e entregue ferramentas de verdade com uma linha.',
 		try: 'Experimente {sites}',
-		entry: { scan: 'Escaneie seu site', agent: 'Configure seu agente' }
+		entry: { question: 'Não tem site, só usa agentes?', agent: 'Configure seu agente' }
 	},
 
 	logos: {

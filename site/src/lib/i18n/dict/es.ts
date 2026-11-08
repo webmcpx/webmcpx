@@ -79,7 +79,7 @@ const es: Messages = {
 		title: { text: 'Deja tu sitio {mark}.', mark: 'listo para agentes' },
 		lead: 'Los agentes de IA ya leen tus páginas. Mira qué obtienen y dales herramientas de verdad con una sola línea.',
 		try: 'Prueba {sites}',
-		entry: { scan: 'Escanea tu sitio', agent: 'Configura tu agente' }
+		entry: { question: '¿No tienes sitio y solo usas agentes?', agent: 'Configura tu agente' }
 	},
 
 	logos: {

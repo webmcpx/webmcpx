@@ -118,8 +118,8 @@ const en = {
 		lead: 'AI agents are already reading your pages. See what they get, then give them real tools with one line.',
 		// {sites} is a row of three site names (buttons that start a scan).
 		try: 'Try {sites}',
-		// The two ways in, side by side: max 20 each (one line in a button at 390 px).
-		entry: { scan: 'Scan your site', agent: 'Set up your agent' }
+		// Under the scan, for people who use agents but run no site: a question, then a link.
+		entry: { question: 'Not running a site, just using agents?', agent: 'Set up your agent' }
 	},
 
 	logos: {

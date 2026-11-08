@@ -2,8 +2,6 @@
 <script lang="ts">
 	import ArrowRight from '@lucide/svelte/icons/arrow-right';
 	import Bot from '@lucide/svelte/icons/bot';
-	import ScanSearch from '@lucide/svelte/icons/scan-search';
-	import Button from '#lib/components/ui/Button.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import { SITES } from '#lib/content/sites.ts';
 	import { SPEC } from '#lib/content/site.ts';
@@ -20,16 +18,6 @@
 	const TRY = [{ name: 'webmcpx', url: 'https://webmcpx.dev/' }, ...SITES.slice(0, 3)];
 	/** The date of the WebMCP draft this release tracks. */
 	const DRAFT = '2026-11-02';
-	/** The hero's address input, which "Scan your site" jumps to. */
-	const INPUT = 'scan-url';
-
-	// Without JavaScript the link jumps to the input; with it, the input also takes focus, ready to type.
-	function toScan(e: MouseEvent) {
-		const input = document.getElementById(INPUT);
-		if (!input) return;
-		e.preventDefault();
-		input.focus();
-	}
 </script>
 
 <section id="scan" aria-labelledby="hero-title" class="scroll-mt-4 px-3 pt-3 sm:px-5 sm:pt-5">
@@ -62,15 +50,8 @@
 					{m.lead}
 				</p>
 			</Reveal>
-			<!-- The two ways in: people who run a site scan it here; people who use agents set theirs up. -->
-			<Reveal delay={150} class="mt-8 flex flex-wrap justify-center gap-3">
-				<Button href="#{INPUT}" variant="outline" onclick={toScan}
-					><ScanSearch aria-hidden="true" />{m.entry.scan}</Button
-				>
-				<Button href="#for-agents" variant="outline"><Bot aria-hidden="true" />{m.entry.agent}</Button>
-			</Reveal>
 			<Reveal delay={180} class="mt-8">
-				<ScanForm fromQuery focusOnLoad inputId={INPUT}>
+				<ScanForm fromQuery focusOnLoad>
 					{#snippet hint()}
 						<p class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-ink-3">
 							<Rich text={m.try}>
@@ -84,6 +65,15 @@
 									{/each}
 								{/snippet}
 							</Rich>
+						</p>
+						<!-- The scan is the one action here; people with no site get a quiet way to theirs. -->
+						<p class="mt-3 text-sm text-ink-3">
+							{m.entry.question}
+							<a
+								href="#for-agents"
+								class="ml-1 inline-flex items-center gap-1 font-medium text-ink underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
+								><Bot size={14} aria-hidden="true" />{m.entry.agent}</a
+							>
 						</p>
 					{/snippet}
 				</ScanForm>

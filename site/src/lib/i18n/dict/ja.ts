@@ -79,7 +79,7 @@ const ja: Messages = {
 		title: { text: 'そのサイトを、{mark}に。', mark: 'エージェント対応' },
 		lead: 'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',
 		try: 'お試し：{sites}',
-		entry: { scan: 'サイトをスキャン', agent: 'エージェントを設定' }
+		entry: { question: 'サイトはなく、エージェントだけ使う？', agent: 'エージェントを設定' }
 	},
 
 	logos: {

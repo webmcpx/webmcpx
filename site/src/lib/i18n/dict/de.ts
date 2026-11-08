@@ -80,7 +80,7 @@ const de: Messages = {
 		title: { text: 'Machen Sie Ihre Website {mark}.', mark: 'agentenfähig' },
 		lead: 'KI-Agenten lesen Ihre Seiten längst. Sehen Sie, was bei ihnen ankommt, und geben Sie ihnen mit einer Zeile echte Tools.',
 		try: 'Testen Sie {sites}',
-		entry: { scan: 'Website scannen', agent: 'Agent einrichten' }
+		entry: { question: 'Keine Website, nur Agenten?', agent: 'Agent einrichten' }
 	},
 
 	logos: {

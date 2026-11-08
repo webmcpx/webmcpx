@@ -82,7 +82,7 @@ const zh: Messages = {
 		title: { text: '让你的网站\u200b{mark}。', mark: '智能体就绪' },
 		lead: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
 		try: '试试 {sites}',
-		entry: { scan: '扫描你的网站', agent: '配置你的智能体' }
+		entry: { question: '没有网站，只用智能体？', agent: '配置你的智能体' }
 	},
 
 	logos: {

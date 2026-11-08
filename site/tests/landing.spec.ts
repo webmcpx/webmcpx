@@ -600,13 +600,12 @@ test('for agents: the measured saving, the tools it works with, one tab per way 
 	await expect(agents.getByRole('tabpanel')).toContainText('document.modelContext');
 });
 
-test('the hero has a way in for each audience', async ({ page }) => {
+test('the scan is the one action in the hero; people with no site get a link to set up their agent', async ({
+	page
+}) => {
 	await page.goto('/');
 	const hero = page.locator('#scan');
-	// Away from the input first, so the button is what gives it focus.
-	await hero.getByRole('link', { name: 'Set up your agent' }).focus();
-	await hero.getByRole('link', { name: 'Scan your site' }).click();
-	await expect(page.getByLabel("Your site's address").first()).toBeFocused();
+	await expect(hero.getByRole('link', { name: 'Scan your site' })).toHaveCount(0);
 	await hero.getByRole('link', { name: 'Set up your agent' }).click();
 	await expect(page).toHaveURL(/#for-agents$/);
 	await expect(page.locator('#for-agents')).toBeInViewport();

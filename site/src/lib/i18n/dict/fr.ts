@@ -81,7 +81,7 @@ const fr: Messages = {
 		title: { text: 'Rendez votre site {mark}.', mark: 'prêt pour les agents' },
 		lead: 'Les agents IA lisent déjà vos pages. Voyez ce qu’ils en retirent, puis donnez-leur de vrais outils en une ligne.',
 		try: 'Essayez {sites}',
-		entry: { scan: 'Scanner votre site', agent: 'Configurer votre agent' }
+		entry: { question: 'Pas de site, juste des agents ?', agent: 'Configurer votre agent' }
 	},
 
 	logos: {

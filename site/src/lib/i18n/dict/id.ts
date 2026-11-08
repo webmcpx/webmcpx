@@ -81,7 +81,7 @@ const id: Messages = {
 		title: { text: 'Jadikan situs Anda {mark}.', mark: 'siap agent' },
 		lead: 'Agent AI sudah membaca halaman Anda. Lihat apa yang mereka dapat, lalu beri mereka tool sungguhan dengan satu baris.',
 		try: 'Coba {sites}',
-		entry: { scan: 'Scan situs Anda', agent: 'Siapkan agen Anda' }
+		entry: { question: 'Tidak punya situs, hanya pakai agen?', agent: 'Siapkan agen Anda' }
 	},
 
 	logos: {
