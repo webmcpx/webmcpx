@@ -2,7 +2,7 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
-use webmcpx_core::{Code, Envelope, push_json_str};
+use webmcpx_core::{Code, Envelope, limits, push_json_str};
 
 use crate::blocks::{self, Kind};
 use crate::text::clean;
@@ -10,6 +10,8 @@ use crate::text::clean;
 const DEFAULT_LIMIT: usize = 5;
 const MAX_LIMIT: usize = 20;
 const SNIPPET_CHARS: usize = 240;
+/// A heading is context for a snippet, not content: a page must not fill the answer with one.
+const HEADING_CHARS: usize = 120;
 // BM25 parameters (Robertson & Zaragoza defaults).
 const K1: f32 = 1.2;
 const B: f32 = 0.75;
@@ -43,19 +45,32 @@ pub fn search(stream: &str, query: &str, limit: usize) -> String {
     }
     ranked.truncate(limit);
 
+    // Results in rank order while they fit the output budget (URLs come from the page and are never
+    // cut: a result that does not fit is left out).
     let mut data = String::from(r#"{"results":["#);
-    for (i, &(index, _)) in ranked.iter().enumerate() {
+    let mut kept = 0;
+    for &(index, _) in &ranked {
         let p = &passages[index];
-        if i > 0 {
+        let mut entry = String::from(r#"{"heading":"#);
+        push_json_str(&mut entry, &p.heading);
+        entry.push_str(r#","snippet":"#);
+        push_json_str(&mut entry, &snippet(&p.text, &terms));
+        entry.push_str(r#","url":"#);
+        push_json_str(&mut entry, &p.anchor);
+        entry.push('}');
+        if data.len() + entry.len() + 3 > limits::OUTPUT_MAX {
+            break;
+        }
+        if kept > 0 {
             data.push(',');
         }
-        data.push_str(r#"{"heading":"#);
-        push_json_str(&mut data, &p.heading);
-        data.push_str(r#","snippet":"#);
-        push_json_str(&mut data, &snippet(&p.text, &terms));
-        data.push_str(r#","url":"#);
-        push_json_str(&mut data, &p.anchor);
-        data.push('}');
+        data.push_str(&entry);
+        kept += 1;
+    }
+    if kept == 0 {
+        return Envelope::new()
+            .hint("Read the page with fetch_as_markdown instead.")
+            .err(Code::ResultTooLarge, "the best match is over the output budget");
     }
     data.push_str("]}");
     Envelope::new().ok(&data)
@@ -68,7 +83,7 @@ fn passages(stream: &str) -> Vec<Passage> {
     for block in blocks::parse(stream) {
         let text = clean(block.text);
         if let Kind::Heading(_) = block.kind {
-            heading = text;
+            heading = shorten(text, HEADING_CHARS);
             heading_anchor = block.anchor;
             continue;
         }
@@ -160,6 +175,18 @@ fn dedup(mut terms: Vec<String>) -> Vec<String> {
     terms
 }
 
+/// `text` cut to `max` chars, marked with an ellipsis when cut.
+fn shorten(text: String, max: usize) -> String {
+    match text.char_indices().nth(max) {
+        Some((byte, _)) => {
+            let mut out = text[..byte].to_owned();
+            out.push('…');
+            out
+        }
+        None => text,
+    }
+}
+
 /// A window of the passage around the first matching term.
 fn snippet(text: &str, terms: &[String]) -> String {
     let chars: Vec<char> = text.chars().collect();
@@ -242,4 +269,22 @@ mod tests {
         let s = snippet(&text, &["needle".to_owned()]);
         assert!(s.contains("needle") && s.starts_with('…') && s.ends_with('…'));
     }
+
+    #[test]
+    fn output_stays_within_budget() {
+        let long = "w".repeat(30_000);
+        let mut page = format!("h2\u{1F}{long}\u{1F}https://x.test/#h\u{1E}");
+        for _ in 0..5 {
+            page.push_str("p\u{1F}pricing is fair\u{1E}");
+        }
+        let out = search(&page, "pricing", 20);
+        assert!(out.len() <= limits::OUTPUT_MAX + 100, "{} chars", out.len());
+        let v = parse(&out);
+        assert_eq!(v["data"]["results"].as_array().unwrap().len(), 5);
+        assert!(v["data"]["results"][0]["heading"].as_str().unwrap().chars().count() <= HEADING_CHARS + 1);
+        // An anchor past the whole budget is never cut: the result is left out.
+        let huge = format!("p\u{1F}pricing\u{1F}https://x.test/#{}", "a".repeat(30_000));
+        assert_eq!(parse(&search(&huge, "pricing", 5))["error"]["code"], "RESULT_TOO_LARGE");
+    }
+
 }

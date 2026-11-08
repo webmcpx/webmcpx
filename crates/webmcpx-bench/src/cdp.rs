@@ -341,7 +341,8 @@ impl Page {
         }
         // Up to 30 s: live sites load slower than the local fixtures.
         for _ in 0..1200 {
-            if self.eval("document.readyState").await? == "complete" {
+            // Mid-navigation the world can vanish between calls: that is "not loaded yet".
+            if matches!(self.eval_isolated("document.readyState").await, Ok(v) if v == "complete") {
                 return Ok(());
             }
             tokio::time::sleep(Duration::from_millis(25)).await;
@@ -351,12 +352,37 @@ impl Page {
 
     /// Evaluates `expression` (awaiting promises) and returns its JSON value.
     pub async fn eval(&self, expression: &str) -> Result<Value> {
-        let r = self
+        self.evaluate(
+            json!({ "expression": expression, "awaitPromise": true, "returnByValue": true }),
+        )
+        .await
+    }
+
+    /// Like [`Page::eval`], in a fresh isolated world of the main frame: the DOM is the page's, the
+    /// JavaScript globals and prototypes are not, so a page can't tamper with what this reads (say, make
+    /// `slice` return a 70 MB title). Use it for every read of untrusted page data.
+    pub async fn eval_isolated(&self, expression: &str) -> Result<Value> {
+        let tree = self.send("Page.getFrameTree", json!({})).await?;
+        let frame = tree["frameTree"]["frame"]["id"]
+            .as_str()
+            .context("no main frame")?;
+        let world = self
             .send(
-                "Runtime.evaluate",
-                json!({ "expression": expression, "awaitPromise": true, "returnByValue": true }),
+                "Page.createIsolatedWorld",
+                json!({ "frameId": frame, "worldName": "webmcpx-scan" }),
             )
             .await?;
+        let context = world["executionContextId"]
+            .as_i64()
+            .context("no isolated world")?;
+        self.evaluate(json!({
+            "expression": expression, "awaitPromise": true, "returnByValue": true, "contextId": context
+        }))
+        .await
+    }
+
+    async fn evaluate(&self, params: Value) -> Result<Value> {
+        let r = self.send("Runtime.evaluate", params).await?;
         if let Some(e) = r.get("exceptionDetails") {
             let text = e["exception"]["description"]
                 .as_str()

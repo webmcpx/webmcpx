@@ -415,22 +415,24 @@ impl Scanner {
     async fn inspect(&self, page: &Page, url: &Url) -> Result<Report, ScanError> {
         page.goto(url.as_str()).await.map_err(failed)?;
         // Everything read from the page is bounded inside Chrome: the CDP connection is shared by every
-        // scan, and a message past its size limit would end it for all of them.
+        // scan, and a message past its size limit would end it for all of them. Reads run in an isolated
+        // world, where the page's scripts can't redefine `slice` or the getters.
         let final_url = page
-            .eval("location.href.slice(0, 4096)")
+            .eval_isolated("location.href.slice(0, 4096)")
             .await
             .map_err(failed)?;
         let final_url = final_url.as_str().unwrap_or(url.as_str()).to_owned();
         // A refused redirect leaves Chrome on an error page for that URL: say why.
         self.check(&parse_url(&final_url)?).await?;
         let tools = registered_tools(page, TOOL_WAIT).await.map_err(failed)?;
-        // Only the snapshot's size travels: that is all the token estimate needs.
+        // Only the snapshot's size travels: that is all the token estimate needs. It is read from the
+        // page's world (the snapshot script lives there), so it is forced to a number there.
         let snapshot_chars = page
-            .eval("__bench.snapshot().length")
+            .eval("+__bench.snapshot().length || 0")
             .await
             .map_err(failed)?;
         let title = page
-            .eval("document.title.slice(0, 300)")
+            .eval_isolated("document.title.slice(0, 300)")
             .await
             .map_err(failed)?;
         let mut report = report(
@@ -441,7 +443,7 @@ impl Scanner {
             usize::try_from(snapshot_chars.as_u64().unwrap_or(0)).unwrap_or(usize::MAX),
         );
         // Best effort: a site without a readable icon still gets its report.
-        report.favicon = tokio::time::timeout(FAVICON_WAIT, page.eval(FAVICON_JS))
+        report.favicon = tokio::time::timeout(FAVICON_WAIT, page.eval_isolated(FAVICON_JS))
             .await
             .ok()
             .and_then(Result::ok)

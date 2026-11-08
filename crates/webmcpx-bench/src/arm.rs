@@ -5,7 +5,7 @@
 use std::fmt;
 use std::time::Duration;
 
-use anyhow::Result;
+use anyhow::{Context as _, Result};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -168,7 +168,16 @@ pub async fn registered_tools(page: &Page, wait: Duration) -> Result<Vec<Value>>
     let mut stable = 0;
     let deadline = tokio::time::Instant::now() + wait;
     while tokio::time::Instant::now() < deadline {
+        // One bounded JSON string (host.js): parsed here, never trusted to be small by shape alone.
         let now = page.eval("__webmcpHost.list()").await?;
+        let now: Value = match now.as_str() {
+            Some(text) => serde_json::from_str(text).context("the tool list is not JSON")?,
+            None if now.is_null() => Value::Null,
+            None => anyhow::bail!("unexpected tool list: {now}"),
+        };
+        if let Some(e) = now.get("error").and_then(Value::as_str) {
+            anyhow::bail!("{e}");
+        }
         // Registration is async; take the list once it is non-empty and unchanged for 100 ms.
         stable = if now == listed && now.as_array().is_some_and(|a| !a.is_empty()) {
             stable + 1

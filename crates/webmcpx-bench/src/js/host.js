@@ -3,6 +3,15 @@
 // Real sites still use origin-trial APIs, so the same object is also `navigator.modelContext` and
 // accepts the removed `provideContext`/`clearContext` (they replace the provided set).
 (() => {
+  // Captured before any page script runs: list() must stay bounded even if the page redefines
+  // JSON.stringify or String.prototype.slice.
+  const { apply } = Reflect;
+  const stringify = JSON.stringify;
+  const slice = String.prototype.slice;
+  const toString = String;
+  const cut = (v, n) => apply(slice, toString(v ?? ""), [0, n]);
+  // The whole list as sent: room for the 200 tools a real page has, never megabytes per scan.
+  const LIST_MAX = 1_000_000;
   const tools = new Map();
   const provided = new Set();
   const NAME = /^[A-Za-z0-9_.-]{1,128}$/;
@@ -77,24 +86,28 @@
   Object.defineProperty(window, "__webmcpHost", {
     value: Object.freeze({
       every,
-      // Bounded before it leaves the page: a page must not be able to send the scanner megabytes. The
-      // caps sit far above every lint limit, so the linter still sees what is too long or too many.
-      list: () =>
-        every().slice(0, 200).map(([t, doc]) => {
-          const cap = (v, n) => String(v ?? "").slice(0, n);
+      // Bounded before it leaves the page, as one JSON string: a page must not be able to send the
+      // scanner megabytes. The caps sit far above every lint limit, so the linter still sees what is too
+      // long or too many; a list past LIST_MAX in all is an error, not a cut.
+      list: () => {
+        const list = every().slice(0, 200).map(([t, doc]) => {
+          const cap = cut;
           // A schema we can't read or that is too big to send is reported as a problem, never replaced.
           let inputSchema;
           let schemaError;
           try {
             inputSchema = schema(t.inputSchema);
-            if (JSON.stringify(inputSchema).length > 50_000) [inputSchema, schemaError] = [undefined, "the input schema is over 50,000 chars"];
+            if (cut(stringify(inputSchema), 50_001).length > 50_000) [inputSchema, schemaError] = [undefined, "the input schema is over 50,000 chars"];
           } catch {
             schemaError = "the input schema is not valid JSON";
           }
           const annotations = {};
           for (const [k, v] of Object.entries(t.annotations ?? {}).slice(0, 20)) annotations[cap(k, 64)] = v === true;
-          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations, schemaError, document: doc };
-        }),
+          return { name: cap(t.name, 256), description: cap(t.description, 10_000), inputSchema, annotations, schemaError, document: cap(doc, 64) };
+        });
+        const out = cut(stringify(list), LIST_MAX + 1);
+        return out.length > LIST_MAX ? stringify({ error: `the tool list is over ${LIST_MAX} chars` }) : out;
+      },
       async call(name, input) {
         const tool = all().get(name);
         if (!tool) return `Error: no tool named ${name}`;

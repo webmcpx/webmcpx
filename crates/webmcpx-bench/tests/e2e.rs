@@ -530,6 +530,74 @@ async fn the_snapshot_reads_through_display_contents_wrappers() {
     );
 }
 
+/// A hostile page can't send the scanner megabytes: not by redefining `slice`, `JSON.stringify` or a
+/// getter, nor with schemas that each pass their own cap. The shared browser connection survives, and
+/// the next scan works.
+#[tokio::test]
+async fn a_hostile_page_cannot_flood_the_scanner() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    let tampered = r#"<!doctype html><title>t</title><main><p>Hello.</p></main><script>
+      String.prototype.slice = function () { return String(this); };
+      JSON.stringify = () => "x".repeat(5e6);
+      document.title = "T".repeat(3e6);
+      Object.defineProperty(document, "readyState", { get: () => "z".repeat(3e6) });
+      document.modelContext.registerTool({ name: "big", description: "d".repeat(3e6), execute() {} });
+    </script>"#;
+    let schemas = r#"<!doctype html><title>s</title><script>
+      for (let i = 0; i < 200; i++) document.modelContext.registerTool({
+        name: "t" + i, description: "d",
+        inputSchema: { type: "object", properties: { v: { enum: Array(24900).fill(0) } } },
+        execute() {},
+      });
+    </script>"#;
+    let site = serve_html(
+        axum::Router::new()
+            .route(
+                "/tampered",
+                axum::routing::get(move || std::future::ready(axum::response::Html(tampered))),
+            )
+            .route(
+                "/schemas",
+                axum::routing::get(move || std::future::ready(axum::response::Html(schemas))),
+            )
+            .route(
+                "/plain",
+                axum::routing::get(|| {
+                    std::future::ready(axum::response::Html(
+                        "<!doctype html><title>Plain</title><p>ok</p>",
+                    ))
+                }),
+            ),
+    )
+    .await;
+    let scanner = webmcpx_bench::scan::Scanner::new(None, true);
+    let report = scanner
+        .scan(&format!("http://{site}/tampered"))
+        .await
+        .unwrap();
+    assert!(
+        report.title.chars().count() <= 300,
+        "{} chars",
+        report.title.len()
+    );
+    assert!(
+        report
+            .tools
+            .iter()
+            .all(|t| t.description.chars().count() <= 10_000)
+    );
+    let err = scanner
+        .scan(&format!("http://{site}/schemas"))
+        .await
+        .unwrap_err();
+    assert!(format!("{err:?}").contains("over 1000000 chars"), "{err:?}");
+    let plain = scanner.scan(&format!("http://{site}/plain")).await.unwrap();
+    assert_eq!(plain.title, "Plain");
+}
+
 /// Sharing a result: the link's page carries that site's card, the card renders, the badge shows the
 /// verdict, and a repeat scan comes from the cache without counting against the visitor's limit.
 #[tokio::test]
