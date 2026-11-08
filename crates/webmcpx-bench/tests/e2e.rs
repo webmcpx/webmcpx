@@ -194,7 +194,7 @@ async fn baseline_selects_an_option_by_its_label() {
         "store-cheapest-blue-mug",
         Arm::Baseline,
         move |step, messages| match step {
-            0 => call("read_page", "{}"),
+            0 | 2 => call("read_page", "{}"),
             1 => call(
                 "fill",
                 &format!(
@@ -202,7 +202,6 @@ async fn baseline_selects_an_option_by_its_label() {
                     sort(messages)
                 ),
             ),
-            2 => call("read_page", "{}"),
             _ => answer("Sorted."),
         },
     )
