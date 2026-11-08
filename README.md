@@ -146,7 +146,7 @@ npx -y webmcpx mcp                     # MCP server: your agent calls the tools 
 npx webmcpx tools localhost:3000       # list a page's WebMCP tools, no browser flag
 npm i webmcpx                          # import { register } from "webmcpx"; await register();
 npx skills add webmcpx/webmcpx -y      # teach your coding agent to add and check WebMCP tools
-cargo install webmcpx                  # the linter (needs Rust); webmcpx lint src/ --format json
+npx webmcpx lint src/                  # the linter (no Rust needed; or cargo install webmcpx); --format json
 ```
 
 Or paste this into your coding agent: *Add WebMCP to this site with webmcpx: run

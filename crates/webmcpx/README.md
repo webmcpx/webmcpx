@@ -5,7 +5,8 @@ standard WebMCP tools in one script tag, a linter for your own, and a public ben
 [webmcpx.dev](https://webmcpx.dev).
 
 ```sh
-cargo install webmcpx
+npx webmcpx lint src/          # no install: the same CLI as WebAssembly, in Node 22+
+cargo install webmcpx          # or the native binary
 webmcpx lint src/
 webmcpx lint --fix             # removes invisible characters
 webmcpx lint --format json     # stable schema for agents and CI; also sarif, github, concise

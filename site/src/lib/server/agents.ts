@@ -65,7 +65,7 @@ const FOR_YOUR_SITE = `For people who run a site. ${en.fix.lead}
 - Script tag: \`<script type="module" src="${LOADER_URL}"></script>\` before </body>. Where the browser lacks WebMCP, it adds the W3C polyfill (a separate file, fetched only there), so document.modelContext exists in Chrome, Firefox and Safari alike.
 - npm: \`npm i webmcpx\`, then \`import "webmcpx/polyfill"; import { register } from "webmcpx"; await register();\` (without the polyfill import, register() is a no-op where the browser lacks WebMCP).
 - Coding agent, in your project: "${SNIPPETS.agentPrompt.code}"
-- Linter: \`cargo install webmcpx\` (needs Rust), then \`webmcpx lint src/\` (\`--format json\` for machines).`;
+- Linter: \`npx webmcpx lint src/\` (no install, Node 22+; \`--format json\` for machines, \`--fix\` removes invisible characters). Native binary: \`cargo install webmcpx\`.`;
 
 const FOR_YOUR_AGENT = `For people who use agents, no site of your own needed. ${en.agents.lead} Paste this into your agent:
 

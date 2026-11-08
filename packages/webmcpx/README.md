@@ -112,7 +112,7 @@ const { registered, dispose } = await register({
 `npx webmcpx --help` shows the setup for Cursor, VS Code and Windsurf, `--headed` to watch the browser and
 `--cdp <url>` to use your own. Needs Node 22+ and Chrome, Chromium, Edge or Brave.
 
-Check your own tools with the [`webmcpx` linter](https://crates.io/crates/webmcpx), and scan any site at
+Check your own tools with `npx webmcpx lint src/` (the [`webmcpx` linter](https://crates.io/crates/webmcpx), no Rust needed), and scan any site at
 [webmcpx.dev](https://webmcpx.dev).
 
 WebMCP is a W3C Community Group draft, not a W3C standard. MIT licensed;

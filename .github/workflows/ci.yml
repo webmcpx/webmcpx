@@ -20,7 +20,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: stable
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown, wasm32-wasip1
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
@@ -46,11 +46,23 @@ jobs:
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: stable
+          targets: wasm32-wasip1
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
       - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
         with:
           tool: just,cargo-nextest
       - run: just test
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      # `npx webmcpx lint` on each OS (path mapping differs on Windows); unoptimized, no binaryen here.
+      - name: npx webmcpx lint (WASI)
+        shell: bash
+        run: |
+          cargo build --target wasm32-wasip1 --profile release-wasm -p webmcpx
+          mkdir -p packages/webmcpx/wasm
+          cp target/wasm32-wasip1/release-wasm/webmcpx.wasm packages/webmcpx/wasm/webmcpx_cli.wasm
+          cd packages/webmcpx && npm ci && node --test test/lint.test.js
 
   msrv:
     runs-on: ubuntu-latest

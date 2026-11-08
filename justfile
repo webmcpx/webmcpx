@@ -10,7 +10,7 @@ default:
 
 # One-time setup of pinned tools.
 setup:
-    rustup target add wasm32-unknown-unknown
+    rustup target add wasm32-unknown-unknown wasm32-wasip1
     cargo install --locked wasm-bindgen-cli --version {{wasm_bindgen_version}}
     cargo install --locked cargo-nextest cargo-insta cargo-deny cargo-shear
     @command -v wasm-opt >/dev/null || echo "Install binaryen (wasm-opt): brew install binaryen / apt install binaryen"
@@ -30,6 +30,7 @@ fmt-check:
 lint:
     cargo clippy --workspace --all-targets -- -D warnings
     cargo clippy -p webmcpx-wasm --target wasm32-unknown-unknown -- -D warnings
+    cargo clippy -p webmcpx --target wasm32-wasip1 -- -D warnings
 
 # Rust tests (pass `-p <crate>` to narrow).
 test *args:
@@ -40,11 +41,16 @@ test *args:
 gen:
     UPDATE_GENERATED=1 cargo test -q -p webmcpx-std --test generated
 
-# Build the optimized wasm module into the npm package.
+wasm_opt := "wasm-opt -Oz --strip-debug --strip-producers --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue"
+
+# Build the optimized wasm modules into the npm package: the browser tools (webmcpx-wasm) and the whole
+# Rust CLI for WASI, which `npx webmcpx lint|rules|rule|explain` runs in Node (no Rust needed).
 wasm:
     cargo build --target wasm32-unknown-unknown --profile release-wasm -p webmcpx-wasm
     wasm-bindgen --target web --no-typescript --out-dir {{wasm_out}} {{wasm_target}}
-    wasm-opt -Oz --strip-debug --strip-producers --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-reference-types --enable-multivalue {{wasm_out}}/webmcpx_wasm_bg.wasm -o {{wasm_out}}/webmcpx_wasm_bg.wasm
+    {{wasm_opt}} {{wasm_out}}/webmcpx_wasm_bg.wasm -o {{wasm_out}}/webmcpx_wasm_bg.wasm
+    cargo build --target wasm32-wasip1 --profile release-wasm -p webmcpx
+    {{wasm_opt}} target/wasm32-wasip1/release-wasm/webmcpx.wasm -o {{wasm_out}}/webmcpx_cli.wasm
 
 # The minified dist/ that browsers and bundlers load (needs `just wasm`; e2e tests and the bench serve it).
 js-build:

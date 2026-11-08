@@ -3,9 +3,11 @@
 //   webmcpx mcp                      MCP server: your agent calls the tools of any page it opens
 //   webmcpx tools <url>              list a page's WebMCP tools (great on localhost)
 //   webmcpx call <url> <tool> [json] call one and print the result
+//   webmcpx lint [paths]             lint WebMCP tools in your source (the Rust linter, as WebAssembly)
 import { parseArgs } from "node:util";
 import { describe, named, serve } from "../agent/mcp.js";
 import { Session, failed, mcpResult, openSessions } from "../agent/session.js";
+import { RUST_COMMANDS, runRust } from "./rust.js";
 
 const tty = process.stdout.isTTY && !process.env.NO_COLOR;
 const paint = (code) => (s) => (tty ? `\x1b[${code}m${s}\x1b[0m` : s);
@@ -26,10 +28,16 @@ ${bold("Check your own site's tools")} ${dim("(no Chrome flags)")}
   npx webmcpx tools localhost:3000
   npx webmcpx call localhost:3000 search_page '{"query": "pricing"}'
 
+${bold("Lint the tools in your source")} ${dim("(no Rust needed)")}
+  npx webmcpx lint src         ${dim("--fix, --format json|sarif|github, --preview")}
+
 ${bold("Commands")}
   mcp                         MCP server over stdio
   tools <url>                 list the page's WebMCP tools
   call <url> <tool> [json]    call one tool and print its result
+  lint [paths]                lint WebMCP tools in JS/TS and *webmcp*.json (lint --help)
+  rules, rule <name>          the lint rules, and what one checks
+  explain <CODE>              what a webmcpx error code means
 
 ${bold("Options")}
   --headed                    show the browser window
@@ -37,7 +45,7 @@ ${bold("Options")}
   --cdp <url>                 use a browser you started with --remote-debugging-port
 
 Every page gets search_page, fetch_as_markdown and get_page_context, plus the site's own tools.
-The linter is the Rust CLI: cargo install webmcpx. Docs: https://webmcpx.dev`;
+Docs: https://webmcpx.dev`;
 
 const usage = (message) => {
   console.error(`${message}\n\nRun "npx webmcpx --help" for usage.`);
@@ -101,7 +109,13 @@ for (const [signal, code] of [["SIGINT", 130], ["SIGTERM", 143], ["SIGHUP", 129]
 }
 
 async function main() {
-  const { values, positionals } = parse(process.argv.slice(2));
+  const argv = process.argv.slice(2);
+  // The linter's commands take the Rust CLI's own flags: hand them over untouched.
+  if (RUST_COMMANDS.has(argv[0])) {
+    process.exitCode = await runRust(argv);
+    return;
+  }
+  const { values, positionals } = parse(argv);
   const [command, ...rest] = positionals;
   if (values.version) {
     const { readFileSync } = await import("node:fs");
@@ -111,7 +125,6 @@ async function main() {
   const options = { headed: values.headed, browser: values.browser, cdp: values.cdp };
 
   if (command === "mcp") return serve(options);
-  if (command === "lint") usage("The linter is the Rust CLI: cargo install webmcpx, then webmcpx lint <dir>.");
   if (command !== "tools" && command !== "call") usage(`Unknown command "${command}".`);
 
   const [url, name, json] = rest;

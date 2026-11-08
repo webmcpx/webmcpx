@@ -324,7 +324,7 @@
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="mb-3 font-medium">{m.result.lint}</p>
 					<CodeBlock
-						snippet={highlightLite('cargo install webmcpx   # needs Rust\nwebmcpx lint src/', 'sh')}
+						snippet={highlightLite('npx webmcpx lint src/', 'sh')}
 						title={m.result.terminal}
 						class="shadow-none"
 					/>

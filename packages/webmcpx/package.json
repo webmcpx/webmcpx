@@ -57,6 +57,7 @@
     "bin",
     "wasm/webmcpx_wasm.js",
     "wasm/webmcpx_wasm_bg.wasm",
+    "wasm/webmcpx_cli.wasm",
     "README.md",
     "LICENSE"
   ],

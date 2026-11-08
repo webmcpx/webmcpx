@@ -81,6 +81,12 @@ pub(crate) struct Failure {
 }
 
 fn main() -> ExitCode {
+    // Under WASI (`npx webmcpx lint`, see packages/webmcpx/bin/rust.js) the host maps its file system at
+    // `/` and passes its working directory as PWD: start there, so paths mean what they mean natively.
+    #[cfg(target_os = "wasi")]
+    if let Some(dir) = std::env::var_os("PWD") {
+        std::env::set_current_dir(dir).ok();
+    }
     let cli = Cli::parse();
     let mut out = BufWriter::new(std::io::stdout().lock());
     let result = run(cli.command, &mut out);

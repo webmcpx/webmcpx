@@ -61,7 +61,7 @@ A server-rendered form needs no JavaScript: add `toolname`, `tooldescription` an
 
 ## 3. Verify
 
-1. **Lint.** Run `webmcpx lint <dir> --format json` (install: `cargo install webmcpx`, needs Rust; exit 1 means errors). Fix every error. `--fix` removes invisible characters.
+1. **Lint.** Run `npx webmcpx lint <dir> --format json` (no install needed; exit 1 means errors). Fix every error. `--fix` removes invisible characters.
    `webmcpx rule <name>` explains a rule, and `webmcpx explain <CODE>` explains a tool error code.
 2. **See the tools in a real browser, yourself.** With the dev server running, run
    `npx webmcpx tools <local URL>` (e.g. `localhost:5173`): it lists the page's tools, no browser flag.
