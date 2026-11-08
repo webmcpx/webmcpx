@@ -1,33 +1,18 @@
-//! Per-visitor scan limits for the public scanner: one scan at a time, and one per period. A visitor is
-//! an IPv4 address or an IPv6 /64 (one household or server can rotate through a /64). Behind a proxy
-//! (production: Cloudflare → nginx), the address comes from `X-Forwarded-For`, which nginx sets to the
-//! visitor's `CF-Connecting-IP`.
+//! Per-visitor scan limit for the public scanner: one scan at a time. A visitor is an IPv4 address or an
+//! IPv6 /64 (one household or server can rotate through a /64). Behind a proxy (production: Cloudflare →
+//! nginx), the address comes from `X-Forwarded-For`, which nginx sets to the visitor's `CF-Connecting-IP`.
+//! Repeat scans of a site are cheap anyway: its report is cached for a few minutes (`scan::CACHE_FOR`).
 
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::net::{IpAddr, Ipv6Addr};
 use std::sync::{Arc, Mutex};
-use std::time::{Duration, Instant};
-
-/// Past this many tracked visitors, those idle for a full period are forgotten, at most once a period
-/// (entries are small: a burst of distinct visitors costs memory for one period, not CPU per request).
-const PRUNE_AT: usize = 10_000;
 
 pub struct Visitors {
-    every: Duration,
     /// Read the visitor from `X-Forwarded-For` (set by our own proxy), not from the TCP peer.
     behind_proxy: bool,
-    seen: Mutex<Table>,
-}
-
-#[derive(Default)]
-struct Table {
-    visitors: HashMap<IpAddr, Seen>,
-    pruned: Option<Instant>,
-}
-
-struct Seen {
-    started: Instant,
-    scanning: bool,
+    /// Visitors with a scan running. Only running scans are kept, so the set never outgrows the
+    /// scanner's own capacity (slots plus places in line).
+    scanning: Mutex<HashSet<IpAddr>>,
 }
 
 /// Why a visitor may not scan now.
@@ -35,8 +20,6 @@ struct Seen {
 pub enum Refused {
     /// Their previous scan is still running.
     Busy,
-    /// Their last scan started less than a period ago; they may scan again after this long.
-    TooSoon(Duration),
 }
 
 /// Held while a visitor's scan runs.
@@ -47,18 +30,15 @@ pub struct Scanning {
 
 impl Drop for Scanning {
     fn drop(&mut self) {
-        if let Some(seen) = lock(&self.visitors.seen).visitors.get_mut(&self.key) {
-            seen.scanning = false;
-        }
+        lock(&self.visitors.scanning).remove(&self.key);
     }
 }
 
 impl Visitors {
-    pub fn new(every: Duration, behind_proxy: bool) -> Self {
+    pub fn new(behind_proxy: bool) -> Self {
         Self {
-            every,
             behind_proxy,
-            seen: Mutex::default(),
+            scanning: Mutex::default(),
         }
     }
 
@@ -77,33 +57,9 @@ impl Visitors {
     /// Starts a scan for `ip`, or says why not.
     pub fn start(self: &Arc<Self>, ip: IpAddr) -> Result<Scanning, Refused> {
         let key = visitor(ip);
-        let mut table = lock(&self.seen);
-        // Refusals are a single lookup: hammering the scanner never makes it do more work.
-        if let Some(s) = table.visitors.get(&key) {
-            if s.scanning {
-                return Err(Refused::Busy);
-            }
-            let since = s.started.elapsed();
-            if since < self.every {
-                return Err(Refused::TooSoon(self.every.saturating_sub(since)));
-            }
+        if !lock(&self.scanning).insert(key) {
+            return Err(Refused::Busy);
         }
-        if table.visitors.len() >= PRUNE_AT
-            && table.pruned.is_none_or(|at| at.elapsed() >= self.every)
-        {
-            let every = self.every;
-            table
-                .visitors
-                .retain(|_, s| s.scanning || s.started.elapsed() < every);
-            table.pruned = Some(Instant::now());
-        }
-        table.visitors.insert(
-            key,
-            Seen {
-                started: Instant::now(),
-                scanning: true,
-            },
-        );
         Ok(Scanning {
             visitors: Arc::clone(self),
             key,
@@ -157,8 +113,8 @@ mod tests {
     }
 
     #[test]
-    fn one_scan_at_a_time_and_one_per_period() {
-        let v = Arc::new(Visitors::new(Duration::from_millis(200), false));
+    fn one_scan_at_a_time_and_no_wait_after() {
+        let v = Arc::new(Visitors::new(false));
         let me = ip("2600::1:2:3:4:5");
         let scanning = v.start(me).unwrap();
         // Same /64, another address: still the same visitor.
@@ -168,43 +124,20 @@ mod tests {
             "another /64 is another visitor"
         );
         drop(scanning);
-        assert!(matches!(v.start(me), Err(Refused::TooSoon(_))));
-        std::thread::sleep(Duration::from_millis(250));
-        assert!(v.start(me).is_ok());
-    }
-
-    #[test]
-    fn a_crowd_of_visitors_is_swept_at_most_once_a_period() {
-        let v = Arc::new(Visitors::new(Duration::from_millis(100), false));
-        let n = u32::try_from(PRUNE_AT).unwrap();
-        let addr = |i: u32| IpAddr::V4(std::net::Ipv4Addr::from(0x0a00_0000 + i));
-        for i in 0..n {
-            drop(v.start(addr(i)).unwrap());
-        }
-        // Over the threshold within one period: entries stay (nothing expired yet), and refusals of a
-        // known visitor do not sweep.
-        drop(v.start(addr(n)).unwrap());
-        let swept = lock(&v.seen).pruned;
-        assert!(v.start(addr(0)).is_err());
-        assert_eq!(lock(&v.seen).pruned, swept, "a refusal swept the table");
-        std::thread::sleep(Duration::from_millis(150));
-        drop(v.start(addr(n + 1)).unwrap());
-        assert!(
-            lock(&v.seen).visitors.len() < 10,
-            "expired visitors were not forgotten"
-        );
+        assert!(v.start(me).is_ok(), "a finished scan leaves no wait");
+        assert!(lock(&v.scanning).is_empty(), "finished scans are forgotten");
     }
 
     #[test]
     fn behind_a_proxy_the_visitor_is_the_forwarded_address() {
         let proxy = ip("172.18.0.3");
-        let direct = Visitors::new(Duration::from_secs(60), false);
+        let direct = Visitors::new(false);
         assert_eq!(
             direct.address(proxy, Some("203.0.113.7")),
             proxy,
             "a header from a stranger is ignored"
         );
-        let behind = Visitors::new(Duration::from_secs(60), true);
+        let behind = Visitors::new(true);
         assert_eq!(
             behind.address(proxy, Some("203.0.113.7, 10.0.0.1")),
             ip("203.0.113.7")

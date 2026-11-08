@@ -120,7 +120,7 @@ const zh: Messages = {
 			},
 			list: {
 				title: '浏览器列出工具',
-				text: '智能体询问页面能做什么，输入带类型，还附有“只读”等提示。'
+				text: '智能体询问浏览器这个页面能做什么，输入带类型，还附有“只读”等提示。'
 			},
 			call: {
 				title: '智能体调用工具',
@@ -572,6 +572,12 @@ const zh: Messages = {
 			issues: { other: '{tools}，但有 {n} 个 lint 错误会让智能体出错。' },
 			toolCount: { other: '{n} 个工具' },
 			basics: '{tools}，没有 lint 错误，但还缺几项面向智能体的基础配置。',
+			cache: {
+				label: '这是缓存的结果。',
+				expires: '{time} 后过期。',
+				expired: '这个缓存的结果已过期。',
+				rescan: '重新扫描'
+			},
 			score: {
 				title: '智能体就绪评分',
 				of: '{score}/100',
@@ -656,8 +662,9 @@ const zh: Messages = {
 			invalid: '请输入网站地址，例如 notion.com 或 https://example.com/docs。',
 			offline: '扫描器已离线。可以用 `just serve` 在本地运行。',
 			noScanner: '这个站点副本没有扫描器。可以用 `just serve` 在本地运行。',
-			busy: '每分钟只能扫描一次，请在 {s} 秒后重试。',
+			busy: '扫描器正忙，请在 {s} 秒后重试。',
 			busyLater: '扫描器正忙，请一分钟后再试。',
+			running: '你上一次的扫描还在进行中。请等它完成后再扫描。',
 			timeout: '页面响应超时。',
 			badAddress: '这个地址无法扫描。',
 			unreadable: '无法读取这个页面。',

@@ -65,16 +65,20 @@ export interface Report {
 	/** The site's icon as a small data:image URI, or null. */
 	favicon: string | null;
 	elapsed_ms: number;
+	/** Present when the report comes from the scanner's cache: its age and when that copy expires. */
+	cached?: { age_s: number; expires_in_s: number };
 }
 
 /**
  * Why a scan failed, as data: the page turns it into words in its language with `errorText()`.
  * `status` is the HTTP status, or 0 when the scanner could not be reached; `detail` is the server's own
- * (English) reason; `retryAfter` the seconds from a 429's `Retry-After` header.
+ * (English) reason; `code` its machine-readable reason (`scan_running`: the visitor's previous scan has
+ * not ended); `retryAfter` the seconds from a 429's `Retry-After` header.
  */
 export interface Failure {
 	status: number;
 	detail: string | null;
+	code: string | null;
 	retryAfter: number | null;
 }
 
@@ -84,12 +88,8 @@ export type Outcome = { ok: true; report: Report } | { ok: false; failure: Failu
 export type ScanErrors = Messages['scan']['errors'];
 
 /** A failed scan in the reader's language. The server's detail stays in English, in parentheses. */
-export function errorText(
-	status: number,
-	detail: string | null,
-	retryAfter: number | null,
-	m: ScanErrors
-): string {
+export function errorText(failure: Failure, m: ScanErrors): string {
+	const { status, detail, retryAfter } = failure;
 	const withDetail = (lead: string) => (detail ? fmt(m.withDetail, { lead, detail }) : lead);
 	switch (status) {
 		case 0:
@@ -97,6 +97,7 @@ export function errorText(
 		case 404:
 			return m.noScanner;
 		case 429:
+			if (failure.code === 'scan_running') return m.running;
 			return retryAfter != null ? fmt(m.busy, { s: retryAfter }) : m.busyLater;
 		case 504:
 			return m.timeout;
@@ -146,17 +147,19 @@ export async function scan(url: string, fetcher: typeof fetch = fetch): Promise<
 	try {
 		res = await fetcher(`/api/scan?url=${encodeURIComponent(url)}`);
 	} catch {
-		return { ok: false, failure: { status: 0, detail: null, retryAfter: null } };
+		return { ok: false, failure: { status: 0, detail: null, code: null, retryAfter: null } };
 	}
-	const body = (await res.json().catch(() => null)) as Report | { error?: string } | null;
+	const body = (await res.json().catch(() => null)) as Report | { error?: string; code?: string } | null;
 	if (!res.ok || !body || !('verdict' in body)) {
 		const detail = body && 'error' in body && body.error ? body.error : null;
+		const code = body && 'code' in body && body.code ? body.code : null;
 		return {
 			ok: false,
 			// A 200 without a report is the scanner misbehaving: report it like a server error.
 			failure: {
 				status: res.ok ? 502 : res.status,
 				detail,
+				code,
 				retryAfter: retryAfter(res.headers.get('Retry-After'))
 			}
 		};

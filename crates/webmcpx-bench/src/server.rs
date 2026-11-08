@@ -313,7 +313,8 @@ async fn scan(
     headers: HeaderMap,
     Query(q): Query<ScanQuery>,
 ) -> Response {
-    // A recent report costs nothing: shared links and repeat visits never count against the limit.
+    // A recent report costs nothing: shared links and repeat visits never count against the limit, and the
+    // report says it is cached and when it expires.
     if let Some(report) = state.scanner.recent(&q.url) {
         return Json(report).into_response();
     }
@@ -348,27 +349,17 @@ async fn scan(
 }
 
 fn too_many(refused: &Refused) -> Response {
-    let (message, wait) = match refused {
-        Refused::Busy => ("Your previous scan is still running.".to_owned(), None),
-        Refused::TooSoon(wait) => {
-            let secs = wait.as_secs() + 1;
-            (
-                format!("One scan per minute, please. Try again in {secs} s."),
-                Some(secs),
-            )
-        }
-    };
-    let mut response = (
-        StatusCode::TOO_MANY_REQUESTS,
-        Json(json!({ "error": message })),
-    )
-        .into_response();
-    if let Some(secs) = wait {
-        response
-            .headers_mut()
-            .insert(axum::http::header::RETRY_AFTER, secs.into());
+    match refused {
+        // `code` lets the page word it in the reader's language; no Retry-After: it ends with their scan.
+        Refused::Busy => (
+            StatusCode::TOO_MANY_REQUESTS,
+            Json(json!({
+                "error": "Your previous scan is still running. One scan at a time, please.",
+                "code": "scan_running",
+            })),
+        )
+            .into_response(),
     }
-    response
 }
 
 /// Binds `addr` and serves in the background. Returns the bound address (useful with port 0).

@@ -6,6 +6,7 @@
 <script lang="ts">
 	import Check from '@lucide/svelte/icons/check';
 	import X from '@lucide/svelte/icons/x';
+	import Clock from '@lucide/svelte/icons/clock';
 	import Link from '@lucide/svelte/icons/link';
 	import Wrench from '@lucide/svelte/icons/wrench';
 	import { tick } from 'svelte';
@@ -45,11 +46,7 @@
 		missing: { tone: 'bad', icon: CircleX, fill: 'bg-bad-soft' }
 	} as const;
 	const error = $derived(
-		scanner.error === 'invalid'
-			? m.errors.invalid
-			: scanner.error
-				? errorText(scanner.error.status, scanner.error.detail, scanner.error.retryAfter, m.errors)
-				: ''
+		scanner.error === 'invalid' ? m.errors.invalid : scanner.error ? errorText(scanner.error, m.errors) : ''
 	);
 
 	/** The install line, highlighted at build time. */
@@ -73,6 +70,23 @@
 		};
 	}
 	const hideTip = () => (tip = null);
+
+	/** A cached report: when its copy expires (this clock), and the seconds left, ticking once a second. */
+	let expiresAt = $state<number | null>(null);
+	let now = $state(Date.now());
+	$effect(() => {
+		const left = scanner.report?.cached?.expires_in_s;
+		expiresAt = left == null ? null : Date.now() + left * 1000;
+		now = Date.now();
+		if (expiresAt == null) return;
+		const timer = setInterval(() => {
+			now = Date.now();
+			if (expiresAt != null && now >= expiresAt) clearInterval(timer);
+		}, 1000);
+		return () => clearInterval(timer);
+	});
+	const secondsLeft = $derived(expiresAt == null ? null : Math.max(0, Math.ceil((expiresAt - now) / 1000)));
+	const clock = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 	/** The tooltip lives on <body>, so the card's rounded clipping never cuts it. */
 	const portal = (node: HTMLElement) => {
 		document.body.append(node);
@@ -174,6 +188,29 @@
 							)}
 						{/if}
 					</p>
+					{#if secondsLeft != null}
+						<!-- From the scanner's cache: say so, and count down to when a scan runs fresh again. -->
+						<p
+							class="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink-3"
+							data-testid="cached"
+						>
+							<Clock class="size-4 shrink-0" aria-hidden="true" />
+							{#if secondsLeft > 0}
+								<span
+									>{m.result.cache.label}
+									<span class="tabular-nums">{fmt(m.result.cache.expires, { time: clock(secondsLeft) })}</span
+									></span
+								>
+							{:else}
+								<span>{m.result.cache.expired}</span>
+								<button
+									type="button"
+									class="font-medium text-ink underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
+									onclick={() => scanner.run(r.url)}>{m.result.cache.rescan}</button
+								>
+							{/if}
+						</p>
+					{/if}
 				</div>
 			</div>
 
@@ -242,7 +279,7 @@
 
 			{#if r.tools.length}
 				<div class="border-t-2 border-ink bg-paper-2 px-5 py-4 sm:px-7">
-					<ul class="flex flex-wrap gap-2" aria-label={m.result.tools}>
+					<ul class="flex flex-wrap items-center gap-2" aria-label={m.result.tools}>
 						{#each r.tools.slice(0, 3) as t, i (i)}
 							<li>
 								<!-- Hover, focus or tap shows the description; screen readers get it as part of the name. -->

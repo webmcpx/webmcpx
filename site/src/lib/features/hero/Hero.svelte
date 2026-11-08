@@ -22,6 +22,11 @@
 	let { best }: Props = $props();
 	const i18n = useI18n();
 	const m = $derived(i18n.m.hero);
+	/** Letters in the headline's longer line from sm up: the text before the mark, or the mark and what follows. */
+	const lineLen = $derived.by(() => {
+		const [before, after = ''] = m.title.text.split('{mark}');
+		return Math.max([...before.trim()].length, [...(m.title.mark + after)].length);
+	});
 	// Three sites that ship WebMCP, then ours: scanning the scanner's own site had better say agent-ready.
 	const TRY = [{ name: 'webmcpx', url: 'https://webmcpx.dev/' }, ...SITES.slice(0, 3)];
 	/** The date of the WebMCP draft this release tracks. */
@@ -38,7 +43,7 @@
 			class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,var(--hairline)_1px,transparent_1px),linear-gradient(to_bottom,var(--hairline)_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,black,transparent_85%)] bg-[size:64px_64px] opacity-70"
 		></div>
 
-		<div class="mx-auto max-w-5xl text-center">
+		<div class="@container mx-auto max-w-5xl text-center">
 			<Reveal>
 				<a href={SPEC} class="group inline-flex items-center gap-2 text-sm text-ink-2 hover:text-ink">
 					<Stamp tone="marker" size="sm">{m.stamp}</Stamp>
@@ -47,9 +52,15 @@
 				</a>
 			</Reveal>
 			<Reveal delay={60}>
-				<h1 id="hero-title" class="mx-auto mt-8 max-w-4xl font-display text-giant font-bold text-balance">
+				<!-- From sm up the marked part starts the second line ("Deixe seu site / pronto para agentes"): the size
+				     shrinks only as much as the longer line needs to fit (about 0.5em per letter; see the style). -->
+				<h1
+					id="hero-title"
+					class="hero-title mx-auto mt-8 font-display text-giant font-bold text-balance"
+					style:--line-len={lineLen}
+				>
 					<Rich text={m.title.text}>
-						{#snippet mark()}<span class="marker">{m.title.mark}</span>{/snippet}
+						{#snippet mark()}<br class="max-sm:hidden" /><span class="marker">{m.title.mark}</span>{/snippet}
 					</Rich>
 				</h1>
 			</Reveal>
@@ -112,3 +123,16 @@
 		</div>
 	</div>
 </section>
+
+<style>
+	@media (min-width: 40rem) {
+		.hero-title {
+			--per-letter: 0.5;
+			font-size: min(var(--text-giant), calc(100cqi / (var(--line-len) * var(--per-letter))));
+		}
+		/* Cyrillic letters run wider in the display face. */
+		.hero-title:lang(ru) {
+			--per-letter: 0.58;
+		}
+	}
+</style>

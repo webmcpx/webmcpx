@@ -9,7 +9,7 @@ use std::io::Write as _;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
@@ -85,12 +85,11 @@ enum Command {
         /// Scans running at once; more wait in line.
         #[arg(long, default_value_t = 2)]
         scan_parallel: usize,
-        /// Public scanner: each visitor (an IPv4 address or IPv6 /64) gets one scan at a time and one
-        /// every this many seconds.
+        /// Public scanner: each visitor (an IPv4 address or IPv6 /64) gets one scan at a time.
         #[arg(long)]
-        scan_every: Option<u64>,
+        one_scan_per_visitor: bool,
         /// Read the visitor's address from X-Forwarded-For, set by our own proxy (production).
-        #[arg(long, requires = "scan_every")]
+        #[arg(long, requires = "one_scan_per_visitor")]
         behind_proxy: bool,
     },
     /// Render a preview image (1200×630 PNG): the site's generic one (e.g. `site/static/og.png`), or with
@@ -257,7 +256,7 @@ async fn main() -> Result<()> {
             remote_chrome,
             proxy_listen,
             scan_parallel,
-            scan_every,
+            one_scan_per_visitor,
             behind_proxy,
         } => {
             let mut scanner = Scanner::new(chrome, scan_private).parallel(scan_parallel);
@@ -265,8 +264,7 @@ async fn main() -> Result<()> {
                 scanner = scanner.remote(Remote { chrome, proxy });
             }
             let served = served.unwrap_or(root);
-            let visitors = scan_every
-                .map(|secs| Arc::new(Visitors::new(Duration::from_secs(secs), behind_proxy)));
+            let visitors = one_scan_per_visitor.then(|| Arc::new(Visitors::new(behind_proxy)));
             let bound =
                 server::spawn_with(&served, addr, Some(Arc::new(scanner)), visitors).await?;
             eprintln!("serving http://{bound}/ (sites under /sites/); Ctrl-C to stop");

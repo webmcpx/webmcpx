@@ -120,7 +120,7 @@ const ptBr: Messages = {
 			},
 			list: {
 				title: 'O navegador lista as ferramentas',
-				text: 'O agente pergunta à página o que ela sabe fazer, com entradas tipadas e dicas como somente leitura.'
+				text: 'O agente pergunta ao navegador o que a página sabe fazer, com entradas tipadas e dicas como somente leitura.'
 			},
 			call: {
 				title: 'O agente chama as ferramentas',
@@ -610,6 +610,12 @@ const ptBr: Messages = {
 			},
 			toolCount: { one: '{n} ferramenta', other: '{n} ferramentas' },
 			basics: '{tools} e nenhum erro de lint, mas faltam alguns básicos para agentes.',
+			cache: {
+				label: 'Resultado em cache.',
+				expires: 'Expira em {time}.',
+				expired: 'Este resultado em cache expirou.',
+				rescan: 'Escanear de novo'
+			},
 			score: {
 				title: 'Nota de prontidão para agentes',
 				of: '{score}/100',
@@ -703,8 +709,9 @@ const ptBr: Messages = {
 			invalid: 'Digite um site como notion.com ou https://example.com/docs.',
 			offline: 'O scanner está offline. Rode localmente com `just serve`.',
 			noScanner: 'Esta cópia do site não tem scanner. Rode localmente com `just serve`.',
-			busy: 'Um scan por minuto, por favor. Tente de novo em {s} s.',
+			busy: 'O scanner está ocupado. Tente de novo em {s} s.',
 			busyLater: 'O scanner está ocupado. Tente de novo em um minuto.',
+			running: 'Seu scan anterior ainda está rodando. Espere ele terminar e escaneie de novo.',
 			timeout: 'A página demorou demais para responder.',
 			badAddress: 'Esse endereço não pode ser escaneado.',
 			unreadable: 'Não foi possível ler a página.',

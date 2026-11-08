@@ -30,7 +30,7 @@ const QUEUE_WAIT: Duration = Duration::from_secs(30);
 const MAX_WAITING: usize = 100;
 /// A site's report is reused for this long: many people scanning the same site (a shared link, a
 /// popular page) cost one browser visit.
-const CACHE_FOR: Duration = Duration::from_mins(10);
+const CACHE_FOR: Duration = Duration::from_mins(5);
 /// Memory the cache may hold (reports as JSON); the oldest go first. Pages control their reports' size
 /// (tool descriptions), so a report bigger than `CACHE_ENTRY_MAX` is never kept.
 const CACHE_BYTES: usize = 64 * 1024 * 1024;
@@ -68,6 +68,18 @@ pub struct Report {
     /// proxy), so the page showing the report never requests anything from the scanned site.
     pub favicon: Option<String>,
     pub elapsed_ms: u64,
+    /// Set when this report comes from the cache (an earlier scan of the same URL), not a scan just now.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cached: Option<Cached>,
+}
+
+/// How old a cached report is, and when its copy expires (then the next request scans again).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+pub struct Cached {
+    /// Seconds since the scan that made this report.
+    pub age_s: u64,
+    /// Seconds until the cache drops it (at least 1).
+    pub expires_in_s: u64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
@@ -635,9 +647,18 @@ struct Cache {
 }
 
 impl Cache {
+    /// The report kept for `key`, marked as cached, while it is fresh.
     fn get(&self, key: &str) -> Option<Report> {
         let (at, _, report) = self.entries.get(key)?;
-        (at.elapsed() < CACHE_FOR).then(|| report.clone())
+        let age = at.elapsed();
+        let left = CACHE_FOR.checked_sub(age).filter(|d| !d.is_zero())?;
+        let mut report = report.clone();
+        report.cached = Some(Cached {
+            age_s: age.as_secs(),
+            // Rounded up: a copy that lives 0.4 s more is still "1 s".
+            expires_in_s: left.as_secs() + u64::from(left.subsec_nanos() > 0),
+        });
+        Some(report)
     }
 
     /// Keeps `report` unless it is too big; drops expired entries, then the oldest, to stay in `budget`.
@@ -930,6 +951,7 @@ pub fn report(
         score_items,
         favicon: None,
         elapsed_ms: 0,
+        cached: None,
     }
 }
 
@@ -1196,7 +1218,10 @@ mod tests {
             );
             assert!(cache.bytes <= budget, "{} > {budget}", cache.bytes);
         }
-        assert!(cache.get("k19").is_some(), "the newest stays");
+        let newest = cache.get("k19").expect("the newest stays");
+        let cached = newest.cached.expect("a report from the cache says so");
+        assert_eq!(cached.age_s, 0);
+        assert_eq!(cached.expires_in_s, CACHE_FOR.as_secs());
         assert!(cache.get("k0").is_none(), "the oldest went first");
     }
 

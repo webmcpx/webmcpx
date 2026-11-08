@@ -122,7 +122,7 @@ const de: Messages = {
 			},
 			list: {
 				title: 'Der Browser listet sie auf',
-				text: 'Ein Agent fragt die Seite, was sie kann, mit typisierten Eingaben und Hinweisen wie „nur lesend“.'
+				text: 'Ein Agent fragt den Browser, was die Seite kann, mit typisierten Eingaben und Hinweisen wie „nur lesend“.'
 			},
 			call: {
 				title: 'Der Agent ruft sie auf',
@@ -612,6 +612,12 @@ const de: Messages = {
 			},
 			toolCount: { one: '{n} Tool', other: '{n} Tools' },
 			basics: '{tools} und keine Lint-Fehler, aber ein paar Grundlagen für Agenten fehlen.',
+			cache: {
+				label: 'Ergebnis aus dem Cache.',
+				expires: 'Läuft ab in {time}.',
+				expired: 'Dieses Ergebnis aus dem Cache ist abgelaufen.',
+				rescan: 'Erneut scannen'
+			},
 			score: {
 				title: 'Agentenfähigkeits-Score',
 				of: '{score}/100',
@@ -705,8 +711,9 @@ const de: Messages = {
 			invalid: 'Geben Sie eine Website ein, etwa notion.com oder https://example.com/docs.',
 			offline: 'Der Scanner ist offline. Starten Sie ihn lokal mit `just serve`.',
 			noScanner: 'Diese Kopie der Website hat keinen Scanner. Starten Sie ihn lokal mit `just serve`.',
-			busy: 'Bitte nur ein Scan pro Minute. Versuchen Sie es in {s} s erneut.',
+			busy: 'Der Scanner ist ausgelastet. Versuchen Sie es in {s} s erneut.',
 			busyLater: 'Der Scanner ist ausgelastet. Versuchen Sie es in einer Minute erneut.',
+			running: 'Ihr vorheriger Scan läuft noch. Warten Sie, bis er fertig ist, und scannen Sie dann erneut.',
 			timeout: 'Die Seite hat zu lange für die Antwort gebraucht.',
 			badAddress: 'Diese Adresse lässt sich nicht scannen.',
 			unreadable: 'Die Seite konnte nicht gelesen werden.',

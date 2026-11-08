@@ -169,7 +169,7 @@ const en = {
 			},
 			list: {
 				title: 'The browser lists them',
-				text: 'An agent asks the page what it can do, with typed inputs and hints such as read-only.'
+				text: 'An agent asks the browser what the page can do, with typed inputs and hints such as read-only.'
 			},
 			call: {
 				title: 'The agent calls them',
@@ -751,6 +751,13 @@ const en = {
 			toolCount: p({ one: '{n} tool', other: '{n} tools' }),
 			// Tools with no lint errors, but under the agent-ready score: {tools} is the tool count.
 			basics: '{tools} and no lint errors, but a few agent basics are missing.',
+			// A report from the scanner's cache: {time} counts down (m:ss) to when a scan runs fresh again.
+			cache: {
+				label: 'Cached result.',
+				expires: 'Expires in {time}.',
+				expired: 'This cached result has expired.',
+				rescan: 'Scan again'
+			},
 			// The agent-ready score: {score} is 0 to 100, {min} the score an agent-ready site needs (70).
 			score: {
 				title: 'Agent-ready score',
@@ -845,8 +852,10 @@ const en = {
 			offline: 'The scanner is offline. Run it locally with `just serve`.',
 			noScanner: 'This copy of the site has no scanner. Run it locally with `just serve`.',
 			// {s} is a number of seconds.
-			busy: 'One scan per minute, please. Try again in {s} s.',
+			busy: 'The scanner is busy. Try again in {s} s.',
 			busyLater: 'The scanner is busy. Try again in a minute.',
+			// The visitor's own previous scan has not ended (one scan at a time).
+			running: 'Your previous scan is still running. Wait for it to finish, then scan again.',
 			timeout: 'The page took too long to answer.',
 			badAddress: "That address can't be scanned.",
 			unreadable: "The page couldn't be read.",

@@ -120,7 +120,7 @@ const id: Messages = {
 			},
 			list: {
 				title: 'Browser menampilkan daftarnya',
-				text: 'Agent bertanya kepada halaman apa saja yang bisa dilakukannya, lengkap dengan input bertipe dan petunjuk seperti read-only.'
+				text: 'Agent bertanya kepada browser apa saja yang bisa dilakukan halaman, lengkap dengan input bertipe dan petunjuk seperti read-only.'
 			},
 			call: {
 				title: 'Agent memanggilnya',
@@ -605,6 +605,12 @@ const id: Messages = {
 			},
 			toolCount: { other: '{n} tool' },
 			basics: '{tools} dan tanpa error lint, tetapi beberapa dasar untuk agent masih kurang.',
+			cache: {
+				label: 'Hasil dari cache.',
+				expires: 'Kedaluwarsa dalam {time}.',
+				expired: 'Hasil dari cache ini sudah kedaluwarsa.',
+				rescan: 'Scan lagi'
+			},
 			score: {
 				title: 'Skor siap agent',
 				of: '{score}/100',
@@ -696,8 +702,9 @@ const id: Messages = {
 			invalid: 'Ketik situs seperti notion.com atau https://example.com/docs.',
 			offline: 'Scanner sedang offline. Jalankan secara lokal dengan `just serve`.',
 			noScanner: 'Salinan situs ini tidak punya scanner. Jalankan secara lokal dengan `just serve`.',
-			busy: 'Maaf, hanya satu scan per menit. Coba lagi dalam {s} detik.',
+			busy: 'Scanner sedang sibuk. Coba lagi dalam {s} detik.',
 			busyLater: 'Scanner sedang sibuk. Coba lagi dalam satu menit.',
+			running: 'Scan Anda sebelumnya masih berjalan. Tunggu sampai selesai, lalu scan lagi.',
 			timeout: 'Halaman terlalu lama merespons.',
 			badAddress: 'Alamat itu tidak bisa di-scan.',
 			unreadable: 'Halaman tidak bisa dibaca.',

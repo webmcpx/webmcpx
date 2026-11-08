@@ -121,7 +121,7 @@ const es: Messages = {
 			},
 			list: {
 				title: 'El navegador las lista',
-				text: 'El agente le pregunta a la página qué puede hacer, con entradas tipadas e indicaciones como solo lectura.'
+				text: 'El agente le pregunta al navegador qué puede hacer la página, con entradas tipadas e indicaciones como solo lectura.'
 			},
 			call: {
 				title: 'El agente las llama',
@@ -611,6 +611,12 @@ const es: Messages = {
 			},
 			toolCount: { one: '{n} herramienta', other: '{n} herramientas' },
 			basics: '{tools} y ningún error de lint, pero faltan algunos básicos para agentes.',
+			cache: {
+				label: 'Resultado en caché.',
+				expires: 'Caduca en {time}.',
+				expired: 'Este resultado en caché ha caducado.',
+				rescan: 'Escanear de nuevo'
+			},
 			score: {
 				title: 'Puntuación para agentes',
 				of: '{score}/100',
@@ -704,8 +710,9 @@ const es: Messages = {
 			invalid: 'Escribe un sitio como notion.com o https://example.com/docs.',
 			offline: 'El escáner no está disponible. Ejecútalo en local con `just serve`.',
 			noScanner: 'Esta copia del sitio no tiene escáner. Ejecútalo en local con `just serve`.',
-			busy: 'Un escaneo por minuto, por favor. Vuelve a intentarlo en {s} s.',
+			busy: 'El escáner está ocupado. Vuelve a intentarlo en {s} s.',
 			busyLater: 'El escáner está ocupado. Vuelve a intentarlo en un minuto.',
+			running: 'Tu escaneo anterior sigue en curso. Espera a que termine y vuelve a escanear.',
 			timeout: 'La página tardó demasiado en responder.',
 			badAddress: 'Esa dirección no se puede escanear.',
 			unreadable: 'No se pudo leer la página.',

@@ -34,8 +34,7 @@ const respond = (status: number, body: unknown, headers: Record<string, string> 
 	(async () => new Response(JSON.stringify(body), { status, headers })) as unknown as typeof fetch;
 
 /** What the page shows for a failed outcome, in English. */
-const text = (out: Outcome) =>
-	out.ok ? '' : errorText(out.failure.status, out.failure.detail, out.failure.retryAfter, en.scan.errors);
+const text = (out: Outcome) => (out.ok ? '' : errorText(out.failure, en.scan.errors));
 const TITLE = en.scan.result.badgeTitle;
 
 describe('normalize', () => {
@@ -60,7 +59,7 @@ describe('scan', () => {
 		const out = await scan('http://10.0.0.1/', respond(400, { error: '10.0.0.1 is not a public address' }));
 		expect(out).toEqual({
 			ok: false,
-			failure: { status: 400, detail: '10.0.0.1 is not a public address', retryAfter: null }
+			failure: { status: 400, detail: '10.0.0.1 is not a public address', code: null, retryAfter: null }
 		});
 		expect(text(out)).toBe("That address can't be scanned. (10.0.0.1 is not a public address)");
 		const unreadable = await scan('https://a.example/', respond(422, { error: 'not HTML' }));
@@ -72,7 +71,12 @@ describe('scan', () => {
 			'https://a.example/',
 			respond(429, { error: 'slow down' }, { 'Retry-After': '52' })
 		);
-		expect(text(out)).toBe('One scan per minute, please. Try again in 52 s.');
+		expect(text(out)).toBe('The scanner is busy. Try again in 52 s.');
+		const running = await scan(
+			'https://a.example/',
+			respond(429, { error: 'still running', code: 'scan_running' })
+		);
+		expect(text(running)).toBe(en.scan.errors.running);
 		const later = await scan('https://a.example/', respond(429, { error: 'slow down' }));
 		expect(text(later)).toBe(en.scan.errors.busyLater);
 	});

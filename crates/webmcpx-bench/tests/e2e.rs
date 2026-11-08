@@ -558,14 +558,25 @@ async fn a_cancelled_scan_frees_its_place_in_line() {
     );
 }
 
-/// The public scanner: one scan per visitor per period, the visitor read from our proxy's header.
+/// The public scanner: one scan at a time per visitor (the visitor read from our proxy's header), and no
+/// wait once it ends.
 #[tokio::test]
 async fn scan_api_limits_each_visitor() {
-    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, false));
-    let visitors = Arc::new(webmcpx_bench::visitors::Visitors::new(
-        std::time::Duration::from_secs(60),
-        true,
-    ));
+    if find_chrome().is_none() {
+        eprintln!("skipping: needs Chrome");
+        return;
+    }
+    // A page that takes a while, so the first scan is still running when the second asks.
+    let site = serve_html(axum::Router::new().route(
+        "/{*path}",
+        axum::routing::get(|| async {
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            axum::response::Html("<title>t</title><p>Slow page</p>")
+        }),
+    ))
+    .await;
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
+    let visitors = Arc::new(webmcpx_bench::visitors::Visitors::new(true));
     let addr = server::spawn_with(
         &repo_root(),
         ([127, 0, 0, 1], 0).into(),
@@ -575,32 +586,33 @@ async fn scan_api_limits_each_visitor() {
     .await
     .unwrap();
     let client = reqwest::Client::new();
-    let scan = |from: &'static str| {
+    let scan = |from: &'static str, page: &'static str| {
         client
-            .get(format!("http://{addr}/api/scan?url=http://127.0.0.1:9/"))
+            .get(format!("http://{addr}/api/scan?url=http://{site}/{page}"))
             .header("X-Forwarded-For", from)
             .send()
     };
-    // A refused URL still counts: the limit comes first.
-    assert_eq!(
-        scan("2600::1:2:3:4:5").await.unwrap().status().as_u16(),
-        400
-    );
-    let again = scan("2600:0:0:1::99").await.unwrap();
+    let first = tokio::spawn(scan("2600::1:2:3:4:5", "a"));
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+    let again = scan("2600:0:0:1::99", "b").await.unwrap();
     assert_eq!(again.status().as_u16(), 429, "same /64, same visitor");
-    assert!(again.headers().contains_key("retry-after"));
+    assert!(!again.headers().contains_key("retry-after"));
     let body: serde_json::Value = again.json().await.unwrap();
-    assert!(
-        body["error"]
-            .as_str()
-            .unwrap()
-            .contains("One scan per minute"),
-        "{body}"
-    );
+    assert_eq!(body["code"], "scan_running", "{body}");
     assert_eq!(
-        scan("2600:0:0:2::1").await.unwrap().status().as_u16(),
-        400,
+        scan("2600:0:0:2::1", "c").await.unwrap().status().as_u16(),
+        200,
         "another visitor"
+    );
+    assert_eq!(first.await.unwrap().unwrap().status().as_u16(), 200);
+    assert_eq!(
+        scan("2600::1:2:3:4:5", "d")
+            .await
+            .unwrap()
+            .status()
+            .as_u16(),
+        200,
+        "no wait after a scan ends"
     );
 }
 
@@ -813,10 +825,7 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
     )
     .unwrap();
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
-    let visitors = Arc::new(webmcpx_bench::visitors::Visitors::new(
-        std::time::Duration::from_secs(60),
-        false,
-    ));
+    let visitors = Arc::new(webmcpx_bench::visitors::Visitors::new(false));
     let addr = server::spawn_with(
         root.path(),
         ([127, 0, 0, 1], 0).into(),
@@ -827,9 +836,14 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
     .unwrap();
     let target = format!("http://{site}/");
     let api = format!("http://{addr}/api/scan?url={target}");
-    assert_eq!(reqwest::get(&api).await.unwrap().status().as_u16(), 200);
-    // Same visitor, within the minute: served from the cache, not refused.
-    assert_eq!(reqwest::get(&api).await.unwrap().status().as_u16(), 200);
+    let fresh: serde_json::Value = reqwest::get(&api).await.unwrap().json().await.unwrap();
+    assert!(fresh.get("cached").is_none(), "a scan just now: {fresh}");
+    // Same site again: served from the cache, which says so and when it expires.
+    let repeat = reqwest::get(&api).await.unwrap();
+    assert_eq!(repeat.status().as_u16(), 200);
+    let repeat: serde_json::Value = repeat.json().await.unwrap();
+    let left = repeat["cached"]["expires_in_s"].as_u64().unwrap();
+    assert!((295..=300).contains(&left), "{repeat}");
 
     std::fs::write(root.path().join("site/build/index.md"), "# landing").unwrap();
     let markdown = reqwest::Client::new()
