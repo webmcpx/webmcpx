@@ -288,6 +288,9 @@ impl Browser {
     }
 }
 
+/// How long [`Page::goto`] waits for the `load` event.
+const LOAD_TIMEOUT: Duration = Duration::from_secs(30);
+
 pub struct Page {
     conn: Conn,
     session: String,
@@ -358,15 +361,22 @@ impl Page {
         if let Some(e) = nav["errorText"].as_str() {
             bail!("navigating to {url}: {e}");
         }
-        // Up to 30 s: live sites load slower than the local fixtures.
-        for _ in 0..1200 {
-            // Mid-navigation the world can vanish between calls: that is "not loaded yet".
-            if matches!(self.eval_isolated("document.readyState").await, Ok(v) if v == "complete") {
-                return Ok(());
+        // Up to 30 s of wall-clock time (live sites load slower than the local fixtures), however long
+        // each check takes: a renderer stuck in a script must not stretch it.
+        let loaded = tokio::time::timeout(LOAD_TIMEOUT, async {
+            loop {
+                // Mid-navigation the world can vanish between calls: that is "not loaded yet".
+                if matches!(self.eval_isolated("document.readyState").await, Ok(v) if v == "complete") {
+                    return;
+                }
+                tokio::time::sleep(Duration::from_millis(25)).await;
             }
-            tokio::time::sleep(Duration::from_millis(25)).await;
+        })
+        .await;
+        if loaded.is_err() {
+            bail!("{url} did not finish loading");
         }
-        bail!("{url} did not finish loading")
+        Ok(())
     }
 
     /// Evaluates `expression` (awaiting promises) and returns its JSON value.

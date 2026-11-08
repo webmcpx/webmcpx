@@ -876,6 +876,34 @@ async fn scan_browser_never_reaches_refused_hosts() {
     assert!(hit.is_err(), "the scan browser connected to a refused host");
 }
 
+/// A renderer stuck in a script while loading makes every readiness check time out: goto gives up after
+/// its 30 s of wall-clock time, not 1,200 checks of 60 s each.
+#[tokio::test]
+async fn goto_gives_up_on_a_page_stuck_while_loading() {
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(|| {
+            std::future::ready(axum::response::Html(
+                "<!doctype html><script>while (true) {}</script>",
+            ))
+        }),
+    ))
+    .await;
+    let browser = Browser::launch(None).await.unwrap();
+    let page = browser.page(&[]).await.unwrap();
+    let start = std::time::Instant::now();
+    assert!(page.goto(&format!("http://{site}/")).await.is_err());
+    assert!(
+        start.elapsed() < std::time::Duration::from_secs(45),
+        "{:?}",
+        start.elapsed()
+    );
+}
+
 #[tokio::test]
 async fn timed_out_scans_leave_no_page_running() {
     use axum::response::Html;
