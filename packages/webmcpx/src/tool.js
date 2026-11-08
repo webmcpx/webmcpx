@@ -226,6 +226,9 @@ export function formSchema(form) {
   for (const el of form.elements) {
     const { name, type } = el;
     if (!fillable(el)) continue;
+    // Several fields with one name that are not choices (cart rows' quantity[]): one value each, in order.
+    const group = choice(el) ? 1 : [...form.elements].filter((e) => e.name === name && fillable(e)).length;
+    if (group > 1 && properties[name]) continue;
     let p;
     // Several checkboxes with one name: a set of choices.
     if (type === "checkbox" && [...form.elements].filter((e) => e.name === name && fillable(e)).length > 1) {
@@ -239,6 +242,7 @@ export function formSchema(form) {
     } else if (type === "number" || type === "range") {
       p = { type: "number", ...(el.min && { minimum: +el.min }), ...(el.max && { maximum: +el.max }) };
     } else p = { type: "string", ...(FORMATS[type] && { format: FORMATS[type] }) };
+    if (group > 1) p = { type: "array", items: p, minItems: group, maxItems: group };
     const description =
       el.getAttribute("toolparamdescription") || (!p.items && (el.labels?.[0]?.textContent.trim() || el.getAttribute("placeholder")));
     if (description) p.description = description;
@@ -249,14 +253,21 @@ export function formSchema(form) {
   return { type: "object", properties, ...(required.length && { required }), additionalProperties: false };
 }
 
+/** A checkbox or radio: same-named ones are one set of choices. */
+const choice = (el) => el.type === "checkbox" || el.type === "radio";
+
 /** A control a user could edit: named, enabled (fieldsets too), not readonly, hidden, password or a file. */
 const fillable = (el) =>
   el.name && !el.matches(":disabled, [readonly]") && !SKIPPED.test(el.type) && "value" in el && el.tagName !== "BUTTON";
 
 function fill(form, args) {
-  for (const [name, value] of Object.entries(args)) {
+  for (const name of Object.keys(args)) {
     const field = form.elements.namedItem(name);
-    for (const el of (field instanceof Element ? [field] : [...(field ?? [])]).filter(fillable)) {
+    const controls = (field instanceof Element ? [field] : [...(field ?? [])]).filter(fillable);
+    // Same-named fields that are not choices take one value each, in order (the schema asks for that).
+    const each = controls.length > 1 && !choice(controls[0]);
+    for (const [i, el] of controls.entries()) {
+      const value = each ? args[name][i] : args[name];
       // Click / native setter: frameworks (React) ignore plain property writes.
       const on = el.type === "checkbox" ? ([].concat(value).includes(el.value) || value === true) : el.value === String(value);
       if (el.type === "checkbox" || el.type === "radio") {

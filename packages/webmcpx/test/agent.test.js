@@ -87,6 +87,10 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <label><input type="checkbox" name="glazes" value="tenmoku"> Tenmoku</label>
   <button name="action" value="book">Book</button>
 </form>
+<form id="cart" toolname="update_cart" tooldescription="Set each row's quantity." method="post" toolautosubmit>
+  <input name="quantity[]" type="number" value="1"><input name="quantity[]" type="number" value="3">
+  <button>Update</button>
+</form>
 <script>
   // Like React: the field's value is tracked by an own property, and onChange only fires when the
   // native value differs from the tracked one. A plain \`el.value = x\` would update the tracker too.
@@ -105,6 +109,10 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   // Alone, so nothing else triggers a refresh: a new id associates the external POST button, and the
   // tool's hints must follow.
   setTimeout(() => (document.getElementById("old-form").id = "new-form"), 1700);
+  document.getElementById("cart").addEventListener("submit", (event) => {
+    event.preventDefault();
+    event.respondWith?.(Promise.resolve({ quantities: new FormData(event.target).getAll("quantity[]") }));
+  });
   document.querySelector('form[method=post]').addEventListener("submit", (event) => {
     event.preventDefault();
     if (event.agentInvoked) {
@@ -333,6 +341,11 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     const unlocked = (await session.tools()).find((t) => t.name === "Book_a_class");
     assert.ok(unlocked.inputSchema.properties.total, "an unlocked field becomes an input");
     assert.equal(updated.inputSchema.properties.kiln.description, "Which kiln.");
+    // Same-named fields that are not choices (cart rows) take one value each, in order.
+    const cart = (await session.tools()).find((t) => t.name === "update_cart");
+    assert.deepEqual(cart.inputSchema.properties["quantity[]"], { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 });
+    const updatedCart = JSON.parse(await session.call(cart, { "quantity[]": [2, 3] }));
+    assert.deepEqual(updatedCart.data.quantities, ["2", "3"]);
     const reassociated = (await session.tools()).find((t) => t.name === "reassociated");
     assert.equal(reassociated.annotations.consequentialHint, true, "a form id change re-registers the tool");
   } finally {
