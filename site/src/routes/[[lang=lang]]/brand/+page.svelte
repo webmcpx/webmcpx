@@ -229,7 +229,7 @@
 <Section id="type" kicker={m.type.kicker} title={m.type.title}>
 	<div class="space-y-6">
 		{#each TYPE as t (t.id)}
-			<div class="grid gap-2 border-t-2 border-hairline pt-4 sm:grid-cols-[16rem_1fr] [&>*]:min-w-0">
+			<div class="grid gap-2 border-t-2 border-hairline pt-4 md:grid-cols-[16rem_1fr] [&>*]:min-w-0">
 				<p class="font-mono text-xs text-ink-3">{m.type.styles[t.id].name}</p>
 				<p class={t.cls}>{m.type.styles[t.id].sample}</p>
 			</div>

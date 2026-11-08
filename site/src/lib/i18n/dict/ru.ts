@@ -397,7 +397,7 @@ const ru: Messages = {
 			same: 'Те же ответы.',
 			bestCase: 'Лучший случай: {site}, {model}'
 		},
-		worksWith: 'Работает с',
+		worksWith: 'Работает с любым MCP-клиентом и браузером',
 		tabs: { scripts: 'Скрипты' },
 		notes: {
 			prompt:

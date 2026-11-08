@@ -11,15 +11,27 @@
 	import Section from '#lib/components/ui/Section.svelte';
 	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import {
+		ARC,
+		BRAVE,
 		CHROME,
 		CLAUDE,
+		CLINE,
+		COPILOT,
 		CURSOR,
+		CYPRESS,
 		FIREFOX,
+		GEMINI,
+		JETBRAINS,
 		OPENAI,
+		OPERA,
 		PLAYWRIGHT,
 		PUPPETEER,
 		SAFARI,
 		SELENIUM,
+		VIVALDI,
+		WEBDRIVERIO,
+		WINDSURF,
+		ZED,
 		type Logo
 	} from '#lib/content/logos.ts';
 	import type { Highlighted, SnippetId } from '#lib/content/snippets.ts';
@@ -56,16 +68,32 @@
 			: null
 	);
 
-	const WORKS: { name: string; logo: Logo }[] = [
+	// Where the claim holds: MCP clients that run stdio servers (the bridge), then browsers (the polyfill, on
+	// HTTPS) and automation tools (document.modelContext in the page). Each is a public, documented fact.
+	const CLIENTS: { name: string; logo: Logo }[] = [
 		{ name: 'Claude Code', logo: CLAUDE },
 		{ name: 'Codex', logo: OPENAI },
 		{ name: 'Cursor', logo: CURSOR },
+		{ name: 'GitHub Copilot', logo: COPILOT },
+		{ name: 'Windsurf', logo: WINDSURF },
+		{ name: 'Gemini CLI', logo: GEMINI },
+		{ name: 'Zed', logo: ZED },
+		{ name: 'JetBrains', logo: JETBRAINS },
+		{ name: 'Cline', logo: CLINE }
+	];
+	const BROWSERS: { name: string; logo: Logo }[] = [
 		{ name: 'Chrome', logo: CHROME },
 		{ name: 'Firefox', logo: FIREFOX },
 		{ name: 'Safari', logo: SAFARI },
+		{ name: 'Brave', logo: BRAVE },
+		{ name: 'Arc', logo: ARC },
+		{ name: 'Opera', logo: OPERA },
+		{ name: 'Vivaldi', logo: VIVALDI },
 		{ name: 'Playwright', logo: PLAYWRIGHT },
 		{ name: 'Selenium', logo: SELENIUM },
-		{ name: 'Puppeteer', logo: PUPPETEER }
+		{ name: 'Puppeteer', logo: PUPPETEER },
+		{ name: 'Cypress', logo: CYPRESS },
+		{ name: 'WebdriverIO', logo: WEBDRIVERIO }
 	];
 
 	const agentLabel = $derived(i18n.m.fix.alternatives.agent);
@@ -138,11 +166,18 @@
 			{/if}
 			<Reveal>
 				<p class="font-mono text-xs tracking-wider text-ink-3 uppercase">{m.worksWith}</p>
-				<ul class="mt-3 flex flex-wrap gap-x-5 gap-y-3 text-sm text-ink-2">
-					{#each WORKS as w (w.name)}
-						<li class="inline-flex items-center gap-1.5"><SiteLogo logo={w.logo} size={16} />{w.name}</li>
-					{/each}
-				</ul>
+				{#each [CLIENTS, BROWSERS] as group, g (g)}
+					<ul
+						class={[
+							'flex flex-wrap gap-x-5 gap-y-3 text-sm text-ink-2',
+							g === 0 ? 'mt-3' : 'mt-4 border-t-2 border-hairline pt-4'
+						]}
+					>
+						{#each group as w (w.name)}
+							<li class="inline-flex items-center gap-1.5"><SiteLogo logo={w.logo} size={16} />{w.name}</li>
+						{/each}
+					</ul>
+				{/each}
 			</Reveal>
 		</div>
 		<Reveal class="min-w-0 lg:col-span-7">

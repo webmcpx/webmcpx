@@ -364,7 +364,7 @@ const hi: Messages = {
 			}
 		},
 		hype: { up: 'तक', fewer: 'कम टोकन', same: 'वही जवाब।', bestCase: 'सबसे अच्छा मामला: {site}, {model}' },
-		worksWith: 'इनके साथ चलता है',
+		worksWith: 'हर MCP क्लाइंट और ब्राउज़र के साथ चलता है',
 		tabs: { scripts: 'स्क्रिप्ट' },
 		notes: {
 			prompt:

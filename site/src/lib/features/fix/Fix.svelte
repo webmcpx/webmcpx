@@ -46,8 +46,11 @@
 	<!-- Each step: what it is on the left, its code on the right (stacked on small screens). -->
 	<Reveal class="grid gap-x-10 gap-y-5 lg:grid-cols-12">
 		<div class="lg:col-span-4">
-			<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
-				<span class="font-mono text-base text-ink-3" aria-hidden="true">1</span>{m.standard.title}
+			<h3 class="flex items-center gap-3 font-display text-2xl font-bold">
+				<span
+					class="grid size-9 shrink-0 place-items-center self-center rounded-full border-2 border-ink bg-marker font-mono text-sm font-bold text-ink"
+					aria-hidden="true">1</span
+				>{m.standard.title}
 			</h3>
 			<p class="mt-2 text-pretty text-ink-2">{m.standard.lead}</p>
 			<p class="mt-4 font-mono text-xs tracking-wider text-ink-3 uppercase">{m.facts}</p>

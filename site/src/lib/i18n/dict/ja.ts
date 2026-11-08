@@ -360,7 +360,7 @@ const ja: Messages = {
 			same: '答えは同じ。',
 			bestCase: '最良ケース：{site}、{model}'
 		},
-		worksWith: '対応',
+		worksWith: 'あらゆるMCPクライアントとブラウザで動作',
 		tabs: { scripts: 'スクリプト' },
 		notes: {
 			prompt:

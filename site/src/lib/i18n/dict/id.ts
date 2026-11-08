@@ -367,7 +367,7 @@ const id: Messages = {
 			same: 'Jawaban yang sama.',
 			bestCase: 'Kasus terbaik: {site}, {model}'
 		},
-		worksWith: 'Bekerja dengan',
+		worksWith: 'Bekerja dengan klien MCP dan browser apa pun',
 		tabs: { scripts: 'Skrip' },
 		notes: {
 			prompt:

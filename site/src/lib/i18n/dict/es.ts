@@ -374,7 +374,7 @@ const es: Messages = {
 			same: 'Las mismas respuestas.',
 			bestCase: 'Mejor caso: {site}, {model}'
 		},
-		worksWith: 'Funciona con',
+		worksWith: 'Funciona con cualquier cliente MCP y navegador',
 		tabs: { scripts: 'Scripts' },
 		notes: {
 			prompt: 'Un prompt: tu agente se configura, usa WebMCP primero en todo y lo prueba en webmcpx.dev.',

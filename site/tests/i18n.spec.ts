@@ -30,8 +30,8 @@ for (const l of LOCALES) {
 		for (const path of PAGES) {
 			const url = localized(path, l.code);
 
-			test(`${url} keeps the layout on a phone and on desktop`, async ({ page }) => {
-				for (const width of [390, 1280]) {
+			test(`${url} keeps the layout on a phone, a small tablet and desktop`, async ({ page }) => {
+				for (const width of [390, 640, 1280]) {
 					await page.setViewportSize({ width, height: 900 });
 					await page.goto(url);
 					await expect(page.locator('html')).toHaveAttribute('lang', l.tag);

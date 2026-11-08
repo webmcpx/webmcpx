@@ -350,7 +350,7 @@ const zh: Messages = {
 			}
 		},
 		hype: { up: '最多', fewer: '更少 token', same: '答案相同。', bestCase: '最佳案例：{site}，{model}' },
-		worksWith: '适用于',
+		worksWith: '适用于任何 MCP 客户端和浏览器',
 		tabs: { scripts: '脚本' },
 		notes: {
 			prompt: '一个提示词：智能体自行配置，处处先用 WebMCP，并在 webmcpx.dev 上验证。',

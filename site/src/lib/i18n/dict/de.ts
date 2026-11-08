@@ -376,7 +376,7 @@ const de: Messages = {
 			same: 'Dieselben Antworten.',
 			bestCase: 'Bester Fall: {site}, {model}'
 		},
-		worksWith: 'Funktioniert mit',
+		worksWith: 'Läuft mit jedem MCP-Client und Browser',
 		tabs: { scripts: 'Skripte' },
 		notes: {
 			prompt:

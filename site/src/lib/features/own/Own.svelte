@@ -55,8 +55,11 @@
 <div id="own" class="mt-16 scroll-mt-20">
 	<Reveal class="grid gap-x-10 gap-y-5 lg:grid-cols-12">
 		<div class="lg:col-span-4">
-			<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
-				<span class="font-mono text-base text-ink-3" aria-hidden="true">2</span>{m.title}
+			<h3 class="flex items-center gap-3 font-display text-2xl font-bold">
+				<span
+					class="grid size-9 shrink-0 place-items-center self-center rounded-full border-2 border-ink bg-marker font-mono text-sm font-bold text-ink"
+					aria-hidden="true">2</span
+				>{m.title}
 			</h3>
 			<p class="mt-2 text-pretty text-ink-2">{m.lead}</p>
 		</div>

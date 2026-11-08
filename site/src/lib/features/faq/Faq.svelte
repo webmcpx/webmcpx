@@ -50,11 +50,9 @@
 						>
 							{item.q}
 						</h3>
-						<p
-							class={['text-pretty text-ink-2', id === 'agent' && 'lg:text-lg lg:[&_code]:whitespace-nowrap']}
-						>
+						<p class={['text-pretty text-ink-2', id === 'agent' && 'lg:text-lg']}>
 							{#each codeParts(item.a) as part, j (j)}{#if part.code}<code
-										class="rounded bg-ink/[0.06] px-1 py-0.5 font-mono text-[0.88em] text-ink"
+										class="rounded bg-ink/[0.06] px-1 py-0.5 font-mono text-[0.88em] [overflow-wrap:anywhere] text-ink"
 										>{part.text}</code
 									>{:else}{part.text}{/if}{/each}
 						</p>

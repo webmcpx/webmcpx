@@ -21,7 +21,9 @@
 						class="group flex h-full flex-col gap-3 rounded-card border-2 border-ink bg-card p-5 transition-[translate,box-shadow] duration-150 hover:-translate-y-1 hover:shadow-hard"
 					>
 						<span class="flex items-center justify-between">
-							<issue.icon size={22} strokeWidth={2} aria-hidden="true" />
+							<span class="grid size-9 place-items-center rounded-full border-2 border-ink bg-marker">
+								<issue.icon size={18} strokeWidth={2} aria-hidden="true" />
+							</span>
 							<span class="flex items-center font-mono text-xs text-ink-3 group-hover:text-ink">
 								#{issue.number}<ArrowUpRight size={14} aria-hidden="true" />
 							</span>

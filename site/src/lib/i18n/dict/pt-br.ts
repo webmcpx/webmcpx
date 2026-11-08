@@ -373,7 +373,7 @@ const ptBr: Messages = {
 			same: 'As mesmas respostas.',
 			bestCase: 'Melhor caso: {site}, {model}'
 		},
-		worksWith: 'Funciona com',
+		worksWith: 'Funciona com qualquer cliente MCP e navegador',
 		tabs: { scripts: 'Scripts' },
 		notes: {
 			prompt: 'Um prompt: seu agente se configura, usa WebMCP primeiro em tudo e prova no webmcpx.dev.',

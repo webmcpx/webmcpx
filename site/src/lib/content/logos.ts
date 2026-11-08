@@ -4,6 +4,17 @@
 // that the site ships WebMCP. Our fictional test brands (Orbit, Kiln & Co) have original marks.
 
 import {
+	siArc,
+	siBrave,
+	siCline,
+	siCypress,
+	siGithubcopilot,
+	siJetbrains,
+	siOpera,
+	siVivaldi,
+	siWebdriverio,
+	siWindsurf,
+	siZedindustries,
 	siAnthropic,
 	siClaude,
 	siCloudflare,
@@ -95,6 +106,17 @@ export const FIREFOX = fromSimpleIcon(siFirefox);
 export const SAFARI = fromSimpleIcon(siSafari);
 export const SELENIUM = fromSimpleIcon(siSelenium);
 export const PUPPETEER = fromSimpleIcon(siPuppeteer);
+export const COPILOT = fromSimpleIcon(siGithubcopilot);
+export const WINDSURF = fromSimpleIcon(siWindsurf);
+export const ZED = fromSimpleIcon(siZedindustries);
+export const JETBRAINS = fromSimpleIcon(siJetbrains);
+export const CLINE = fromSimpleIcon(siCline);
+export const BRAVE = fromSimpleIcon(siBrave);
+export const ARC = fromSimpleIcon(siArc);
+export const OPERA = fromSimpleIcon(siOpera);
+export const VIVALDI = fromSimpleIcon(siVivaldi);
+export const CYPRESS = fromSimpleIcon(siCypress);
+export const WEBDRIVERIO = fromSimpleIcon(siWebdriverio);
 /** Playwright's two masks, from its own file (https://playwright.dev/img/playwright-logo.svg,
  * 2026-11-08), drawn in one color like the other marks. */
 export const PLAYWRIGHT: Logo = {

@@ -374,7 +374,7 @@ const bn: Messages = {
 			same: 'একই উত্তর।',
 			bestCase: 'সেরা ক্ষেত্র: {site}, {model}'
 		},
-		worksWith: 'যেগুলোর সাথে চলে',
+		worksWith: 'যেকোনো MCP ক্লায়েন্ট ও ব্রাউজারে চলে',
 		tabs: { scripts: 'স্ক্রিপ্ট' },
 		notes: {
 			prompt:

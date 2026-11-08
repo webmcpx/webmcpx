@@ -491,7 +491,7 @@ const en = {
 			same: 'Same answers.',
 			bestCase: 'Best case: {site}, {model}'
 		},
-		worksWith: 'Works with',
+		worksWith: 'Works with any MCP client and browser',
 		tabs: { scripts: 'Scripts' },
 		notes: {
 			prompt:
