@@ -5188,8 +5188,8 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0297739,
-      "answer": "In a Notion API request, the maximum length for a single rich text object's text content (`text.content`) is **2,000 characters**. (Note that an array of rich text objects within a block or property can contain up to 100 elements per request.)",
+      "cost_usd": 0.0306601,
+      "answer": "In a Notion API request, the `text.content` property of a single rich text object has a maximum limit of **2,000 characters**. \n\n*(Note: If your paragraph exceeds 2,000 characters, you can split it across multiple rich text objects within the block's `rich_text` array, up to the limit of **100 elements** per array).*",
       "stop": "answered",
       "steps": 6,
       "tool_calls": [
@@ -5220,13 +5220,13 @@
         }
       ],
       "usage": {
-        "input": 18262,
-        "cached": 4779,
+        "input": 18306,
+        "cached": 4801,
         "cache_write": 0,
-        "output": 233,
-        "reasoning": 84
+        "output": 317,
+        "reasoning": 143
       },
-      "duration_ms": 40683
+      "duration_ms": 82324
     },
     {
       "task": "live-notion-rich-text-limit",
@@ -5234,8 +5234,8 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0295901,
-      "answer": "A single rich text object's `text.content` property can have a maximum of **2,000 characters** in a request.",
+      "cost_usd": 0.029867900000000003,
+      "answer": "In a Notion API request, the maximum length for a single rich text object's text content (`text.content`) is **2,000 characters**.",
       "stop": "answered",
       "steps": 6,
       "tool_calls": [
@@ -5266,33 +5266,59 @@
         }
       ],
       "usage": {
-        "input": 18267,
-        "cached": 4781,
+        "input": 18342,
+        "cached": 4819,
         "cache_write": 0,
-        "output": 214,
-        "reasoning": 94
+        "output": 234,
+        "reasoning": 111
       },
-      "duration_ms": 37906
+      "duration_ms": 87762
     },
     {
       "task": "live-notion-rich-text-limit",
       "arm": "baseline",
       "attempt": 3,
-      "success": false,
-      "harness_error": "Page.navigate: timed out",
-      "cost_usd": 0.0,
-      "answer": null,
+      "success": true,
+      "harness_error": null,
+      "cost_usd": 0.0301952,
+      "answer": "According to the Notion API documentation on Request limits, a single rich text object's `text.content` property can have a maximum of **2,000 characters** in a request. (Additionally, any array of rich text objects is limited to 100 elements per request.)",
       "stop": "answered",
-      "steps": 0,
-      "tool_calls": [],
+      "steps": 6,
+      "tool_calls": [
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 6431
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":15}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 3685
+        },
+        {
+          "name": "click",
+          "arguments": "{\"ref\":25}",
+          "result_chars": 13
+        },
+        {
+          "name": "read_page",
+          "arguments": "{}",
+          "result_chars": 12403
+        }
+      ],
       "usage": {
-        "input": 0,
-        "cached": 0,
+        "input": 18329,
+        "cached": 4812,
         "cache_write": 0,
-        "output": 0,
-        "reasoning": 0
+        "output": 268,
+        "reasoning": 118
       },
-      "duration_ms": 0
+      "duration_ms": 90611
     },
     {
       "task": "live-notion-rich-text-limit",
@@ -5300,7 +5326,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.006654,
+      "cost_usd": 0.014426,
       "tools": [
         {
           "name": "get_site_overview",
@@ -5323,29 +5349,29 @@
           "description": "Search the Notion Docs documentation for relevant pages and content."
         }
       ],
-      "answer": "A single rich text object's `text.content` property can have a maximum of **2,000 characters** in a request. (Additionally, an array of rich text objects within a block can contain up to **100 elements** per request.)",
+      "answer": "According to the Notion API [Request limits](https://developers.notion.com/reference/request-limits) documentation, a single rich text object's `text.content` property can have a maximum of **2,000 characters** in a request.\n\nAdditionally, if you are splitting long paragraphs across multiple rich text objects within a single block, note that any array of rich text objects is limited to a maximum of **100 elements** per request.",
       "stop": "answered",
       "steps": 3,
       "tool_calls": [
         {
           "name": "search_docs",
-          "arguments": "{\"query\":\"request limits rich text characters\"}",
+          "arguments": "{\"query\":\"request limits rich text character\"}",
           "result_chars": 1549
         },
         {
-          "name": "navigate_page",
-          "arguments": "{\"path\":\"https://developers.notion.com/reference/request-limits\"}",
-          "result_chars": 106
+          "name": "read_page",
+          "arguments": "{\"path\":\"/reference/request-limits\"}",
+          "result_chars": 12433
         }
       ],
       "usage": {
-        "input": 2332,
+        "input": 5838,
         "cached": 0,
         "cache_write": 0,
-        "output": 199,
-        "reasoning": 80
+        "output": 275,
+        "reasoning": 121
       },
-      "duration_ms": 18353
+      "duration_ms": 90975
     },
     {
       "task": "live-notion-rich-text-limit",
@@ -5353,7 +5379,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.013842,
+      "cost_usd": 0.01574,
       "tools": [
         {
           "name": "get_site_overview",
@@ -5376,13 +5402,13 @@
           "description": "Search the Notion Docs documentation for relevant pages and content."
         }
       ],
-      "answer": "A single rich text object's `text.content` property can have a maximum of **2,000 characters** in a request. \n\n*(Note: If your paragraph is longer than 2,000 characters, you can split the text across multiple rich text objects within the block's `rich_text` array, up to 100 rich text objects per array in a single request.)*",
+      "answer": "In the Notion API, a single rich text object's `text.content` property can have a maximum of **2,000 characters** per request.\n\n### Additional relevant limits for long paragraphs:\n* **`rich_text` array size:** A block's `rich_text` array can contain up to **100 elements** (rich text objects) in a single request. If your paragraph exceeds 2,000 characters, you can split the text across multiple rich text objects within the same block's `rich_text` array (up to 100 chunks × 2,000 characters = 200,000 characters per block).\n* **`text.link.url`:** Maximum of **2,000 characters**.\n* **`equation.expression`:** Maximum of **1,000 characters**.",
       "stop": "answered",
       "steps": 3,
       "tool_calls": [
         {
           "name": "search_docs",
-          "arguments": "{\"query\":\"request limits rich text characters\"}",
+          "arguments": "{\"query\":\"request limits rich text character\"}",
           "result_chars": 1549
         },
         {
@@ -5392,13 +5418,13 @@
         }
       ],
       "usage": {
-        "input": 5861,
+        "input": 5855,
         "cached": 0,
         "cache_write": 0,
-        "output": 212,
-        "reasoning": 60
+        "output": 403,
+        "reasoning": 155
       },
-      "duration_ms": 20685
+      "duration_ms": 19297
     },
     {
       "task": "live-notion-rich-text-limit",
@@ -5406,7 +5432,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.013006,
+      "cost_usd": 0.013618,
       "tools": [
         {
           "name": "get_site_overview",
@@ -5429,7 +5455,7 @@
           "description": "Search the Notion Docs documentation for relevant pages and content."
         }
       ],
-      "answer": "The maximum number of characters a single rich text object's `text.content` can have in a Notion API request is **2,000 characters**. \n\n*(Note: For longer paragraphs, you can split the text across multiple rich text objects within the block's `rich_text` array, which supports up to 100 elements per request.)*",
+      "answer": "A single rich text object's `text.content` property can have a maximum of **2,000 characters** in a request. \n\n*(Note: If you need to write a longer paragraph, a single block's `rich_text` array can hold up to **100 rich text objects**, allowing you to split longer text across multiple rich text objects within the same paragraph block.)*",
       "stop": "answered",
       "steps": 3,
       "tool_calls": [
@@ -5445,13 +5471,13 @@
         }
       ],
       "usage": {
-        "input": 5798,
+        "input": 5849,
         "cached": 0,
         "cache_write": 0,
-        "output": 141,
-        "reasoning": 0
+        "output": 192,
+        "reasoning": 43
       },
-      "duration_ms": 14579
+      "duration_ms": 25173
     },
     {
       "task": "live-notion-upload-size",
@@ -10220,25 +10246,25 @@
     "arms": {
       "baseline": {
         "runs": 105,
-        "success_rate": 0.9904761904761905,
-        "tokens": 12580.095238095239,
-        "input_tokens": 12357.295238095237,
-        "output_tokens": 222.8,
-        "steps": 4.666666666666667,
-        "tool_calls": 3.704761904761905,
-        "duration_ms": 38833.05714285714,
-        "cost_usd": 0.0205691761904762
+        "success_rate": 1.0,
+        "tokens": 12759.333333333334,
+        "input_tokens": 12532.990476190476,
+        "output_tokens": 226.34285714285716,
+        "steps": 4.723809523809524,
+        "tool_calls": 3.7523809523809524,
+        "duration_ms": 40567.41904761905,
+        "cost_usd": 0.020867835238095243
       },
       "webmcp": {
         "runs": 105,
         "success_rate": 1.0,
-        "tokens": 4798.676190476191,
-        "input_tokens": 4651.952380952381,
-        "output_tokens": 146.72380952380954,
+        "tokens": 4835.523809523809,
+        "input_tokens": 4685.771428571428,
+        "output_tokens": 149.75238095238095,
         "steps": 2.657142857142857,
         "tool_calls": 1.7523809523809524,
-        "duration_ms": 23373.438095238096,
-        "cost_usd": 0.009564860000000001
+        "duration_ms": 24152.75238095238,
+        "cost_usd": 0.009662783809523809
       }
     },
     "tasks": {
@@ -10677,25 +10703,25 @@
       "live-notion-rich-text-limit": {
         "baseline": {
           "runs": 3,
-          "success_rate": 0.6666666666666666,
-          "tokens": 12325.333333333334,
-          "input_tokens": 12176.333333333334,
-          "output_tokens": 149.0,
-          "steps": 4.0,
-          "tool_calls": 3.3333333333333335,
-          "duration_ms": 26196.333333333332,
-          "cost_usd": 0.019788
+          "success_rate": 1.0,
+          "tokens": 18598.666666666668,
+          "input_tokens": 18325.666666666668,
+          "output_tokens": 273.0,
+          "steps": 6.0,
+          "tool_calls": 5.0,
+          "duration_ms": 86899.0,
+          "cost_usd": 0.030241066666666667
         },
         "webmcp": {
           "runs": 3,
           "success_rate": 1.0,
-          "tokens": 4847.666666666667,
-          "input_tokens": 4663.666666666667,
-          "output_tokens": 184.0,
+          "tokens": 6137.333333333333,
+          "input_tokens": 5847.333333333333,
+          "output_tokens": 290.0,
           "steps": 3.0,
           "tool_calls": 2.0,
-          "duration_ms": 17872.333333333332,
-          "cost_usd": 0.011167333333333335
+          "duration_ms": 45148.333333333336,
+          "cost_usd": 0.014594666666666666
         }
       },
       "live-notion-upload-size": {
