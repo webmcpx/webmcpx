@@ -345,7 +345,10 @@ const ptBr: Messages = {
 		lead: 'As mesmas respostas, com uma fração dos tokens. Funciona no Codex, Claude Code, Cursor e em qualquer script: Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: 'De {low} a {high} menos tokens nos {n} modelos do leaderboard.' },
-			best: 'Até {high} menos tokens no leaderboard.'
+			best: 'Até {high} menos tokens no leaderboard.',
+			losses: {
+				other: 'Execuções completas: em {worse} de {total} perguntas por modelo, o WebMCP usou mais tokens.'
+			}
 		},
 		prompt: 'Um prompt: seu agente se configura sozinho e prova que funciona no webmcpx.dev.',
 		ways: {

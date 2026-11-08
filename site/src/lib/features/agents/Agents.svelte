@@ -8,7 +8,7 @@
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
 	import type { Highlighted } from '#lib/content/snippets.ts';
-	import { ratio, savingIsRange, type TokenSaving } from '#lib/features/benchmark/bench.ts';
+	import { ratio, savingIsRange, span, type TokenSaving } from '#lib/features/benchmark/bench.ts';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
 	import Reveal from '#lib/motion/Reveal.svelte';
@@ -31,6 +31,12 @@
 			? i18n.plural(saving.models, m.saving.range, { low, high })
 			: fmt(m.saving.best, { high });
 	});
+	// The questions where WebMCP used more tokens: said next to the saving, never hidden.
+	const losses = $derived(
+		saving && saving.worse[1] > 0
+			? i18n.plural(saving.questions, m.saving.losses, { worse: span(saving.worse), total: saving.questions })
+			: null
+	);
 
 	const ways = $derived([
 		{ way: m.ways.mcp, inline: 'npx -y webmcpx mcp' },
@@ -51,6 +57,7 @@
 			>
 				<ChartColumn size={18} strokeWidth={2.25} class="shrink-0" aria-hidden="true" />{proof}
 			</a>
+			{#if losses}<p class="mx-auto mt-2 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
 		</Reveal>
 	{/if}
 	<Reveal class="mx-auto max-w-3xl rounded-card border-2 border-ink bg-card p-5 text-left shadow-hard sm:p-6">

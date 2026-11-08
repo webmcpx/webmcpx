@@ -547,6 +547,11 @@ test('for sites: one line, as tabs that open on your coding agent', async ({ pag
 	await expect(sites.getByText('npx -y webmcpx mcp')).toHaveCount(0);
 });
 
+test('the old #fix links, printed by published CLIs, still land on the site section', async ({ page }) => {
+	await page.goto('/#fix');
+	await expect(page.locator('#for-sites').getByRole('heading', { level: 2 })).toBeInViewport();
+});
+
 test('for agents: the measured saving, one prompt, then the two ways', async ({ page }) => {
 	await page.goto('/#for-agents');
 	const agents = page.locator('#for-agents');
@@ -557,6 +562,10 @@ test('for agents: the measured saving, one prompt, then the two ways', async ({ 
 		/^\d+(\.\d)?× to \d+(\.\d)?× fewer tokens across \d+ models on the leaderboard\.$/
 	);
 	await expect(saving).toHaveAttribute('href', '#leaderboard');
+	// The losses sit right under it, never hidden.
+	await expect(
+		agents.getByText(/^Whole runs: on \d+(–\d+)? of \d+ questions per model, WebMCP used more tokens\.$/)
+	).toBeVisible();
 	const prompt = agents.getByRole('figure').filter({ hasText: 'Use WebMCP first on every web page' });
 	await expect(prompt.getByRole('button', { name: /Copy/ })).toBeVisible();
 	await expect(agents.getByRole('definition').filter({ hasText: 'npx -y webmcpx mcp' })).toBeVisible();

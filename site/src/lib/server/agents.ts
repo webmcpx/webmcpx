@@ -11,7 +11,7 @@ import { ORIGIN, REPO, SPEC } from '#lib/content/site.ts';
 import { LOADER_URL, SNIPPETS } from '#lib/content/snippets.ts';
 import { VERSUS as VERSUS_ROWS } from '#lib/content/versus.ts';
 import { REASONS } from '#lib/content/why.ts';
-import { ratio, savingIsRange, tokenSaving, type ArmSummary } from '#lib/features/benchmark/bench.ts';
+import { ratio, savingIsRange, span, tokenSaving, type ArmSummary } from '#lib/features/benchmark/bench.ts';
 import { bySite } from '#lib/features/benchmark/sites.ts';
 import { loadRuns } from './bench.ts';
 
@@ -52,7 +52,10 @@ function savingLine(): string {
 	const range = savingIsRange(s)
 		? `${ratio(s.low)} to ${ratio(s.high)} fewer tokens on each of the ${s.models} models`
 		: `up to ${ratio(s.high)} fewer tokens`;
-	return `Measured on the leaderboard (whole runs, every question): ${range} with WebMCP than reading the page. Details: ${ORIGIN}/#leaderboard\n\n`;
+	const losses = s.worse[1]
+		? ` Not on every question: on ${span(s.worse)} of ${s.questions} questions per model, WebMCP used more tokens.`
+		: '';
+	return `Measured on the leaderboard (whole runs, every question): ${range} with WebMCP than reading the page.${losses} Details: ${ORIGIN}/#leaderboard\n\n`;
 }
 
 // Two audiences: people who run a site (it registers tools) and people who use an agent (it calls them).

@@ -348,7 +348,10 @@ const de: Messages = {
 		lead: 'Gleiche Antworten, ein Bruchteil der Tokens. Läuft in Codex, Claude Code, Cursor und jedem Skript: Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: '{low} bis {high} weniger Tokens bei allen {n} Modellen der Rangliste.' },
-			best: 'Bis zu {high} weniger Tokens in der Rangliste.'
+			best: 'Bis zu {high} weniger Tokens in der Rangliste.',
+			losses: {
+				other: 'Komplette Läufe: Bei {worse} von {total} Fragen pro Modell brauchte WebMCP mehr Tokens.'
+			}
 		},
 		prompt: 'Ein Prompt: Dein Agent richtet sich selbst ein und beweist es auf webmcpx.dev.',
 		ways: {

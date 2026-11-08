@@ -344,7 +344,10 @@ const hi: Messages = {
 		lead: 'वही जवाब, टोकन का छोटा-सा हिस्सा। Codex, Claude Code, Cursor और किसी भी स्क्रिप्ट में चलता है: Chrome, Firefox, Safari, Selenium, Playwright।',
 		saving: {
 			range: { other: 'लीडरबोर्ड के सभी {n} मॉडल पर {low} से {high} कम टोकन।' },
-			best: 'लीडरबोर्ड पर {high} तक कम टोकन।'
+			best: 'लीडरबोर्ड पर {high} तक कम टोकन।',
+			losses: {
+				other: 'पूरे रन का हिसाब: हर मॉडल के {total} में से {worse} सवालों पर WebMCP ने ज़्यादा टोकन लिए।'
+			}
 		},
 		prompt: 'एक प्रॉम्प्ट: आपका एजेंट खुद को सेट करता है, फिर webmcpx.dev पर साबित करता है।',
 		ways: {

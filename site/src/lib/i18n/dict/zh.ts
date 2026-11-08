@@ -333,7 +333,8 @@ const zh: Messages = {
 		lead: '答案不变，token 只需一小部分。适用于 Codex、Claude Code、Cursor 和任何脚本：Chrome、Firefox、Safari、Selenium、Playwright。',
 		saving: {
 			range: { other: '排行榜全部 {n} 个模型，token 减少 {low} 到 {high}。' },
-			best: '排行榜上，token 最多减少 {high}。'
+			best: '排行榜上，token 最多减少 {high}。',
+			losses: { other: '按完整运行统计：每个模型的 {total} 个问题中，有 {worse} 个 WebMCP 用的 token 更多。' }
 		},
 		prompt: '一个提示词：智能体自己完成配置，再到 webmcpx.dev 上验证。',
 		ways: {

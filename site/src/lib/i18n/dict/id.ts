@@ -338,7 +338,11 @@ const id: Messages = {
 		lead: 'Jawaban sama, token jauh lebih sedikit. Jalan di Codex, Claude Code, Cursor, dan skrip apa pun: Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: '{low} hingga {high} lebih sedikit token di semua {n} model peringkat.' },
-			best: 'Hingga {high} lebih sedikit token di peringkat.'
+			best: 'Hingga {high} lebih sedikit token di peringkat.',
+			losses: {
+				other:
+					'Seluruh run: pada {worse} dari {total} pertanyaan per model, WebMCP memakai lebih banyak token.'
+			}
 		},
 		prompt: 'Satu prompt: agen Anda menyiapkan dirinya sendiri, lalu membuktikannya di webmcpx.dev.',
 		ways: {

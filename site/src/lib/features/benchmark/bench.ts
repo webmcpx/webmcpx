@@ -158,21 +158,42 @@ export interface TokenSaving {
 	low: number;
 	high: number;
 	models: number;
+	/** The losses, never hidden: per model, the questions where WebMCP used more tokens (fewest, most). */
+	worse: [number, number];
+	/** Questions per model (the most any model ran). */
+	questions: number;
 }
 
 /**
  * Each published model's token saving over its whole run (every question, never the showcase), as the
- * lowest and highest across models. Null when no run has both arms, or when no model saved tokens.
+ * lowest and highest across models, with the questions where it lost. Null when no run has both arms,
+ * or when no model saved tokens.
  */
 export function tokenSaving(runs: { results: Results }[]): TokenSaving | null {
-	const saving = runs.flatMap(({ results }) => {
+	const models = runs.flatMap(({ results }) => {
 		const h = headline(results);
-		return h ? [h.baseline.tokens / Math.max(1, h.webmcp.tokens)] : [];
+		if (!h) return [];
+		const both = rows(results).filter((r) => r.baseline && r.webmcp);
+		const worse = both.filter((r) => r.webmcp!.tokens > r.baseline!.tokens).length;
+		return [{ saving: h.baseline.tokens / Math.max(1, h.webmcp.tokens), worse, questions: both.length }];
 	});
-	if (!saving.length) return null;
+	if (!models.length) return null;
+	const saving = models.map((m) => m.saving);
+	const worse = models.map((m) => m.worse);
 	const high = Math.max(...saving);
-	return high > 1 ? { low: Math.min(...saving), high, models: saving.length } : null;
+	return high > 1
+		? {
+				low: Math.min(...saving),
+				high,
+				models: models.length,
+				worse: [Math.min(...worse), Math.max(...worse)],
+				questions: Math.max(...models.map((m) => m.questions))
+			}
+		: null;
 }
+
+/** A count or a range of counts: "6", or "5–7". */
+export const span = ([low, high]: [number, number]) => (low === high ? `${low}` : `${low}–${high}`);
 
 /** Say it as a range ("2.4× to 5.7×") only when every model saved and the ends read differently;
  * otherwise as "up to" the best one. */

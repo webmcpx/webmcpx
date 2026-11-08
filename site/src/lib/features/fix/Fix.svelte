@@ -38,6 +38,8 @@
 	]);
 </script>
 
+<!-- The old anchor: published CLIs (npx webmcpx tools, 0.2.5 and before) still print webmcpx.dev/#fix. -->
+<div id="fix" class="scroll-mt-20" aria-hidden="true"></div>
 <Section id="for-sites" title={m.title} lead={m.lead} center>
 	<Reveal class="mx-auto max-w-3xl text-left">
 		<CodeTabs label={m.title} tabs={install} />

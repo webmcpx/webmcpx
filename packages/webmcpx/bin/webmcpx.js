@@ -82,7 +82,7 @@ function printTools(page) {
     console.log(green(`✓ ${own.length} WebMCP tool${own.length === 1 ? "" : "s"} registered by the site`));
     for (const t of own) console.log(row(t));
   } else {
-    console.log(yellow("○ The site registers no WebMCP tools of its own.") + dim(" Add them: https://webmcpx.dev/#fix"));
+    console.log(yellow("○ The site registers no WebMCP tools of its own.") + dim(" Add them: https://webmcpx.dev/#for-sites"));
   }
   if (standard.length) {
     console.log(`\n${dim("+ standard tools webmcpx adds to every page")}`);

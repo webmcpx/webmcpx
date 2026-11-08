@@ -130,7 +130,7 @@ describe('tokenSaving', () => {
 
 	it('spans the whole-run saving of every model with both arms', () => {
 		const half = { results: results({ baseline: arm(100, 1, null) }) };
-		expect(tokenSaving([run(300, 100), run(1000, 200), half])).toEqual({ low: 3, high: 5, models: 2 });
+		expect(tokenSaving([run(300, 100), run(1000, 200), half])).toMatchObject({ low: 3, high: 5, models: 2 });
 	});
 
 	it('is null without a run, or when no model saved tokens', () => {
@@ -140,13 +140,27 @@ describe('tokenSaving', () => {
 
 	it('keeps a model that used more tokens as the low end, and then says "up to"', () => {
 		const s = tokenSaving([run(100, 200), run(400, 100)]);
-		expect(s).toEqual({ low: 0.5, high: 4, models: 2 });
+		expect(s).toMatchObject({ low: 0.5, high: 4, models: 2 });
 		expect(savingIsRange(s!)).toBe(false);
 	});
 
+	it('counts, per model, the questions where WebMCP used more tokens', () => {
+		const q = (b: number, w: number) => ({ baseline: arm(b, 1, null), webmcp: arm(w, 1, null) });
+		const withTasks = (tasks: Results['summary']['tasks']) => {
+			const r = run(300, 100).results;
+			return { results: { ...r, summary: { ...r.summary, tasks } } };
+		};
+		const s = tokenSaving([
+			withTasks({ a: q(100, 10), b: q(10, 20), c: q(10, 30) }),
+			withTasks({ a: q(100, 10), b: q(10, 5), c: { baseline: arm(1, 1, null) } })
+		]);
+		expect(s).toMatchObject({ worse: [0, 2], questions: 3 });
+	});
+
+	const none = { worse: [0, 0] as [number, number], questions: 0 };
 	it('is a range only across models whose ends read differently', () => {
-		expect(savingIsRange({ low: 2.4, high: 5.7, models: 6 })).toBe(true);
-		expect(savingIsRange({ low: 5.7, high: 5.7, models: 1 })).toBe(false);
-		expect(savingIsRange({ low: 12.2, high: 12.4, models: 2 })).toBe(false);
+		expect(savingIsRange({ ...none, low: 2.4, high: 5.7, models: 6 })).toBe(true);
+		expect(savingIsRange({ ...none, low: 5.7, high: 5.7, models: 1 })).toBe(false);
+		expect(savingIsRange({ ...none, low: 12.2, high: 12.4, models: 2 })).toBe(false);
 	});
 });

@@ -460,7 +460,12 @@ const en = {
 		// models are on the leaderboard. `best` is used when there is one model, or one did not save.
 		saving: {
 			range: p({ other: '{low} to {high} fewer tokens across {n} models on the leaderboard.' }),
-			best: 'Up to {high} fewer tokens on the leaderboard.'
+			best: 'Up to {high} fewer tokens on the leaderboard.',
+			// Under that line, the losses: never hidden. {worse} is a count or a range across models ("6",
+			// "5–7"), {total} the questions each model ran (35); plural by {total}.
+			losses: p({
+				other: 'Whole runs: on {worse} of {total} questions per model, WebMCP used more tokens.'
+			})
 		},
 		prompt: 'One prompt: your agent sets itself up, then proves it on webmcpx.dev.',
 		// {cmd} and {api} are code: keep them.

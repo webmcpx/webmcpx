@@ -345,7 +345,11 @@ const bn: Messages = {
 		lead: 'একই উত্তর, টোকেনের সামান্য অংশেই। Codex, Claude Code, Cursor আর যেকোনো স্ক্রিপ্টে চলে: Chrome, Firefox, Safari, Selenium, Playwright।',
 		saving: {
 			range: { other: 'লিডারবোর্ডের সব {n}টি মডেলে {low} থেকে {high} কম টোকেন।' },
-			best: 'লিডারবোর্ডে {high} পর্যন্ত কম টোকেন।'
+			best: 'লিডারবোর্ডে {high} পর্যন্ত কম টোকেন।',
+			losses: {
+				other:
+					'পুরো রানের হিসাব: প্রতি মডেলের {total}টি প্রশ্নের মধ্যে {worse}টিতে WebMCP বেশি টোকেন নিয়েছে।'
+			}
 		},
 		prompt: 'একটি প্রম্পট: আপনার এজেন্ট নিজেই সেটআপ করে, তারপর webmcpx.dev-এ প্রমাণ করে।',
 		ways: {

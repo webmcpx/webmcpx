@@ -335,7 +335,10 @@ const ja: Messages = {
 		lead: '答えは同じ、トークンはごくわずか。Codex、Claude Code、Cursor、そしてあらゆるスクリプト（Chrome、Firefox、Safari、Selenium、Playwright）で動きます。',
 		saving: {
 			range: { other: 'リーダーボードの全 {n} モデルで、トークンを {low}〜{high} 削減。' },
-			best: 'リーダーボードで、トークンを最大 {high} 削減。'
+			best: 'リーダーボードで、トークンを最大 {high} 削減。',
+			losses: {
+				other: '全問を集計。各モデル {total} 問中 {worse} 問では、WebMCP の方がトークンを多く使いました。'
+			}
 		},
 		prompt: 'プロンプトはひとつ。エージェントが自分でセットアップし、webmcpx.dev で動作を確かめます。',
 		ways: {

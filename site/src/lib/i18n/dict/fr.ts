@@ -349,7 +349,11 @@ const fr: Messages = {
 		lead: 'Les mêmes réponses, pour une fraction des tokens. Fonctionne dans Codex, Claude Code, Cursor et tout script : Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: 'De {low} à {high} moins de tokens sur les {n} modèles du classement.' },
-			best: 'Jusqu’à {high} moins de tokens au classement.'
+			best: 'Jusqu’à {high} moins de tokens au classement.',
+			losses: {
+				other:
+					'Exécutions complètes : sur {worse} des {total} questions par modèle, WebMCP a consommé plus de tokens.'
+			}
 		},
 		prompt: 'Un prompt : votre agent se configure seul, puis le prouve sur webmcpx.dev.',
 		ways: {
