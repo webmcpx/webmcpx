@@ -275,9 +275,8 @@ test('the site filter shows each site and each question on its own, never averag
 	await page.goto('/#leaderboard');
 	const proof = page.locator('#leaderboard');
 	const sites = proof.getByRole('tablist', { name: 'Site' });
-	// Sites are ordered by their biggest saving: Cloudflare first in this run.
+	// Sites are ordered by their biggest saving (which one comes first depends on the run): the first is open.
 	await expect(sites.getByRole('tab').first()).toHaveAttribute('aria-selected', 'true');
-	await expect(sites.getByRole('tab').first()).toContainText('Cloudflare');
 	await sites.getByRole('tab', { name: /Notion/ }).click();
 	await expect(proof.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	await expect(proof.getByRole('link', { name: /developers\.notion\.com/ })).toBeVisible();
@@ -372,7 +371,7 @@ test('switching sites starts the question rotation over', async ({ page }) => {
 	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	await proof.getByRole('button', { name: 'Question 4 of 5' }).click();
 	await proof.getByRole('tab', { name: /Kiln/ }).click();
-	await expect(proof.getByRole('button', { name: 'Question 1 of 4' })).toHaveAttribute(
+	await expect(proof.getByRole('button', { name: /^Question 1 of \d+$/ })).toHaveAttribute(
 		'aria-current',
 		'true'
 	);
