@@ -574,3 +574,15 @@ test('a scan with same-named tools in two frames shows both', async ({ page }) =
 	).toHaveCount(REPORT.tools.length * 2);
 	expect(errors).toEqual([]);
 });
+
+test("a model's own page shows its place on the leaderboard, not first", async ({ page }) => {
+	await page.goto('/');
+	const tabs = page.locator('#leaderboard [role=tablist]').first().locator('[role=tab]');
+	const last = await tabs.last().textContent();
+	const total = await tabs.count();
+	const id = (await tabs.last().getAttribute('id'))?.replace(/^.*-tab-/, '');
+	await page.goto(`/benchmark/${id}/`);
+	await expect(page.locator(`[aria-label="Rank ${total}"]`)).toHaveCount(1);
+	await expect(page.getByLabel('Rank 1')).toHaveCount(0);
+	expect(last).toContain(String(total));
+});

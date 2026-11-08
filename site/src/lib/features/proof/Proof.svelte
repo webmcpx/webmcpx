@@ -54,13 +54,8 @@
 	const pages = $derived((published ?? runs.map((r) => r.results.model)).map(modelLook));
 
 	const models = $derived(
-		runs.map((run, i) => ({
-			...run,
-			...modelLook(run.results.model),
-			id: run.results.model,
-			label: '',
-			rank: i + 1
-		}))
+		// Each run carries its leaderboard place: a model's own page shows its real one.
+		runs.map((run) => ({ ...run, ...modelLook(run.results.model), id: run.results.model, label: '' }))
 	);
 	// Initial values only: the tabs own the state after that.
 	const initial = () => ({ model: runs[0]?.results.model, site: runs[0]?.sites[0]?.id });

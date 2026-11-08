@@ -23,5 +23,5 @@ export function loadRuns(): ModelRun[] {
 				totalQuestions: Object.keys(results.summary.tasks).length
 			};
 		})
-	);
+	).map((run, i) => ({ ...run, rank: i + 1 }));
 }

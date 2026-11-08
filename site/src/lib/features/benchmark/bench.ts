@@ -82,6 +82,8 @@ export interface ModelRun {
 	tools: Record<string, import('./tools.ts').QuestionTools>;
 	/** Questions in the whole run, of which `sites` shows a selection. */
 	totalQuestions: number;
+	/** Place on the leaderboard (1 = best), the same on every page that shows this run. */
+	rank: number;
 }
 
 /** Accepts the JSON written by the harness; fails the build on an unknown schema. */
