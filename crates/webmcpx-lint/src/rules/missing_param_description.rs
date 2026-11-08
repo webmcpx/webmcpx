@@ -15,7 +15,7 @@ pub(crate) static RULE: Rule = Rule {
 fn check(ctx: &Ctx<'_>, out: &mut Vec<Diagnostic>) {
     for tool in ctx.tools {
         for (param, span, schema) in tool.params() {
-            if schema.get("description").is_none() {
+            if schema.lacks("description") {
                 out.push(RULE.report(
                     span,
                     format!(

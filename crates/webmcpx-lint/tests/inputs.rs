@@ -78,10 +78,16 @@ fn syntax_errors_are_reported() {
     ");
 }
 
-/// A spread can supply any field (`{ ...TOOLS[name], execute }`, as the webmcpx loader does): such a
-/// tool is unresolved, never reported as missing its name or description.
+/// A spread can supply any field (`{ ...TOOLS[name], execute }`, as the webmcpx loader does): what it
+/// may supply is never reported missing, while fields written after it are still checked.
 #[test]
-fn spread_tools_are_unresolved_not_missing() {
+fn spreads_hide_missing_fields_not_known_ones() {
     let source = "document.modelContext.registerTool({ ...TOOLS[name], execute: run });";
-    assert_eq!(render("loader.js", source), "tools=0 unresolved=1\n");
+    assert_eq!(render("loader.js", source), "tools=1 unresolved=0\n");
+    let source = r#"document.modelContext.registerTool({ ...defaults, name: "bad name", description: "Search." });"#;
+    let out = render("tool.js", source);
+    assert!(out.contains("[invalid-name]"), "{out}");
+    // A field before the spread may be overridden by it: unknown, not checked.
+    let source = r#"document.modelContext.registerTool({ name: "bad name", ...defaults });"#;
+    assert_eq!(render("tool.js", source), "tools=1 unresolved=0\n");
 }

@@ -24,6 +24,9 @@ pub(crate) enum Node {
 pub(crate) struct Obj {
     pub(crate) span: Span,
     pub(crate) fields: Vec<Field>,
+    /// Built with a spread (`{ ...defaults, name }`): `fields` holds only what follows the last spread,
+    /// and any other field may exist. Rules never report such a field as missing.
+    pub(crate) open: bool,
 }
 
 #[derive(Debug)]
@@ -76,6 +79,11 @@ impl Node {
 }
 
 impl Obj {
+    /// `key` is certainly absent (not just unknown because of a spread).
+    pub(crate) fn lacks(&self, key: &str) -> bool {
+        !self.open && self.get(key).is_none()
+    }
+
     pub(crate) fn get(&self, key: &str) -> Option<&Field> {
         self.fields.iter().rev().find(|f| f.key == key)
     }

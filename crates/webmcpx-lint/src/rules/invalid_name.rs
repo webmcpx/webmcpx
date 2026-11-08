@@ -15,6 +15,7 @@ pub(crate) static RULE: Rule = Rule {
 fn check(ctx: &Ctx<'_>, out: &mut Vec<Diagnostic>) {
     for tool in ctx.tools {
         match tool.get("name") {
+            None if tool.open => {}
             None => out.push(RULE.report(tool.span, "tool has no `name`".into())),
             Some(field) => match field.value.as_str() {
                 Some(name) => {

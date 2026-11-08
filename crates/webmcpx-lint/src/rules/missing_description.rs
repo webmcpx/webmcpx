@@ -15,6 +15,7 @@ pub(crate) static RULE: Rule = Rule {
 fn check(ctx: &Ctx<'_>, out: &mut Vec<Diagnostic>) {
     for tool in ctx.tools {
         match tool.get("description") {
+            None if tool.open => {}
             None => out.push(RULE.report(
                 tool.anchor(),
                 format!("`{}` has no description", tool.label()),

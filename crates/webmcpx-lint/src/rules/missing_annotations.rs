@@ -17,8 +17,8 @@ pub(crate) static RULE: Rule = Rule {
 fn check(ctx: &Ctx<'_>, out: &mut Vec<Diagnostic>) {
     for tool in ctx.tools {
         let declared = match tool.get("annotations").map(|f| &f.value) {
-            None => false,
-            Some(Node::Obj(obj)) => !obj.fields.is_empty(),
+            None => tool.open,
+            Some(Node::Obj(obj)) => obj.open || !obj.fields.is_empty(),
             Some(_) => true,
         };
         if !declared {

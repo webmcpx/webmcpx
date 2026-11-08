@@ -174,34 +174,34 @@ fn convert(expr: &Expression<'_>) -> Node {
                 .collect(),
             span,
         },
-        // A spread can supply or override any field: the object's fields are unknown, never "missing".
-        Expression::ObjectExpression(obj)
-            if obj
+        Expression::ObjectExpression(obj) => {
+            // Fields before the last spread may be overridden by it: only those after it are known.
+            let last_spread = obj
                 .properties
                 .iter()
-                .any(|p| matches!(p, ObjectPropertyKind::SpreadProperty(_))) =>
-        {
-            Node::Dynamic(span)
+                .rposition(|p| matches!(p, ObjectPropertyKind::SpreadProperty(_)));
+            Node::Obj(Obj {
+                span,
+                open: last_spread.is_some(),
+                fields: obj
+                    .properties
+                    .iter()
+                    .skip(last_spread.map_or(0, |i| i + 1))
+                    .filter_map(|prop| match prop {
+                        ObjectPropertyKind::ObjectProperty(p) => Some(Field {
+                            key: p.key.static_name()?.as_str()?.to_owned(),
+                            key_span: p.key.span().into(),
+                            value: if p.method {
+                                Node::Dynamic(p.span.into())
+                            } else {
+                                convert(&p.value)
+                            },
+                        }),
+                        ObjectPropertyKind::SpreadProperty(_) => None,
+                    })
+                    .collect(),
+            })
         }
-        Expression::ObjectExpression(obj) => Node::Obj(Obj {
-            span,
-            fields: obj
-                .properties
-                .iter()
-                .filter_map(|prop| match prop {
-                    ObjectPropertyKind::ObjectProperty(p) => Some(Field {
-                        key: p.key.static_name()?.as_str()?.to_owned(),
-                        key_span: p.key.span().into(),
-                        value: if p.method {
-                            Node::Dynamic(p.span.into())
-                        } else {
-                            convert(&p.value)
-                        },
-                    }),
-                    ObjectPropertyKind::SpreadProperty(_) => None,
-                })
-                .collect(),
-        }),
         Expression::TSAsExpression(e) => convert(&e.expression),
         Expression::TSSatisfiesExpression(e) => convert(&e.expression),
         _ => Node::Dynamic(span),
