@@ -70,7 +70,10 @@ pub fn search(stream: &str, query: &str, limit: usize) -> String {
     if kept == 0 {
         return Envelope::new()
             .hint("Read the page with fetch_as_markdown instead.")
-            .err(Code::ResultTooLarge, "the best match is over the output budget");
+            .err(
+                Code::ResultTooLarge,
+                "the best match is over the output budget",
+            );
     }
     data.push_str("]}");
     Envelope::new().ok(&data)
@@ -281,10 +284,19 @@ mod tests {
         assert!(out.len() <= limits::OUTPUT_MAX + 100, "{} chars", out.len());
         let v = parse(&out);
         assert_eq!(v["data"]["results"].as_array().unwrap().len(), 5);
-        assert!(v["data"]["results"][0]["heading"].as_str().unwrap().chars().count() <= HEADING_CHARS + 1);
+        assert!(
+            v["data"]["results"][0]["heading"]
+                .as_str()
+                .unwrap()
+                .chars()
+                .count()
+                <= HEADING_CHARS + 1
+        );
         // An anchor past the whole budget is never cut: the result is left out.
         let huge = format!("p\u{1F}pricing\u{1F}https://x.test/#{}", "a".repeat(30_000));
-        assert_eq!(parse(&search(&huge, "pricing", 5))["error"]["code"], "RESULT_TOO_LARGE");
+        assert_eq!(
+            parse(&search(&huge, "pricing", 5))["error"]["code"],
+            "RESULT_TOO_LARGE"
+        );
     }
-
 }
