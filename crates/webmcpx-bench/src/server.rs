@@ -448,6 +448,24 @@ mod tests {
 
     use super::*;
 
+    /// Docker kills the server after compose's `stop_grace_period`: it must outlast the longest request a
+    /// stopping server waits for, or a deploy cuts queued scans off.
+    #[test]
+    fn compose_waits_for_the_longest_scan_on_a_deploy() {
+        let compose =
+            std::fs::read_to_string(crate::repo_root().join("deploy/compose.yaml")).unwrap();
+        let grace = compose
+            .lines()
+            .find_map(|l| l.trim().strip_prefix("stop_grace_period:"))
+            .and_then(|v| v.trim().strip_suffix('s')?.parse::<u64>().ok())
+            .expect("stop_grace_period: <n>s in deploy/compose.yaml");
+        assert!(
+            grace > crate::scan::LONGEST_SCAN.as_secs(),
+            "stop_grace_period {grace}s must exceed {:?}",
+            crate::scan::LONGEST_SCAN
+        );
+    }
+
     #[test]
     fn a_failed_scan_tells_the_public_only_the_network_code() {
         let leaky = "navigating: Page.navigate failed on ws://chrome:9222/devtools/page/AB12: net::ERR_NAME_NOT_RESOLVED at 10.0.0.5";

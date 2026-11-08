@@ -12,8 +12,7 @@ pub enum Code {
 }
 
 impl Code {
-    /// Every code, in a stable order. A slice, so adding a code (the enum is `non_exhaustive`) keeps its type.
-    pub const ALL: &'static [Self] = &[
+    pub const ALL: [Self; 7] = [
         Self::InvalidInput,
         Self::NotFound,
         Self::ResultTooLarge,
@@ -67,8 +66,7 @@ impl Code {
 
     pub fn parse(s: &str) -> Option<Self> {
         Self::ALL
-            .iter()
-            .copied()
+            .into_iter()
             .find(|c| c.as_str().eq_ignore_ascii_case(s))
     }
 }
@@ -79,7 +77,7 @@ mod tests {
 
     #[test]
     fn round_trips() {
-        for &code in Code::ALL {
+        for code in Code::ALL {
             assert_eq!(Code::parse(code.as_str()), Some(code));
         }
         assert_eq!(Code::parse("refused"), Some(Code::Refused));

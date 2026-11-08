@@ -48,8 +48,9 @@ services:
     build: { context: .., dockerfile: deploy/web.Dockerfile }
     # 12 scans at once; each visitor (IPv4 address or IPv6 /64, from nginx) one at a time.
     command: [--scan-parallel, "12", --one-scan-per-visitor, --behind-proxy]
-    # On a deploy, scans in flight finish (the server stops accepting, then waits up to 55 s).
-    stop_grace_period: 60s
+    # On a deploy, requests in flight finish, queued scans included: the server stops accepting, then waits
+    # up to scan::LONGEST_SCAN (90 s); a test keeps this above it.
+    stop_grace_period: 100s
     read_only: true
     networks: [edge, scan]
     depends_on: [chrome]

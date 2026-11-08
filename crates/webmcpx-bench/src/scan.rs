@@ -45,6 +45,12 @@ const CACHE_ENTRY_MAX: usize = 256 * 1024;
 const DEADLINE: Duration = Duration::from_secs(45);
 /// Resolving the site's host before a scan (and after its redirects).
 const RESOLVE_WAIT: Duration = Duration::from_secs(5);
+/// The longest a scan request can take with the default deadline: resolving, waiting in line, the scan,
+/// then closing its page. A server stopping for a deploy waits this long for requests in flight.
+pub const LONGEST_SCAN: Duration = RESOLVE_WAIT
+    .saturating_add(QUEUE_WAIT)
+    .saturating_add(DEADLINE)
+    .saturating_add(CLOSE_WAIT);
 /// Kept free at the end of a scan's deadline for building the report after the best-effort steps.
 const REPORT_MARGIN: Duration = Duration::from_secs(1);
 /// Closing a context after a scan; longer means the browser is stuck and gets replaced.

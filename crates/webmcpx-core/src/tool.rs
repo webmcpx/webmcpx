@@ -11,8 +11,7 @@ pub enum Annotation {
 }
 
 impl Annotation {
-    /// Every annotation. A slice, so adding one (the enum is `non_exhaustive`) keeps its type.
-    pub const ALL: &'static [Self] = &[
+    pub const ALL: [Self; 4] = [
         Self::ReadOnly,
         Self::UntrustedContent,
         Self::Consequential,
@@ -32,7 +31,7 @@ impl Annotation {
     }
 
     pub fn parse(key: &str) -> Option<Self> {
-        Self::ALL.iter().copied().find(|a| a.key() == key)
+        Self::ALL.into_iter().find(|a| a.key() == key)
     }
 }
 

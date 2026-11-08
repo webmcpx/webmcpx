@@ -9,7 +9,7 @@ use std::io::Write as _;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
@@ -273,10 +273,11 @@ async fn main() -> Result<()> {
                 .await?;
             eprintln!("serving http://{bound}/ (sites under /sites/); Ctrl-C to stop");
             shutdown().await?;
-            // A deploy stops us: finish the scans in flight (a scan's worst case fits; compose waits 60 s).
+            // A deploy stops us: finish the requests in flight, queued scans included (compose's
+            // stop_grace_period covers this; a test checks it).
             eprintln!("stopping: letting requests in flight finish");
             stop.send(()).ok();
-            tokio::time::timeout(Duration::from_secs(55), serving)
+            tokio::time::timeout(webmcpx_bench::scan::LONGEST_SCAN, serving)
                 .await
                 .ok();
         }
