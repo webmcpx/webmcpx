@@ -172,6 +172,15 @@ export async function serve(options = {}, { input = process.stdin, output = proc
   const naming = { suffixes: new Map(), owned: new Map() };
   let initialized = false;
   const write = (msg) => output.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
+  // An answer that can't be serialized (a page tool's result nested 20,000 deep) becomes an error for
+  // that request: nothing a page returns may end the server.
+  const answer = (id, body) => {
+    try {
+      write({ id, ...body });
+    } catch (e) {
+      write({ id, error: { code: -32603, message: `the result could not be sent: ${e?.message ?? e}` } });
+    }
+  };
   // Replaces the tool list and tells the client when what it would see changed.
   const update = (tools) => {
     const before = JSON.stringify(entries.map(asMcp));
@@ -264,8 +273,8 @@ export async function serve(options = {}, { input = process.stdin, output = proc
     }
     // Requests run concurrently: a slow page must not block ping or tools/list.
     handle(msg).then(
-      (result) => msg.id !== undefined && result !== undefined && write({ id: msg.id, result }),
-      (e) => msg.id !== undefined && write({ id: msg.id, error: { code: e.code ?? -32603, message: e.message } }),
+      (result) => msg.id !== undefined && result !== undefined && answer(msg.id, { result }),
+      (e) => msg.id !== undefined && answer(msg.id, { error: { code: e?.code ?? -32603, message: String(e?.message ?? e) } }),
     );
   }
   await session.close();
