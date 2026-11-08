@@ -14,7 +14,7 @@ mock.module("../agent/session.js", {
       }
       tools() {
         this.calls++;
-        return new Promise(() => {}); // a page whose tool list never answers
+        return this.next ?? new Promise(() => {}); // by default, a page whose tool list never answers
       }
       close() {}
     },
@@ -30,5 +30,15 @@ test("page changes coalesce: one refresh at a time, whatever the page fires", as
   for (let i = 0; i < 300; i++) session.options.onChange();
   await new Promise((resolve) => setImmediate(resolve));
   assert.equal(session.calls, 1);
+  input.end();
+});
+
+test("a malformed tool list from the page never ends the server", async () => {
+  const input = new PassThrough();
+  serve({}, { input, output: new PassThrough() });
+  session.next = Promise.resolve([{ name: null }]);
+  session.options.onChange();
+  await new Promise((resolve) => setTimeout(resolve, 10));
+  assert.equal(session.calls, 1, "the refresh ran and its failure was contained");
   input.end();
 });

@@ -168,7 +168,8 @@ export async function serve(options = {}, { input = process.stdin, output = proc
     try {
       do {
         again = false;
-        await session.tools().then(update, () => {});
+        // Nothing a page does may end the server: any failure here only skips this refresh.
+        await session.tools().then(update).catch(() => {});
       } while (again);
     } finally {
       refreshing = false;

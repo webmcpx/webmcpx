@@ -77,3 +77,11 @@ fn syntax_errors_are_reported() {
     1:1 error [syntax-error] Expected `}` but found `EOF`
     ");
 }
+
+/// A spread can supply any field (`{ ...TOOLS[name], execute }`, as the webmcpx loader does): such a
+/// tool is unresolved, never reported as missing its name or description.
+#[test]
+fn spread_tools_are_unresolved_not_missing() {
+    let source = r#"document.modelContext.registerTool({ ...TOOLS[name], execute: run });"#;
+    assert_eq!(render("loader.js", source), "tools=0 unresolved=1\n");
+}

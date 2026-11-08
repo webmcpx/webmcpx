@@ -174,6 +174,15 @@ fn convert(expr: &Expression<'_>) -> Node {
                 .collect(),
             span,
         },
+        // A spread can supply or override any field: the object's fields are unknown, never "missing".
+        Expression::ObjectExpression(obj)
+            if obj
+                .properties
+                .iter()
+                .any(|p| matches!(p, ObjectPropertyKind::SpreadProperty(_))) =>
+        {
+            Node::Dynamic(span)
+        }
         Expression::ObjectExpression(obj) => Node::Obj(Obj {
             span,
             fields: obj

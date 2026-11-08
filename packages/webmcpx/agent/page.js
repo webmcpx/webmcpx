@@ -272,7 +272,10 @@ export class Page {
     if (this.#handles.length > 50) {
       this.#send("Runtime.releaseObject", { objectId: this.#handles.shift() }).catch(() => {});
     }
-    return list.value.map((tool) => ({ ...tool, list: result.objectId }));
+    // The page wrote these (it may have replaced getTools): keep only well-formed summaries.
+    const valid = (t) =>
+      t && typeof t.name === "string" && t.name && typeof t.description === "string" && t.annotations && typeof t.annotations === "object";
+    return (Array.isArray(list?.value) ? list.value : []).filter(valid).map((tool) => ({ ...tool, list: result.objectId }));
   }
 
   /**
