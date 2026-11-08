@@ -650,7 +650,7 @@ const ja: Messages = {
 		},
 		trademark: {
 			kicker: '08 · 商標',
-			title: '名前は自由に。公式を装わない。',
+			title: '名前は自由に。公式を装わない',
 			lead: 'コードは MIT ライセンスですが、名前とマークはこのライセンスの対象外です。ポリシーの全文は TRADEMARK.md にあります。',
 			sayIt: 'このように書く',
 			never: '使わない表現',

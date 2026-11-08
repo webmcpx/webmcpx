@@ -670,7 +670,7 @@ const fr: Messages = {
 		},
 		trademark: {
 			kicker: '08 · Marques',
-			title: 'Utilisez le nom librement. Sans jouer les officiels.',
+			title: 'Utilisez le nom librement. Sans jouer les officiels',
 			lead: 'Le code est sous licence MIT ; le nom et les symboles ne sont pas couverts par cette licence. La politique complète figure dans TRADEMARK.md.',
 			sayIt: 'Formulations correctes',
 			never: 'Jamais',

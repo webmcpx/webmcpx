@@ -664,7 +664,7 @@ const ptBr: Messages = {
 		},
 		trademark: {
 			kicker: '08 · Marcas',
-			title: 'Use o nome à vontade. Não pareça oficial.',
+			title: 'Use o nome à vontade. Não pareça oficial',
 			lead: 'O código tem licença MIT; o nome e as marcas não estão cobertos por essa licença. A política completa está em TRADEMARK.md.',
 			sayIt: 'Diga assim',
 			never: 'Nunca',

@@ -671,7 +671,7 @@ const de: Messages = {
 		},
 		trademark: {
 			kicker: '08 · Marken',
-			title: 'Name frei nutzbar. Kein offizieller Anschein.',
+			title: 'Name frei nutzbar. Kein offizieller Anschein',
 			lead: 'Der Code steht unter MIT-Lizenz; Name und Bildmarken fallen nicht unter diese Lizenz. Die vollständige Richtlinie steht in TRADEMARK.md.',
 			sayIt: 'So formulieren Sie es',
 			never: 'Niemals',

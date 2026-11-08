@@ -666,7 +666,7 @@ const es: Messages = {
 		},
 		trademark: {
 			kicker: '08 · Marcas',
-			title: 'Usa el nombre con libertad. No parezcas oficial.',
+			title: 'Usa el nombre con libertad. No parezcas oficial',
 			lead: 'El código tiene licencia MIT; el nombre y las marcas no están cubiertos por esa licencia. La política completa está en TRADEMARK.md.',
 			sayIt: 'Dilo así',
 			never: 'Nunca',

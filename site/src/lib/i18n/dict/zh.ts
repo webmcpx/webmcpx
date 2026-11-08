@@ -623,7 +623,7 @@ const zh: Messages = {
 		},
 		trademark: {
 			kicker: '08 · 商标',
-			title: '名字随便用，别装官方。',
+			title: '名字随便用，别装官方',
 			lead: '代码采用 MIT 许可证；名称和标志不在该许可证范围内。完整政策见 TRADEMARK.md。',
 			sayIt: '可以这样说',
 			never: '绝不要说',

@@ -658,7 +658,7 @@ const id: Messages = {
 		},
 		trademark: {
 			kicker: '08 · Merek dagang',
-			title: 'Pakai namanya dengan bebas. Jangan terkesan resmi.',
+			title: 'Pakai namanya dengan bebas. Jangan terkesan resmi',
 			lead: 'Kodenya berlisensi MIT; nama dan logonya tidak termasuk dalam lisensi itu. Kebijakan lengkapnya ada di TRADEMARK.md.',
 			sayIt: 'Tulis seperti ini',
 			never: 'Jangan pernah',

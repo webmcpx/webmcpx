@@ -829,7 +829,7 @@ const en = {
 		trademark: {
 			kicker: '08 · Trademarks',
 			// "Don't look official": the point is to never imply endorsement; adapt the phrasing.
-			title: 'Use the name freely. Don’t look official.',
+			title: 'Use the name freely. Don’t look official',
 			// TRADEMARK.md is a file name: keep it.
 			lead: 'The code is MIT licensed; the name and the marks are not covered by that license. The full policy is in TRADEMARK.md.',
 			sayIt: 'Say it like this',
