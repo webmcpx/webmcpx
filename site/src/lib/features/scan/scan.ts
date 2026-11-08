@@ -188,9 +188,7 @@ export const shareLink = (origin: string, url: string, home = '/') =>
 export const BADGES = [
 	{ id: 'card', svg: cardSvg.trim() },
 	{ id: 'flat', svg: flatSvg.trim() },
-	{ id: 'dark', svg: darkSvg.trim() },
-	// READMEs can't hold inline SVG (GitHub strips it): an image of the site's latest verdict, served by us.
-	{ id: 'readme', svg: flatSvg.trim() }
+	{ id: 'dark', svg: darkSvg.trim() }
 ] as const;
 export type BadgeStyle = (typeof BADGES)[number]['id'];
 
@@ -209,10 +207,23 @@ export function badgeEmbed(
 	home = '/'
 ): string {
 	const href = `${shareLink(origin, url, home)}#scan`;
-	if (style === 'readme') {
-		const image = `${origin}/badge/${host(url)}.svg`;
-		return `[![${title.replace(/[[\]]/g, '')}](${image})](${href})`;
-	}
 	const svg = BADGES.find((b) => b.id === style)?.svg ?? BADGES[0].svg;
 	return `<a href="${attr(href)}" title="${attr(title)}">${svg}</a>`;
+}
+
+/**
+ * The same badge for Markdown (READMEs can't hold inline SVG; GitHub strips it): an image served by us,
+ * `/badge/<host>.svg?style=…`, which shows this artwork while the site is agent-ready and its real verdict
+ * otherwise (scan/card.rs, badge_styled), linked to a live re-scan.
+ */
+export function badgeMarkdown(
+	origin: string,
+	url: string,
+	style: BadgeStyle,
+	title: string,
+	home = '/'
+): string {
+	const href = `${shareLink(origin, url, home)}#scan`;
+	const image = `${origin}/badge/${host(url)}.svg?style=${style}`;
+	return `[![${title.replace(/[[\]]/g, '')}](${image})](${href})`;
 }

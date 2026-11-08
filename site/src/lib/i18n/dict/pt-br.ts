@@ -715,7 +715,6 @@ const ptBr: Messages = {
 		badges: {
 			card: { name: 'Cartão', fits: 'Páginas claras' },
 			flat: { name: 'Plano', fits: 'Rodapés' },
-			readme: { name: 'README', fits: 'GitHub e npm' },
 			dark: { name: 'Escuro', fits: 'Páginas escuras' }
 		},
 		errors: {

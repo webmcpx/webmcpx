@@ -3,6 +3,7 @@ import en from '#lib/i18n/dict/en.ts';
 import {
 	BADGES,
 	badgeEmbed,
+	badgeMarkdown,
 	errors,
 	errorText,
 	host,
@@ -127,17 +128,17 @@ describe('badgeEmbed', () => {
 		expect(html).toContain(`title="${TITLE}"`);
 	});
 
-	it.each(BADGES.filter((b) => b.id !== 'readme'))('ships a small, script-free $id badge', ({ id, svg }) => {
+	it.each(BADGES)('ships a small, script-free $id badge', ({ id, svg }) => {
 		expect(svg.length).toBeLessThan(2000);
 		expect(svg).not.toMatch(/<script|on\w+=|<image|xlink:href|href=|\sid=/i);
 		expect(svg).toContain('<title>Agent-ready: WebMCP tools checked with webmcpx</title>');
 		expect(badgeEmbed('https://webmcp.zone', 'https://a.example/', id, TITLE)).toContain(svg);
 	});
 
-	it('gives READMEs a Markdown image of the live verdict, linked to a re-scan', () => {
-		const md = badgeEmbed('https://webmcpx.dev', 'https://www.a.example/docs', 'readme', '[Agent]-ready');
+	it('gives READMEs a Markdown image of the live verdict in the chosen style, linked to a re-scan', () => {
+		const md = badgeMarkdown('https://webmcpx.dev', 'https://www.a.example/docs', 'dark', '[Agent]-ready');
 		expect(md).toBe(
-			'[![Agent-ready](https://webmcpx.dev/badge/a.example.svg)](https://webmcpx.dev/?scan=https%3A%2F%2Fwww.a.example%2Fdocs#scan)'
+			'[![Agent-ready](https://webmcpx.dev/badge/a.example.svg?style=dark)](https://webmcpx.dev/?scan=https%3A%2F%2Fwww.a.example%2Fdocs#scan)'
 		);
 	});
 });

@@ -704,7 +704,6 @@ const hi: Messages = {
 		badges: {
 			card: { name: 'कार्ड', fits: 'लाइट पेज' },
 			flat: { name: 'फ़्लैट', fits: 'फ़ुटर' },
-			readme: { name: 'README', fits: 'GitHub और npm' },
 			dark: { name: 'डार्क', fits: 'डार्क पेज' }
 		},
 		errors: {

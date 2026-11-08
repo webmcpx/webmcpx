@@ -707,7 +707,6 @@ const id: Messages = {
 		badges: {
 			card: { name: 'Kartu', fits: 'Halaman terang' },
 			flat: { name: 'Datar', fits: 'Footer' },
-			readme: { name: 'README', fits: 'GitHub dan npm' },
 			dark: { name: 'Gelap', fits: 'Halaman gelap' }
 		},
 		errors: {

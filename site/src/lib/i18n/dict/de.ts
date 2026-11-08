@@ -716,7 +716,6 @@ const de: Messages = {
 		badges: {
 			card: { name: 'Karte', fits: 'Helle Seiten' },
 			flat: { name: 'Flach', fits: 'Footer' },
-			readme: { name: 'README', fits: 'GitHub und npm' },
 			dark: { name: 'Dunkel', fits: 'Dunkle Seiten' }
 		},
 		errors: {

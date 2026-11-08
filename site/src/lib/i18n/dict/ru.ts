@@ -750,7 +750,6 @@ const ru: Messages = {
 		badges: {
 			card: { name: 'Карточка', fits: 'Светлые страницы' },
 			flat: { name: 'Плоский', fits: 'Футеры' },
-			readme: { name: 'README', fits: 'GitHub и npm' },
 			dark: { name: 'Тёмный', fits: 'Тёмные страницы' }
 		},
 		errors: {

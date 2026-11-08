@@ -668,7 +668,6 @@ const zh: Messages = {
 		badges: {
 			card: { name: '卡片', fits: '浅色页面' },
 			flat: { name: '扁平', fits: '页脚' },
-			readme: { name: 'README', fits: 'GitHub 和 npm' },
 			dark: { name: '深色', fits: '深色页面' }
 		},
 		errors: {

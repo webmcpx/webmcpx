@@ -697,7 +697,6 @@ const ja: Messages = {
 		badges: {
 			card: { name: 'カード', fits: '明るいページ' },
 			flat: { name: 'フラット', fits: 'フッター' },
-			readme: { name: 'README', fits: 'GitHub や npm' },
 			dark: { name: 'ダーク', fits: '暗いページ' }
 		},
 		errors: {

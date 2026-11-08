@@ -861,8 +861,6 @@ const en = {
 		badges: {
 			card: { name: 'Card', fits: 'Light pages' },
 			flat: { name: 'Flat', fits: 'Footers' },
-			// Name max 10, fits max 22: an image link for GitHub and npm READMEs (Markdown).
-			readme: { name: 'README', fits: 'GitHub and npm' },
 			dark: { name: 'Dark', fits: 'Dark pages' }
 		},
 		errors: {

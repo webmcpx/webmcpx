@@ -713,7 +713,6 @@ const bn: Messages = {
 		badges: {
 			card: { name: 'কার্ড', fits: 'হালকা পেজ' },
 			flat: { name: 'ফ্ল্যাট', fits: 'ফুটার' },
-			readme: { name: 'README', fits: 'GitHub আর npm' },
 			dark: { name: 'ডার্ক', fits: 'গাঢ় পেজ' }
 		},
 		errors: {

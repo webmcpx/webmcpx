@@ -220,6 +220,36 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
 }
 
 /// The README badge for a site: `webmcp | agent-ready` (or almost, not yet, unknown).
+/// The site's own badge artwork (`site/src/lib/content/badges/`), by style: what a Markdown embed shows
+/// for an agent-ready site, the same picture the HTML embed carries inline.
+const STYLED: [(&str, &str); 3] = [
+    (
+        "card",
+        include_str!("../../../site/src/lib/content/badges/card.svg"),
+    ),
+    (
+        "flat",
+        include_str!("../../../site/src/lib/content/badges/flat.svg"),
+    ),
+    (
+        "dark",
+        include_str!("../../../site/src/lib/content/badges/dark.svg"),
+    ),
+];
+
+/// The badge for `/badge/<host>.svg?style=…`: the chosen artwork only while the site is agent-ready (it
+/// says so); otherwise, or for an unknown style, the badge with the site's real verdict.
+pub fn badge_styled(verdict: Option<Verdict>, style: Option<&str>) -> String {
+    let artwork = STYLED
+        .iter()
+        .find(|(name, _)| Some(*name) == style)
+        .map(|(_, svg)| svg.trim().to_owned());
+    match (verdict, artwork) {
+        (Some(Verdict::Ready), Some(svg)) => svg,
+        _ => badge(verdict),
+    }
+}
+
 pub fn badge(verdict: Option<Verdict>) -> String {
     let (label, fill) = match verdict {
         Some(v) => {
@@ -356,5 +386,24 @@ mod tests {
         assert!(badge(Some(Verdict::Ready)).contains(">agent-ready</text>"));
         assert!(badge(None).contains(">scan</text>"));
         assert!(!badge(Some(Verdict::Missing)).contains("<script"));
+    }
+
+    /// A styled badge is the site's artwork only for an agent-ready site: it never claims a verdict the
+    /// site doesn't have.
+    #[test]
+    fn styled_badges_only_for_agent_ready_sites() {
+        use super::badge_styled;
+        let card = badge_styled(Some(Verdict::Ready), Some("card"));
+        assert!(card.starts_with("<svg") && card.contains("agent-ready"));
+        assert_ne!(card, badge(Some(Verdict::Ready)));
+        assert_eq!(
+            badge_styled(Some(Verdict::Missing), Some("card")),
+            badge(Some(Verdict::Missing))
+        );
+        assert_eq!(badge_styled(None, Some("dark")), badge(None));
+        assert_eq!(
+            badge_styled(Some(Verdict::Ready), Some("<script>")),
+            badge(Some(Verdict::Ready))
+        );
     }
 }

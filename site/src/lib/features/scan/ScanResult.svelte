@@ -26,6 +26,7 @@
 	import {
 		BADGES,
 		badgeEmbed,
+		badgeMarkdown,
 		errors,
 		errorText,
 		host,
@@ -371,40 +372,36 @@
 				</div>
 			{:else}
 				{@const embed = badgeEmbed(location.origin, r.url, badge, m.result.badgeTitle, i18n.href('/'))}
+				{@const markdown = badgeMarkdown(location.origin, r.url, badge, m.result.badgeTitle, i18n.href('/'))}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="font-medium">{m.result.badge}</p>
-					<!-- The styles as one slim row of small tiles: the badge, then its name (what it fits is the tile's title). -->
-					<fieldset class="mt-4 grid grid-cols-2 gap-2">
+					<!-- Just the badges, our own artwork (content/badges/); the picked one gets a ring, its name and fit are
+					     its label for screen readers and its tooltip. -->
+					<fieldset class="mt-4 flex flex-wrap items-center gap-3">
 						<legend class="sr-only">{m.result.badgeStyle}</legend>
 						{#each BADGES as b (b.id)}
 							<label
 								title={m.badges[b.id].fits}
-								class="flex cursor-pointer flex-col overflow-hidden rounded-xl border-2 border-hairline transition hover:border-ink has-checked:border-ink has-checked:shadow-hard-sm has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink"
+								class="cursor-pointer rounded-xl p-2 ring-2 ring-transparent transition hover:ring-hairline has-checked:ring-ink has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ink [&_svg]:block"
 							>
 								<input type="radio" name="badge-style" value={b.id} bind:group={badge} class="sr-only" />
-								<!-- Our own artwork (content/badges/), the same markup the embed code carries. -->
-								<span
-									class={[
-										'grid h-14 place-items-center px-2 [&_svg]:h-auto [&_svg]:max-w-[85%]',
-										b.id === 'dark' ? 'bg-ink' : 'bg-paper'
-									]}
-									aria-hidden="true"
-								>
-									<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-									{@html b.svg}
-								</span>
-								<span
-									class="border-t-2 border-inherit px-2.5 py-1.5 font-mono text-[11px] tracking-wider uppercase"
-								>
-									{m.badges[b.id].name}<span class="sr-only">: {m.badges[b.id].fits}</span>
-								</span>
+								<span class="sr-only">{m.badges[b.id].name}: {m.badges[b.id].fits}</span>
+								<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+								<span aria-hidden="true">{@html b.svg}</span>
 							</label>
 						{/each}
 					</fieldset>
+					<!-- HTML for sites (the SVG inline, nothing loaded from us); Markdown for READMEs (an image we serve). -->
 					<CodeBlock
-						snippet={highlightLite(embed, badge === 'readme' ? 'md' : 'html')}
-						title={badge === 'readme' ? 'README.md' : 'badge.html'}
+						snippet={highlightLite(embed, 'html')}
+						title="badge.html"
 						class="mt-4 shadow-none"
+						compact
+					/>
+					<CodeBlock
+						snippet={highlightLite(markdown, 'md')}
+						title="README.md"
+						class="mt-3 shadow-none"
 						compact
 					/>
 				</div>

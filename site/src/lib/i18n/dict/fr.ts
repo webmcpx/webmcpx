@@ -721,7 +721,6 @@ const fr: Messages = {
 		badges: {
 			card: { name: 'Carte', fits: 'Pages claires' },
 			flat: { name: 'Plat', fits: 'Pieds de page' },
-			readme: { name: 'README', fits: 'GitHub et npm' },
 			dark: { name: 'Sombre', fits: 'Pages sombres' }
 		},
 		errors: {

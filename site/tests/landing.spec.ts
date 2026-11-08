@@ -157,16 +157,20 @@ test('a long tool description wraps inside the tooltip on a phone', async ({ pag
 	expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test('an agent-ready site can pick one of four badge styles, inline or a README image', async ({ page }) => {
+test('an agent-ready site picks one of three badges and gets it as HTML and as Markdown', async ({
+	page
+}) => {
 	await mockScan(page);
 	await page.goto('/');
 	await page.getByLabel("Your site's address").first().fill('docs.example.com');
 	await page.getByRole('button', { name: 'Scan my site' }).first().click();
 	const styles = page.getByRole('group', { name: 'Badge style' }).getByRole('radio');
-	await expect(styles).toHaveCount(4);
+	await expect(styles).toHaveCount(3);
 	await expect(styles.first()).toBeChecked();
 	const embed = page.locator('#scan').getByRole('figure').filter({ hasText: 'badge.html' });
+	const readme = page.locator('#scan').getByRole('figure').filter({ hasText: 'README.md' });
 	const card = await embed.textContent();
+	await expect(readme).toContainText('/badge/docs.example.com.svg?style=card)](');
 	await page.locator('#scan label', { hasText: 'Flat' }).click();
 	await expect(styles.nth(1)).toBeChecked();
 	await expect(embed).toContainText('width="158" height="20"');
@@ -174,11 +178,9 @@ test('an agent-ready site can pick one of four badge styles, inline or a README 
 	await page.locator('#scan label', { hasText: 'Dark' }).click();
 	await expect(embed).toContainText('#3d3c37');
 	await expect(embed).not.toContainText('<img');
-	// READMEs can't hold inline SVG: Markdown for an image of the latest verdict, linking to a live scan.
-	await page.locator('#scan label', { hasText: 'README' }).click();
-	const readme = page.locator('#scan').getByRole('figure').filter({ hasText: 'README.md' });
+	// READMEs can't hold inline SVG: Markdown for an image we serve in that style, linking to a live scan.
 	await expect(readme).toContainText('[![');
-	await expect(readme).toContainText('/badge/docs.example.com.svg)](');
+	await expect(readme).toContainText('/badge/docs.example.com.svg?style=dark)](');
 	await expect(readme).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan)');
 });
 

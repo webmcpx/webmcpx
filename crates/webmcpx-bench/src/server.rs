@@ -281,10 +281,17 @@ async fn scan_card(State(state): State<ScanState>, Query(q): Query<CardQuery>) -
     }
 }
 
-/// `/badge/<host>.svg`: the site's latest verdict as a README badge ("scan" until it has one).
+#[derive(Deserialize)]
+struct BadgeQuery {
+    style: Option<String>,
+}
+
+/// `/badge/<host>.svg[?style=card|flat|dark]`: the site's latest verdict as a README badge ("scan" until it
+/// has one); an agent-ready site gets the chosen artwork.
 async fn badge(
     State(state): State<ScanState>,
     axum::extract::Path(file): axum::extract::Path<String>,
+    Query(q): Query<BadgeQuery>,
 ) -> Response {
     let Some(host) = file
         .strip_suffix(".svg")
@@ -297,7 +304,7 @@ async fn badge(
             (axum::http::header::CONTENT_TYPE, "image/svg+xml"),
             (axum::http::header::CACHE_CONTROL, "public, max-age=300"),
         ],
-        crate::card::badge(state.scanner.verdict_for(host)),
+        crate::card::badge_styled(state.scanner.verdict_for(host), q.style.as_deref()),
     )
         .into_response()
 }
