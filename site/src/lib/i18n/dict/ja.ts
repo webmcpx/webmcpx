@@ -688,8 +688,10 @@ const ja: Messages = {
 				'SVG はコードに直接埋め込まれるので、こちらからは何も読み込みません。リンク先はそのサイトのライブスキャンなので、誰でも確認できます。',
 			badgeStyle: 'バッジのスタイル',
 			badgeTitle: 'エージェント対応：webmcpx でライブ確認',
-			share: '結果を共有',
-			shared: 'リンクをコピー済み'
+			share: '共有',
+			shared: 'リンクをコピー済み',
+			save: 'PDF で保存',
+			printed: 'webmcpx.dev で {date} にスキャン。再スキャン: {link}'
 		},
 		badges: {
 			card: { name: 'カード', fits: '明るいページ' },

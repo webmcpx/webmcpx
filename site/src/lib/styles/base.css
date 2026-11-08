@@ -282,3 +282,33 @@
 		background-color: var(--marker);
 	}
 }
+
+/* Save PDF on a scan result: print the result card alone, colors kept (ScanResult.svelte, savePdf). Everything
+   that is neither the card, inside it, nor one of its ancestors is removed, so the PDF is the card's pages only. */
+@media print {
+	html[data-printing],
+	html[data-printing] body {
+		background: #fff !important;
+	}
+	html[data-printing] body *:not([data-print-area], [data-print-area] *, :has([data-print-area])) {
+		display: none !important;
+	}
+	html[data-printing] body :has([data-print-area]) {
+		margin: 0 !important;
+		padding: 0 !important;
+		border: 0 !important;
+		min-height: 0 !important;
+		background: none !important;
+		box-shadow: none !important;
+		transform: none !important;
+		max-width: none !important;
+	}
+	html[data-printing] [data-print-area] {
+		box-shadow: none;
+		print-color-adjust: exact;
+		-webkit-print-color-adjust: exact;
+	}
+	html[data-printing] [data-print-hide] {
+		display: none !important;
+	}
+}

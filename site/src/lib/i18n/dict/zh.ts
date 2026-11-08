@@ -659,8 +659,10 @@ const zh: Messages = {
 				'SVG 直接内嵌在代码里，不会从我们这里加载任何东西。徽章链接到对你网站的实时扫描，谁都可以验证。',
 			badgeStyle: '徽章样式',
 			badgeTitle: '智能体就绪：用 webmcpx 实时验证',
-			share: '分享结果',
-			shared: '链接已复制'
+			share: '分享',
+			shared: '链接已复制',
+			save: '保存 PDF',
+			printed: '由 webmcpx.dev 于 {date} 扫描。重新扫描：{link}'
 		},
 		badges: {
 			card: { name: '卡片', fits: '浅色页面' },

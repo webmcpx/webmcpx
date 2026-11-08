@@ -8,6 +8,7 @@
 	import X from '@lucide/svelte/icons/x';
 	import Clock from '@lucide/svelte/icons/clock';
 	import Link from '@lucide/svelte/icons/link';
+	import FileDown from '@lucide/svelte/icons/file-down';
 	import Wrench from '@lucide/svelte/icons/wrench';
 	import { tick } from 'svelte';
 	import CircleAlert from '@lucide/svelte/icons/circle-exclamation-point';
@@ -114,6 +115,26 @@
 		});
 	});
 
+	/**
+	 * Save PDF: the browser's print dialog (every browser offers "Save as PDF"), with only the result card
+	 * on the page (`data-printing`, see base.css) and the file named after the site.
+	 */
+	function savePdf(site: string) {
+		const root = document.documentElement;
+		const title = document.title;
+		document.title = `webmcpx scan · ${site}`;
+		root.dataset.printing = '';
+		addEventListener(
+			'afterprint',
+			() => {
+				delete root.dataset.printing;
+				document.title = title;
+			},
+			{ once: true }
+		);
+		print();
+	}
+
 	async function share(url: string) {
 		try {
 			await navigator.clipboard.writeText(shareLink(location.origin, url, i18n.href('/')));
@@ -144,7 +165,8 @@
 	{:else if scanner.status === 'done' && scanner.report}
 		{@const r = scanner.report}
 		{@const v = VERDICT[r.verdict]}
-		<Card padding="none" shadow="lg" class="overflow-hidden text-left">
+		<!-- data-print-area: Save PDF prints this card alone (see base.css). -->
+		<Card padding="none" shadow="lg" class="overflow-hidden text-left" data-print-area>
 			<div class="flex items-start gap-4 p-5 sm:p-7">
 				<span
 					class="hidden size-12 shrink-0 place-items-center overflow-hidden rounded-xl border-2 border-ink sm:grid {r.favicon
@@ -288,12 +310,6 @@
 												{/if}
 											{/each}
 										</ul>
-										{#if g.id === 'webmcp' && r.verdict === 'missing'}
-											<!-- Our offer is WebMCP: the fix sits under its checks; the other groups are the site's own basics. -->
-											<Button href="#for-sites" size="sm" class="mt-3"
-												><Wrench aria-hidden="true" />{m.result.fix}</Button
-											>
-										{/if}
 									</div>
 								{/each}
 							</div>
@@ -391,9 +407,24 @@
 				</div>
 			{/if}
 
-			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7">
+			<!-- Only in the PDF: when, where, and the link that re-runs the scan. -->
+			<p
+				class="hidden border-t-2 border-ink px-5 py-3 text-xs [overflow-wrap:anywhere] text-ink-3 sm:px-7 print:block"
+			>
+				{fmt(m.result.printed, {
+					date: new Date().toLocaleDateString(i18n.intl, { dateStyle: 'long' }),
+					link: shareLink('https://webmcpx.dev', r.url, i18n.href('/'))
+				})}
+			</p>
+			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7" data-print-hide>
+				{#if r.verdict === 'missing'}
+					<Button href="#for-sites" size="sm"><Wrench aria-hidden="true" />{m.result.fix}</Button>
+				{/if}
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
 					<Link aria-hidden="true" />{shared ? m.result.shared : m.result.share}
+				</Button>
+				<Button variant="outline" size="sm" onclick={() => savePdf(host(r.final_url))}>
+					<FileDown aria-hidden="true" />{m.result.save}
 				</Button>
 			</div>
 		</Card>

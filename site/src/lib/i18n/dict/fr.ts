@@ -713,7 +713,9 @@ const fr: Messages = {
 			badgeStyle: 'Style du badge',
 			badgeTitle: 'Prêt pour les agents : vérifiez-le en direct avec webmcpx',
 			share: 'Partager',
-			shared: 'Lien copié'
+			shared: 'Lien copié',
+			save: 'Enregistrer en PDF',
+			printed: 'Scanné par webmcpx.dev le {date}. Relancer le scan : {link}'
 		},
 		badges: {
 			card: { name: 'Carte', fits: 'Pages claires' },

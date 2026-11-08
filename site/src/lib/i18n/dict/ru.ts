@@ -742,7 +742,9 @@ const ru: Messages = {
 			badgeStyle: 'Стиль бейджа',
 			badgeTitle: 'Готов для агентов: проверьте вживую на webmcpx',
 			share: 'Поделиться',
-			shared: 'Ссылка скопирована'
+			shared: 'Ссылка скопирована',
+			save: 'Сохранить PDF',
+			printed: 'Проверено webmcpx.dev {date}. Проверить снова: {link}'
 		},
 		badges: {
 			card: { name: 'Карточка', fits: 'Светлые страницы' },

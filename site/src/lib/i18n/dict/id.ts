@@ -698,8 +698,10 @@ const id: Messages = {
 				'SVG-nya ada di dalam kode, jadi tidak ada yang dimuat dari server kami. Badge ini menautkan ke scan langsung situs Anda, jadi siapa pun bisa mengeceknya.',
 			badgeStyle: 'Gaya badge',
 			badgeTitle: 'Siap agent: cek langsung dengan webmcpx',
-			share: 'Bagikan hasil',
-			shared: 'Tautan disalin'
+			share: 'Bagikan',
+			shared: 'Tautan disalin',
+			save: 'Simpan PDF',
+			printed: 'Dipindai oleh webmcpx.dev pada {date}. Pindai lagi: {link}'
 		},
 		badges: {
 			card: { name: 'Kartu', fits: 'Halaman terang' },

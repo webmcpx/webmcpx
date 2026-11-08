@@ -708,7 +708,9 @@ const es: Messages = {
 			badgeStyle: 'Estilo de insignia',
 			badgeTitle: 'Listo para agentes: compruébalo en vivo con webmcpx',
 			share: 'Compartir',
-			shared: 'Enlace copiado'
+			shared: 'Enlace copiado',
+			save: 'Guardar PDF',
+			printed: 'Escaneado por webmcpx.dev el {date}. Vuelve a escanear: {link}'
 		},
 		badges: {
 			card: { name: 'Tarjeta', fits: 'Páginas claras' },

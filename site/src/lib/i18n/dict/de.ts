@@ -707,8 +707,10 @@ const de: Messages = {
 				'Das SVG steckt im Code, es wird also nichts von uns geladen. Es verlinkt auf einen Live-Scan Ihrer Website, damit jeder es nachprüfen kann.',
 			badgeStyle: 'Badge-Stil',
 			badgeTitle: 'Agentenfähig: live mit webmcpx prüfen',
-			share: 'Ergebnis teilen',
-			shared: 'Link kopiert'
+			share: 'Teilen',
+			shared: 'Link kopiert',
+			save: 'PDF speichern',
+			printed: 'Gescannt von webmcpx.dev am {date}. Erneut scannen: {link}'
 		},
 		badges: {
 			card: { name: 'Karte', fits: 'Helle Seiten' },

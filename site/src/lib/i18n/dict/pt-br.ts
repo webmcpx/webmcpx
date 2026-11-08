@@ -707,7 +707,9 @@ const ptBr: Messages = {
 			badgeStyle: 'Estilo do badge',
 			badgeTitle: 'Pronto para agentes: confira ao vivo com o webmcpx',
 			share: 'Compartilhar',
-			shared: 'Link copiado'
+			shared: 'Link copiado',
+			save: 'Salvar PDF',
+			printed: 'Escaneado pelo webmcpx.dev em {date}. Escaneie de novo: {link}'
 		},
 		badges: {
 			card: { name: 'Cartão', fits: 'Páginas claras' },

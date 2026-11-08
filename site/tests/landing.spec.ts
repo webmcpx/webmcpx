@@ -267,6 +267,48 @@ test('a site without WebMCP gets the fix', async ({ page }) => {
 	await expect(page.locator('#for-sites')).toBeInViewport();
 });
 
+test('Save PDF prints the result card alone, named after the site', async ({ page }) => {
+	await mockScan(page, { ...REPORT, verdict: 'missing', tools: [] });
+	await page.goto('/');
+	// The dialog can't be driven here: record what the page looks like when it would open.
+	await page.evaluate(() => {
+		window.print = () => {
+			const w = window as unknown as { printed: object };
+			w.printed = { title: document.title, printing: 'printing' in document.documentElement.dataset };
+			dispatchEvent(new Event('afterprint'));
+		};
+	});
+	await page.getByLabel("Your site's address").first().fill('plain.example.com');
+	await page.keyboard.press('Enter');
+	await page.locator('#scan').getByRole('button', { name: 'Save PDF' }).click();
+	expect(await page.evaluate(() => (window as unknown as { printed: object }).printed)).toEqual({
+		title: 'webmcpx scan · docs.example.com',
+		printing: true
+	});
+	// Back to normal after the dialog.
+	expect(await page.evaluate(() => 'printing' in document.documentElement.dataset)).toBe(false);
+	// In print, only the card is laid out.
+	await page.evaluate(() => (document.documentElement.dataset.printing = ''));
+	await page.emulateMedia({ media: 'print' });
+	await expect(page.locator('header').first()).toBeHidden();
+	await expect(page.locator('[data-print-area]')).toBeVisible();
+	await expect(page.locator('[data-print-area]').getByRole('button', { name: 'Save PDF' })).toBeHidden();
+});
+
+test('the printed rescan link wraps instead of being cut, however long the URL', async ({ page }) => {
+	const url = `https://docs.example.com/${'a'.repeat(200)}`;
+	await mockScan(page, { ...REPORT, url, final_url: url, verdict: 'missing', tools: [] });
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill(url);
+	await page.keyboard.press('Enter');
+	await page.locator('[data-print-area]').waitFor();
+	await page.evaluate(() => (document.documentElement.dataset.printing = ''));
+	await page.emulateMedia({ media: 'print' });
+	const line = page.locator('[data-print-area] p', { hasText: 'Scan again:' });
+	await expect(line).toBeVisible();
+	expect(await line.evaluate((p) => p.scrollWidth <= p.clientWidth)).toBe(true);
+});
+
 test('scan errors are shown, not swallowed', async ({ page }) => {
 	await mockScan(page, { error: '10.0.0.1 is not a public address' }, 400);
 	await page.goto('/');

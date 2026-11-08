@@ -848,8 +848,12 @@ const en = {
 			// The badge's tooltip in the code people paste on their site: max 60.
 			badgeTitle: 'Agent-ready: check it live with webmcpx',
 			// Button: max 18.
-			share: 'Share result',
-			shared: 'Link copied'
+			share: 'Share',
+			shared: 'Link copied',
+			// Saves the result card as a PDF through the print dialog: max 18.
+			save: 'Save PDF',
+			// Printed under the card in the PDF: {date} is the day, {link} re-runs the scan.
+			printed: 'Scanned by webmcpx.dev on {date}. Scan again: {link}'
 		},
 		// Badge styles: the name (max 8) and where it fits (max 22).
 		badges: {
