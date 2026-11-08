@@ -12,7 +12,7 @@ SvelteKit 3 + Svelte 5 (runes only) + Tailwind 4 + TypeScript, prerendered by `a
 
 ## Page narrative (keep this order; cut before adding)
 
-Scan your site (hero, with two entry buttons: "Scan your site" and "Set up your agent") → sites already on
+Scan your site (hero: the scan is its one action; under it, a quiet link for people with no site: "Set up your agent") → sites already on
 WebMCP (logos, each one scans live) → why WebMCP (four pains it removes, each backed by the draft or the
 benchmark; the saving is computed) → proof (`#leaderboard`: pick a site by logo; biggest savings first) →
 then one section per audience, each standing on its own (nobody has to do both):
@@ -147,4 +147,6 @@ tests/                       Playwright e2e against the prerendered build
   smaller, untracked display type; Chinese headings break only at punctuation and at `\u200b` placed in the
   copy. The wordmark (`font-brand`) is artwork and never changes font.
 - Must work at 390 px wide without horizontal scroll, and with keyboard only. Anything that moves on its own
-  (the question rotator) pauses on hover and focus, has a pause control, and stays still for reduced motion.
+  (the leaderboard carousel: it runs through every site's questions and the selected logo follows) pauses on
+  hover, focus and off screen, has a pause control before the logos, stays still for reduced motion, and has
+  previous/next buttons with an "n / total" count, so every question is reachable by hand.

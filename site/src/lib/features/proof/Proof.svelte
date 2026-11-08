@@ -10,6 +10,8 @@
 	import Coins from '@lucide/svelte/icons/coins';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Footprints from '@lucide/svelte/icons/footprints';
+	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Pause from '@lucide/svelte/icons/pause';
 	import Play from '@lucide/svelte/icons/play';
 	import Timer from '@lucide/svelte/icons/timer';
@@ -118,6 +120,11 @@
 	function pick(id: string) {
 		siteId = id;
 		step = { site: id, i: 0 };
+	}
+	/** Previous or next question of a site by hand (the only way with reduced motion or focus inside). */
+	function go(site: BenchSite, by: number) {
+		const n = site.tasks.length;
+		step = { site: site.id, i: (Math.min(questionIndex, n - 1) + by + n) % n };
 	}
 	function watch(node: HTMLElement) {
 		const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting));
@@ -335,6 +342,27 @@
 						</div>
 					{/key}
 				</div>
+				{#if site.tasks.length > 1}
+					{@const at = visible ? Math.min(questionIndex, site.tasks.length - 1) : 0}
+					<!-- Where the rotation is within this site, and a way through it by hand. -->
+					<div class="mt-6 flex items-center justify-center gap-3 font-mono text-xs text-ink-3">
+						<button
+							type="button"
+							onclick={() => go(site, -1)}
+							aria-label={m.rotator.previous}
+							class="grid size-8 place-items-center rounded-full border-2 border-ink/20 text-ink-2 transition hover:border-ink hover:text-ink"
+							><ChevronLeft size={14} aria-hidden="true" /></button
+						>
+						<span class="tabular-nums">{i18n.number(at + 1)} / {i18n.number(site.tasks.length)}</span>
+						<button
+							type="button"
+							onclick={() => go(site, 1)}
+							aria-label={m.rotator.next}
+							class="grid size-8 place-items-center rounded-full border-2 border-ink/20 text-ink-2 transition hover:border-ink hover:text-ink"
+							><ChevronRight size={14} aria-hidden="true" /></button
+						>
+					</div>
+				{/if}
 				{@const siteQuestions = questions.filter((q) => q.site.id === site.id)}
 				{@const st = siteTools(site.tasks.map((t) => tools[t.task]).filter(Boolean))}
 				<Tabs

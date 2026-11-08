@@ -197,6 +197,8 @@ const bn: Messages = {
 		opens: '({site} খুলবে)',
 		rotator: {
 			label: 'প্রশ্নগুলো',
+			previous: 'আগের প্রশ্ন',
+			next: 'পরের প্রশ্ন',
 			pause: 'ঘোরানো থামান',
 			resume: 'আবার ঘোরান'
 		},

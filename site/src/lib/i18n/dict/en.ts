@@ -274,6 +274,8 @@ const en = {
 		rotator: {
 			/** Names the rotating questions for screen readers. */
 			label: 'Questions',
+			previous: 'Previous question',
+			next: 'Next question',
 			pause: 'Pause rotation',
 			resume: 'Resume rotation'
 		},

@@ -195,6 +195,8 @@ const ptBr: Messages = {
 		opens: '(abre {site})',
 		rotator: {
 			label: 'Perguntas',
+			previous: 'Pergunta anterior',
+			next: 'Próxima pergunta',
 			pause: 'Pausar rotação',
 			resume: 'Retomar rotação'
 		},

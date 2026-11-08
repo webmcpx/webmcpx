@@ -197,6 +197,8 @@ const de: Messages = {
 		opens: '(öffnet {site})',
 		rotator: {
 			label: 'Fragen',
+			previous: 'Vorherige Frage',
+			next: 'Nächste Frage',
 			pause: 'Rotation anhalten',
 			resume: 'Rotation fortsetzen'
 		},

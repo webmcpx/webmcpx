@@ -195,6 +195,8 @@ const zh: Messages = {
 		opens: '（打开 {site}）',
 		rotator: {
 			label: '问题',
+			previous: '上一个问题',
+			next: '下一个问题',
 			pause: '暂停轮播',
 			resume: '继续轮播'
 		},

@@ -369,6 +369,19 @@ test('no automatic rotation for people who prefer reduced motion', async ({ page
 	expect(await shownQuestion(proof)).toBe(question);
 });
 
+test('every question is reachable by hand, with reduced motion too', async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.goto('/#leaderboard');
+	const proof = page.locator('#leaderboard');
+	const first = await shownQuestion(proof);
+	await expect(proof.getByText(/^1 \/ \d+$/).filter({ visible: true })).toBeVisible();
+	await proof.getByRole('button', { name: 'Next question' }).filter({ visible: true }).click();
+	await expect(proof.getByText(/^2 \/ \d+$/).filter({ visible: true })).toBeVisible();
+	await expect.poll(() => shownQuestion(proof)).not.toBe(first);
+	await proof.getByRole('button', { name: 'Previous question' }).filter({ visible: true }).click();
+	await expect.poll(() => shownQuestion(proof)).toBe(first);
+});
+
 test('picking a site starts at its first question', async ({ page }) => {
 	await page.clock.install();
 	await page.goto('/#leaderboard');
