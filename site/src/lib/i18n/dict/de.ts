@@ -77,7 +77,7 @@ const de: Messages = {
 	hero: {
 		stamp: 'Neu',
 		draft: 'Folgt dem WebMCP-Entwurf vom {date}',
-		title: { text: 'Machen Sie Ihre Website {mark}.', mark: 'agentenfähig' },
+		title: { text: 'Machen Sie Ihre Website {mark}', mark: 'agentenfähig' },
 		lead: 'In unserem Benchmark brauchten Agenten mit WebMCP bis zu {best} weniger Tokens (bester Fall: {site}, {model}). Sehen Sie, was Agenten von Ihrer Website bekommen, und beheben Sie es mit einer Zeile.',
 		// Without a published run (no number to quote).
 		leadPlain:
@@ -132,7 +132,7 @@ const de: Messages = {
 				gain: 'Ein Aufruf ersetzt eine ganze Klickkette: im Benchmark von WindTunnel im Median 3,4× schneller.'
 			},
 			backend: {
-				title: 'Kein neuer Server. Kein OAuth.',
+				title: 'Kein neuer Server. Kein OAuth',
 				pain: 'Wer Agenten eine API anbieten will, braucht meist ein eigenes Backend, doppelten State und einen Auth-Flow.',
 				gain: 'Tools sind Ihr Frontend-Code und laufen mit der Session, die der Nutzer bereits hat. Shopify setzt es genau so ein.'
 			},
@@ -174,7 +174,7 @@ const de: Messages = {
 		ranking: 'Sortiert nach Erfolg mit WebMCP, dann nach Kosten pro Lauf.',
 		modelHeading: '{name} ({provider})',
 		empty: {
-			title: 'Noch kein Lauf veröffentlicht.',
+			title: 'Noch kein Lauf veröffentlicht',
 			text: 'Führen Sie {command} aus, dann erscheinen hier die Ergebnisse.'
 		},
 		selected: {
@@ -184,7 +184,7 @@ const de: Messages = {
 		},
 		results: 'Alle Ergebnisse',
 		none: {
-			title: 'Auf {model} erfüllte keine Frage das Kriterium.',
+			title: 'Auf {model} erfüllte keine Frage das Kriterium',
 			text: 'Alle Fragen und beide Varianten stehen in den vollständigen Ergebnissen oben.'
 		},
 		local: 'lokal',
@@ -555,7 +555,7 @@ const de: Messages = {
 
 	brand: {
 		kicker: 'Markenhandbuch · Designsystem',
-		title: 'Papier, Tinte und eine Junction.',
+		title: 'Papier, Tinte und eine Junction',
 		lead: 'Eine Seite deklariert ihre Tools; der Browser steht dazwischen; Seite und Agent treffen sich, ohne dass einer den anderen ersetzt. Die Bildmarke zeigt diese Begegnung. Alles Folgende wird aus dem ausgelieferten Code gerendert.',
 		name: {
 			kicker: '01 · Name',

@@ -78,7 +78,7 @@ const ptBr: Messages = {
 	hero: {
 		stamp: 'Novo',
 		draft: 'Acompanha o rascunho do WebMCP de {date}',
-		title: { text: 'Deixe seu site {mark}.', mark: 'pronto para agentes' },
+		title: { text: 'Deixe seu site {mark}', mark: 'pronto para agentes' },
 		lead: 'No nosso benchmark, agentes gastaram até {best} menos tokens com WebMCP (melhor caso: {site}, {model}). Veja o que os agentes recebem do seu site e resolva com uma linha.',
 		// Without a published run (no number to quote).
 		leadPlain:
@@ -130,7 +130,7 @@ const ptBr: Messages = {
 				gain: 'Uma chamada substitui uma sequência de cliques: mediana 3,4× mais rápida no benchmark da WindTunnel.'
 			},
 			backend: {
-				title: 'Sem servidor novo. Sem OAuth.',
+				title: 'Sem servidor novo. Sem OAuth',
 				pain: 'Dar uma API aos agentes costuma exigir um backend separado, estado duplicado e um fluxo de autenticação.',
 				gain: 'As ferramentas são o seu código de front-end, rodando com a sessão que o usuário já tem. A Shopify já faz assim em produção.'
 			},
@@ -172,7 +172,7 @@ const ptBr: Messages = {
 		ranking: 'Ordenado pelo acerto com WebMCP e, no empate, pelo custo por execução.',
 		modelHeading: '{name} ({provider})',
 		empty: {
-			title: 'Nenhuma execução publicada ainda.',
+			title: 'Nenhuma execução publicada ainda',
 			text: 'Rode {command} para preencher esta seção.'
 		},
 		selected: {
@@ -182,7 +182,7 @@ const ptBr: Messages = {
 		},
 		results: 'Todos os resultados',
 		none: {
-			title: 'Nenhuma pergunta passou no critério com o {model}.',
+			title: 'Nenhuma pergunta passou no critério com o {model}',
 			text: 'Todas as perguntas, nos dois cenários, estão nos resultados completos acima.'
 		},
 		local: 'local',
@@ -552,7 +552,7 @@ const ptBr: Messages = {
 
 	brand: {
 		kicker: 'Marca e design system',
-		title: 'Papel, tinta e uma junção.',
+		title: 'Papel, tinta e uma junção',
 		lead: 'A página declara suas ferramentas; o navegador fica no meio; página e agente se encontram sem que um substitua o outro. A marca desenha esse encontro. Tudo abaixo é renderizado a partir do código que vai para produção.',
 		name: {
 			kicker: '01 · Nome',

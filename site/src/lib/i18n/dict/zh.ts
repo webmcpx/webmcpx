@@ -79,7 +79,7 @@ const zh: Messages = {
 		stamp: '最新',
 		draft: '已跟进 {date} 版 WebMCP 草案',
 		// \u200b: where the headline may break (headings only break at punctuation and these).
-		title: { text: '让你的网站\u200b{mark}。', mark: '智能体就绪' },
+		title: { text: '让你的网站\u200b{mark}', mark: '智能体就绪' },
 		lead: '在我们的基准测试中，使用 WebMCP 的智能体最多少用 {best} 的 token（最佳案例：{site}，{model}）。看看智能体能从你的网站拿到什么，然后一行代码搞定。',
 		// Without a published run (no number to quote).
 		leadPlain: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
@@ -130,7 +130,7 @@ const zh: Messages = {
 				gain: '一次调用替代一连串点击：在 WindTunnel 的基准测试中，中位耗时快 3.4 倍。'
 			},
 			backend: {
-				title: '无需新服务器，无需 OAuth。',
+				title: '无需新服务器，无需 OAuth',
 				pain: '给智能体开放 API，通常意味着单独的后端、重复的状态和一套鉴权流程。',
 				gain: '工具就是你的前端代码，沿用用户已有的会话运行。Shopify 就是这样上线的。'
 			},
@@ -172,7 +172,7 @@ const zh: Messages = {
 		ranking: '按使用 WebMCP 的成功率排序，相同时按每次运行成本排序。',
 		modelHeading: '{name}（{provider}）',
 		empty: {
-			title: '还没有发布任何运行结果。',
+			title: '还没有发布任何运行结果',
 			text: '运行 {command}，这里就会有数据。'
 		},
 		selected: {
@@ -181,7 +181,7 @@ const zh: Messages = {
 		},
 		results: '全部结果',
 		none: {
-			title: '在 {model} 上没有问题达到这一标准。',
+			title: '在 {model} 上没有问题达到这一标准',
 			text: '每个问题和两组的数据都在上方的全部结果里。'
 		},
 		local: '本地',
@@ -512,7 +512,7 @@ const zh: Messages = {
 
 	brand: {
 		kicker: '品牌手册 · 设计系统',
-		title: '纸、墨与交汇点。',
+		title: '纸、墨与交汇点',
 		lead: '页面声明自己的工具，浏览器居于其间；页面与智能体在此相遇，谁也不取代谁。标志画的就是这次相遇。下面的一切都由实际发布的代码渲染。',
 		name: {
 			kicker: '01 · 名称',

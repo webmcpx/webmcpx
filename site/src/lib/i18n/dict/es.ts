@@ -76,7 +76,7 @@ const es: Messages = {
 	hero: {
 		stamp: 'Nuevo',
 		draft: 'Sigue el borrador de WebMCP del {date}',
-		title: { text: 'Deja tu sitio {mark}.', mark: 'listo para agentes' },
+		title: { text: 'Deja tu sitio {mark}', mark: 'listo para agentes' },
 		lead: 'En nuestro benchmark, los agentes gastaron hasta {best} menos tokens con WebMCP (mejor caso: {site}, {model}). Mira qué reciben los agentes de tu sitio y arréglalo con una línea.',
 		// Without a published run (no number to quote).
 		leadPlain:
@@ -131,7 +131,7 @@ const es: Messages = {
 				gain: 'Una llamada sustituye una cadena de clics: una mediana 3,4× más rápida en el benchmark de WindTunnel.'
 			},
 			backend: {
-				title: 'Sin servidor nuevo. Sin OAuth.',
+				title: 'Sin servidor nuevo. Sin OAuth',
 				pain: 'Dar una API a los agentes suele implicar un backend aparte, estado duplicado y un flujo de autenticación.',
 				gain: 'Las herramientas son tu código de front-end y usan la sesión que el usuario ya tiene. Así lo hace Shopify.'
 			},
@@ -173,7 +173,7 @@ const es: Messages = {
 		ranking: 'Ordenado por acierto con WebMCP y, en empate, por coste por ejecución.',
 		modelHeading: '{name} ({provider})',
 		empty: {
-			title: 'Aún no hay ejecuciones publicadas.',
+			title: 'Aún no hay ejecuciones publicadas',
 			text: 'Ejecuta {command} y esto se completa.'
 		},
 		selected: {
@@ -183,7 +183,7 @@ const es: Messages = {
 		},
 		results: 'Todos los resultados',
 		none: {
-			title: 'Ninguna pregunta superó el umbral en {model}.',
+			title: 'Ninguna pregunta superó el umbral en {model}',
 			text: 'Todas las preguntas y ambas variantes están en los resultados completos de arriba.'
 		},
 		local: 'local',
@@ -553,7 +553,7 @@ const es: Messages = {
 
 	brand: {
 		kicker: 'Marca · sistema de diseño',
-		title: 'Papel, tinta y un cruce.',
+		title: 'Papel, tinta y un cruce',
 		lead: 'Una página declara sus herramientas; el navegador se sitúa en medio; página y agente se encuentran sin que uno sustituya al otro. La marca dibuja ese encuentro. Todo lo que sigue se renderiza a partir del código que se publica.',
 		name: {
 			kicker: '01 · Nombre',

@@ -76,7 +76,7 @@ const ja: Messages = {
 	hero: {
 		stamp: '最新',
 		draft: '{date} 版の WebMCP ドラフトに追従',
-		title: { text: 'そのサイトを、{mark}に。', mark: 'エージェント対応' },
+		title: { text: 'そのサイトを、{mark}に', mark: 'エージェント対応' },
 		lead: '私たちのベンチマークでは、WebMCPを使うとエージェントのトークンが最大{best}削減されました（最良ケース：{site}、{model}）。あなたのサイトでエージェントが何を得るかを確認し、1行で改善しましょう。',
 		// Without a published run (no number to quote).
 		leadPlain:
@@ -170,7 +170,7 @@ const ja: Messages = {
 		ranking: 'WebMCP での成功率、同率なら 1 回あたりのコストで順位付け。',
 		modelHeading: '{name}（{provider}）',
 		empty: {
-			title: '公開済みの実行結果はまだありません。',
+			title: '公開済みの実行結果はまだありません',
 			text: '{command} を実行すると、ここに表示されます。'
 		},
 		selected: {
@@ -179,7 +179,7 @@ const ja: Messages = {
 		},
 		results: 'すべての結果',
 		none: {
-			title: '{model} では、基準を満たす質問はありませんでした。',
+			title: '{model} では、基準を満たす質問はありませんでした',
 			text: 'すべての質問と両条件の結果は、上の全結果に掲載しています。'
 		},
 		local: 'テスト',
@@ -537,7 +537,7 @@ const ja: Messages = {
 
 	brand: {
 		kicker: 'ブランド · デザインシステム',
-		title: '紙と、インクと、ジャンクション。',
+		title: '紙と、インクと、ジャンクション',
 		lead: 'ページはツールを宣言し、ブラウザーがその間に立ちます。ページとエージェントは、どちらかが相手に取って代わることなく出会います。ロゴマークが描くのは、その出会いです。以下はすべて、実際にリリースしているコードからレンダリングしています。',
 		name: {
 			kicker: '01 · 名前',

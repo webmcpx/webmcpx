@@ -78,7 +78,7 @@ const id: Messages = {
 	hero: {
 		stamp: 'Baru',
 		draft: 'Mengikuti draf WebMCP per {date}',
-		title: { text: 'Jadikan situs Anda {mark}.', mark: 'siap agent' },
+		title: { text: 'Jadikan situs Anda {mark}', mark: 'siap agent' },
 		lead: 'Di benchmark kami, agen memakai hingga {best} lebih sedikit token dengan WebMCP (kasus terbaik: {site}, {model}). Lihat apa yang didapat agen dari situs Anda, lalu perbaiki dengan satu baris.',
 		// Without a published run (no number to quote).
 		leadPlain:
@@ -130,7 +130,7 @@ const id: Messages = {
 				gain: 'Satu panggilan menggantikan serangkaian klik: median 3,4× lebih cepat dalam benchmark WindTunnel.'
 			},
 			backend: {
-				title: 'Tanpa server baru. Tanpa OAuth.',
+				title: 'Tanpa server baru. Tanpa OAuth',
 				pain: 'Memberi agent akses lewat API biasanya berarti backend terpisah, state ganda, dan alur autentikasi.',
 				gain: 'Tool adalah kode front-end Anda, berjalan dengan sesi yang sudah dimiliki pengguna. Shopify menerapkannya dengan cara ini.'
 			},
@@ -172,7 +172,7 @@ const id: Messages = {
 		ranking: 'Diurutkan menurut keberhasilan dengan WebMCP, lalu biaya per eksekusi.',
 		modelHeading: '{name} ({provider})',
 		empty: {
-			title: 'Belum ada run yang dipublikasikan.',
+			title: 'Belum ada run yang dipublikasikan',
 			text: 'Jalankan {command}, lalu bagian ini akan terisi.'
 		},
 		selected: {
@@ -181,7 +181,7 @@ const id: Messages = {
 		},
 		results: 'Semua hasil',
 		none: {
-			title: 'Tidak ada pertanyaan yang lolos ambang di {model}.',
+			title: 'Tidak ada pertanyaan yang lolos ambang di {model}',
 			text: 'Semua pertanyaan dan kedua varian ada di hasil lengkap di atas.'
 		},
 		local: 'lokal',
@@ -543,7 +543,7 @@ const id: Messages = {
 
 	brand: {
 		kicker: 'Panduan merek · sistem desain',
-		title: 'Kertas, tinta, dan satu titik temu.',
+		title: 'Kertas, tinta, dan satu titik temu',
 		lead: 'Halaman mendeklarasikan tool-nya; browser berada di antaranya; halaman dan agent bertemu tanpa saling menggantikan. Logo ini menggambarkan pertemuan itu. Semua yang ada di bawah dirender dari kode yang benar-benar dirilis.',
 		name: {
 			kicker: '01 · Nama',

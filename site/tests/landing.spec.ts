@@ -413,7 +413,7 @@ test('the brand page shows the marks, real token values and downloadable assets'
 	request
 }) => {
 	await page.goto('/brand');
-	await expect(page.getByRole('heading', { level: 1 })).toContainText('Paper, ink and a junction.');
+	await expect(page.getByRole('heading', { level: 1 })).toContainText('Paper, ink and a junction');
 	// Hex values come from tokens.css; ink on paper is the main pair.
 	await expect(page.getByText(/ink on paper/).first()).toBeVisible();
 	const downloads = page.getByRole('link', { name: /Download .* SVG/ });

@@ -113,7 +113,7 @@ const en = {
 		// The headline: at most 2 lines at 390 px (about 24 characters per line), and the marked part
 		// should stay on one line. "Agent-ready" is our key term: the state a site is in once agents can
 		// use it through tools; keep it short and use the same word everywhere it appears.
-		title: { text: 'Make your site {mark}.', mark: 'agent-ready' },
+		title: { text: 'Make your site {mark}', mark: 'agent-ready' },
 		// max 120: 3 lines on a phone.
 		lead: 'In our benchmark, agents used up to {best} fewer tokens with WebMCP (best case: {site}, {model}). See what agents get from your site, then fix it with one line.',
 		// Without a published run (no number to quote).
@@ -181,7 +181,7 @@ const en = {
 				gain: 'One call replaces a chain of clicks: a 3.4× faster median in WindTunnel’s benchmark.'
 			},
 			backend: {
-				title: 'No new server. No OAuth.',
+				title: 'No new server. No OAuth',
 				pain: 'Giving agents an API usually means a separate backend, duplicated state and an auth flow.',
 				gain: 'Tools are your front-end code, running with the session the user already has. Shopify ships it this way.'
 			},
@@ -237,7 +237,7 @@ const en = {
 		/** A heading for screen readers: the model and who makes it. */
 		modelHeading: '{name} ({provider})',
 		empty: {
-			title: 'No run published yet.',
+			title: 'No run published yet',
 			// {command} is `just bench`, shown as code.
 			text: 'Run {command} and this fills in.'
 		},
@@ -251,7 +251,7 @@ const en = {
 		results: 'All results',
 		none: {
 			// {model} is a model id (gpt-6.1-sol).
-			title: 'No question met the bar on {model}.',
+			title: 'No question met the bar on {model}',
 			text: 'Every question and both arms are in the full results above.'
 		},
 		// Tag on a site tab for our local test sites: max 7, small capitals.
@@ -698,7 +698,7 @@ const en = {
 		// Kicker: max 30, small capitals.
 		kicker: 'Brand manual · design system',
 		// "Paper, ink and a junction": the three things the brand is made of (the mark is the "Junction").
-		title: 'Paper, ink and a junction.',
+		title: 'Paper, ink and a junction',
 		lead: 'A page declares its tools; the browser sits in between; page and agent meet without one replacing the other. The mark draws that meeting. Everything below is rendered from the code that ships.',
 		name: {
 			kicker: '01 · Name',

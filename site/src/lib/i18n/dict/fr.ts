@@ -78,7 +78,7 @@ const fr: Messages = {
 	hero: {
 		stamp: 'Nouveau',
 		draft: 'Suit le brouillon WebMCP du {date}',
-		title: { text: 'Rendez votre site {mark}.', mark: 'prêt pour les agents' },
+		title: { text: 'Rendez votre site {mark}', mark: 'prêt pour les agents' },
 		lead: 'Dans notre benchmark, les agents ont consommé jusqu’à {best} moins de tokens avec WebMCP (meilleur cas : {site}, {model}). Voyez ce que les agents tirent de votre site, puis corrigez en une ligne.',
 		// Without a published run (no number to quote).
 		leadPlain:
@@ -175,7 +175,7 @@ const fr: Messages = {
 		ranking: 'Classé par taux de réussite avec WebMCP, puis par coût par exécution.',
 		modelHeading: '{name} ({provider})',
 		empty: {
-			title: 'Aucune exécution publiée pour l’instant.',
+			title: 'Aucune exécution publiée pour l’instant',
 			text: 'Lancez {command} et cette section se remplira.'
 		},
 		selected: {
@@ -185,7 +185,7 @@ const fr: Messages = {
 		},
 		results: 'Tous les résultats',
 		none: {
-			title: 'Aucune question n’atteint le seuil sur {model}.',
+			title: 'Aucune question n’atteint le seuil sur {model}',
 			text: 'Toutes les questions et les deux variantes figurent dans les résultats complets ci-dessus.'
 		},
 		local: 'local',
@@ -557,7 +557,7 @@ const fr: Messages = {
 
 	brand: {
 		kicker: 'Charte · design system',
-		title: 'Du papier, de l’encre et une jonction.',
+		title: 'Du papier, de l’encre et une jonction',
 		lead: 'Une page déclare ses outils ; le navigateur s’interpose ; page et agent se rencontrent sans que l’un remplace l’autre. Le symbole dessine cette rencontre. Tout ce qui suit est rendu à partir du code en production.',
 		name: {
 			kicker: '01 · Nom',

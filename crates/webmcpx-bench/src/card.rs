@@ -128,7 +128,7 @@ background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1
 /// The site's own preview image (`/og.png`): what webmcpx is, for links without a scan.
 pub fn generic_html() -> String {
     html_with(
-        "Make your site agent-ready.",
+        "Make your site agent-ready",
         104,
         "Scan any site for WebMCP tools. One line makes it agent\u{2011}ready.",
         None,
