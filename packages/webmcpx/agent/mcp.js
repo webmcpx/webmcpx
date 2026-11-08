@@ -55,7 +55,8 @@ const keyOf = (t) => (t.standard ? `standard ${t.name}` : `${t.origin ?? ""} ${t
  * name come back only to the same key: a name a client already has never runs a different tool.
  * @returns {{name: string, id: string, tool: import("./session.js").Tool}[]}
  */
-export function named(tools, previous = new Map(), reserved = new Map(), retired = new Set(), suffixes = new Map()) {
+export function named(tools, previous = new Map(), reserved = new Map(), retired = new Set(), state = { suffixes: new Map(), owned: new Map() }) {
+  const { suffixes, owned } = state;
   const ids = tools.map(keyOf);
   const count = (id) => ids.filter((x) => x === id).length;
   // Same-named tools whose number changed can't be matched to their old names: retire those names for
@@ -76,6 +77,10 @@ export function named(tools, previous = new Map(), reserved = new Map(), retired
   });
   const entries = tools.map((tool, i) => {
     let name = kept[i];
+    // A tool coming back gets a name it had before, when that one is free: names stay stable across
+    // visits without rescanning every name ever handed out.
+    name ??= [...(owned.get(ids[i]) ?? [])].find((n) => free(n, ids[i]));
+    if (name) used.add(name);
     if (!name) {
       const base = tool.name.replace(/[^A-Za-z0-9_-]/g, "_").slice(0, 64) || "tool";
       name = base;
@@ -88,7 +93,11 @@ export function named(tools, previous = new Map(), reserved = new Map(), retired
     }
     return { name, id: ids[i], tool };
   });
-  for (const e of entries) reserved.set(e.name, e.id);
+  for (const e of entries) {
+    reserved.set(e.name, e.id);
+    if (!owned.has(e.id)) owned.set(e.id, new Set());
+    owned.get(e.id).add(e.name);
+  }
   return entries;
 }
 
@@ -154,13 +163,13 @@ export async function serve(options = {}, { input = process.stdin, output = proc
   let entries = [];
   const reserved = new Map();
   const retired = new Set();
-  const suffixes = new Map();
+  const naming = { suffixes: new Map(), owned: new Map() };
   let initialized = false;
   const write = (msg) => output.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
   // Replaces the tool list and tells the client when what it would see changed.
   const update = (tools) => {
     const before = JSON.stringify(entries.map(asMcp));
-    entries = named(tools, carry(entries), reserved, retired, suffixes);
+    entries = named(tools, carry(entries), reserved, retired, naming);
     if (initialized && JSON.stringify(entries.map(asMcp)) !== before) write({ method: "notifications/tools/list_changed" });
   };
   // Page changes coalesce into one refresh at a time plus at most one after it: a page firing changes

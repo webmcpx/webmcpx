@@ -71,6 +71,10 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <input name="note">
 </form>
 <button form="note-form" formmethod="post" formaction="/save">Save</button>
+<form id="old-form" toolname="reassociated" tooldescription="Gains a POST button when renamed." method="get" toolautosubmit>
+  <input name="q">
+</form>
+<button form="new-form" formmethod="post">Go</button>
 <form toolname="Book a class" tooldescription="Book a pottery class." method="post" toolautosubmit>
   <input type="hidden" name="price" value="40">
   <input name="total" value="40" readonly>
@@ -98,6 +102,9 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
       '<input name="kiln" required toolparamdescription="Which kiln.">');
     document.querySelector("[name=total]").removeAttribute("readonly");
   }, 1500);
+  // Alone, so nothing else triggers a refresh: a new id associates the external POST button, and the
+  // tool's hints must follow.
+  setTimeout(() => (document.getElementById("old-form").id = "new-form"), 1700);
   document.querySelector('form[method=post]').addEventListener("submit", (event) => {
     event.preventDefault();
     if (event.agentInvoked) {
@@ -326,6 +333,8 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     const unlocked = (await session.tools()).find((t) => t.name === "Book_a_class");
     assert.ok(unlocked.inputSchema.properties.total, "an unlocked field becomes an input");
     assert.equal(updated.inputSchema.properties.kiln.description, "Which kiln.");
+    const reassociated = (await session.tools()).find((t) => t.name === "reassociated");
+    assert.equal(reassociated.annotations.consequentialHint, true, "a form id change re-registers the tool");
   } finally {
     await session.close();
   }
@@ -512,13 +521,13 @@ test("naming stays fast when a page churns names: suffixes only grow per base", 
   const { carry, named } = await import("../agent/mcp.js");
   const reserved = new Map();
   const retired = new Set();
-  const suffixes = new Map();
+  const naming = { suffixes: new Map(), owned: new Map() };
   const base = "x".repeat(64);
   let previous = new Map();
   const start = Date.now();
   for (let round = 0; round < 200; round++) {
     const tools = Array.from({ length: 200 }, (_, i) => ({ name: `${base}${round}_${i}`, origin: "o" }));
-    previous = carry(named(tools, previous, reserved, retired, suffixes));
+    previous = carry(named(tools, previous, reserved, retired, naming));
   }
   assert.ok(Date.now() - start < 3_000, `${Date.now() - start} ms`);
   assert.equal(new Set([...reserved.keys()]).size, reserved.size);
@@ -538,4 +547,14 @@ test("a DevTools endpoint that accepts but never answers fails within the limit"
     for (const s of sockets) s.destroy();
     silent.close();
   }
+});
+
+test("a tool keeps its name across an empty refresh, with the session's naming state", async () => {
+  const { carry, named } = await import("../agent/mcp.js");
+  const [reserved, retired, naming] = [new Map(), new Set(), { suffixes: new Map(), owned: new Map() }];
+  const tools = [{ name: "search.page", origin: "o" }, { name: "search_page", origin: "o" }];
+  const first = named(tools, new Map(), reserved, retired, naming).map((e) => e.name);
+  const empty = named([], new Map(), reserved, retired, naming);
+  const again = named(tools, carry(empty), reserved, retired, naming).map((e) => e.name);
+  assert.deepEqual(again, first);
 });
