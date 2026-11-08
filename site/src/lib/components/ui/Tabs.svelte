@@ -22,6 +22,8 @@
 		tabClass?: string;
 		/** Render only the active panel; the tab list is hidden without JavaScript, where it could not switch. */
 		lazy?: boolean;
+		/** A control before the tab list, on its row (e.g. a carousel's pause button). */
+		start?: Snippet;
 	}
 
 	let {
@@ -33,7 +35,8 @@
 		class: className,
 		listClass,
 		tabClass,
-		lazy = false
+		lazy = false,
+		start
 	}: Props = $props();
 
 	const uid = $props.id();
@@ -64,29 +67,43 @@
 </script>
 
 <div class={className}>
-	<div role="tablist" aria-label={label} class={['flex gap-1 overflow-x-auto', lazy && 'js-only', listClass]}>
-		{#each items as item, i (item.id)}
-			{@const selected = item.id === active?.id}
-			<button
-				bind:this={buttons[i]}
-				type="button"
-				role="tab"
-				id="{uid}-tab-{item.id}"
-				aria-selected={selected}
-				aria-controls="{uid}-panel-{item.id}"
-				tabindex={selected ? 0 : -1}
-				onclick={() => (value = item.id)}
-				onkeydown={(e) => onkeydown(e, i)}
-				class={[
-					'relative inline-flex shrink-0 items-center gap-2 rounded-full border-2 font-medium transition',
-					tabClass ??
-						'h-9 border-transparent px-4 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper [&_svg]:size-4'
-				]}
-			>
-				{#if tab}{@render tab(item)}{:else}{item.label}{/if}
-			</button>
-		{/each}
-	</div>
+	{#snippet list()}
+		<div
+			role="tablist"
+			aria-label={label}
+			class={['flex gap-1 overflow-x-auto', lazy && 'js-only', listClass]}
+		>
+			{#each items as item, i (item.id)}
+				{@const selected = item.id === active?.id}
+				<button
+					bind:this={buttons[i]}
+					type="button"
+					role="tab"
+					id="{uid}-tab-{item.id}"
+					aria-selected={selected}
+					aria-controls="{uid}-panel-{item.id}"
+					tabindex={selected ? 0 : -1}
+					onclick={() => (value = item.id)}
+					onkeydown={(e) => onkeydown(e, i)}
+					class={[
+						'relative inline-flex shrink-0 items-center gap-2 rounded-full border-2 font-medium transition',
+						tabClass ??
+							'h-9 border-transparent px-4 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-ink aria-selected:text-paper [&_svg]:size-4'
+					]}
+				>
+					{#if tab}{@render tab(item)}{:else}{item.label}{/if}
+				</button>
+			{/each}
+		</div>
+	{/snippet}
+	{#if start}
+		<div class="flex items-center gap-2">
+			{@render start()}
+			<div class="min-w-0 flex-1">{@render list()}</div>
+		</div>
+	{:else}
+		{@render list()}
+	{/if}
 	{#each items as item (item.id)}
 		{@const on = item.id === active?.id}
 		<div

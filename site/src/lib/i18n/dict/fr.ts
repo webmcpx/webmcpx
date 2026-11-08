@@ -198,7 +198,6 @@ const fr: Messages = {
 		opens: '(ouvre {site})',
 		rotator: {
 			label: 'Questions',
-			item: 'Question {n} sur {total}',
 			pause: 'Suspendre la rotation',
 			resume: 'Reprendre la rotation'
 		},

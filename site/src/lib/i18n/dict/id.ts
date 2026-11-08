@@ -194,7 +194,6 @@ const id: Messages = {
 		opens: '(membuka {site})',
 		rotator: {
 			label: 'Pertanyaan',
-			item: 'Pertanyaan {n} dari {total}',
 			pause: 'Jeda rotasi',
 			resume: 'Lanjutkan rotasi'
 		},

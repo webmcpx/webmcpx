@@ -209,7 +209,6 @@ const ru: Messages = {
 		opens: '(откроется {site})',
 		rotator: {
 			label: 'Вопросы',
-			item: 'Вопрос {n} из {total}',
 			pause: 'Остановить смену вопросов',
 			resume: 'Продолжить смену вопросов'
 		},

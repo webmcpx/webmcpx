@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Locator, type Page } from '@playwright/test';
 
 /** Scrolls to the bottom so every reveal is in its final state. */
 async function scrollThrough(page: Page) {
@@ -249,6 +249,8 @@ test('logos scan their site, and shared links rerun a scan', async ({ page }) =>
 	const seen = await mockScan(page);
 	await page.goto('/');
 	await page.getByRole('button', { name: /Notion.*scan this site/ }).click();
+	// The logo scrolls up first, then scans.
+	await expect.poll(() => seen).toEqual(['https://developers.notion.com/']);
 	await expect(page.getByText('Agent-ready').first()).toBeVisible();
 	await page.goto('/?scan=https%3A%2F%2Fkith.com%2F');
 	await expect(page.getByText('Agent-ready').first()).toBeVisible();
@@ -309,46 +311,49 @@ test('the model switcher shows each model on its own run', async ({ page }) => {
 	expect(new Set(ids).size).toBe(ids.length);
 });
 
-test('a site with several questions rotates them, and the rotation can be paused', async ({ page }) => {
+// The carousel: the question on screen, and the site whose logo is selected.
+const shownQuestion = (proof: Locator) =>
+	proof
+		.locator('[aria-roledescription=carousel] [role=tabpanel]:not([data-inactive]) p')
+		.first()
+		.textContent();
+const selectedSite = (proof: Locator) =>
+	proof.locator('[aria-roledescription=carousel] [role=tab][aria-selected=true]').first().textContent();
+
+/** Lets time pass (a second at a time, as the carousel starts once it is on screen) until the question changes. */
+const nextQuestion = (page: Page, proof: Locator, from: string | null) =>
+	expect
+		.poll(async () => {
+			await page.clock.runFor(1000);
+			return shownQuestion(proof);
+		})
+		.not.toBe(from);
+
+test('the questions rotate through every site, the selected logo follows, and it can be paused', async ({
+	page
+}) => {
 	await page.clock.install();
 	await page.goto('/#leaderboard');
 	const proof = page.locator('#leaderboard');
-	await proof.getByRole('tab', { name: /specification\.website/ }).click();
-	const dots = proof.getByRole('button', { name: /^Question \d of 5$/ });
-	await expect(dots).toHaveCount(5);
-	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
-		'aria-current',
-		'true'
-	);
-
-	// Rotation pauses while the pointer is over it: move away, then let time pass.
 	await page.mouse.move(0, 0);
-	await page.clock.runFor(5100);
-	await expect(proof.getByRole('button', { name: 'Question 2 of 5' })).toHaveAttribute(
-		'aria-current',
-		'true'
-	);
+	const firstSite = await selectedSite(proof);
+	let question = await shownQuestion(proof);
+	// Each tick shows another question; within a few, the next site's logo is selected.
+	let moved = false;
+	for (let n = 0; n < 12 && !moved; n++) {
+		await nextQuestion(page, proof, question);
+		question = await shownQuestion(proof);
+		moved = (await selectedSite(proof)) !== firstSite;
+	}
+	expect(moved).toBe(true);
 
-	const before = await proof
-		.locator('[aria-roledescription=carousel] p')
-		.filter({ visible: true })
-		.first()
-		.textContent();
-	await proof.getByRole('button', { name: 'Question 3 of 5' }).click();
-	await expect(proof.getByRole('button', { name: 'Question 3 of 5' })).toHaveAttribute(
-		'aria-current',
-		'true'
-	);
-	await expect(
-		proof.locator('[aria-roledescription=carousel] p').filter({ visible: true }).first()
-	).not.toHaveText(before ?? '');
+	const site = await selectedSite(proof);
 	await proof.getByRole('button', { name: 'Pause rotation' }).click();
 	await page.mouse.move(0, 0);
 	await page.clock.runFor(12000);
-	await expect(proof.getByRole('button', { name: 'Question 3 of 5' })).toHaveAttribute(
-		'aria-current',
-		'true'
-	);
+	expect(await selectedSite(proof)).toBe(site);
+	expect(await shownQuestion(proof)).toBe(question);
+	await expect(proof.getByRole('button', { name: 'Resume rotation' })).toBeVisible();
 });
 
 test('no automatic rotation for people who prefer reduced motion', async ({ page }) => {
@@ -356,30 +361,26 @@ test('no automatic rotation for people who prefer reduced motion', async ({ page
 	await page.clock.install();
 	await page.goto('/#leaderboard');
 	const proof = page.locator('#leaderboard');
-	await proof.getByRole('tab', { name: /specification\.website/ }).click();
 	await page.mouse.move(0, 0);
+	const site = await selectedSite(proof);
+	const question = await shownQuestion(proof);
 	await page.clock.runFor(12000);
-	await expect(proof.getByRole('button', { name: 'Question 1 of 5' })).toHaveAttribute(
-		'aria-current',
-		'true'
-	);
+	expect(await selectedSite(proof)).toBe(site);
+	expect(await shownQuestion(proof)).toBe(question);
 });
 
-test('switching sites starts the question rotation over', async ({ page }) => {
-	await page.emulateMedia({ reducedMotion: 'reduce' });
+test('picking a site starts at its first question', async ({ page }) => {
+	await page.clock.install();
 	await page.goto('/#leaderboard');
 	const proof = page.locator('#leaderboard');
-	await proof.getByRole('tab', { name: /specification\.website/ }).click();
-	// Move off the first question (how many there are depends on the run).
-	await proof
-		.getByRole('button', { name: /^Question \d+ of \d+$/ })
-		.last()
-		.click();
-	await proof.getByRole('tab', { name: /Kiln/ }).click();
-	await expect(proof.getByRole('button', { name: /^Question 1 of \d+$/ })).toHaveAttribute(
-		'aria-current',
-		'true'
-	);
+	await page.mouse.move(0, 0);
+	const first = await shownQuestion(proof);
+	// Rotate past the first question, then come back to the site by its logo.
+	await nextQuestion(page, proof, first);
+	const logos = proof.locator('[aria-roledescription=carousel] [role=tablist]').first().getByRole('tab');
+	await logos.nth(1).click();
+	await logos.nth(0).click();
+	await expect.poll(() => shownQuestion(proof)).toBe(first);
 });
 
 test('the page says its benchmark shows selected cases and links to all results', async ({ page }) => {

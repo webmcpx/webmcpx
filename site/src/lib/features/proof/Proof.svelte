@@ -1,7 +1,8 @@
 <!--
 	The evidence, one model, one site and one question at a time: no averages. The model switcher picks the
-	run (cheap and frontier models from each provider); logos pick the site (best case first); a site's
-	questions rotate. Under them, tabs show that site's questions per metric, its
+	run; logos pick the site (best case first). The questions rotate through every site in turn, and the
+	selected logo follows, so the logos are the carousel's position (WCAG 2.2.2: a pause button before
+	them; it holds while hovered, focused or off screen, and never moves for reduced motion). Under them, tabs show that site's questions per metric, its
 	WebMCP tools and the method. All tab panels are in the HTML, so everything reads without JavaScript.
 -->
 <script lang="ts">
@@ -9,10 +10,14 @@
 	import Coins from '@lucide/svelte/icons/coins';
 	import FlaskConical from '@lucide/svelte/icons/flask-conical';
 	import Footprints from '@lucide/svelte/icons/footprints';
+	import Pause from '@lucide/svelte/icons/pause';
+	import Play from '@lucide/svelte/icons/play';
 	import Timer from '@lucide/svelte/icons/timer';
 	import Wrench from '@lucide/svelte/icons/wrench';
 	import Zap from '@lucide/svelte/icons/zap';
 	import type { Component } from 'svelte';
+	import { prefersReducedMotion } from 'svelte/motion';
+	import { fade } from 'svelte/transition';
 	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
@@ -35,7 +40,6 @@
 	import type { BenchSite, SiteTask } from '#lib/features/benchmark/sites.ts';
 	import TaskChart from '#lib/features/benchmark/TaskChart.svelte';
 	import { siteTools } from '#lib/features/benchmark/tools.ts';
-	import Rotator from './Rotator.svelte';
 	import ToolTable from './ToolTable.svelte';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
@@ -79,6 +83,47 @@
 		(Object.keys(ICONS) as (keyof typeof ICONS)[]).map((id) => ({ id, label: m.tabs[id], icon: ICONS[id] }))
 	);
 	let detailId = $state('tokens');
+
+	// The carousel: the question shown is its index within the selected site.
+	let step = $state({ site: initial().site, i: 0 });
+	const questionIndex = $derived(step.site === siteId ? step.i : 0);
+	let paused = $state(false);
+	let hovering = $state(false);
+	let focused = $state(false);
+	let onScreen = $state(false);
+	const running = $derived(
+		!paused && !hovering && !focused && onScreen && !prefersReducedMotion.current && !!current
+	);
+	$effect(() => {
+		if (!running || !current) return;
+		const sites = current.sites;
+		if (sites.reduce((n, x) => n + x.tasks.length, 0) < 2) return;
+		void [siteId, questionIndex]; // read here: the clock restarts on every move, so each gets its full time
+		const t = setInterval(() => {
+			if (document.hidden) return;
+			const at = Math.max(
+				0,
+				sites.findIndex((x) => x.id === siteId)
+			);
+			const [site, i] =
+				questionIndex + 1 < sites[at].tasks.length
+					? [sites[at], questionIndex + 1]
+					: [sites[(at + 1) % sites.length], 0];
+			siteId = site.id;
+			step = { site: site.id, i };
+		}, 5000);
+		return () => clearInterval(t);
+	});
+	/** A site picked by hand starts at its first question. */
+	function pick(id: string) {
+		siteId = id;
+		step = { site: id, i: 0 };
+	}
+	function watch(node: HTMLElement) {
+		const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting));
+		io.observe(node);
+		return { destroy: () => io.disconnect() };
+	}
 	const solved = (s: ArmSummary) => `${Math.round(s.success_rate * s.runs)}/${s.runs}`;
 	const shown = (sites: BenchSite[]) => sites.reduce((n, s) => n + s.tasks.length, 0);
 	const repeats = (run: ModelRun) => {
@@ -236,81 +281,103 @@
 			<p class="mt-1 text-sm text-ink-2">{m.none.text}</p>
 		</Card>
 	{/if}
-	<Tabs
-		{items}
-		bind:value={siteId}
-		label={m.site}
-		listClass="-mx-4 mb-10 gap-2.5 px-4 pt-1 pb-3 sm:mx-0 sm:mb-12 sm:flex-wrap sm:px-0"
-		tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none"
+	<div
+		use:watch
+		onmouseenter={() => (hovering = true)}
+		onmouseleave={() => (hovering = false)}
+		onfocusin={() => (focused = true)}
+		onfocusout={() => (focused = false)}
+		role="group"
+		aria-roledescription="carousel"
+		aria-label={m.rotator.label}
 	>
-		{#snippet tab(site)}
-			{#if site.logo?.wordmark}
-				<SiteLogo logo={site.logo} size={18} />
-				<span class="sr-only">{site.name}</span>
-			{:else}
-				{#if site.logo}<SiteLogo logo={site.logo} size={20} />{/if}
-				{site.name}
-			{/if}
-			{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70">{m.local}</span
-				>{/if}
-		{/snippet}
-		{#snippet panel(site, visible)}
-			<!-- The selected logo already names the site: the heading is for screen readers only. -->
-			<h4 class="sr-only">{site.name}</h4>
-			{#if site.tasks.length === 1}
-				{@render question(site, site.tasks[0])}
-			{:else}
-				<!-- Keyed by site: switching sites starts the rotation over. -->
-				{#key site.id}
-					<Rotator items={site.tasks} label={m.rotator.label} itemLabel={m.rotator.item} enabled={visible}>
-						{#snippet item(t)}
-							{@render question(site, t)}
-						{/snippet}
-					</Rotator>
-				{/key}
-			{/if}
-			{@const siteQuestions = questions.filter((q) => q.site.id === site.id)}
-			{@const st = siteTools(site.tasks.map((t) => tools[t.task]).filter(Boolean))}
-			<Tabs
-				items={DETAILS}
-				bind:value={detailId}
-				label={fmt(m.details, { site: site.name })}
-				class="mt-12"
-				listClass="mb-6 flex-wrap"
-			>
-				{#snippet tab(d)}<d.icon aria-hidden="true" />{d.label}{/snippet}
-				{#snippet panel(d)}
-					{@const metric = METRICS.find((x) => x.id === d.id)}
-					<div class="rounded-card border-2 border-ink bg-card p-5 sm:p-7">
-						{#if metric}
-							<TaskChart questions={siteQuestions} {metric} />
-						{:else if d.id === 'tools'}
-							{#if st}<ToolTable tools={st} siteName={site.name} />{/if}
-						{:else}
-							<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
-								<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
-									<li>
-										{i18n.plural(
-											repeats(model),
-											result.reasoning_effort ? m.method.setup : m.method.setupNoEffort,
-											{ model: result.model, effort: result.reasoning_effort ?? '' }
-										)}
-									</li>
-									<li>{m.method.baseline}</li>
-									<li>{m.method.webmcp}</li>
-									<li>{m.method.graded}</li>
-									<li>{site.live ? m.method.live : m.method.local}</li>
-									<li>{m.method.scope}</li>
-									<li>{m.method.runs}</li>
-									<li>{m.method.measures}</li>
-									<li>{m.method.failures}</li>
-								</ul>
-								<CodeBlock snippet={reproduce} title={m.method.reproduce} />
-							</div>
-						{/if}
-					</div>
-				{/snippet}
-			</Tabs>
-		{/snippet}
-	</Tabs>
+		<Tabs
+			{items}
+			bind:value={() => siteId, pick}
+			label={m.site}
+			listClass="-mr-4 gap-2.5 pt-1 pr-4 pb-3 sm:mr-0 sm:flex-wrap sm:pr-0"
+			tabClass="h-11 border-ink bg-card px-4 text-[15px] text-ink shadow-hard-sm hover:-translate-y-0.5 aria-selected:bg-ink aria-selected:text-paper aria-selected:shadow-none"
+		>
+			{#snippet start()}
+				<button
+					type="button"
+					onclick={() => (paused = !paused)}
+					aria-label={paused ? m.rotator.resume : m.rotator.pause}
+					class="mb-2 grid size-11 shrink-0 place-items-center rounded-full border-2 border-ink bg-card text-ink shadow-hard-sm transition hover:-translate-y-0.5"
+				>
+					{#if paused}<Play size={16} aria-hidden="true" />{:else}<Pause size={16} aria-hidden="true" />{/if}
+				</button>
+			{/snippet}
+			{#snippet tab(site)}
+				{#if site.logo?.wordmark}
+					<SiteLogo logo={site.logo} size={18} />
+					<span class="sr-only">{site.name}</span>
+				{:else}
+					{#if site.logo}<SiteLogo logo={site.logo} size={20} />{/if}
+					{site.name}
+				{/if}
+				{#if !site.live}<span class="font-mono text-[10px] tracking-wider uppercase opacity-70"
+						>{m.local}</span
+					>{/if}
+			{/snippet}
+			{#snippet panel(site, visible)}
+				<!-- The selected logo already names the site: the heading is for screen readers only. -->
+				<h4 class="sr-only">{site.name}</h4>
+				<div class="mt-8 grid sm:mt-10" aria-live={running ? 'off' : 'polite'}>
+					{#key visible ? questionIndex : 0}
+						{@const task = site.tasks[visible ? Math.min(questionIndex, site.tasks.length - 1) : 0]}
+						<div
+							class="col-start-1 row-start-1"
+							in:fade={{ duration: prefersReducedMotion.current ? 0 : 400 }}
+							out:fade={{ duration: prefersReducedMotion.current ? 0 : 200 }}
+						>
+							{#if task}{@render question(site, task)}{/if}
+						</div>
+					{/key}
+				</div>
+				{@const siteQuestions = questions.filter((q) => q.site.id === site.id)}
+				{@const st = siteTools(site.tasks.map((t) => tools[t.task]).filter(Boolean))}
+				<Tabs
+					items={DETAILS}
+					bind:value={detailId}
+					label={fmt(m.details, { site: site.name })}
+					class="mt-12"
+					listClass="mb-6 flex-wrap"
+				>
+					{#snippet tab(d)}<d.icon aria-hidden="true" />{d.label}{/snippet}
+					{#snippet panel(d)}
+						{@const metric = METRICS.find((x) => x.id === d.id)}
+						<div class="rounded-card border-2 border-ink bg-card p-5 sm:p-7">
+							{#if metric}
+								<TaskChart questions={siteQuestions} {metric} />
+							{:else if d.id === 'tools'}
+								{#if st}<ToolTable tools={st} siteName={site.name} />{/if}
+							{:else}
+								<div class="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+									<ul class="list-disc space-y-2 pl-5 text-sm text-ink-2">
+										<li>
+											{i18n.plural(
+												repeats(model),
+												result.reasoning_effort ? m.method.setup : m.method.setupNoEffort,
+												{ model: result.model, effort: result.reasoning_effort ?? '' }
+											)}
+										</li>
+										<li>{m.method.baseline}</li>
+										<li>{m.method.webmcp}</li>
+										<li>{m.method.graded}</li>
+										<li>{site.live ? m.method.live : m.method.local}</li>
+										<li>{m.method.scope}</li>
+										<li>{m.method.runs}</li>
+										<li>{m.method.measures}</li>
+										<li>{m.method.failures}</li>
+									</ul>
+									<CodeBlock snippet={reproduce} title={m.method.reproduce} />
+								</div>
+							{/if}
+						</div>
+					{/snippet}
+				</Tabs>
+			{/snippet}
+		</Tabs>
+	</div>
 {/snippet}

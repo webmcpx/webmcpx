@@ -192,7 +192,6 @@ const ja: Messages = {
 		opens: '（{site} を開きます）',
 		rotator: {
 			label: '質問',
-			item: '全 {total} 問中 {n} 問目',
 			pause: '自動切り替えを一時停止',
 			resume: '自動切り替えを再開'
 		},

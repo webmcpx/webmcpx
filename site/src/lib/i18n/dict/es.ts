@@ -196,7 +196,6 @@ const es: Messages = {
 		opens: '(abre {site})',
 		rotator: {
 			label: 'Preguntas',
-			item: 'Pregunta {n} de {total}',
 			pause: 'Pausar rotación',
 			resume: 'Reanudar rotación'
 		},

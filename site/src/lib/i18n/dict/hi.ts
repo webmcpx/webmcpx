@@ -196,7 +196,6 @@ const hi: Messages = {
 		opens: '({site} पर जाता है)',
 		rotator: {
 			label: 'सवाल',
-			item: '{total} में से सवाल {n}',
 			pause: 'रोटेशन रोकें',
 			resume: 'रोटेशन फिर शुरू करें'
 		},

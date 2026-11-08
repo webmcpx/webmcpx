@@ -197,7 +197,6 @@ const bn: Messages = {
 		opens: '({site} খুলবে)',
 		rotator: {
 			label: 'প্রশ্নগুলো',
-			item: 'প্রশ্ন {n}, মোট {total}টির মধ্যে',
 			pause: 'ঘোরানো থামান',
 			resume: 'আবার ঘোরান'
 		},
