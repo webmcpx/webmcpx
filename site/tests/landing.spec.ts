@@ -508,7 +508,7 @@ test('your own tools: the coding agent first, then the same tool written five wa
 	await page.goto('/#own');
 	const own = page.locator('#own');
 	const tabs = own.getByRole('tab');
-	await expect(tabs).toHaveText(['Your coding agent', 'React', 'Vue', 'Svelte', 'JavaScript', 'HTML']);
+	await expect(tabs).toHaveText(['Agent', 'React', 'Vue', 'Svelte', 'JavaScript', 'HTML']);
 	await expect(tabs.first()).toHaveAttribute('aria-selected', 'true');
 	await expect(tabs.nth(1).locator('svg')).toHaveCount(1);
 	await expect(own.getByRole('tabpanel')).toHaveCount(1);
@@ -532,7 +532,7 @@ test('step 1 opens on your coding agent; step 2 is one prompt', async ({ page })
 	await page.goto('/#fix');
 	const fix = page.locator('#fix');
 	const install = fix.getByRole('tablist', { name: 'On your site' }).getByRole('tab');
-	await expect(install).toHaveText(['Your coding agent', 'HTML', 'npm']);
+	await expect(install).toHaveText(['Agent', 'HTML', 'npm']);
 	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
 	await expect(fix.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
 	await expect(fix.getByRole('tablist')).toHaveCount(1);

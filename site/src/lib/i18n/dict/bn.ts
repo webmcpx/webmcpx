@@ -324,7 +324,7 @@ const bn: Messages = {
 	fix: {
 		title: 'দুই ধাপ। এজেন্ট-রেডি।',
 		lead: 'ধাপ ১ আপনার সাইটে টুল যোগ করে। ধাপ ২ আপনার এজেন্টকে সেগুলো কল করতে দেয়।',
-		alternatives: { npm: 'npm', agent: 'আপনার কোডিং এজেন্ট' },
+		alternatives: { npm: 'npm', agent: 'এজেন্ট' },
 		facts: 'লোডে ~3.2 KB · Rust + WebAssembly · MIT লাইসেন্স',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

@@ -65,6 +65,7 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
 <form toolname="search_mugs" tooldescription="Search the mug catalog." action="/search" method="get">
   <label>Glaze <input name="glaze" required></label>
   <input name="limit" type="number" min="1" max="20" toolparamdescription="How many results.">
+  <input name="cc" type="email" multiple toolparamdescription="Who else gets the results.">
 </form>
 <form toolname="Book a class" tooldescription="Book a pottery class." method="post" toolautosubmit>
   <input type="hidden" name="price" value="40">
@@ -280,6 +281,7 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
       properties: {
         glaze: { type: "string", description: "Glaze" },
         limit: { type: "number", minimum: 1, maximum: 20, description: "How many results." },
+        cc: { type: "string", format: "email", description: "Who else gets the results." },
       },
       required: ["glaze"],
       additionalProperties: false,
@@ -291,7 +293,8 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.deepEqual(book.inputSchema.properties.day, { type: "string", enum: ["monday", "friday"] });
 
     // Without toolautosubmit the agent fills the form and leaves the submit to the user.
-    const filled = JSON.parse(await session.call(search, { glaze: "celadon", limit: 3 }));
+    // An email input with multiple takes a comma-separated list, as text.
+    const filled = JSON.parse(await session.call(search, { glaze: "celadon", limit: 3, cc: "ana@kiln.test,bo@kiln.test" }));
     assert.deepEqual(filled, { ok: true, data: { submitted: false, next: "Ask the user to review the form and submit it." } });
     // With it, the page's submit handler sees agentInvoked and answers through respondWith().
     const booked = JSON.parse(await session.call(book, { name: "Ana", day: "friday", wheel: true }));

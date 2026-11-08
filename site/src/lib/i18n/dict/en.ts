@@ -421,7 +421,7 @@ const en = {
 		// Two short beats; reuse your word for "agent-ready" (see hero.title).
 		title: 'Two steps. Agent-ready.',
 		lead: 'Step 1 puts tools on your site. Step 2 lets your agent call them.',
-		alternatives: { npm: 'npm', agent: 'your coding agent' },
+		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
 		facts: '~3.2 KB on load · Rust + WebAssembly · MIT license',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.

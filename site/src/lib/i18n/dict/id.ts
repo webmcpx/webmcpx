@@ -316,7 +316,7 @@ const id: Messages = {
 	fix: {
 		title: 'Dua langkah. Siap agent.',
 		lead: 'Langkah 1 memasang tool di situs Anda. Langkah 2 membuat agen Anda bisa memanggilnya.',
-		alternatives: { npm: 'npm', agent: 'coding agent Anda' },
+		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~3,2 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

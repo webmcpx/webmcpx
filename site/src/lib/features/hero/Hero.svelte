@@ -17,7 +17,7 @@
 	const i18n = useI18n();
 	const m = $derived(i18n.m.hero);
 	// Three sites that ship WebMCP, then ours: scanning the scanner's own site had better say agent-ready.
-	const TRY = [...SITES.slice(0, 3), { name: 'webmcpx.dev', url: 'https://webmcpx.dev/' }];
+	const TRY = [{ name: 'webmcpx', url: 'https://webmcpx.dev/' }, ...SITES.slice(0, 3)];
 	/** The date of the WebMCP draft this release tracks. */
 	const DRAFT = '2026-11-02';
 </script>

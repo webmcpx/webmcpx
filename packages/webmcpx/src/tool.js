@@ -263,7 +263,8 @@ function fill(form, args) {
         if (el.checked !== on) el.click();
         continue;
       }
-      if (el.multiple) for (const o of el.options) o.selected = !o.matches(":disabled") && [].concat(value).includes(o.value);
+      // Only a select has options: <input type="email" multiple> takes "a@x.com,b@x.com" as text.
+      if (el.tagName === "SELECT" && el.multiple) for (const o of el.options) o.selected = !o.matches(":disabled") && [].concat(value).includes(o.value);
       else Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
       // Frameworks listen for these, not for property writes.
       el.dispatchEvent(new Event("input", { bubbles: true }));

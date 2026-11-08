@@ -342,7 +342,7 @@ const ru: Messages = {
 	fix: {
 		title: 'Два шага. Сайт готов для агентов.',
 		lead: 'Шаг 1 добавляет инструменты на ваш сайт. Шаг 2 позволяет агенту их вызывать.',
-		alternatives: { npm: 'npm', agent: 'вашего кодинг-агента' },
+		alternatives: { npm: 'npm', agent: 'Агент' },
 		facts: '~3,2 КБ на загрузку · Rust + WebAssembly · MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

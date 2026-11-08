@@ -314,7 +314,7 @@ const zh: Messages = {
 	fix: {
 		title: '两步，智能体就绪。',
 		lead: '第 1 步在你的网站上提供工具，第 2 步让你的智能体调用它们。',
-		alternatives: { npm: 'npm', agent: 'AI 编程智能体' },
+		alternatives: { npm: 'npm', agent: '智能体' },
 		facts: '加载约 3.2 KB · Rust + WebAssembly · MIT 许可证',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

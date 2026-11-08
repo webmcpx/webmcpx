@@ -327,7 +327,7 @@ const fr: Messages = {
 	fix: {
 		title: 'Deux étapes. Prêt pour les agents.',
 		lead: 'L’étape 1 met des outils sur votre site. L’étape 2 permet à votre agent de les appeler.',
-		alternatives: { npm: 'npm', agent: 'votre agent de code' },
+		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~3,2 Ko chargés · Rust + WebAssembly · licence MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

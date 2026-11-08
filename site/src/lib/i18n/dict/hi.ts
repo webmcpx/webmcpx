@@ -323,7 +323,7 @@ const hi: Messages = {
 	fix: {
 		title: 'दो कदम। एजेंट-रेडी।',
 		lead: 'कदम 1 आपकी साइट पर टूल लाता है। कदम 2 आपके एजेंट को उन्हें कॉल करने देता है।',
-		alternatives: { npm: 'npm', agent: 'आपके कोडिंग एजेंट' },
+		alternatives: { npm: 'npm', agent: 'एजेंट' },
 		facts: 'लोड पर ~3.2 KB · Rust + WebAssembly · MIT लाइसेंस',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

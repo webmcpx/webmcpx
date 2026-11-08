@@ -315,7 +315,7 @@ const ja: Messages = {
 	fix: {
 		title: '2 ステップで、エージェント対応。',
 		lead: 'ステップ 1 でサイトにツールを置き、ステップ 2 でエージェントがそれを呼べるようにします。',
-		alternatives: { npm: 'npm を使う場合', agent: 'コーディングエージェントの場合' },
+		alternatives: { npm: 'npm を使う場合', agent: 'エージェント' },
 		facts: '読込時 ~3.2 KB · Rust + WebAssembly · MIT License',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

@@ -326,7 +326,7 @@ const de: Messages = {
 	fix: {
 		title: 'Zwei Schritte. Agentenfähig.',
 		lead: 'Schritt 1 bringt Tools auf deine Website. Schritt 2 lässt deinen Agenten sie aufrufen.',
-		alternatives: { npm: 'npm', agent: 'Ihren Coding-Agenten' },
+		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~3,2 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {

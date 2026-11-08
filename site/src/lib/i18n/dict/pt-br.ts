@@ -323,7 +323,7 @@ const ptBr: Messages = {
 	fix: {
 		title: 'Dois passos. Pronto para agentes.',
 		lead: 'O passo 1 coloca ferramentas no seu site. O passo 2 deixa seu agente chamá-las.',
-		alternatives: { npm: 'npm', agent: 'seu agente de código' },
+		alternatives: { npm: 'npm', agent: 'Agente' },
 		facts: '~3,2 KB ao carregar · Rust + WebAssembly · MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
