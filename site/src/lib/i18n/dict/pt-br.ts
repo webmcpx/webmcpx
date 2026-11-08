@@ -333,15 +333,15 @@ const ptBr: Messages = {
 	},
 
 	fix: {
-		title: 'Deixe seu site pronto para agentes',
-		lead: 'Uma linha. Agentes chamam seu site em vez de adivinhar.',
+		title: 'Para o seu site',
+		lead: 'Uma linha deixa ele pronto para agentes: eles chamam o seu site em vez de adivinhar.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
 		facts: '~2,7 KB ao carregar · Rust + WebAssembly · MIT',
 		html: 'Cole antes de {tag}. Em navegadores sem WebMCP, ele adiciona o polyfill do W3C.'
 	},
 
 	agents: {
-		title: 'Seu agente mais rápido em qualquer site',
+		title: 'Para o seu agente',
 		lead: 'As mesmas respostas, com uma fração dos tokens. Funciona no Codex, Claude Code, Cursor e em qualquer script: Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: 'De {low} a {high} menos tokens nos {n} modelos do leaderboard.' },

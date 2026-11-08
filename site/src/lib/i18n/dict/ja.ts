@@ -323,15 +323,15 @@ const ja: Messages = {
 	},
 
 	fix: {
-		title: 'サイトを、エージェント対応に。',
-		lead: 'たった 1 行。エージェントは推測せず、サイトを直接呼び出します。',
+		title: 'あなたのサイトに',
+		lead: '1 行でエージェント対応に。エージェントは推測せずサイトを呼び出す。',
 		alternatives: { npm: 'npm を使う場合', agent: 'エージェント' },
 		facts: '読込時 ~2.7 KB · Rust + WebAssembly · MIT License',
 		html: '{tag} の前に貼るだけ。WebMCP のないブラウザには W3C のポリフィルを追加します。'
 	},
 
 	agents: {
-		title: 'どのサイトでも、エージェントをもっと速く。',
+		title: 'あなたのエージェントに',
 		lead: '答えは同じ、トークンはごくわずか。Codex、Claude Code、Cursor、そしてあらゆるスクリプト（Chrome、Firefox、Safari、Selenium、Playwright）で動きます。',
 		saving: {
 			range: { other: 'リーダーボードの全 {n} モデルで、トークンを {low}〜{high} 削減。' },

@@ -438,10 +438,10 @@ const en = {
 	// (ChatGPT, Codex, Claude Code, Cursor, Playwright, Selenium, Puppeteer, browser-use, CDP, Chrome,
 	// Chromium, Firefox, Safari) stay as they are, here and in `agents`.
 	fix: {
-		// max 40; reuse your word for "agent-ready" (see hero.title).
-		title: 'Make your site agent-ready',
+		// max 40: names the audience, as the nav's "For sites" does.
+		title: 'For your site',
 		// max 70
-		lead: 'One line. Agents call your site instead of guessing.',
+		lead: 'One line makes it agent-ready: agents call your site instead of guessing.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
 		facts: '~2.7 KB on load · Rust + WebAssembly · MIT license',
@@ -452,7 +452,7 @@ const en = {
 	// For people who use agents (no site, no scan needed): one prompt for the agent itself.
 	agents: {
 		// max 45
-		title: 'Make your agent faster on every site',
+		title: 'For your agent',
 		// max 160
 		lead: 'Same answers, a fraction of the tokens. Works in Codex, Claude Code, Cursor and any script: Chrome, Firefox, Safari, Selenium, Playwright.',
 		// One line, linked to the leaderboard. {low} and {high} are ratios (2.4×, 5.7×): each model's

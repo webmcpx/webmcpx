@@ -321,15 +321,15 @@ const zh: Messages = {
 	},
 
 	fix: {
-		title: '让你的网站\u200b智能体就绪',
-		lead: '一行代码。智能体直接调用你的网站，不再靠猜。',
+		title: '给你的网站',
+		lead: '一行代码让它为智能体就绪：智能体直接调用你的网站，而不是猜。',
 		alternatives: { npm: 'npm', agent: '智能体' },
 		facts: '加载约 2.7 KB · Rust + WebAssembly · MIT 许可证',
 		html: '粘贴到 {tag} 之前。浏览器没有 WebMCP 时，它会补上 W3C polyfill。'
 	},
 
 	agents: {
-		title: '让你的智能体\u200b在任何网站都更快',
+		title: '给你的智能体',
 		lead: '答案不变，token 只需一小部分。适用于 Codex、Claude Code、Cursor 和任何脚本：Chrome、Firefox、Safari、Selenium、Playwright。',
 		saving: {
 			range: { other: '排行榜全部 {n} 个模型，token 减少 {low} 到 {high}。' },

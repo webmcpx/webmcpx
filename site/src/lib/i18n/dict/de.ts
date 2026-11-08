@@ -336,15 +336,15 @@ const de: Messages = {
 	},
 
 	fix: {
-		title: 'Mach deine Website agentenfähig',
-		lead: 'Eine Zeile. Agenten rufen deine Website auf, statt zu raten.',
+		title: 'Für deine Website',
+		lead: 'Eine Zeile macht sie agent-ready: Agenten rufen deine Website auf, statt zu raten.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		html: 'Vor {tag} einfügen. In Browsern ohne WebMCP ergänzt es das W3C-Polyfill.'
 	},
 
 	agents: {
-		title: 'Dein Agent, schneller auf jeder Website',
+		title: 'Für deinen Agenten',
 		lead: 'Gleiche Antworten, ein Bruchteil der Tokens. Läuft in Codex, Claude Code, Cursor und jedem Skript: Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: '{low} bis {high} weniger Tokens bei allen {n} Modellen der Rangliste.' },

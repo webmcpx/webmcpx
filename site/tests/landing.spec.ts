@@ -74,8 +74,8 @@ test('the benchmark numbers are in the prerendered HTML', async ({ request }) =>
 test('content is visible without JavaScript', async ({ browser }) => {
 	const page = await browser.newPage({ javaScriptEnabled: false });
 	await page.goto('/');
-	await expect(page.getByRole('heading', { name: 'Make your site agent-ready', exact: true })).toBeVisible();
-	await expect(page.getByRole('heading', { name: 'Make your agent faster on every site' })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'For your site', exact: true })).toBeVisible();
+	await expect(page.getByRole('heading', { name: 'For your agent', exact: true })).toBeVisible();
 	// Every tab panel is in the HTML: the best case first, then every other site, tools included.
 	await expect(page.getByText(/requests per minute does the Notion API/).first()).toBeVisible();
 	const tools = page.getByRole('region', { name: 'WebMCP tools on Notion' });
@@ -537,8 +537,8 @@ test('without JavaScript every way to write a tool still shows', async ({ browse
 test('for sites: one line, as tabs that open on your coding agent', async ({ page }) => {
 	await page.goto('/#for-sites');
 	const sites = page.locator('#for-sites');
-	await expect(sites.getByRole('heading', { level: 2 })).toHaveText('Make your site agent-ready');
-	const install = sites.getByRole('tablist', { name: 'Make your site agent-ready' }).getByRole('tab');
+	await expect(sites.getByRole('heading', { level: 2 })).toHaveText('For your site');
+	const install = sites.getByRole('tablist', { name: 'For your site' }).getByRole('tab');
 	await expect(install).toHaveText(['Agent', 'HTML', 'npm']);
 	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
 	await expect(sites.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
@@ -555,7 +555,7 @@ test('the old #fix links, printed by published CLIs, still land on the site sect
 test('for agents: the measured saving, one prompt, then the two ways', async ({ page }) => {
 	await page.goto('/#for-agents');
 	const agents = page.locator('#for-agents');
-	await expect(agents.getByRole('heading', { level: 2 })).toHaveText('Make your agent faster on every site');
+	await expect(agents.getByRole('heading', { level: 2 })).toHaveText('For your agent');
 	// Computed from the published runs, linked to them.
 	const saving = agents.getByRole('link', { name: /fewer tokens/ });
 	await expect(saving).toHaveText(

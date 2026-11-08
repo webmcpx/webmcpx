@@ -352,15 +352,15 @@ const ru: Messages = {
 	},
 
 	fix: {
-		title: 'Сделайте сайт готовым для агентов',
-		lead: 'Одна строка. Агенты вызывают ваш сайт, а не гадают.',
+		title: 'Для вашего сайта',
+		lead: 'Одна строка делает его готовым для агентов: они вызывают ваш сайт, а не угадывают.',
 		alternatives: { npm: 'npm', agent: 'Агент' },
 		facts: '~2,7 КБ на загрузку · Rust + WebAssembly · MIT',
 		html: 'Вставьте перед {tag}. В браузерах без WebMCP он добавит полифил W3C.'
 	},
 
 	agents: {
-		title: 'Ваш агент быстрее на любом сайте',
+		title: 'Для вашего агента',
 		lead: 'Те же ответы — за долю токенов. Работает в Codex, Claude Code, Cursor и любом скрипте: Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: {

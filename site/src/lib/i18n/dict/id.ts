@@ -326,15 +326,15 @@ const id: Messages = {
 	},
 
 	fix: {
-		title: 'Jadikan situs Anda siap agent',
-		lead: 'Satu baris. Agen memanggil situs Anda, tanpa menebak.',
+		title: 'Untuk situs Anda',
+		lead: 'Satu baris membuatnya siap agen: agen memanggil situs Anda, bukan menebak.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		html: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, ia menambahkan polyfill W3C.'
 	},
 
 	agents: {
-		title: 'Agen Anda lebih cepat di semua situs',
+		title: 'Untuk agen Anda',
 		lead: 'Jawaban sama, token jauh lebih sedikit. Jalan di Codex, Claude Code, Cursor, dan skrip apa pun: Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: '{low} hingga {high} lebih sedikit token di semua {n} model peringkat.' },

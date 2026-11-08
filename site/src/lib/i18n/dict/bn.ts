@@ -333,15 +333,15 @@ const bn: Messages = {
 	},
 
 	fix: {
-		title: 'আপনার সাইটকে এজেন্ট-রেডি করুন',
-		lead: 'মাত্র এক লাইন। এজেন্ট আন্দাজ না করে সরাসরি আপনার সাইটকে কল করে।',
+		title: 'আপনার সাইটের জন্য',
+		lead: 'এক লাইনেই এজেন্ট-রেডি: এজেন্টরা অনুমান না করে আপনার সাইট কল করে।',
 		alternatives: { npm: 'npm', agent: 'এজেন্ট' },
 		facts: 'লোডে ~2.7 KB · Rust + WebAssembly · MIT লাইসেন্স',
 		html: '{tag}-এর আগে পেস্ট করুন। যে ব্রাউজারে WebMCP নেই, সেখানে এটি W3C-র পলিফিল যোগ করে।'
 	},
 
 	agents: {
-		title: 'প্রতিটি সাইটে আপনার এজেন্ট আরও দ্রুত',
+		title: 'আপনার এজেন্টের জন্য',
 		lead: 'একই উত্তর, টোকেনের সামান্য অংশেই। Codex, Claude Code, Cursor আর যেকোনো স্ক্রিপ্টে চলে: Chrome, Firefox, Safari, Selenium, Playwright।',
 		saving: {
 			range: { other: 'লিডারবোর্ডের সব {n}টি মডেলে {low} থেকে {high} কম টোকেন।' },

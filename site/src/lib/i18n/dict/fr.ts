@@ -337,15 +337,15 @@ const fr: Messages = {
 	},
 
 	fix: {
-		title: 'Rendez votre site prêt pour les agents',
-		lead: 'Une ligne. Les agents appellent votre site au lieu de deviner.',
+		title: 'Pour votre site',
+		lead: 'Une ligne le rend prêt pour les agents : ils appellent votre site au lieu de deviner.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 Ko chargés · Rust + WebAssembly · licence MIT',
 		html: 'Collez-le avant {tag}. Dans les navigateurs sans WebMCP, il ajoute le polyfill du W3C.'
 	},
 
 	agents: {
-		title: 'Un agent plus rapide sur tous les sites',
+		title: 'Pour votre agent',
 		lead: 'Les mêmes réponses, pour une fraction des tokens. Fonctionne dans Codex, Claude Code, Cursor et tout script : Chrome, Firefox, Safari, Selenium, Playwright.',
 		saving: {
 			range: { other: 'De {low} à {high} moins de tokens sur les {n} modèles du classement.' },
