@@ -24,8 +24,10 @@ fn check(ctx: &Ctx<'_>, out: &mut Vec<Diagnostic>) {
                 Some((other, span)) => out.push(
                     RULE.report(span, format!("schema type is `{other}`, expected `object`")),
                 ),
-                None if schema.open || schema.get("type").is_some_and(|f| f.value.is_dynamic()) => {
-                }
+                // Unknown, not wrong: a dynamic `type`, or none written after a spread that may supply it.
+                None if schema
+                    .get("type")
+                    .map_or(schema.open, |f| f.value.is_dynamic()) => {}
                 None => out
                     .push(RULE.report(schema.span, "schema has no `\"type\": \"object\"`".into())),
             },
