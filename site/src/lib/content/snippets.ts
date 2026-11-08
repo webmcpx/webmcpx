@@ -56,7 +56,11 @@ register(); // the standard tools; tool() adds your own`
   description: "Search the catalog by keyword.",
   inputSchema: { type: "object", properties: { query: { type: "string" } } },
   annotations: { readOnlyHint: true },
-  execute: async ({ query }) => JSON.stringify(await searchCatalog(query))
+  async execute({ query }) {
+    // Expected failures are answers, never rejections: hosts drop rejection reasons.
+    try { return JSON.stringify(await searchCatalog(query)); }
+    catch { return JSON.stringify({ error: "Catalog unavailable, try again shortly." }); }
+  }
 });`
 	},
 	pageScript: {

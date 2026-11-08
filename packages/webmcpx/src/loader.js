@@ -1,5 +1,5 @@
 // The standard tools: DOM and registerTool() here, text work in WebAssembly (loaded on first call).
-import { CODES, LIMITS, TOOLS } from "./generated.js";
+import { CODES, INVISIBLE, LIMITS, TOOLS } from "./generated.js";
 
 const DEFAULT_TOOLS = ["get_page_context", "search_page", "fetch_as_markdown"];
 
@@ -8,9 +8,21 @@ const ok = (data) => envelope({ ok: true, data });
 const err = (code, message, hint) =>
   envelope({ ok: false, error: { code, message, retryable: CODES[code] }, ...(hint && { hint }) });
 
-/** get_page_context's envelope from what readPage("context") gave (agent/ uses it too). */
-export const contextEnvelope = (context) =>
-  context?.tooLarge ? err("RESULT_TOO_LARGE", "the page context is over 20,000 chars") : ok(context);
+/** get_page_context's envelope from what readPage("context") gave (agent/ uses it too): page text with
+ * invisible characters stripped, as the other standard tools do (WebAssembly), and empty headings dropped. */
+export const contextEnvelope = (context) => {
+  if (context?.tooLarge) return err("RESULT_TOO_LARGE", "the page context is over 20,000 chars");
+  const clean = (s) => s?.replace(INVISIBLE, "") || undefined;
+  return ok({
+    ...context,
+    title: clean(context.title) ?? "",
+    description: clean(context.description),
+    headings: (context.headings ?? [])
+      .map((h) => ({ ...h, text: clean(h.text) }))
+      .filter((h) => h.text),
+    selection: clean(context.selection),
+  });
+};
 
 let wasm;
 const engine = (source) =>
@@ -34,6 +46,9 @@ export function readPage(what, root) {
   const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "SVG", "NAV", "FOOTER", "ASIDE"]);
   const base = location.href.split("#")[0];
   const text = (s) => (s ?? "").replace(/\s+/g, " ").trim();
+  const css = (el) => globalThis.getComputedStyle?.(el) ?? {};
+  const hidden = (el) => el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" || css(el).display == "none";
+  const shown = (el) => !el || !hidden(el) && shown(el.parentElement);
   if (what === "context") {
     // Page-set fields are cut to size; URLs never are (a heading with a giant id gets no URL), and a
     // context still past the output budget (20,000 chars) comes back as { tooLarge: true }.
@@ -42,7 +57,8 @@ export function readPage(what, root) {
       url: location.href,
       lang: document.documentElement.lang.slice(0, 35) || undefined,
       description: text(document.querySelector('meta[name="description"]')?.getAttribute("content")).slice(0, 500) || undefined,
-      headings: [...document.querySelectorAll("h1, h2, h3")].slice(0, 30).map((h) => ({
+      // Only headings a reader can see: never hidden or aria-hidden ones (agents get what humans get).
+      headings: [...document.querySelectorAll("h1, h2, h3")].filter((h) => shown(h)).slice(0, 30).map((h) => ({
         level: Number(h.tagName[1]),
         text: text(h.textContent).slice(0, 120),
         url: h.id && h.id.length <= 200 ? `${base}#${h.id}` : undefined,
@@ -51,8 +67,6 @@ export function readPage(what, root) {
     };
     return JSON.stringify(context).length > 20_000 ? { tooLarge: true } : context;
   }
-  const css = (el) => globalThis.getComputedStyle?.(el) ?? {};
-  const hidden = (el) => el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" || css(el).display == "none";
   // Boilerplate (nav, footer, aside...) is skipped inside a root, but a root may sit in one.
   const skipped = (el) => SKIP.has(el.tagName) || hidden(el);
   // visibility is inherited and a child can undo it, so it is checked per text node.
@@ -76,7 +90,6 @@ export function readPage(what, root) {
       else visit(child);
     }
   };
-  const shown = (el) => !el || !hidden(el) && shown(el.parentElement);
   for (const el of root ? [root] : [...document.querySelectorAll("main, [role=main], article"), document.body]) {
     anchor = "";
     if (shown(el) && (visit(el), out)) break;

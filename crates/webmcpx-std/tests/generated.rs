@@ -3,7 +3,7 @@
 
 use std::path::Path;
 
-use webmcpx_core::{Code, limits};
+use webmcpx_core::{Code, limits, unicode};
 use webmcpx_std::tools::ALL;
 
 fn render() -> String {
@@ -32,7 +32,41 @@ fn render() -> String {
     ] {
         out.extend(["  ", key, ": ", &value.to_string(), ",\n"]);
     }
-    out.push_str("};\n");
+    out.push_str("};\n\n");
+    // The invisible set as a regex, so JS strips exactly what Rust strips: an emoji joiner is kept right
+    // after a pictograph (`unicode::invisible_chars`).
+    let class = |keep: fn(char) -> bool| {
+        let mut out = String::new();
+        let mut run: Option<(u32, u32)> = None;
+        let mut flush = |run: Option<(u32, u32)>, out: &mut String| {
+            if let Some((a, b)) = run {
+                out.push_str(&format!("\\u{{{a:X}}}"));
+                if b > a {
+                    out.push_str(&format!("-\\u{{{b:X}}}"));
+                }
+            }
+        };
+        for c in (0..=0x10_FFFF).filter_map(char::from_u32) {
+            let u = c as u32;
+            if keep(c) {
+                run = match run {
+                    Some((a, b)) if b + 1 == u => Some((a, u)),
+                    other => {
+                        flush(other, &mut out);
+                        Some((u, u))
+                    }
+                };
+            }
+        }
+        flush(run, &mut out);
+        out
+    };
+    let picto = class(unicode::is_pictograph);
+    let joiners = class(unicode::joins_emoji);
+    let rest = class(|c| unicode::is_invisible(c) && !unicode::joins_emoji(c));
+    out.push_str(&format!(
+        "/** Invisible characters (webmcpx-core `unicode`): strip with `s.replace(INVISIBLE, \"\")`. */\nexport const INVISIBLE = new RegExp(\"(?<![{picto}])[{joiners}]|[{rest}]\", \"gu\");\n"
+    ));
     out
 }
 

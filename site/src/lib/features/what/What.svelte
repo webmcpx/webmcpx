@@ -26,6 +26,34 @@
 	const i18n = useI18n();
 	const m = $derived(i18n.m.what);
 	const STEPS = ['register', 'list', 'call'] as const;
+	// Every claim in the lead, sourced (checked 2026-11-08): who drafts it and where, who tests it.
+	const SOURCES = [
+		{
+			label: 'WebMCP draft, W3C Web Machine Learning CG (editors from Google and Microsoft)',
+			href: 'https://webmachinelearning.github.io/webmcp/'
+		},
+		{
+			label: 'Implementation status (Chrome and Edge origin trials)',
+			href: 'https://github.com/webmachinelearning/webmcp/blob/main/implementation-status.md'
+		},
+		{
+			label: 'Chrome: WebMCP origin trial',
+			href: 'https://developer.chrome.com/blog/ai-webmcp-origin-trial'
+		},
+		{ label: 'Chrome Platform Status', href: 'https://chromestatus.com/feature/5117755740913664' },
+		{
+			label: 'Microsoft Edge: WebMCP origin trial',
+			href: 'https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/trials/0b76fe60-b266-458e-a285-04e375c0c31a'
+		},
+		{
+			label: 'Microsoft Edge explainer',
+			href: 'https://microsoftedge.github.io/MSEdgeExplainers/WebModelContext/explainer.html'
+		},
+		{
+			label: 'Our benchmark method',
+			href: 'https://github.com/webmcpx/webmcpx/blob/main/bench/METHODOLOGY.md'
+		}
+	];
 	const withWebmcpx = (id: (typeof ROWS)[number]) => {
 		if (id !== 'proof') return m.webmcpx.items[id].webmcpx;
 		const p = m.webmcpx.items.proof;
@@ -37,6 +65,18 @@
 </script>
 
 <Section id="what" kicker={m.kicker} title={m.title} lead={m.lead}>
+	<!-- The lead's claims, each with its source. -->
+	<p class="-mt-4 mb-10 flex flex-wrap items-baseline gap-x-2 gap-y-1 font-mono text-xs text-ink-3">
+		<span class="tracking-widest uppercase">{i18n.m.sources.title}</span>
+		{#each SOURCES as s, i (s.href)}
+			{#if i > 0}<span aria-hidden="true">·</span>{/if}
+			<a
+				href={s.href}
+				class="text-ink-2 underline decoration-ink/30 underline-offset-2 hover:text-ink hover:decoration-ink"
+				>{s.label}</a
+			>
+		{/each}
+	</p>
 	<div class="grid gap-x-12 gap-y-10 lg:grid-cols-12">
 		<ol class="space-y-6 lg:col-span-5">
 			{#each STEPS as id, i (id)}

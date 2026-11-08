@@ -255,6 +255,18 @@ test("get_page_context keeps page-set fields to size and never cuts a URL", asyn
   assert.match(out.data.headings[1].url, /#ok$/);
 });
 
+test("get_page_context gives agents what readers see: no hidden headings, no invisible characters", async () => {
+  const page = host();
+  document.head.innerHTML = "<title>Shop\u200b</title><meta name=\"description\" content=\"Pots\u2060 and bowls\">";
+  document.body.innerHTML = `<main><h1 hidden>secret\u200b</h1><div aria-hidden="true"><h2>also secret</h2></div>
+    <h2>Teapots\u200b</h2><h2>\u200b</h2><h3>Mug ☕\ufe0f</h3></main>`;
+  await register({ wasm: WASM });
+  const { data } = await page.call("get_page_context");
+  assert.equal(data.title, "Shop");
+  assert.equal(data.description, "Pots and bowls");
+  assert.deepEqual(data.headings.map((h) => h.text), ["Teapots", "Mug ☕\ufe0f"], "an emoji keeps its style selector");
+});
+
 test("nested blocks keep their words apart", async () => {
   const page = host();
   document.body.innerHTML = "<main><ul><li><p>Refunds</p><p>Contact support.</p></li><li>Products<ul><li>Notebook</li><li>Mug</li></ul></li></ul></main>";

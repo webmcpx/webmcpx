@@ -30,11 +30,13 @@ pub fn is_invisible(c: char) -> bool {
     )
 }
 
-fn is_pictograph(c: char) -> bool {
+/// Returns true if `c` is a pictograph that an emoji joiner may follow (kept after one).
+pub fn is_pictograph(c: char) -> bool {
     matches!(c as u32, 0x2190..=0x2BFF | 0x1F000..=0x1FAFF)
 }
 
-fn joins_emoji(c: char) -> bool {
+/// Returns true if `c` joins or styles an emoji (ZWJ, VS15, VS16): kept right after a pictograph.
+pub fn joins_emoji(c: char) -> bool {
     matches!(c, '\u{200D}' | '\u{FE0E}' | '\u{FE0F}')
 }
 
