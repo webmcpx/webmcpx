@@ -17,17 +17,14 @@
 	import Versus from '#lib/features/versus/Versus.svelte';
 	import Why from '#lib/features/why/Why.svelte';
 	import Proof from '#lib/features/proof/Proof.svelte';
-	import { ratio } from '#lib/features/benchmark/bench.ts';
 	import { locale } from '#lib/i18n/locales.ts';
-	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
+	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import type { PageProps } from './$types';
 
 	let { data: page }: PageProps = $props();
 	const i18n = useI18n();
 	const home = $derived(i18n.m.meta.home);
-	const description = $derived(
-		page.best ? fmt(home.description, { best: ratio(page.best.saving) }) : home.descriptionPlain
-	);
+	const description = $derived(home.description);
 	const ld = $derived(jsonForScript(homeJsonLd(i18n.m.faq, description, locale(i18n.code).tag)));
 	// Built here: a closing script tag can't be written literally inside this script block.
 	const ldTag = $derived(`<script type="application/ld+json">${ld}<${'/'}script>`);
@@ -40,7 +37,7 @@
 	{@html ldTag}
 </svelte:head>
 
-<Hero best={page.best?.saving ?? null} />
+<Hero best={page.best} />
 <LogoWall />
 {#if page.best}
 	<Divider />

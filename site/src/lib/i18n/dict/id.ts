@@ -22,8 +22,6 @@ const id: Messages = {
 		home: {
 			title: 'webmcpx: WebMCP untuk setiap situs dan setiap agen',
 			description:
-				'Scan situs mana pun untuk tool WebMCP, buat situs Anda siap agent dengan satu baris, beri Claude Code atau Codex WebMCP: hingga {best} lebih sedikit token.',
-			descriptionPlain:
 				'Scan situs mana pun untuk tool WebMCP, jadikan situs Anda siap agent dengan satu baris, dan beri Claude Code atau Codex WebMCP di setiap situs. Open source.'
 		},
 		brand: {
@@ -81,7 +79,7 @@ const id: Messages = {
 		stamp: 'Baru',
 		draft: 'Mengikuti draf WebMCP per {date}',
 		title: { text: 'Jadikan situs Anda {mark}.', mark: 'siap agent' },
-		lead: 'Claude Code, Codex, dan agen lain memakai hingga {best} lebih sedikit token di situs dengan WebMCP. Lihat apa yang didapat agen dari situs Anda, lalu perbaiki dengan satu baris.',
+		lead: 'Di benchmark kami, agen memakai hingga {best} lebih sedikit token dengan WebMCP (kasus terbaik: {site}, {model}). Lihat apa yang didapat agen dari situs Anda, lalu perbaiki dengan satu baris.',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'Agent AI sudah membaca halaman Anda. Lihat apa yang mereka dapat, lalu beri mereka tool sungguhan dengan satu baris.',

@@ -36,11 +36,8 @@ const en = {
 		home: {
 			// max 60: search results cut longer titles. Leads with "WebMCP" (what people search for).
 			title: 'webmcpx: WebMCP for every site and every agent',
-			// max 160: search results cut longer descriptions. {best} is a ratio (20×) from the benchmark.
+			// max 160: search results cut longer descriptions. No benchmark number here: it needs its attribution.
 			description:
-				'Scan any site for WebMCP tools, make yours agent-ready with one line, and give Claude Code or Codex WebMCP on every site: up to {best} fewer tokens. Open source.',
-			// Without a published run (no number to quote).
-			descriptionPlain:
 				'Scan any site for WebMCP tools, make yours agent-ready with one line, and give Claude Code or Codex WebMCP on every site. Open source.'
 		},
 		brand: {
@@ -118,7 +115,7 @@ const en = {
 		// use it through tools; keep it short and use the same word everywhere it appears.
 		title: { text: 'Make your site {mark}.', mark: 'agent-ready' },
 		// max 120: 3 lines on a phone.
-		lead: 'Claude Code, Codex and other agents use up to {best} fewer tokens on sites with WebMCP. See what agents get from yours, then fix it with one line.',
+		lead: 'In our benchmark, agents used up to {best} fewer tokens with WebMCP (best case: {site}, {model}). See what agents get from your site, then fix it with one line.',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'AI agents are already reading your pages. See what they get, then give them real tools with one line.',

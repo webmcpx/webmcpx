@@ -14,8 +14,8 @@
 	import Rich from '#lib/i18n/Rich.svelte';
 
 	interface Props {
-		/** The leaderboard's best-case saving (a ratio), quoted in the lead; null: no run published. */
-		best: number | null;
+		/** The leaderboard's best case, quoted in the lead with its site and model; null: no run published. */
+		best: { saving: number; site: string; model: string } | null;
 	}
 
 	let { best }: Props = $props();
@@ -54,7 +54,7 @@
 			</Reveal>
 			<Reveal delay={120}>
 				<p class="mx-auto mt-7 max-w-xl text-lg text-pretty text-ink-2 sm:text-xl">
-					{best ? fmt(m.lead, { best: ratio(best) }) : m.leadPlain}
+					{best ? fmt(m.lead, { best: ratio(best.saving), site: best.site, model: best.model }) : m.leadPlain}
 				</p>
 			</Reveal>
 			<Reveal delay={180} class="mt-8">

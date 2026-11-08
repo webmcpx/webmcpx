@@ -21,8 +21,6 @@ const de: Messages = {
 		home: {
 			title: 'webmcpx: WebMCP für jede Website und jeden Agenten',
 			description:
-				'Prüfen Sie Websites auf WebMCP-Tools, machen Sie Ihre mit einer Zeile agentenfähig, geben Sie Claude Code oder Codex überall WebMCP: bis zu {best} weniger Tokens.',
-			descriptionPlain:
 				'Prüfen Sie jede Website auf WebMCP-Tools, machen Sie Ihre mit einer Zeile agentenfähig und geben Sie Claude Code oder Codex überall WebMCP. Open Source.'
 		},
 		brand: {
@@ -80,7 +78,7 @@ const de: Messages = {
 		stamp: 'Neu',
 		draft: 'Folgt dem WebMCP-Entwurf vom {date}',
 		title: { text: 'Machen Sie Ihre Website {mark}.', mark: 'agentenfähig' },
-		lead: 'Claude Code, Codex und andere Agenten brauchen auf Websites mit WebMCP bis zu {best} weniger Tokens. Sehen Sie, was Agenten von Ihrer bekommen, und beheben Sie es mit einer Zeile.',
+		lead: 'In unserem Benchmark brauchten Agenten mit WebMCP bis zu {best} weniger Tokens (bester Fall: {site}, {model}). Sehen Sie, was Agenten von Ihrer Website bekommen, und beheben Sie es mit einer Zeile.',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'KI-Agenten lesen Ihre Seiten längst. Sehen Sie, was bei ihnen ankommt, und geben Sie ihnen mit einer Zeile echte Tools.',

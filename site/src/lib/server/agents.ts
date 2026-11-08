@@ -155,9 +155,15 @@ export function homeMarkdown(): string {
 	}).join('\n');
 	return `# webmcpx: make your site agent-ready
 
-${m.hero.lead}
+${m.hero.leadPlain}
 
-Two independent paths: one for people who run a site, one for people who use agents.
+Two independent paths: one for people who use agents, one for people who run a site.
+
+## ${m.agents.title}
+
+${savingLine()}${FOR_YOUR_AGENT}
+
+${SEE_IT_WORK}
 
 ## ${m.fix.title}
 
@@ -166,12 +172,6 @@ ${FOR_YOUR_SITE}
 ### Your own tools
 
 ${OWN_TOOLS}
-
-## ${m.agents.title}
-
-${savingLine()}${FOR_YOUR_AGENT}
-
-${SEE_IT_WORK}
 
 ## Scan any site
 

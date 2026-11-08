@@ -20,8 +20,6 @@ const ja: Messages = {
 		home: {
 			title: 'webmcpx：すべてのサイトとエージェントに WebMCP を',
 			description:
-				'あらゆるサイトの WebMCP ツールをスキャン。1 行で自分のサイトをエージェント対応にし、Claude Code や Codex にどのサイトでも WebMCP を。トークンは最大 {best} 削減。オープンソース。',
-			descriptionPlain:
 				'あらゆるサイトの WebMCP ツールをスキャン。1 行で自分のサイトをエージェント対応にし、Claude Code や Codex にどのサイトでも WebMCP を。オープンソース。'
 		},
 		brand: {
@@ -79,7 +77,7 @@ const ja: Messages = {
 		stamp: '最新',
 		draft: '{date} 版の WebMCP ドラフトに追従',
 		title: { text: 'そのサイトを、{mark}に。', mark: 'エージェント対応' },
-		lead: 'Claude Code、Codexなどのエージェントは、WebMCP対応サイトでトークンを最大{best}削減。あなたのサイトでエージェントが何を得るかを確認し、1行で改善しましょう。',
+		lead: '私たちのベンチマークでは、WebMCPを使うとエージェントのトークンが最大{best}削減されました（最良ケース：{site}、{model}）。あなたのサイトでエージェントが何を得るかを確認し、1行で改善しましょう。',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',

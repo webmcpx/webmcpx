@@ -22,8 +22,6 @@ const ptBr: Messages = {
 		home: {
 			title: 'webmcpx: WebMCP para todo site e todo agente',
 			description:
-				'Ache ferramentas WebMCP em qualquer site, deixe o seu pronto para agentes em uma linha e dê WebMCP ao Claude Code ou Codex: até {best} menos tokens. Open source.',
-			descriptionPlain:
 				'Escaneie qualquer site atrás de ferramentas WebMCP, deixe o seu pronto para agentes com uma linha e dê WebMCP ao Claude Code ou Codex em todo site. Open source.'
 		},
 		brand: {
@@ -81,7 +79,7 @@ const ptBr: Messages = {
 		stamp: 'Novo',
 		draft: 'Acompanha o rascunho do WebMCP de {date}',
 		title: { text: 'Deixe seu site {mark}.', mark: 'pronto para agentes' },
-		lead: 'Claude Code, Codex e outros agentes gastam até {best} menos tokens em sites com WebMCP. Veja o que os agentes recebem do seu, e resolva com uma linha.',
+		lead: 'No nosso benchmark, agentes gastaram até {best} menos tokens com WebMCP (melhor caso: {site}, {model}). Veja o que os agentes recebem do seu site e resolva com uma linha.',
 		// Without a published run (no number to quote).
 		leadPlain:
 			'Agentes de IA já leem suas páginas. Veja o que eles recebem e entregue ferramentas de verdade com uma linha.',

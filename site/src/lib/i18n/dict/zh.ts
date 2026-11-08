@@ -23,8 +23,6 @@ const zh: Messages = {
 		home: {
 			title: 'webmcpx：让每个网站、每个智能体都用上 WebMCP',
 			description:
-				'扫描任意网站的 WebMCP 工具，一行代码让你的网站智能体就绪，让 Claude Code 或 Codex 在任何网站上都能用 WebMCP：token 最多减少 {best}。代码开源。',
-			descriptionPlain:
 				'扫描任意网站的 WebMCP 工具，一行代码让你的网站智能体就绪，让 Claude Code 或 Codex 在任何网站上都能用 WebMCP。代码开源。'
 		},
 		brand: {
@@ -82,7 +80,7 @@ const zh: Messages = {
 		draft: '已跟进 {date} 版 WebMCP 草案',
 		// \u200b: where the headline may break (headings only break at punctuation and these).
 		title: { text: '让你的网站\u200b{mark}。', mark: '智能体就绪' },
-		lead: 'Claude Code、Codex 等智能体在支持 WebMCP 的网站上最多可少用 {best} 的 token。看看智能体能从你的网站拿到什么，然后一行代码搞定。',
+		lead: '在我们的基准测试中，使用 WebMCP 的智能体最多少用 {best} 的 token（最佳案例：{site}，{model}）。看看智能体能从你的网站拿到什么，然后一行代码搞定。',
 		// Without a published run (no number to quote).
 		leadPlain: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
 		try: '试试 {sites}',
