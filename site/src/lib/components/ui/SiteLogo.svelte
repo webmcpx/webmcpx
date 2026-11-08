@@ -30,7 +30,7 @@
 	aria-hidden={title ? undefined : 'true'}
 	aria-label={title}
 >
-	{#if logo.cutouts}
+	{#if logo.cutouts || logo.holes}
 		<defs>
 			<mask id="{uid}-cut" maskUnits="userSpaceOnUse">
 				<rect x="-1e4" y="-1e4" width="2e4" height="2e4" fill="white" />
@@ -44,10 +44,13 @@
 						stroke-linejoin="round"
 					/>
 				{/each}
+				{#each logo.holes ?? [] as h, i (i)}
+					<path d={h.d} fill={h.keep ? 'white' : 'black'} />
+				{/each}
 			</mask>
 		</defs>
 	{/if}
-	<g mask={logo.cutouts ? `url(#${uid}-cut)` : undefined}>
+	<g mask={logo.cutouts || logo.holes ? `url(#${uid}-cut)` : undefined}>
 		{#each logo.paths as p, i (i)}
 			<path d={p.d} fill-rule={p.evenodd ? 'evenodd' : undefined} />
 		{/each}

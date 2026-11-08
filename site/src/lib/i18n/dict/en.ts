@@ -852,6 +852,8 @@ const en = {
 			shared: 'Link copied',
 			// Saves the result card as a PDF through the print dialog: max 18.
 			save: 'Save PDF',
+			// Downloads the result's share image (PNG): max 18.
+			savePng: 'Save PNG',
 			// Printed under the card in the PDF: {date} is the day, {link} re-runs the scan.
 			printed: 'Scanned by webmcpx.dev on {date}. Scan again: {link}'
 		},

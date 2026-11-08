@@ -10,6 +10,8 @@ use crate::scan::{Report, Verdict};
 const FONT: &[u8] = include_bytes!("../assets/fonts/bricolage-grotesque-latin-wght-normal.woff2");
 /// The webmcpx lockup, outlined (scripts/lockup.py), in ink.
 const LOCKUP: &str = include_str!("../../../site/static/brand-assets/lockup/lockup-ink.svg");
+/// The Junction mark, drawn faint and large behind the card, as on the site's sections.
+const MARK: &str = include_str!("../../../site/static/brand-assets/junction/mark.svg");
 
 /// What a card or badge shows.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -70,10 +72,15 @@ fn stamp(verdict: Verdict) -> (&'static str, &'static str) {
     }
 }
 
-/// The card's one line under the site name, ending with the score.
+/// The card's one line under the site name, ending with the score (link previews' description).
 pub fn line(s: Summary<'_>) -> String {
+    format!("{} Score {}/100.", what(s), s.score)
+}
+
+/// What the scan found, in one sentence (the card shows the score on its own).
+fn what(s: Summary<'_>) -> String {
     let tools = if s.tools == 1 { "tool" } else { "tools" };
-    let what = match s.verdict {
+    match s.verdict {
         Verdict::Missing => format!(
             "No WebMCP tools. Agents read ~{} tokens of this page and guess.",
             short(s.page_tokens)
@@ -86,8 +93,7 @@ pub fn line(s: Summary<'_>) -> String {
         }
         Verdict::Issues => format!("{} WebMCP {tools}; a few agent basics missing.", s.tools),
         Verdict::Ready => format!("{} WebMCP {tools} agents can call directly.", s.tools),
-    };
-    format!("{what} Score {}/100.", s.score)
+    }
 }
 
 /// The card as a standalone HTML page, 1200×630.
@@ -99,34 +105,69 @@ pub fn html(s: Summary<'_>) -> String {
         27..=36 => 60,
         _ => 46,
     };
-    html_with(s.host, size, &line(s), Some(stamp(s.verdict)))
+    html_with(
+        s.host,
+        size,
+        &what(s),
+        Some(stamp(s.verdict)),
+        Some(s.score),
+    )
 }
 
-fn html_with(title: &str, size: u32, line: &str, stamp: Option<(&str, &str)>) -> String {
+fn html_with(
+    title: &str,
+    size: u32,
+    line: &str,
+    stamp: Option<(&str, &str)>,
+    score: Option<u8>,
+) -> String {
     let (label, fill) = stamp.unwrap_or(("", "transparent"));
     let stamp_display = if stamp.is_some() { "block" } else { "none" };
     let host = escape(title);
+    // The score, big at the bottom right; highlighted from the agent-ready bar up.
+    let score = score.map_or_else(String::new, |n| {
+        let mark = if n >= crate::scan::READY_SCORE {
+            " marked"
+        } else {
+            ""
+        };
+        format!(
+            r#"<div class="score"><div class="label">Agent-ready score</div><div class="num{mark}"><b>{n}</b><small>/100</small></div></div>"#
+        )
+    });
     format!(
         r#"<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face{{font-family:B;src:url(data:font/woff2;base64,{font}) format("woff2");font-weight:200 800}}
 *{{margin:0;box-sizing:border-box}}
 html,body{{width:1200px;height:630px;background:oklch(0.958 0.006 95);font-family:B,sans-serif;color:oklch(0.18 0.004 95)}}
-.frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;padding:56px 64px;display:flex;flex-direction:column;
+.frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;padding:56px 64px;display:flex;flex-direction:column;overflow:hidden;
 background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.86 0.006 95) 1px,transparent 1px);background-size:64px 64px}}
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .lockup svg{{height:44px;width:auto}}
 .stamp{{display:{stamp_display};border:4px solid currentColor;border-radius:999px;padding:10px 28px;font-size:34px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};box-shadow:5px 5px 0 currentColor}}
-.host{{margin-top:auto;font-size:{size}px;font-weight:800;letter-spacing:-.04em;line-height:1;overflow-wrap:anywhere}}
-.line{{margin-top:22px;font-size:36px;font-weight:500;color:oklch(0.38 0.006 95);max-width:1000px}}
-.foot{{margin-top:40px;font-size:28px;font-weight:700}}
+.mark{{position:absolute;right:-110px;top:50%;width:600px;height:600px;transform:translateY(-50%) rotate(-12deg);opacity:.06}}
+.top,.main,.foot{{position:relative}}
+.main{{margin-top:auto}}
+.row{{display:flex;align-items:flex-end;gap:48px}}
+.text{{flex:1;min-width:0}}
+.host{{font-size:{size}px;font-weight:800;letter-spacing:-.04em;line-height:1;overflow-wrap:anywhere}}
+.line{{margin-top:22px;font-size:34px;font-weight:500;color:oklch(0.38 0.006 95);max-width:1000px}}
+.score{{text-align:right;flex:none}}
+.score .label{{font-size:20px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.38 0.006 95);margin-bottom:6px}}
+.num b{{font-size:150px;font-weight:800;letter-spacing:-.05em;line-height:.85}}
+.num small{{font-size:46px;font-weight:700;color:oklch(0.38 0.006 95)}}
+.num.marked b{{background:linear-gradient(transparent 45%,oklch(0.89 0.16 95) 45%,oklch(0.89 0.16 95) 80%,transparent 80%)}}
+.foot{{margin-top:40px;font-size:30px;font-weight:700}}
 .foot span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
 </style></head><body><div class="frame">
+<div class="mark">{mark}</div>
 <div class="top"><div class="lockup">{lockup}</div><div class="stamp">{label}</div></div>
-<div class="host">{host}</div><div class="line">{line}</div>
+<div class="main"><div class="host">{host}</div><div class="row"><div class="text line">{line}</div>{score}</div></div>
 <div class="foot">Scan yours at <span>webmcpx.dev</span></div>
 </div></body></html>"#,
         font = base64(FONT),
         lockup = LOCKUP,
+        mark = MARK,
         line = escape(line),
     )
 }
@@ -137,6 +178,7 @@ pub fn generic_html() -> String {
         "Make your site agent-ready",
         104,
         "Scan any site for WebMCP tools. One line makes it agent\u{2011}ready.",
+        None,
         None,
     )
 }
@@ -172,6 +214,7 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
         &format!(
             "{model}, same question with and without WebMCP: best case, on {place}. Every question is published."
         ),
+        None,
         None,
     ))
 }

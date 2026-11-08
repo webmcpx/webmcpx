@@ -9,6 +9,7 @@
 	import Clock from '@lucide/svelte/icons/clock';
 	import Link from '@lucide/svelte/icons/link';
 	import FileDown from '@lucide/svelte/icons/file-down';
+	import ImageDown from '@lucide/svelte/icons/image-down';
 	import Wrench from '@lucide/svelte/icons/wrench';
 	import { tick } from 'svelte';
 	import CircleAlert from '@lucide/svelte/icons/circle-exclamation-point';
@@ -420,13 +421,24 @@
 			</p>
 			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7" data-print-hide>
 				{#if r.verdict === 'missing'}
-					<Button href="#for-sites" size="sm"><Wrench aria-hidden="true" />{m.result.fix}</Button>
+					<Button href="#for-sites" variant="marker" size="sm"
+						><Wrench aria-hidden="true" />{m.result.fix}</Button
+					>
 				{/if}
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
 					<Link aria-hidden="true" />{shared ? m.result.shared : m.result.share}
 				</Button>
 				<Button variant="outline" size="sm" onclick={() => savePdf(host(r.final_url))}>
 					<FileDown aria-hidden="true" />{m.result.save}
+				</Button>
+				<!-- The share card the scanner renders (1200×630, same origin, so `download` names the file). -->
+				<Button
+					variant="outline"
+					size="sm"
+					href={`/og/scan.png?url=${encodeURIComponent(r.url)}`}
+					download={`webmcpx-scan-${host(r.final_url)}.png`}
+				>
+					<ImageDown aria-hidden="true" />{m.result.savePng}
 				</Button>
 			</div>
 		</Card>

@@ -10,7 +10,9 @@ const PATH = /^[MmLlHhVvCcSsQqTtAaZz0-9.,\-\s eE]+$/;
 describe('logos', () => {
 	it.each(all)('%s is drawing data only, with a valid viewBox', (_, logo) => {
 		expect(logo.viewBox).toMatch(/^-?[\d.]+ -?[\d.]+ [\d.]+ [\d.]+$/);
-		const ds = [...logo.paths, ...(logo.strokes ?? []), ...(logo.cutouts ?? [])].map((p) => p.d);
+		const ds = [...logo.paths, ...(logo.strokes ?? []), ...(logo.cutouts ?? []), ...(logo.holes ?? [])].map(
+			(p) => p.d
+		);
 		expect(ds.length).toBeGreaterThan(0);
 		for (const d of ds) expect(d).toMatch(PATH);
 	});

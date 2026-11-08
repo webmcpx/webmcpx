@@ -9,6 +9,14 @@
 	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import {
 		ARC,
+		CONTINUE,
+		GOOSE,
+		KILO,
+		KIRO,
+		OPENCLAW,
+		OPENCODE,
+		WARP,
+		ZEN,
 		BRAVE,
 		CHROME,
 		CLAUDE,
@@ -66,25 +74,38 @@
 
 	// Where the claim holds: MCP clients that run stdio servers (the bridge), then browsers (the polyfill, on
 	// HTTPS) and automation tools (document.modelContext in the page). Each is a public, documented fact.
-	const CLIENTS: { name: string; logo: Logo }[] = [
+	// A name without a logo: the brand's only official mark is too heavy for a row icon (Hermes Agent's SVG is
+	// 115 KB), needs a license (Microsoft Edge), or has no official SVG (Comet). Sources: docs/decisions/0004.
+	const CLIENTS: { name: string; logo?: Logo }[] = [
 		{ name: 'Claude Code', logo: CLAUDE },
 		{ name: 'Codex', logo: OPENAI },
 		{ name: 'Cursor', logo: CURSOR },
 		{ name: 'GitHub Copilot', logo: COPILOT },
-		{ name: 'Windsurf', logo: WINDSURF },
+		{ name: 'OpenClaw', logo: OPENCLAW },
+		{ name: 'Hermes Agent' },
 		{ name: 'Gemini CLI', logo: GEMINI },
+		{ name: 'OpenCode', logo: OPENCODE },
+		{ name: 'Windsurf', logo: WINDSURF },
+		{ name: 'Warp', logo: WARP },
+		{ name: 'Goose', logo: GOOSE },
 		{ name: 'Zed', logo: ZED },
 		{ name: 'JetBrains', logo: JETBRAINS },
-		{ name: 'Cline', logo: CLINE }
+		{ name: 'Cline', logo: CLINE },
+		{ name: 'Continue', logo: CONTINUE },
+		{ name: 'Kilo Code', logo: KILO },
+		{ name: 'Kiro', logo: KIRO }
 	];
-	const BROWSERS: { name: string; logo: Logo }[] = [
+	const BROWSERS: { name: string; logo?: Logo }[] = [
 		{ name: 'Chrome', logo: CHROME },
-		{ name: 'Firefox', logo: FIREFOX },
+		{ name: 'Microsoft Edge' },
 		{ name: 'Safari', logo: SAFARI },
+		{ name: 'Firefox', logo: FIREFOX },
 		{ name: 'Brave', logo: BRAVE },
 		{ name: 'Arc', logo: ARC },
 		{ name: 'Opera', logo: OPERA },
 		{ name: 'Vivaldi', logo: VIVALDI },
+		{ name: 'Zen', logo: ZEN },
+		{ name: 'Perplexity Comet' },
 		{ name: 'Playwright', logo: PLAYWRIGHT },
 		{ name: 'Selenium', logo: SELENIUM },
 		{ name: 'Puppeteer', logo: PUPPETEER },
@@ -135,7 +156,9 @@
 						]}
 					>
 						{#each group as w (w.name)}
-							<li class="inline-flex items-center gap-1.5"><SiteLogo logo={w.logo} size={16} />{w.name}</li>
+							<li class="inline-flex items-center gap-1.5">
+								{#if w.logo}<SiteLogo logo={w.logo} size={16} />{/if}{w.name}
+							</li>
 						{/each}
 					</ul>
 				{/each}

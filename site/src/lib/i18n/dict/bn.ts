@@ -707,6 +707,7 @@ const bn: Messages = {
 			share: 'শেয়ার করুন',
 			shared: 'লিংক কপি হয়েছে',
 			save: 'PDF সেভ করুন',
+			savePng: 'PNG সেভ করুন',
 			printed: 'webmcpx.dev {date} তারিখে স্ক্যান করেছে। আবার স্ক্যান করুন: {link}'
 		},
 		badges: {

@@ -715,6 +715,7 @@ const fr: Messages = {
 			share: 'Partager',
 			shared: 'Lien copié',
 			save: 'Enregistrer en PDF',
+			savePng: 'Enregistrer en PNG',
 			printed: 'Scanné par webmcpx.dev le {date}. Relancer le scan : {link}'
 		},
 		badges: {

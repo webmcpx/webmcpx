@@ -17,7 +17,9 @@
 		variants: {
 			variant: {
 				solid: 'bg-ink text-paper',
-				outline: 'bg-card text-ink'
+				outline: 'bg-card text-ink',
+				/** The highlighter yellow: the one action we want taken. */
+				marker: 'bg-marker text-ink'
 			},
 			size: {
 				sm: 'h-9 px-4 text-sm',

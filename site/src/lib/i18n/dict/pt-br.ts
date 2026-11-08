@@ -709,6 +709,7 @@ const ptBr: Messages = {
 			share: 'Compartilhar',
 			shared: 'Link copiado',
 			save: 'Salvar PDF',
+			savePng: 'Salvar PNG',
 			printed: 'Escaneado pelo webmcpx.dev em {date}. Escaneie de novo: {link}'
 		},
 		badges: {

@@ -701,6 +701,7 @@ const id: Messages = {
 			share: 'Bagikan',
 			shared: 'Tautan disalin',
 			save: 'Simpan PDF',
+			savePng: 'Simpan PNG',
 			printed: 'Dipindai oleh webmcpx.dev pada {date}. Pindai lagi: {link}'
 		},
 		badges: {

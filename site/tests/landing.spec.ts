@@ -280,6 +280,10 @@ test('Save PDF prints the result card alone, named after the site', async ({ pag
 	});
 	await page.getByLabel("Your site's address").first().fill('plain.example.com');
 	await page.keyboard.press('Enter');
+	// Save PNG downloads the scanner's share card for this result, named after the site.
+	const png = page.locator('#scan').getByRole('link', { name: 'Save PNG' });
+	await expect(png).toHaveAttribute('href', `/og/scan.png?url=${encodeURIComponent(REPORT.url)}`);
+	await expect(png).toHaveAttribute('download', 'webmcpx-scan-docs.example.com.png');
 	await page.locator('#scan').getByRole('button', { name: 'Save PDF' }).click();
 	expect(await page.evaluate(() => (window as unknown as { printed: object }).printed)).toEqual({
 		title: 'webmcpx scan · docs.example.com',

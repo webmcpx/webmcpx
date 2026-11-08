@@ -698,6 +698,7 @@ const hi: Messages = {
 			share: 'शेयर करें',
 			shared: 'लिंक कॉपी हो गया',
 			save: 'PDF सेव करें',
+			savePng: 'PNG सेव करें',
 			printed: 'webmcpx.dev ने {date} को स्कैन किया। फिर से स्कैन करें: {link}'
 		},
 		badges: {

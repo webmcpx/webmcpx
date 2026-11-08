@@ -662,6 +662,7 @@ const zh: Messages = {
 			share: '分享',
 			shared: '链接已复制',
 			save: '保存 PDF',
+			savePng: '保存 PNG',
 			printed: '由 webmcpx.dev 于 {date} 扫描。重新扫描：{link}'
 		},
 		badges: {

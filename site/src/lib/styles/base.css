@@ -285,6 +285,10 @@
 
 /* Save PDF on a scan result: print the result card alone, colors kept (ScanResult.svelte, savePdf). Everything
    that is neither the card, inside it, nor one of its ancestors is removed, so the PDF is the card's pages only. */
+/* A page margin, so the card's border and rounded corners never touch the paper's edge. */
+@page {
+	margin: 14mm;
+}
 @media print {
 	html[data-printing],
 	html[data-printing] body {
@@ -302,9 +306,14 @@
 		box-shadow: none !important;
 		transform: none !important;
 		max-width: none !important;
+		/* The hero frame clips with its own rounded corners: unclipped, the card keeps its arcs. */
+		overflow: visible !important;
+		border-radius: 0 !important;
 	}
 	html[data-printing] [data-print-area] {
 		box-shadow: none;
+		max-width: 100%;
+		break-inside: avoid;
 		print-color-adjust: exact;
 		-webkit-print-color-adjust: exact;
 	}

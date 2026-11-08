@@ -710,6 +710,7 @@ const es: Messages = {
 			share: 'Compartir',
 			shared: 'Enlace copiado',
 			save: 'Guardar PDF',
+			savePng: 'Guardar PNG',
 			printed: 'Escaneado por webmcpx.dev el {date}. Vuelve a escanear: {link}'
 		},
 		badges: {

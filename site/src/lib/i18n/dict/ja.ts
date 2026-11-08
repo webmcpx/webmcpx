@@ -691,6 +691,7 @@ const ja: Messages = {
 			share: '共有',
 			shared: 'リンクをコピー済み',
 			save: 'PDF で保存',
+			savePng: 'PNG で保存',
 			printed: 'webmcpx.dev で {date} にスキャン。再スキャン: {link}'
 		},
 		badges: {

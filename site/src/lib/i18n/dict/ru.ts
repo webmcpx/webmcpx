@@ -744,6 +744,7 @@ const ru: Messages = {
 			share: 'Поделиться',
 			shared: 'Ссылка скопирована',
 			save: 'Сохранить PDF',
+			savePng: 'Сохранить PNG',
 			printed: 'Проверено webmcpx.dev {date}. Проверить снова: {link}'
 		},
 		badges: {
