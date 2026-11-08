@@ -344,7 +344,7 @@ const ru: Messages = {
 		title: 'Два шага. Сайт готов для агентов.',
 		lead: 'Шаг 1 добавляет инструменты на ваш сайт. Шаг 2 позволяет агенту их вызывать.',
 		alternatives: { npm: 'npm', agent: 'Агент' },
-		facts: '~3,2 КБ на загрузку · Rust + WebAssembly · MIT',
+		facts: '~2,4 КБ на загрузку · Rust + WebAssembly · MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: { title: 'На вашем сайте', lead: 'Вставьте перед {tag}. Где нет WebMCP, он ничего не делает.' },
@@ -476,7 +476,7 @@ const ru: Messages = {
 			tools: 'Найденные инструменты',
 			more: 'ещё {n}',
 			findings: 'Замечания линтера',
-			fix: 'Исправьте одной строкой. Вставьте её перед {tag}:',
+			fix: 'Исправить',
 			lint: 'Найдите все проблемы в исходниках — сразу с исправлениями:',
 			terminal: 'терминал',
 			badge: 'Покажите это. Выберите бейдж и вставьте его на сайт:',

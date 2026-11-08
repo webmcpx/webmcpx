@@ -23,7 +23,7 @@
 
 <Meta title={i18n.m.meta.home.title} description={i18n.m.meta.home.description} />
 
-<Hero scriptTag={page.code.scriptTag} />
+<Hero />
 <LogoWall />
 <Divider />
 <Fix code={page.code} />

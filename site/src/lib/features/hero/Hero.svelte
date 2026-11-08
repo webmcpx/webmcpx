@@ -8,11 +8,8 @@
 	import ScanForm from '#lib/features/scan/ScanForm.svelte';
 	import ScanResult from '#lib/features/scan/ScanResult.svelte';
 	import { scanner } from '#lib/features/scan/scanner.svelte.ts';
-	import type { Highlighted } from '#lib/content/snippets.ts';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
-
-	let { scriptTag }: { scriptTag: Highlighted } = $props();
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.hero);
@@ -72,7 +69,7 @@
 				</ScanForm>
 			</Reveal>
 			<div class="mt-10">
-				<ScanResult {scriptTag} />
+				<ScanResult />
 			</div>
 		</div>
 	</div>

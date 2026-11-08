@@ -316,7 +316,7 @@ const zh: Messages = {
 		title: '两步，智能体就绪。',
 		lead: '第 1 步在你的网站上提供工具，第 2 步让你的智能体调用它们。',
 		alternatives: { npm: 'npm', agent: '智能体' },
-		facts: '加载约 3.2 KB · Rust + WebAssembly · MIT 许可证',
+		facts: '加载约 2.4 KB · Rust + WebAssembly · MIT 许可证',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: { title: '在你的网站上', lead: '粘贴到 {tag} 之前。没有 WebMCP 的地方，它什么也不做。' },
@@ -420,7 +420,7 @@ const zh: Messages = {
 			tools: '发现的工具',
 			more: '+{n} 个',
 			findings: 'lint 结果',
-			fix: '一行代码就能修好。粘贴到 {tag} 之前：',
+			fix: '修复',
 			lint: '找出源码里的所有问题，并给出修复方案：',
 			terminal: '终端',
 			badge: '亮出来。选一个徽章，贴到你的网站上：',

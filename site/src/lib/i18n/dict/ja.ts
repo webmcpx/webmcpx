@@ -317,7 +317,7 @@ const ja: Messages = {
 		title: '2 ステップで、エージェント対応。',
 		lead: 'ステップ 1 でサイトにツールを置き、ステップ 2 でエージェントがそれを呼べるようにします。',
 		alternatives: { npm: 'npm を使う場合', agent: 'エージェント' },
-		facts: '読込時 ~3.2 KB · Rust + WebAssembly · MIT License',
+		facts: '読込時 ~2.4 KB · Rust + WebAssembly · MIT License',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: { title: 'サイト側', lead: '{tag} の前に貼るだけ。WebMCP がない環境では何もしません。' },
@@ -435,7 +435,7 @@ const ja: Messages = {
 			tools: '検出されたツール',
 			more: 'ほか {n} 件',
 			findings: 'lint の指摘事項',
-			fix: '1 行で解決できます。{tag} の直前に貼り付けてください：',
+			fix: '修正する',
 			lint: 'ソース内の問題をすべて洗い出し、修正案も示します：',
 			terminal: 'ターミナル',
 			badge: '対応済みであることを示しましょう。バッジを選んで、サイトに貼り付けてください：',

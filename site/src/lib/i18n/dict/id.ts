@@ -318,7 +318,7 @@ const id: Messages = {
 		title: 'Dua langkah. Siap agent.',
 		lead: 'Langkah 1 memasang tool di situs Anda. Langkah 2 membuat agen Anda bisa memanggilnya.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
-		facts: '~3,2 KB dimuat · Rust + WebAssembly · lisensi MIT',
+		facts: '~2,4 KB dimuat · Rust + WebAssembly · lisensi MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: {
@@ -438,7 +438,7 @@ const id: Messages = {
 			tools: 'Tool yang ditemukan',
 			more: '+{n} lainnya',
 			findings: 'Temuan lint',
-			fix: 'Perbaiki dengan satu baris. Tempel sebelum {tag}:',
+			fix: 'Perbaiki',
 			lint: 'Temukan semua masalah di source Anda, lengkap dengan perbaikannya:',
 			terminal: 'terminal',
 			badge: 'Tunjukkan. Pilih badge, lalu tempel di situs Anda:',

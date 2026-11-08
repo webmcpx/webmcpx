@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
 	import Link from '@lucide/svelte/icons/link';
+	import Wrench from '@lucide/svelte/icons/wrench';
 	import { tick } from 'svelte';
 	import CircleAlert from '@lucide/svelte/icons/circle-exclamation-point';
 	import CircleCheck from '@lucide/svelte/icons/circle-check';
@@ -40,7 +41,6 @@
 	);
 
 	/** The install line, highlighted at build time. */
-	let { scriptTag }: { scriptTag: Highlighted } = $props();
 
 	/** A code sample that is not highlighted (built in the browser), shown in the same CodeBlock. */
 	const plain = (code: string): Highlighted => ({
@@ -208,10 +208,7 @@
 			{/if}
 
 			{#if r.verdict === 'missing'}
-				<div class="border-t-2 border-ink p-5 sm:px-7">
-					<p class="mb-3 font-medium">{fmt(m.result.fix, { tag: '</body>' })}</p>
-					<CodeBlock snippet={scriptTag} title="index.html" class="shadow-none" />
-				</div>
+				<!-- The fix lives in one place, the #fix section; the result only points there. -->
 			{:else if r.verdict === 'issues'}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="mb-3 font-medium">{m.result.lint}</p>
@@ -260,6 +257,9 @@
 			{/if}
 
 			<div class="flex flex-wrap gap-3 border-t-2 border-ink p-5 sm:px-7">
+				{#if r.verdict === 'missing'}
+					<Button href="#fix" size="sm"><Wrench aria-hidden="true" />{m.result.fix}</Button>
+				{/if}
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
 					<Link aria-hidden="true" />{shared ? m.result.shared : m.result.share}
 				</Button>

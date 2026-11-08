@@ -326,7 +326,7 @@ const es: Messages = {
 		title: 'Dos pasos. Listo para agentes.',
 		lead: 'El paso 1 pone herramientas en tu sitio. El paso 2 deja que tu agente las llame.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
-		facts: '~3,2 KB al cargar · Rust + WebAssembly · MIT',
+		facts: '~2,4 KB al cargar · Rust + WebAssembly · MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: { title: 'En tu sitio', lead: 'Pégalo antes de {tag}. Donde no hay WebMCP, no hace nada.' },
@@ -447,7 +447,7 @@ const es: Messages = {
 			tools: 'Herramientas encontradas',
 			more: '+{n} más',
 			findings: 'Hallazgos del linter',
-			fix: 'Arréglalo con una línea. Pégala antes de {tag}:',
+			fix: 'Corregir',
 			lint: 'Encuentra todos los problemas en tu código fuente, con su corrección:',
 			terminal: 'terminal',
 			badge: 'Muéstralo. Elige una insignia y pégala en tu sitio:',

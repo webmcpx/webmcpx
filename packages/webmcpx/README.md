@@ -87,7 +87,7 @@ const { registered, dispose } = await register({
 - **Invisible characters stripped** from page text.
 - **A no-op where WebMCP is missing.** Uses `document.modelContext`, with a `navigator.modelContext`
   fallback.
-- **About 3.2 KB brotli on page load.** The WebAssembly engine loads on the first tool call.
+- **About 2.4 KB brotli on page load.** The WebAssembly engine loads on the first tool call.
 
 `npx webmcpx --help` shows the setup for Cursor, VS Code and Windsurf, `--headed` to watch the browser and
 `--cdp <url>` to use your own. Needs Node 22+ and Chrome, Chromium, Edge or Brave.

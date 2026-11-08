@@ -425,7 +425,7 @@ const en = {
 		lead: 'Step 1 puts tools on your site. Step 2 lets your agent call them.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
-		facts: '~3.2 KB on load · Rust + WebAssembly · MIT license',
+		facts: '~2.4 KB on load · Rust + WebAssembly · MIT license',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: {
@@ -561,8 +561,8 @@ const en = {
 			more: '+{n} more',
 			/** Names the list of lint findings. */
 			findings: 'Lint findings',
-			// {tag} is `</body>` (code): keep it.
-			fix: 'Fix it with one line. Paste it before {tag}:',
+			// A button that jumps to the install steps: max 14.
+			fix: 'Fix it',
 			lint: 'Find every issue in your source, with fixes:',
 			// A code block's title: max 12.
 			terminal: 'terminal',

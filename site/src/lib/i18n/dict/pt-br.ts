@@ -325,7 +325,7 @@ const ptBr: Messages = {
 		title: 'Dois passos. Pronto para agentes.',
 		lead: 'O passo 1 coloca ferramentas no seu site. O passo 2 deixa seu agente chamá-las.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
-		facts: '~3,2 KB ao carregar · Rust + WebAssembly · MIT',
+		facts: '~2,4 KB ao carregar · Rust + WebAssembly · MIT',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: { title: 'No seu site', lead: 'Cole antes de {tag}. Onde não há WebMCP, ele não faz nada.' },
@@ -446,7 +446,7 @@ const ptBr: Messages = {
 			tools: 'Ferramentas encontradas',
 			more: '+{n} outras',
 			findings: 'Resultados do lint',
-			fix: 'Resolva com uma linha. Cole antes de {tag}:',
+			fix: 'Corrigir',
 			lint: 'Encontre todos os problemas no seu código-fonte, com as correções:',
 			terminal: 'terminal',
 			badge: 'Mostre isso. Escolha um badge e cole no seu site:',

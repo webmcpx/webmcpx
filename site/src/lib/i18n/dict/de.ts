@@ -328,7 +328,7 @@ const de: Messages = {
 		title: 'Zwei Schritte. Agentenfähig.',
 		lead: 'Schritt 1 bringt Tools auf deine Website. Schritt 2 lässt deinen Agenten sie aufrufen.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
-		facts: '~3,2 KB geladen · Rust + WebAssembly · MIT-Lizenz',
+		facts: '~2,4 KB geladen · Rust + WebAssembly · MIT-Lizenz',
 		// {tag} is `</body>` and {docs} a link: keep them. ChatGPT, Codex and Chromium are product names.
 		steps: {
 			site: { title: 'Auf deiner Website', lead: 'Vor {tag} einfügen. Wo WebMCP fehlt, tut es nichts.' },
@@ -448,7 +448,7 @@ const de: Messages = {
 			tools: 'Gefundene Tools',
 			more: '+{n} weitere',
 			findings: 'Lint-Befunde',
-			fix: 'Mit einer Zeile beheben. Fügen Sie sie vor {tag} ein:',
+			fix: 'Beheben',
 			lint: 'Finden Sie alle Probleme im Quellcode, samt Korrekturen:',
 			terminal: 'Terminal',
 			badge: 'Zeigen Sie es. Wählen Sie ein Badge und binden Sie es auf Ihrer Website ein:',

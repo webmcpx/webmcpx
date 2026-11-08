@@ -78,7 +78,7 @@ registers it while the component is mounted. Then see it, no browser flag: `npx 
 
 | | |
 |---|---|
-| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped. About 3.2 KB on load. |
+| **[Loader](packages/webmcpx)** · [npm](https://www.npmjs.com/package/webmcpx) | The script above: standard tools with one result shape, output budgets and paging, correct annotations, invisible characters stripped. About 2.4 KB on load. |
 | **[Agent bridge](packages/webmcpx/agent)** · `npx webmcpx mcp` | An MCP server for Claude Code, Codex, Cursor and others: it opens pages in a local Chromium and hands the agent their WebMCP tools as typed tools. Also `npx webmcpx tools <url>` to check yours. |
 | **[Linter](crates/webmcpx)** · [crates.io](https://crates.io/crates/webmcpx) | `webmcpx lint` checks your own `registerTool()` calls. It catches the silent failures: too many tools, the removed `provideContext`, the legacy `navigator.modelContext`, hidden characters. |
 | **[Scanner](https://webmcpx.dev)** | Paste a URL: which tools a site registers, what the linter thinks, what an agent would read instead. Shareable result, README badge. |
