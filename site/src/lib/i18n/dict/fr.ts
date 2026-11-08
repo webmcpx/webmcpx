@@ -144,7 +144,7 @@ const fr: Messages = {
 			items: {
 				support: {
 					label: 'Prise en charge navigateurs',
-					hand: 'Chrome seulement, derrière un flag ou en origin trial. Firefox et Safari : rien pour l’instant.',
+					hand: 'Chrome et Edge seulement, derrière un flag ou en origin trial. Firefox et Safari : rien pour l’instant.',
 					webmcpx:
 						'Le polyfill officiel du W3C partout où WebMCP manque : vos outils sont là dès aujourd’hui dans Chrome, Firefox et Safari.'
 				},
@@ -174,9 +174,21 @@ const fr: Messages = {
 				},
 				correct: {
 					label: 'Faire les choses bien',
-					hand: 'Formes de résultat, codes d’erreur, budgets de sortie, pagination, annotations, texte caché : tout repose sur vous.',
+					hand: 'Formes de résultat, codes d’erreur, budgets de sortie, pagination, annotations : tout repose sur vous.',
 					webmcpx:
-						'Juste par défaut, caractères invisibles retirés, avec un linter et un scanner pour vérifier.'
+						'Juste par défaut : une même forme de résultat, des codes d’erreur exploitables par l’agent, des budgets de sortie, la pagination et des annotations correctes.'
+				},
+				safe: {
+					label: 'Sûr pour les agents',
+					hand: 'Instructions cachées et caractères invisibles dans les descriptions d’outils ou le texte de la page : faciles à rater, faciles à exploiter.',
+					webmcpx:
+						'Les outils standard ne font que lire, le texte caché reste à l’écart, les caractères invisibles sont retirés et le linter signale les instructions cachées dans vos outils.'
+				},
+				testing: {
+					label: 'Tester',
+					hand: 'Activer un flag Chrome, ouvrir les DevTools et croiser les doigts.',
+					webmcpx:
+						'npx webmcpx tools localhost:3000 liste vos outils dans n’importe quel navigateur, sans flag ; le scanner vérifie n’importe quelle URL en ligne.'
 				},
 				proof: {
 					label: 'La preuve que ça paie',

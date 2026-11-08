@@ -45,7 +45,7 @@
 	const home = $derived(i18n.href('/'));
 	const NAV: Item[] = $derived([
 		// In page order; then the two audiences: people who run a site, people who use an agent.
-		{ label: m.links.why, href: `${home}#why`, icon: Lightbulb, section: 'why' },
+		{ label: m.links.why, href: `${home}#what`, icon: Lightbulb, section: 'what' },
 		{ label: m.links.proof, href: `${home}#leaderboard`, icon: ChartColumn, section: 'leaderboard' },
 		{ label: m.links.agents, href: `${home}#for-agents`, icon: Bot, section: 'for-agents' },
 		{ label: m.links.sites, href: `${home}#for-sites`, icon: AppWindow, section: 'for-sites' },

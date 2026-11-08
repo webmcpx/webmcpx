@@ -1,6 +1,5 @@
 <!--
-	The landing, in order of importance: can agents use YOUR site (scan) → others already do (logos) → what WebMCP is → why it
-	matters → proof it matters (benchmark) → then one section per audience: people who run a site (one line,
+	The landing, in order of importance: can agents use YOUR site (scan) → others already do (logos) → what WebMCP is and why it matters (sourced) → proof it matters (benchmark) → then one section per audience: people who run a site (one line,
 	then their own tools), and people who use agents (one prompt) → how it relates to MCP → what the community
 	asked for.
 -->
@@ -16,7 +15,6 @@
 	import LogoWall from '#lib/features/logos/LogoWall.svelte';
 	import Versus from '#lib/features/versus/Versus.svelte';
 	import What from '#lib/features/what/What.svelte';
-	import Why from '#lib/features/why/Why.svelte';
 	import Proof from '#lib/features/proof/Proof.svelte';
 	import { locale } from '#lib/i18n/locales.ts';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
@@ -42,10 +40,6 @@
 <LogoWall />
 <Divider />
 <What snippet={page.code.registerTool} best={page.best} />
-{#if page.best}
-	<Divider />
-	<Why bestSaving={page.best.saving} bestSite={page.best.site} />
-{/if}
 <Divider />
 <Proof runs={page.runs} reproduce={page.code.reproduce} compact />
 <Divider />

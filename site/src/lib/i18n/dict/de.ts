@@ -143,7 +143,7 @@ const de: Messages = {
 			items: {
 				support: {
 					label: 'Browser-Unterstützung',
-					hand: 'Nur Chrome, hinter einem Flag oder als Origin Trial. Firefox und Safari: noch nichts.',
+					hand: 'Nur Chrome und Edge, hinter einem Flag oder als Origin Trial. Firefox und Safari: noch nichts.',
 					webmcpx:
 						'Das offizielle Polyfill des W3C, wo WebMCP fehlt: Ihre Tools sind schon heute in Chrome, Firefox und Safari da.'
 				},
@@ -170,9 +170,21 @@ const de: Messages = {
 				},
 				correct: {
 					label: 'Alles richtig machen',
-					hand: 'Ergebnisformen, Fehlercodes, Ausgabebudgets, Paging, Annotationen, versteckter Text: alles Ihre Sache.',
+					hand: 'Ergebnisformen, Fehlercodes, Ausgabebudgets, Paging, Annotationen: alles Ihre Sache.',
 					webmcpx:
-						'Von Haus aus richtig, unsichtbare Zeichen entfernt, dazu ein Linter und ein Scanner zur Prüfung.'
+						'Von Haus aus richtig: eine Ergebnisform, Fehlercodes, mit denen Agenten etwas anfangen können, Ausgabebudgets, Paging und korrekte Annotationen.'
+				},
+				safe: {
+					label: 'Sicher für Agenten',
+					hand: 'Versteckte Anweisungen und unsichtbare Zeichen in Tool-Beschreibungen oder im Seitentext: leicht zu übersehen, leicht auszunutzen.',
+					webmcpx:
+						'Standard-Tools lesen nur, versteckter Text bleibt draußen, unsichtbare Zeichen werden entfernt, und der Linter meldet versteckte Anweisungen in Ihren Tools.'
+				},
+				testing: {
+					label: 'Testen',
+					hand: 'Ein Chrome-Flag aktivieren, die DevTools öffnen und hoffen.',
+					webmcpx:
+						'npx webmcpx tools localhost:3000 listet Ihre Tools in jedem Browser auf, ohne Flag; der Scanner prüft jede Live-URL.'
 				},
 				proof: {
 					label: 'Beleg, dass es sich lohnt',

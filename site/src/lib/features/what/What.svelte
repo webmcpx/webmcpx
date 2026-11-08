@@ -26,8 +26,18 @@
 	const i18n = useI18n();
 	const m = $derived(i18n.m.what);
 	const STEPS = ['register', 'list', 'call'] as const;
-	// Every claim in the lead, sourced (checked 2026-11-08): who drafts it and where, who tests it.
+	// Every claim in the lead, sourced (checked 2026-11-08): why agents need it (fail, cost, time), who
+	// drafts it and where, who tests it.
 	const SOURCES = [
+		{
+			label: 'Online-Mind2Web: agents fail about 4 in 10 live tasks',
+			href: 'https://arxiv.org/abs/2504.01382'
+		},
+		{
+			label: 'A page snapshot costs 12k to 77k tokens',
+			href: 'https://dev.to/nitai_aharoni_1006318cb51/what-a-browser-mcp-snapshot-actually-costs-i-measured-it-46if'
+		},
+		{ label: 'WindTunnel: tools vs clicking, timed', href: 'https://webmcp.com/benchmark' },
 		{
 			label: 'WebMCP draft, W3C Web Machine Learning CG (editors from Google and Microsoft)',
 			href: 'https://webmachinelearning.github.io/webmcp/'
@@ -61,7 +71,18 @@
 			? fmt(p.webmcpx, { best: ratio(best.saving), site: best.site, model: best.model })
 			: p.webmcpxPlain;
 	};
-	const ROWS = ['support', 'tools', 'actions', 'agents', 'draft', 'correct', 'proof', 'cost'] as const;
+	const ROWS = [
+		'support',
+		'tools',
+		'actions',
+		'agents',
+		'draft',
+		'correct',
+		'safe',
+		'testing',
+		'proof',
+		'cost'
+	] as const;
 </script>
 
 <Section id="what" kicker={m.kicker} title={m.title} lead={m.lead}>
@@ -72,7 +93,7 @@
 			{#if i > 0}<span aria-hidden="true">·</span>{/if}
 			<a
 				href={s.href}
-				class="text-ink-2 underline decoration-ink/30 underline-offset-2 hover:text-ink hover:decoration-ink"
+				class="inline-block py-1 text-ink-2 underline decoration-ink/30 underline-offset-2 hover:text-ink hover:decoration-ink"
 				>{s.label}</a
 			>
 		{/each}

@@ -194,7 +194,7 @@ const en = {
 			items: {
 				support: {
 					label: 'Browser support',
-					hand: 'Chrome only, behind a flag or an origin trial. Firefox and Safari: nothing yet.',
+					hand: 'Chrome and Edge only, behind a flag or an origin trial. Firefox and Safari: nothing yet.',
 					webmcpx:
 						'The official W3C polyfill wherever WebMCP is missing: your tools are there today in Chrome, Firefox and Safari.'
 				},
@@ -221,8 +221,21 @@ const en = {
 				},
 				correct: {
 					label: 'Getting it right',
-					hand: 'Result shapes, error codes, output budgets, paging, annotations, hidden text: all yours to get right.',
-					webmcpx: 'Right by default, invisible characters stripped, plus a linter and a scanner to check.'
+					hand: 'Result shapes, error codes, output budgets, paging, annotations: all yours to get right.',
+					webmcpx:
+						'Right by default: one result shape, error codes agents can act on, output budgets, paging and correct annotations.'
+				},
+				safe: {
+					label: 'Safe for agents',
+					hand: 'Hidden instructions and invisible characters in tool descriptions or page text: easy to miss, easy to exploit.',
+					webmcpx:
+						'Standard tools only read, hidden text stays out, invisible characters are stripped, and the linter flags hidden instructions in your tools.'
+				},
+				testing: {
+					label: 'Testing it',
+					hand: 'Turn on a Chrome flag, open DevTools and hope.',
+					webmcpx:
+						'npx webmcpx tools localhost:3000 lists your tools in any browser, no flag; the scanner checks any live URL.'
 				},
 				proof: {
 					label: 'Proof it pays off',

@@ -1,6 +1,7 @@
 //! Keeps `packages/webmcpx/src/generated.js` in sync with the Rust contracts.
 //! Run `just gen` (sets `UPDATE_GENERATED=1`) after changing a contract.
 
+use std::fmt::Write as _;
 use std::path::Path;
 
 use webmcpx_core::{Code, limits, unicode};
@@ -40,9 +41,9 @@ fn render() -> String {
         let mut run: Option<(u32, u32)> = None;
         let flush = |run: Option<(u32, u32)>, out: &mut String| {
             if let Some((a, b)) = run {
-                out.push_str(&format!("\\u{{{a:X}}}"));
+                write!(out, "\\u{{{a:X}}}").expect("writing to a String never fails");
                 if b > a {
-                    out.push_str(&format!("-\\u{{{b:X}}}"));
+                    write!(out, "-\\u{{{b:X}}}").expect("writing to a String never fails");
                 }
             }
         };
@@ -64,9 +65,11 @@ fn render() -> String {
     let picto = class(unicode::is_pictograph);
     let joiners = class(unicode::joins_emoji);
     let rest = class(|c| unicode::is_invisible(c) && !unicode::joins_emoji(c));
-    out.push_str(&format!(
+    write!(
+        out,
         "/** Invisible characters (webmcpx-core `unicode`): strip with `s.replace(INVISIBLE, \"\")`. */\nexport const INVISIBLE = new RegExp(\"(?<![{picto}])[{joiners}]|[{rest}]\", \"gu\");\n"
-    ));
+    )
+    .expect("writing to a String never fails");
     out
 }
 
@@ -76,7 +79,7 @@ fn generated_js_is_up_to_date() {
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../../packages/webmcpx/src/generated.js");
     let expected = render();
     if std::env::var_os("UPDATE_GENERATED").is_some() {
-        std::fs::write(&path, &expected).unwrap();
+        std::fs::write(&path, &expected).expect("writing to a String never fails");
         return;
     }
     let actual = std::fs::read_to_string(&path).unwrap_or_default();
@@ -96,9 +99,11 @@ fn contracts_are_valid() {
             "{}",
             tool.name
         );
-        let schema: serde_json::Value = serde_json::from_str(tool.input_schema).unwrap();
+        let schema: serde_json::Value =
+            serde_json::from_str(tool.input_schema).expect("writing to a String never fails");
         assert_eq!(schema["type"], "object", "{}", tool.name);
-        let def: serde_json::Value = serde_json::from_str(&tool.to_json()).unwrap();
+        let def: serde_json::Value =
+            serde_json::from_str(&tool.to_json()).expect("writing to a String never fails");
         assert_eq!(def["name"], tool.name);
     }
 }

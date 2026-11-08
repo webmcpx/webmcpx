@@ -141,7 +141,7 @@ const zh: Messages = {
 			items: {
 				support: {
 					label: '浏览器支持',
-					hand: '只有 Chrome，而且要开 flag 或加入 origin trial。Firefox 和 Safari：暂无。',
+					hand: '只有 Chrome 和 Edge，而且要开 flag 或加入 origin trial。Firefox 和 Safari：暂无。',
 					webmcpx:
 						'缺少 WebMCP 时加载 W3C 官方 polyfill：你的工具今天就能在 Chrome、Firefox 和 Safari 中使用。'
 				},
@@ -167,8 +167,19 @@ const zh: Messages = {
 				},
 				correct: {
 					label: '做对细节',
-					hand: '结果结构、错误码、输出预算、分页、注解、隐藏文本：全靠你自己做对。',
-					webmcpx: '默认就正确，去除不可见字符，还有 linter 和扫描器帮你检查。'
+					hand: '结果结构、错误码、输出预算、分页、注解：全靠你自己做对。',
+					webmcpx: '默认就正确：统一的结果结构、智能体能据此处理的错误码、输出预算、分页和正确的注解。'
+				},
+				safe: {
+					label: '对智能体安全',
+					hand: '工具描述或页面文本中的隐藏指令和不可见字符：容易漏看，也容易被利用。',
+					webmcpx: '标准工具只读，隐藏文本不纳入，不可见字符会被去除，linter 还会标出你工具中的隐藏指令。'
+				},
+				testing: {
+					label: '测试',
+					hand: '打开 Chrome flag，打开 DevTools，然后祈祷。',
+					webmcpx:
+						'npx webmcpx tools localhost:3000 在任何浏览器中列出你的工具，无需 flag；扫描器可检查任何线上 URL。'
 				},
 				proof: {
 					label: '值不值得的证据',

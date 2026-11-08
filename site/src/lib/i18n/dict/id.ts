@@ -141,7 +141,7 @@ const id: Messages = {
 			items: {
 				support: {
 					label: 'Dukungan browser',
-					hand: 'Hanya Chrome, lewat flag atau origin trial. Firefox dan Safari: belum ada.',
+					hand: 'Hanya Chrome dan Edge, lewat flag atau origin trial. Firefox dan Safari: belum ada.',
 					webmcpx:
 						'Polyfill resmi W3C di mana pun WebMCP belum ada: tool Anda sudah tersedia hari ini di Chrome, Firefox, dan Safari.'
 				},
@@ -170,9 +170,21 @@ const id: Messages = {
 				},
 				correct: {
 					label: 'Membuatnya benar',
-					hand: 'Bentuk hasil, kode error, batas output, paginasi, anotasi, teks tersembunyi: semuanya tanggung jawab Anda.',
+					hand: 'Bentuk hasil, kode error, batas output, paginasi, anotasi: semuanya tanggung jawab Anda.',
 					webmcpx:
-						'Benar sejak awal, karakter tak terlihat dibuang, plus linter dan scanner untuk mengeceknya.'
+						'Benar sejak awal: satu bentuk hasil, kode error yang bisa ditindaklanjuti agen, batas output, paginasi, dan anotasi yang benar.'
+				},
+				safe: {
+					label: 'Aman untuk agen',
+					hand: 'Instruksi tersembunyi dan karakter tak terlihat di deskripsi tool atau teks halaman: mudah terlewat, mudah dieksploitasi.',
+					webmcpx:
+						'Tool standar hanya membaca, teks tersembunyi tidak ikut, karakter tak terlihat dibuang, dan linter menandai instruksi tersembunyi di tool Anda.'
+				},
+				testing: {
+					label: 'Pengujian',
+					hand: 'Nyalakan flag Chrome, buka DevTools, lalu berharap.',
+					webmcpx:
+						'npx webmcpx tools localhost:3000 menampilkan daftar tool Anda di browser apa pun, tanpa flag; scanner mengecek URL live mana pun.'
 				},
 				proof: {
 					label: 'Bukti bahwa ini sepadan',

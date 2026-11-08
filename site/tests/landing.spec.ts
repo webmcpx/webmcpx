@@ -444,20 +444,16 @@ test('every page carries the trademark notices', async ({ page }) => {
 	await expect(page.getByText(/not affiliated with or endorsed by LF Projects/)).toBeVisible();
 });
 
-test('Why WebMCP gives four sourced reasons, lists the rest and states the draft status', async ({
-	page
-}) => {
-	await page.goto('/#why');
-	const why = page.locator('#why');
-	await expect(why.getByRole('heading', { level: 3 })).toHaveCount(4);
-	await expect(
-		why.getByText(/up to \d+(\.\d)?× fewer tokens on \S+ in our benchmark \(best case\)/)
-	).toBeVisible();
-	// Every reason names where its claim comes from.
-	await expect(why.getByText('Sources', { exact: true })).toHaveCount(4);
-	await expect(why.getByText('Also:', { exact: true })).toBeVisible();
-	await expect(why.getByText('Same cart, same form', { exact: true })).toBeVisible();
-	await expect(why.getByText(/Community Group draft .* not a W3C standard/)).toBeVisible();
+test('What is WebMCP sources every claim in its lead and compares by hand with webmcpx', async ({ page }) => {
+	await page.goto('/#what');
+	const what = page.locator('#what');
+	await expect(what.getByText('Sources', { exact: true })).toBeVisible();
+	await expect(what.getByRole('link', { name: /Online-Mind2Web/ })).toHaveAttribute('href', /arxiv\.org/);
+	await expect(what.getByRole('link', { name: /WebMCP draft/ })).toHaveAttribute(
+		'href',
+		/webmachinelearning/
+	);
+	await expect(what.getByRole('table', { name: 'WebMCP by hand compared with webmcpx' })).toBeVisible();
 });
 
 test('WebMCP vs MCP compares them row by row and says to use both', async ({ page }) => {
@@ -693,7 +689,7 @@ test('a logo takes you up to the scan first, then scans', async ({ page }) => {
 
 test('the sections carry the Junction as a faint watermark that never blocks a click', async ({ page }) => {
 	await page.goto('/');
-	const mark = page.locator('#why').locator('xpath=..').locator('svg.watermark');
+	const mark = page.locator('#what').locator('xpath=..').locator('svg.watermark');
 	await expect(mark).toHaveCount(1);
 	const style = await mark.evaluate((el) => {
 		const s = getComputedStyle(el);
