@@ -45,8 +45,9 @@ export function readPage(what, root) {
     };
   }
   const css = (el) => globalThis.getComputedStyle?.(el) ?? {};
-  const skipped = (el) =>
-    SKIP.has(el.tagName) || el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" || css(el).display == "none";
+  const hidden = (el) => el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" || css(el).display == "none";
+  // Boilerplate (nav, footer, aside...) is skipped inside a root, but a root may sit in one.
+  const skipped = (el) => SKIP.has(el.tagName) || hidden(el);
   // visibility is inherited and a child can undo it, so it is checked per text node.
   const data = (n) => (css(n.parentNode).visibility == "hidden" ? "" : n.data);
   // Visible text; an element with no block inside is one block.
@@ -68,7 +69,7 @@ export function readPage(what, root) {
       else visit(child);
     }
   };
-  const shown = (el) => !el || !skipped(el) && shown(el.parentElement);
+  const shown = (el) => !el || !hidden(el) && shown(el.parentElement);
   for (const el of root ? [root] : [...document.querySelectorAll("main, [role=main], article"), document.body]) {
     anchor = "";
     if (shown(el) && (visit(el), out)) break;

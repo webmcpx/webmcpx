@@ -197,3 +197,10 @@ test("a content root without visible text falls through to the next", async () =
     delete globalThis.getComputedStyle;
   }
 });
+
+test("an explicit root inside boilerplate (an aside) is still read", async () => {
+  const page = host();
+  document.body.innerHTML = '<aside><article id="content"><p>Return window: 30 days.</p></article></aside>';
+  await register({ wasm: WASM, root: "#content" });
+  assert.match((await page.call("fetch_as_markdown", {})).data.markdown, /Return window: 30 days/);
+});
