@@ -42,7 +42,9 @@ export function mapArgs(args, cwd, p = path) {
   // working directory's drive, as it is natively.
   const norm = (r) => (p.sep === "\\" ? r.replaceAll("/", "\\").toLowerCase() : r);
   const same = (r) => norm(r) === norm(root) || /^[\\/]+$/.test(r);
-  const posix = (abs) => "/" + abs.slice(p.parse(abs).root.length).split(/[\\/]/).filter(Boolean).join("/");
+  // Windows takes either slash as a separator; elsewhere a backslash is part of a file name.
+  const parts = p.sep === "\\" ? /[\\/]/ : "/";
+  const posix = (abs) => "/" + abs.slice(p.parse(abs).root.length).split(parts).filter(Boolean).join("/");
   const out = [];
   for (const arg of args) {
     const argRoot = p.parse(arg).root;

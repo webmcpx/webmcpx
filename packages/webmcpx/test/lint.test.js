@@ -74,3 +74,13 @@ test("Windows: a path on another drive or share is refused, never mapped onto th
     assert.match(mapArgs(["lint", other, "--fix"], cwd, win32).error, /not on the same drive/, other);
   }
 });
+
+test("POSIX: a backslash is part of a file name, in arguments and in the working directory", async () => {
+  const { posix } = await import("node:path");
+  const { mapArgs } = await import("../bin/rust.js");
+  assert.deepEqual(mapArgs(["lint", "/repo/src\\tools.js"], "/home/a\\b", posix), {
+    args: ["lint", "/repo/src\\tools.js"],
+    root: "/",
+    pwd: "/home/a\\b"
+  });
+});
