@@ -53,6 +53,7 @@ export class Cdp {
   #listeners = new Set();
   #closed = false;
   #onClose = new Set();
+  #timeout;
 
   static async connect(url) {
     const ws = new WebSocket(url);
@@ -63,8 +64,10 @@ export class Cdp {
     return new Cdp(ws);
   }
 
-  constructor(ws) {
+  /** `commandTimeout` (ms) bounds every command but in-page awaits, which the page bounds itself. */
+  constructor(ws, { commandTimeout = 30_000 } = {}) {
     this.#ws = ws;
+    this.#timeout = commandTimeout;
     ws.addEventListener("message", ({ data }) => {
       const msg = JSON.parse(String(data));
       if (msg.id === undefined) {
@@ -73,6 +76,7 @@ export class Cdp {
       }
       const pending = this.#pending.get(msg.id);
       this.#pending.delete(msg.id);
+      clearTimeout(pending?.timer);
       if (msg.error) pending?.reject(new Error(msg.error.message));
       else pending?.resolve(msg.result);
     });
@@ -84,7 +88,10 @@ export class Cdp {
   #shut() {
     if (this.#closed) return;
     this.#closed = true;
-    for (const { reject } of this.#pending.values()) reject(new Error("the browser connection closed"));
+    for (const { reject, timer } of this.#pending.values()) {
+      clearTimeout(timer);
+      reject(new Error("the browser connection closed"));
+    }
     this.#pending.clear();
     for (const listener of this.#onClose) listener();
   }
@@ -102,11 +109,20 @@ export class Cdp {
     if (this.#closed) return Promise.reject(new Error("the browser connection closed"));
     const id = ++this.#id;
     return new Promise((resolve, reject) => {
-      this.#pending.set(id, { resolve, reject });
+      // A browser that stops answering (a wedged tab, a hung navigation) must not hang the server forever.
+      const timer = params.awaitPromise
+        ? undefined
+        : setTimeout(() => {
+            this.#pending.delete(id);
+            reject(new Error(`the browser did not answer ${method} within ${this.#timeout / 1000} s`));
+          }, this.#timeout);
+      timer?.unref?.();
+      this.#pending.set(id, { resolve, reject, timer });
       try {
         this.#ws.send(JSON.stringify({ id, method, params, ...(sessionId && { sessionId }) }));
       } catch (e) {
         this.#pending.delete(id);
+        clearTimeout(timer);
         reject(e);
       }
     });

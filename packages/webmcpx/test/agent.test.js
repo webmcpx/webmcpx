@@ -7,7 +7,7 @@ import { createServer } from "node:http";
 import { createInterface } from "node:readline";
 import { after, before, test } from "node:test";
 import { promisify } from "node:util";
-import { findBrowser } from "../agent/browser.js";
+import { Cdp, findBrowser } from "../agent/browser.js";
 import { Session, normalize } from "../agent/session.js";
 import { runStandard } from "../agent/standard.js";
 
@@ -485,4 +485,17 @@ test("bare hosts get a scheme: https for the web, http for localhost", () => {
   assert.equal(normalize("127.0.0.1:8080/x"), "http://127.0.0.1:8080/x");
   assert.equal(normalize("http://a.test"), "http://a.test");
   assert.throws(() => normalize(" "), /give a URL/);
+});
+
+test("a browser that stops answering fails the command instead of hanging", async () => {
+  const sent = [];
+  const ws = { addEventListener() {}, send: (m) => sent.push(m), close() {} };
+  const cdp = new Cdp(ws, { commandTimeout: 50 });
+  await assert.rejects(cdp.send("Page.navigate", { url: "https://a.test/" }), /did not answer Page.navigate within 0.05 s/);
+  // In-page awaits are bounded by the page (the tool call's own time limit), not here.
+  let settled = false;
+  cdp.send("Runtime.evaluate", { expression: "x", awaitPromise: true }).finally(() => (settled = true)).catch(() => {});
+  await new Promise((resolve) => setTimeout(resolve, 100));
+  assert.equal(settled, false);
+  cdp.close();
 });
