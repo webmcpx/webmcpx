@@ -10,6 +10,7 @@ use crate::text::clean;
 const DEFAULT_LIMIT: usize = 5;
 const MAX_LIMIT: usize = 20;
 const MAX_TERMS: usize = 32;
+const MAX_QUERY_BYTES: usize = 1_000;
 const SNIPPET_CHARS: usize = 240;
 /// A heading is context for a snippet, not content: a page must not fill the answer with one.
 const HEADING_CHARS: usize = 120;
@@ -45,9 +46,20 @@ fn counts(text: &str, terms: &[String]) -> (Vec<u32>, usize) {
 ///
 /// `limit == 0` means the default. Matching is case-insensitive for ASCII letters.
 pub fn search(stream: &str, query: &str, limit: usize) -> String {
-    // A query is a few words; past MAX_TERMS the rest are ignored, so memory stays passages × 32.
-    let mut terms = dedup(tokenize(query));
-    terms.truncate(MAX_TERMS);
+    // A query is a few words: a long one is refused before any work, and past MAX_TERMS distinct
+    // words the rest are ignored, so memory stays passages × 32.
+    if query.len() > MAX_QUERY_BYTES {
+        return Envelope::new().err(Code::InvalidInput, "query is over 1,000 bytes");
+    }
+    let mut terms: Vec<String> = Vec::new();
+    for word in tokenize(query) {
+        if terms.len() == MAX_TERMS {
+            break;
+        }
+        if !terms.contains(&word) {
+            terms.push(word);
+        }
+    }
     if terms.is_empty() {
         return Envelope::new().err(Code::InvalidInput, "query must contain a word");
     }
@@ -190,18 +202,6 @@ fn is_separator(c: char) -> bool {
         return !c.is_ascii_alphanumeric();
     }
     matches!(c as u32, 0x80..=0xBF | 0xD7 | 0xF7 | 0x2000..=0x206F | 0x3000..=0x3002)
-}
-
-fn dedup(mut terms: Vec<String>) -> Vec<String> {
-    let mut seen = Vec::with_capacity(terms.len());
-    terms.retain(|t| {
-        let new = !seen.contains(t);
-        if new {
-            seen.push(t.clone());
-        }
-        new
-    });
-    terms
 }
 
 /// `text` cut to `max` chars, marked with an ellipsis when cut.
@@ -351,13 +351,21 @@ mod tests {
     #[test]
     fn a_query_counts_at_most_max_terms_words() {
         let mut query = String::new();
-        for i in 0..5_000 {
+        for i in 0..150 {
             core::fmt::Write::write_fmt(&mut query, format_args!("w{i} ")).unwrap();
         }
-        let page = "p\u{1F}w0 here\u{1E}";
-        let v = parse(&search(page, &query, 5));
+        assert!(query.len() <= MAX_QUERY_BYTES);
+        let v = parse(&search("p\u{1F}w0 here\u{1E}", &query, 5));
         assert_eq!(v["data"]["results"][0]["snippet"], "w0 here");
-        let (_, passages) = passages(page, &dedup(tokenize(&query))[..MAX_TERMS]);
-        assert_eq!(passages[0].tf.len(), MAX_TERMS);
+        // Words past the 32nd distinct one are not searched.
+        assert_eq!(
+            parse(&search("p\u{1F}w100 here\u{1E}", &query, 5))["error"]["code"],
+            "NOT_FOUND"
+        );
+        let long = "word ".repeat(201);
+        assert_eq!(
+            parse(&search("p\u{1F}word\u{1E}", &long, 5))["error"]["code"],
+            "INVALID_INPUT"
+        );
     }
 }

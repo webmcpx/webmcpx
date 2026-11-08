@@ -545,10 +545,14 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
       document.title = "T".repeat(3e6);
       Object.defineProperty(document, "readyState", { get: () => "z".repeat(3e6) });
       document.modelContext.registerTool({ name: "big", description: "d".repeat(3e6), execute() {} });
-      // A frame name is page-set and unbounded: nothing may ask Chrome for the frame tree.
+    </script>"#;
+    // A frame name is page-set and unbounded, and Chrome sends it in Page.frameNavigated: this page can
+    // end its own connection (its scan fails), never the one other scans use.
+    let frame_name = r#"<!doctype html><title>f</title><script>
       const f = document.createElement("iframe");
       document.documentElement.append(f);
       f.contentWindow.name = "n".repeat(7e7);
+      f.src = "/plain";
     </script>"#;
     let schemas = r#"<!doctype html><title>s</title><script>
       for (let i = 0; i < 200; i++) document.modelContext.registerTool({
@@ -573,6 +577,10 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
     </script>"#;
     let site = serve_html(
         axum::Router::new()
+            .route(
+                "/framename",
+                axum::routing::get(move || std::future::ready(axum::response::Html(frame_name))),
+            )
             .route(
                 "/throws",
                 axum::routing::get(move || std::future::ready(axum::response::Html(throws))),
@@ -620,6 +628,19 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
         .await
         .unwrap_err();
     assert!(format!("{err:?}").contains("over 1000000 chars"), "{err:?}");
+    let (hostile, plain) = (
+        format!("http://{site}/framename"),
+        format!("http://{site}/plain"),
+    );
+    let (_, beside) = tokio::join!(scanner.scan(&hostile), async {
+        tokio::time::sleep(std::time::Duration::from_millis(300)).await;
+        scanner.scan(&plain).await
+    });
+    assert_eq!(
+        beside.unwrap().title,
+        "Plain",
+        "a scan beside the hostile one"
+    );
     let err = scanner
         .scan(&format!("http://{site}/throws"))
         .await

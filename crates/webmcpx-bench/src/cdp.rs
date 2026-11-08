@@ -99,6 +99,8 @@ fn lock<T>(m: &Mutex<T>) -> std::sync::MutexGuard<'_, T> {
 /// A headless Chrome: a process we started (killed on drop), or one running elsewhere that we connected to.
 pub struct Browser {
     conn: Conn,
+    /// The DevTools URL: each page gets a connection of its own (see [`Browser::page`]).
+    url: String,
     _child: Option<Child>,
     _profile: Option<tempfile::TempDir>,
 }
@@ -166,6 +168,7 @@ impl Browser {
         tokio::spawn(async move { while let Ok(Some(_)) = lines.next_line().await {} });
         Ok(Self {
             conn: Conn::connect(&url).await?,
+            url,
             _child: Some(child),
             _profile: Some(profile),
         })
@@ -193,8 +196,10 @@ impl Browser {
             .split_once("/devtools/")
             .map(|(_, path)| path)
             .context("unexpected DevTools URL")?;
+        let url = format!("ws://{addr}/devtools/{path}");
         Ok(Self {
-            conn: Conn::connect(&format!("ws://{addr}/devtools/{path}")).await?,
+            conn: Conn::connect(&url).await?,
+            url,
             _child: None,
             _profile: None,
         })
@@ -251,8 +256,11 @@ impl Browser {
             .as_str()
             .context("no targetId")?
             .to_owned();
-        let session = self
-            .conn
+        // The page talks over a connection of its own: whatever it makes Chrome send (an event carrying
+        // a 70 MB frame name, say) can only end that connection, never the one every scan shares. The
+        // context stays on the shared one, so it is still disposed if this one dies.
+        let conn = Conn::connect(&self.url).await?;
+        let session = conn
             .call(
                 None,
                 "Target.attachToTarget",
@@ -263,7 +271,7 @@ impl Browser {
             .context("no sessionId")?
             .to_owned();
         let page = Page {
-            conn: self.conn.clone(),
+            conn,
             session,
             frame: target,
             context,
@@ -287,6 +295,13 @@ pub struct Page {
     /// for the frame tree (whose frame names a page sets, at any length).
     frame: String,
     context: ContextGuard,
+}
+
+impl Drop for Page {
+    fn drop(&mut self) {
+        // Its own connection: close it (the context is disposed by its guard, on the shared one).
+        let _ = self.conn.tx.send(Ws::Close(None));
+    }
 }
 
 /// An isolated browser context that is disposed when dropped, so a scan cancelled at any point (say, the

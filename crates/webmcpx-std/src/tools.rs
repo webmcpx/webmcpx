@@ -21,7 +21,7 @@ pub const SEARCH_PAGE: ToolDef = ToolDef {
     description: "Find passages on the current page that match a query. Returns up to `limit` \
         passages ranked by relevance, each with its section heading and a link to it. Prefer \
         it to reading the whole page when looking for something specific.",
-    input_schema: r#"{"type":"object","properties":{"query":{"type":"string","description":"Words to look for."},"limit":{"type":"integer","minimum":1,"maximum":20,"default":5,"description":"Maximum passages to return."}},"required":["query"],"additionalProperties":false}"#,
+    input_schema: r#"{"type":"object","properties":{"query":{"type":"string","maxLength":1000,"description":"Words to look for."},"limit":{"type":"integer","minimum":1,"maximum":20,"default":5,"description":"Maximum passages to return."}},"required":["query"],"additionalProperties":false}"#,
     annotations: PAGE_CONTENT,
 };
 
