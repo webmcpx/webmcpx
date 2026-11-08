@@ -21,6 +21,7 @@
 	import Rich from '#lib/i18n/Rich.svelte';
 	import { BADGES, badgeEmbed, errors, errorText, host, shareLink, type BadgeStyle } from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
+	import { highlightLite } from './highlight-lite.ts';
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.scan);
@@ -43,11 +44,6 @@
 	/** The install line, highlighted at build time. */
 
 	/** A code sample that is not highlighted (built in the browser), shown in the same CodeBlock. */
-	const plain = (code: string): Highlighted => ({
-		lang: 'html',
-		code,
-		html: `<pre class="shiki"><code>${code.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</code></pre>`
-	});
 
 	let step = $state(0);
 	let badge: BadgeStyle = $state('card');
@@ -213,7 +209,7 @@
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="mb-3 font-medium">{m.result.lint}</p>
 					<CodeBlock
-						snippet={plain('cargo install webmcpx   # needs Rust\nwebmcpx lint src/')}
+						snippet={highlightLite('cargo install webmcpx   # needs Rust\nwebmcpx lint src/', 'sh')}
 						title={m.result.terminal}
 						class="shadow-none"
 					/>
@@ -249,7 +245,7 @@
 						{/each}
 					</fieldset>
 					<CodeBlock
-						snippet={plain(embed)}
+						snippet={highlightLite(embed, badge === 'readme' ? 'md' : 'html')}
 						title={badge === 'readme' ? 'README.md' : 'badge.html'}
 						class="mt-4 shadow-none"
 					/>
