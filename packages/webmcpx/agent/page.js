@@ -42,6 +42,9 @@ ${POLYFILL}
   }
 })();`;
 
+/** Most tools taken from one page: a page listing more can't make naming and diffing them stall the server. */
+const MAX_TOOLS = 200;
+
 const GET_TOOLS = `(async () => {
   const mc = document.modelContext;
   return typeof mc?.getTools === "function" ? await mc.getTools() : null;
@@ -81,7 +84,8 @@ function summarize() {
   };
   // What each tool's frame showed when listed: a call refuses a frame that has navigated since.
   this.__webmcpxDocs = this.map((t) => (t.window ? docOf(t.window) : null));
-  return this.map((t, index) => ({
+  // At most MAX_TOOLS cross over (the linter's error is past 100 per page); Node checks again.
+  return this.slice(0, 200).map((t, index) => ({
     index,
     name: t.name,
     description: t.description ?? "",
@@ -161,11 +165,20 @@ export class Page {
   /** `callTimeout` (ms) bounds one tool call; tests shorten it. */
   static async create(cdp, { onChange = () => {}, callTimeout = CALL_TIMEOUT } = {}) {
     const { targetId } = await cdp.send("Target.createTarget", { url: "about:blank" });
-    const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
-    const page = new Page(cdp, sessionId, targetId, onChange);
-    page.#callTimeout = callTimeout;
-    await page.#init();
-    return page;
+    let page;
+    try {
+      const { sessionId } = await cdp.send("Target.attachToTarget", { targetId, flatten: true });
+      page = new Page(cdp, sessionId, targetId, onChange);
+      page.#callTimeout = callTimeout;
+      await page.#init();
+      return page;
+    } catch (e) {
+      // Our tab is closed (and its listener dropped) when it can't be set up, even in a browser we
+      // only attached to.
+      if (page) await page.close();
+      else await cdp.send("Target.closeTarget", { targetId }).catch(() => {});
+      throw e;
+    }
   }
 
   constructor(cdp, session, target, onChange) {
@@ -275,7 +288,8 @@ export class Page {
     // The page wrote these (it may have replaced getTools): keep only well-formed summaries.
     const valid = (t) =>
       t && typeof t.name === "string" && t.name && typeof t.description === "string" && t.annotations && typeof t.annotations === "object";
-    return (Array.isArray(list?.value) ? list.value : []).filter(valid).map((tool) => ({ ...tool, list: result.objectId }));
+    const tools = Array.isArray(list?.value) ? list.value.slice(0, MAX_TOOLS) : [];
+    return tools.filter(valid).map((tool) => ({ ...tool, list: result.objectId }));
   }
 
   /**

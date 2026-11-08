@@ -36,7 +36,14 @@ export class Session {
       opened.cdp.onClose(() => {
         if (this.#browser === opened) [this.#browser, this.#ready, this.#page] = [];
       });
-      return Page.create(opened.cdp, { onChange, callTimeout });
+      try {
+        return await Page.create(opened.cdp, { onChange, callTimeout });
+      } catch (e) {
+        // A tab that can't be set up must not leave its browser behind: the next page starts afresh.
+        if (this.#browser === opened) this.#browser = undefined;
+        opened.close();
+        throw e;
+      }
     })().catch((e) => {
       this.#ready = undefined;
       throw e;
