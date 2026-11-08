@@ -65,6 +65,7 @@
 	// Initial values only: the tabs own the state after that.
 	const initial = () => ({ model: runs[0]?.results.model, site: runs[0]?.sites[0]?.id });
 	let modelId = $state(initial().model);
+	const current = $derived(models.find((x) => x.id === modelId));
 	// The site and detail tab stay put when the model changes (a site a model lacks falls back to its
 	// best one). Sites come best case first (see sites.ts), so the first is shown by default, already
 	// in the prerendered HTML.
@@ -172,25 +173,46 @@
 			</ul>
 		</nav>
 	{/if}
+	{#if current}
+		<!-- Footnotes to the lead: how models are ranked, and which questions the page shows. -->
+		<div class="-mt-4 mb-8 space-y-1 text-xs text-ink-3">
+			<p>{m.ranking}</p>
+			<p>
+				<Rich
+					text={i18n.plural(current.totalQuestions, m.selected, {
+						shown: i18n.number(shown(current.sites)),
+						total: i18n.number(current.totalQuestions)
+					})}
+				>
+					{#snippet results()}<a
+							href="{REPO}/blob/main/site/src/lib/content/bench/{current.results.model}.json"
+							class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
+							>{m.results}</a
+						>{/snippet}
+					{#snippet command()}<code class="font-mono text-ink">just bench</code>{/snippet}
+				</Rich>
+			</p>
+		</div>
+	{/if}
 	{#if models.length}
 		<Tabs
 			items={models}
 			bind:value={modelId}
 			label={m.model}
 			lazy
-			listClass="-mx-4 mb-3 gap-1 px-4 pt-1 pb-3 sm:mx-0 sm:px-0"
+			listClass="-mx-4 mb-8 gap-1 px-4 pt-3 pb-3 sm:mx-0 sm:px-1"
 			tabClass="h-10 border-ink/0 px-2.5 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-card aria-selected:text-ink aria-selected:shadow-hard-sm [&_svg]:size-4"
 		>
 			{#snippet tab(model)}
+				<!-- The place hangs on the tab's corner, taking no room in the row. -->
 				<span
-					class="grid size-5 place-items-center rounded-full border border-ink bg-marker font-mono text-[10px] font-bold text-ink"
+					class="absolute -top-2 -left-1 grid size-[18px] place-items-center rounded-full border border-ink bg-marker font-mono text-[10px] leading-none font-bold text-ink"
 					aria-label={fmt(m.rank, { n: model.rank })}>{model.rank}</span
 				>
 				{#if model.logo}<SiteLogo logo={model.logo} size={16} />{/if}
 				{model.name}
 			{/snippet}
 			{#snippet panel(model)}
-				<p class="-mt-1 mb-8 text-xs text-ink-3">{m.ranking}</p>
 				<h3 class="sr-only">
 					{model.provider ? fmt(m.modelHeading, { name: model.name, provider: model.provider }) : model.name}
 				</h3>
@@ -213,21 +235,6 @@
 	{@const { results: result, sites, tools } = model}
 	{@const items = sites.map((s) => ({ ...s, label: s.name }))}
 	{@const questions = sites.flatMap((site) => site.tasks.map((task) => ({ task, site })))}
-	<p class="mb-10 text-sm text-ink-3">
-		<Rich
-			text={i18n.plural(model.totalQuestions, m.selected, {
-				shown: i18n.number(shown(sites)),
-				total: i18n.number(model.totalQuestions)
-			})}
-		>
-			{#snippet results()}<a
-					href="{REPO}/blob/main/site/src/lib/content/bench/{model.results.model}.json"
-					class="font-medium text-ink underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink"
-					>{m.results}</a
-				>{/snippet}
-			{#snippet command()}<code class="font-mono text-ink">just bench</code>{/snippet}
-		</Rich>
-	</p>
 	{#if !sites.length}
 		<Card padding="lg" shadow="none" class="border-dashed">
 			<p class="font-display font-bold">{fmt(m.none.title, { model: result.model })}</p>
