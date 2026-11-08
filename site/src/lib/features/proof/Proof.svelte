@@ -178,8 +178,8 @@
 			bind:value={modelId}
 			label={m.model}
 			lazy
-			listClass="-mx-4 mb-3 gap-2 px-4 pt-1 pb-3 sm:mx-0 sm:px-0"
-			tabClass="h-10 border-ink/0 px-3.5 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-card aria-selected:text-ink aria-selected:shadow-hard-sm [&_svg]:size-4"
+			listClass="-mx-4 mb-3 gap-1 px-4 pt-1 pb-3 sm:mx-0 sm:px-0"
+			tabClass="h-10 border-ink/0 px-2.5 text-sm text-ink-2 hover:border-ink hover:text-ink aria-selected:border-ink aria-selected:bg-card aria-selected:text-ink aria-selected:shadow-hard-sm [&_svg]:size-4"
 		>
 			{#snippet tab(model)}
 				<span
