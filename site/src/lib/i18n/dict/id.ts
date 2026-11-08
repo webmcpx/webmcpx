@@ -213,6 +213,7 @@ const id: Messages = {
 			question: 'Pertanyaan',
 			solved: 'Berhasil',
 			head: '{metric} · {unit}',
+			better: 'Lebih pendek lebih baik',
 			caption: '{metric} per pertanyaan, {unit}; makin rendah makin baik. Tingkat keberhasilan per varian.',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: berhasil',

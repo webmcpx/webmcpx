@@ -215,6 +215,7 @@ const hi: Messages = {
 			question: 'सवाल',
 			solved: 'हल',
 			head: '{metric} · {unit}',
+			better: 'जितना छोटा, उतना बेहतर',
 			caption: 'हर सवाल पर {metric}, {unit}; जितना कम, उतना बेहतर। हर पक्ष की सफलता दर।',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: हल',

@@ -215,6 +215,7 @@ const es: Messages = {
 			question: 'Pregunta',
 			solved: 'Resuelta',
 			head: '{metric} · {unit}',
+			better: 'Más corto es mejor',
 			caption: '{metric} por pregunta, {unit}; cuanto menos, mejor. Tasa de éxito por variante.',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: resuelta',

@@ -37,13 +37,14 @@
 
 <Reveal>
 	<div aria-hidden="true">
-		<!-- What each bar color means (the table below says it in words for screen readers). -->
+		<!-- What each bar color means, and how to read the bars (the table below says it in words for screen readers). -->
 		<p class="flex flex-wrap gap-x-5 gap-y-1 pb-4 text-xs text-ink-2">
 			{#each ARMS as a (a.arm)}
 				<span class="inline-flex items-center gap-2"
 					><span class={['inline-block h-2.5 w-6 rounded-full', a.bar]}></span>{m.arms[a.arm]}</span
 				>
 			{/each}
+			<span class="text-ink-3 sm:ml-auto">{c.better}</span>
 		</p>
 		<div class="hidden grid-cols-[30%_1fr_4.5rem] gap-4 pb-3 text-xs text-ink-3 sm:grid">
 			<span>{c.question}</span><span>{fmt(c.head, { metric: name.label, unit: name.unit })}</span><span

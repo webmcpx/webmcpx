@@ -216,6 +216,7 @@ const bn: Messages = {
 			question: 'প্রশ্ন',
 			solved: 'সমাধান',
 			head: '{metric} · {unit}',
+			better: 'যত ছোট, তত ভালো',
 			caption: 'প্রতি প্রশ্নে {metric}, {unit}; যত কম, তত ভালো। প্রতিটি সেটআপের সাফল্যের হার।',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: সমাধান',

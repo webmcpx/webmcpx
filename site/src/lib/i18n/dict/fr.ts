@@ -217,6 +217,7 @@ const fr: Messages = {
 			question: 'Question',
 			solved: 'Résolu',
 			head: '{metric} · {unit}',
+			better: 'Plus court, c’est mieux',
 			caption:
 				'{metric} par question, en {unit} ; plus c’est bas, mieux c’est. Taux de réussite par variante.',
 			armMetric: '{arm} : {metric}',

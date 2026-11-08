@@ -297,6 +297,8 @@ const en = {
 			/** Over the bars: "Tokens · tokens per run". */
 			head: '{metric} · {unit}',
 			/** The screen-reader table's caption. */
+			// Next to the legend: every metric is lower-is-better (bars). max 24.
+			better: 'Shorter is better',
 			caption: '{metric} per question, {unit}; lower is better. Success rate per arm.',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: solved',

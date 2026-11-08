@@ -228,6 +228,7 @@ const ru: Messages = {
 			question: 'Вопрос',
 			solved: 'Решено',
 			head: '{metric} · {unit}',
+			better: 'Чем короче, тем лучше',
 			caption: '{metric} по вопросам, {unit}; чем меньше, тем лучше. Доля решённых для каждого варианта.',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: решено',

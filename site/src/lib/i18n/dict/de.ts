@@ -216,6 +216,7 @@ const de: Messages = {
 			question: 'Frage',
 			solved: 'Gelöst',
 			head: '{metric} · {unit}',
+			better: 'Kürzer ist besser',
 			caption: '{metric} pro Frage, {unit}; niedriger ist besser. Erfolgsquote pro Variante.',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: gelöst',

@@ -211,6 +211,7 @@ const ja: Messages = {
 			question: '質問',
 			solved: '成功',
 			head: '{metric} · {unit}',
+			better: '短いほど良い',
 			caption: '質問ごとの{metric}（{unit}）。低いほど良好です。条件ごとの成功率も掲載しています。',
 			armMetric: '{arm}：{metric}',
 			armSolved: '{arm}：成功',

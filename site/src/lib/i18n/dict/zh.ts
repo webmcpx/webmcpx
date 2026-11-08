@@ -214,6 +214,7 @@ const zh: Messages = {
 			question: '问题',
 			solved: '解决',
 			head: '{metric} · {unit}',
+			better: '越短越好',
 			caption: '{metric}（按问题统计，{unit}）：越低越好。另附各组成功率。',
 			armMetric: '{arm}：{metric}',
 			armSolved: '{arm}：解决情况',

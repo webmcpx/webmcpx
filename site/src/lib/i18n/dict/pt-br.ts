@@ -214,6 +214,7 @@ const ptBr: Messages = {
 			question: 'Pergunta',
 			solved: 'Resolvida',
 			head: '{metric} · {unit}',
+			better: 'Menor é melhor',
 			caption: '{metric} por pergunta, em {unit}; quanto menor, melhor. Taxa de sucesso por cenário.',
 			armMetric: '{arm}: {metric}',
 			armSolved: '{arm}: resolvida',
