@@ -334,15 +334,19 @@ const ptBr: Messages = {
 
 	fix: {
 		title: 'Para o seu site',
-		lead: 'Uma linha deixa ele pronto para agentes: eles chamam o seu site em vez de adivinhar.',
+		lead: 'Duas partes. Peça ao seu agente de código (Claude Code, Codex, Cursor) ou faça à mão.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
 		facts: '~2,7 KB ao carregar · Rust + WebAssembly · MIT',
-		html: 'Cole antes de {tag}. Em navegadores sem WebMCP, ele adiciona o polyfill do W3C.'
+		html: 'Cole antes de {tag}. Em navegadores sem WebMCP, ele adiciona o polyfill do W3C.',
+		standard: {
+			title: 'Ferramentas padrão: uma linha',
+			lead: 'Busca, leitura e contexto em todas as páginas. Sem código.'
+		}
 	},
 
 	agents: {
 		title: 'Para o seu agente',
-		lead: 'As mesmas respostas, com uma fração dos tokens. Funciona no Codex, Claude Code, Cursor e em qualquer script: Chrome, Firefox, Safari, Selenium, Playwright.',
+		lead: 'O MCP que todo setup de Claude Code e Codex deveria ter: as mesmas respostas em qualquer site, com uma fração dos tokens.',
 		saving: {
 			range: { other: 'De {low} a {high} menos tokens nos {n} modelos do leaderboard.' },
 			best: 'Até {high} menos tokens no leaderboard.',
@@ -360,12 +364,22 @@ const ptBr: Messages = {
 				label: 'Agentes que controlam um navegador',
 				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: chame {api} na página. Todo site com webmcpx tem.'
 			}
+		},
+		hype: { up: 'Até', fewer: 'menos tokens', same: 'As mesmas respostas.' },
+		worksWith: 'Funciona com',
+		tabs: { scripts: 'Scripts' },
+		notes: {
+			prompt: 'Um prompt: seu agente se configura, usa WebMCP primeiro em tudo e prova no webmcpx.dev.',
+			cli: 'Rode uma vez no terminal. A partir daí, as ferramentas WebMCP de cada página viram ferramentas do seu agente.',
+			cursor: 'Em .cursor/mcp.json (ou Settings → MCP). O mesmo servidor, em qualquer cliente MCP.',
+			scripts:
+				'Seu próprio Playwright, Selenium ou Puppeteer: todo site com webmcpx tem document.modelContext, no Chrome, Firefox e Safari.'
 		}
 	},
 
 	own: {
-		title: 'Deixe os agentes agirem, não adivinharem',
-		lead: 'Hoje, um agente que quer pôr algo no carrinho sai clicando e adivinhando, e muitas vezes erra. Entregue a ele a função que o seu botão já chama: entrada tipada, resposta clara e a sessão do próprio usuário.',
+		title: 'As ações do seu site',
+		lead: 'Adicionar ao carrinho, reservar, buscar no catálogo: as funções que seus botões já chamam, como ferramentas que os agentes chamam direto.',
 		notes: {
 			agent:
 				'Seu agente lê o que o webmcpx faz, encontra no projeto as ações que vale expor, pergunta quais você quer, depois adiciona e confere.',

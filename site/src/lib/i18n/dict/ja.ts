@@ -324,15 +324,16 @@ const ja: Messages = {
 
 	fix: {
 		title: 'あなたのサイトに',
-		lead: '1 行でエージェント対応に。エージェントは推測せずサイトを呼び出す。',
+		lead: '2 つのパート。コーディングエージェント (Claude Code、Codex、Cursor) に頼むか、手で追加。',
 		alternatives: { npm: 'npm を使う場合', agent: 'エージェント' },
 		facts: '読込時 ~2.7 KB · Rust + WebAssembly · MIT License',
-		html: '{tag} の前に貼るだけ。WebMCP のないブラウザには W3C のポリフィルを追加します。'
+		html: '{tag} の前に貼るだけ。WebMCP のないブラウザには W3C のポリフィルを追加します。',
+		standard: { title: '標準ツール：1 行', lead: '全ページで検索・読み取り・ページ情報。コード不要。' }
 	},
 
 	agents: {
 		title: 'あなたのエージェントに',
-		lead: '答えは同じ、トークンはごくわずか。Codex、Claude Code、Cursor、そしてあらゆるスクリプト（Chrome、Firefox、Safari、Selenium、Playwright）で動きます。',
+		lead: 'Claude Code と Codex に入れておくべき MCP。どのサイトでも同じ答えを、ごく一部のトークンで。',
 		saving: {
 			range: { other: 'リーダーボードの全 {n} モデルで、トークンを {low}〜{high} 削減。' },
 			best: 'リーダーボードで、トークンを最大 {high} 削減。',
@@ -350,12 +351,23 @@ const ja: Messages = {
 				label: 'ブラウザを自分で操作するエージェント',
 				text: 'Playwright、Selenium、Puppeteer、browser-use、CDP。Chrome、Firefox、Safari：ページ内で {api} を呼ぶだけ。webmcpx を入れたサイトならどこでも使えます。'
 			}
+		},
+		hype: { up: '最大', fewer: 'トークン削減', same: '答えは同じ。' },
+		worksWith: '対応',
+		tabs: { scripts: 'スクリプト' },
+		notes: {
+			prompt:
+				'1 つのプロンプトで、エージェントが自分で設定し、どこでも WebMCP を先に使い、webmcpx.dev で確認します。',
+			cli: 'ターミナルで 1 回実行するだけ。以降、各ページの WebMCP ツールがエージェントのツールになります。',
+			cursor: '.cursor/mcp.json (または Settings → MCP) に。どの MCP クライアントでも同じサーバー。',
+			scripts:
+				'自分の Playwright・Selenium・Puppeteer でも。webmcpx のサイトには Chrome・Firefox・Safari で document.modelContext があります。'
 		}
 	},
 
 	own: {
-		title: 'エージェントに、推測ではなく操作を',
-		lead: 'いまのエージェントは、カートに商品を入れたいときも手探りでクリックして推測し、よく間違えます。ボタンが既に呼んでいる関数を渡しましょう。型付きの入力、明確な結果、そしてユーザー自身のセッションで動きます。',
+		title: 'サイト独自のアクション',
+		lead: 'カートに追加、予約、カタログ検索：ボタンがすでに呼んでいる関数を、エージェントが直接呼べるツールに。',
 		notes: {
 			agent:
 				'エージェントが webmcpx の仕組みを読み、プロジェクトの中から公開する価値のある操作を見つけ、どれを追加するか確認したうえで追加・検証します。',

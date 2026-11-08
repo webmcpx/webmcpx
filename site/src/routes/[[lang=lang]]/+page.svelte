@@ -9,7 +9,6 @@
 	import Divider from '#lib/components/ui/Divider.svelte';
 	import Agents from '#lib/features/agents/Agents.svelte';
 	import Fix from '#lib/features/fix/Fix.svelte';
-	import Own from '#lib/features/own/Own.svelte';
 	import Hero from '#lib/features/hero/Hero.svelte';
 	import Issues from '#lib/features/issues/Issues.svelte';
 	import LogoWall from '#lib/features/logos/LogoWall.svelte';
@@ -34,10 +33,9 @@
 <Divider />
 <Proof runs={page.runs} reproduce={page.code.reproduce} />
 <Divider />
-<Fix code={page.code} />
-<Own samples={page.own} />
+<Fix code={page.code} own={page.own} />
 <Divider />
-<Agents prompt={page.code.mcpPrompt} saving={page.saving} />
+<Agents code={page.code} saving={page.saving} />
 <Divider />
 <Versus />
 <Divider />

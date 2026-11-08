@@ -338,15 +338,19 @@ const fr: Messages = {
 
 	fix: {
 		title: 'Pour votre site',
-		lead: 'Une ligne le rend prêt pour les agents : ils appellent votre site au lieu de deviner.',
+		lead: 'Deux parties. Demandez à votre agent de code (Claude Code, Codex, Cursor) ou faites-le à la main.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 Ko chargés · Rust + WebAssembly · licence MIT',
-		html: 'Collez-le avant {tag}. Dans les navigateurs sans WebMCP, il ajoute le polyfill du W3C.'
+		html: 'Collez-le avant {tag}. Dans les navigateurs sans WebMCP, il ajoute le polyfill du W3C.',
+		standard: {
+			title: 'Outils standard : une ligne',
+			lead: 'Recherche, lecture et contexte sur chaque page. Sans code.'
+		}
 	},
 
 	agents: {
 		title: 'Pour votre agent',
-		lead: 'Les mêmes réponses, pour une fraction des tokens. Fonctionne dans Codex, Claude Code, Cursor et tout script : Chrome, Firefox, Safari, Selenium, Playwright.',
+		lead: 'Le MCP que tout setup Claude Code et Codex devrait avoir : les mêmes réponses sur chaque site, pour une fraction des tokens.',
 		saving: {
 			range: { other: 'De {low} à {high} moins de tokens sur les {n} modèles du classement.' },
 			best: 'Jusqu’à {high} moins de tokens au classement.',
@@ -365,12 +369,23 @@ const fr: Messages = {
 				label: 'Agents qui pilotent un navigateur',
 				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP ; Chrome, Firefox, Safari : appelez {api} dans la page. Tout site doté de webmcpx l’expose.'
 			}
+		},
+		hype: { up: 'Jusqu’à', fewer: 'de tokens en moins', same: 'Les mêmes réponses.' },
+		worksWith: 'Fonctionne avec',
+		tabs: { scripts: 'Scripts' },
+		notes: {
+			prompt:
+				'Un prompt : votre agent se configure, utilise WebMCP d’abord partout et le prouve sur webmcpx.dev.',
+			cli: 'À lancer une fois dans un terminal. Ensuite, les outils WebMCP de chaque page deviennent des outils de votre agent.',
+			cursor: 'Dans .cursor/mcp.json (ou Settings → MCP). Le même serveur, pour tout client MCP.',
+			scripts:
+				'Votre propre Playwright, Selenium ou Puppeteer : chaque site avec webmcpx a document.modelContext, dans Chrome, Firefox et Safari.'
 		}
 	},
 
 	own: {
-		title: 'Laissez les agents agir, pas deviner',
-		lead: 'Aujourd’hui, un agent qui veut ajouter un article au panier clique au hasard et devine, et se trompe souvent. Donnez-lui la fonction que votre bouton appelle déjà : une entrée typée, une réponse claire, la session de l’utilisateur.',
+		title: 'Les actions de votre site',
+		lead: 'Ajouter au panier, réserver, chercher dans le catalogue : les fonctions que vos boutons appellent déjà, en outils que les agents appellent directement.',
 		notes: {
 			agent:
 				'Votre agent lit ce que fait webmcpx, repère dans votre projet les actions qui valent la peine d’être exposées, vous demande lesquelles ajouter, puis les ajoute et les vérifie.',

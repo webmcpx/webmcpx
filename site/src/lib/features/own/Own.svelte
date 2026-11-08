@@ -1,12 +1,11 @@
 <!--
-	"Your own tools": the same tool written each way a site can, as tabs (most used first), then the
-	command that shows it, with no browser flag.
+	Part 2 of "For your site" (rendered inside Fix): the site's own actions, the same tool written each way a
+	site can, as tabs (your coding agent first).
 -->
 <script lang="ts">
 	import Bot from '@lucide/svelte/icons/bot';
 	import { siHtml5, siJavascript, siReact, siSvelte, siVuedotjs, type SimpleIcon } from 'simple-icons';
 	import CodeTabs, { type CodeTab } from '#lib/components/ui/CodeTabs.svelte';
-	import Section from '#lib/components/ui/Section.svelte';
 	import { OWN_TABS, type Highlighted, type OwnId } from '#lib/content/snippets.ts';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
@@ -53,8 +52,12 @@
 	]);
 </script>
 
-<Section id="own" title={m.title} lead={m.lead} center>
-	<Reveal class="mx-auto max-w-3xl text-left">
+<div id="own" class="mx-auto mt-14 max-w-3xl scroll-mt-20 text-left">
+	<Reveal>
+		<h3 class="flex items-baseline gap-3 font-display text-2xl font-bold">
+			<span class="font-mono text-base text-ink-3" aria-hidden="true">2</span>{m.title}
+		</h3>
+		<p class="mt-2 mb-5 text-pretty text-ink-2">{m.lead}</p>
 		<CodeTabs label={m.title} {tabs} />
 	</Reveal>
-</Section>
+</div>

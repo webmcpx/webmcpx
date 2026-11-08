@@ -441,12 +441,16 @@ const en = {
 		// max 40: names the audience, as the nav's "For sites" does.
 		title: 'For your site',
 		// max 70
-		lead: 'One line makes it agent-ready: agents call your site instead of guessing.',
+		lead: 'Two parts. Ask your coding agent (Claude Code, Codex, Cursor), or do it by hand.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		// Small capitals, max 50.
 		facts: '~2.7 KB on load · Rust + WebAssembly · MIT license',
 		// The HTML tab's note. {tag} is `</body>`: keep it.
-		html: 'Paste it before {tag}. In browsers without WebMCP, it adds the W3C polyfill.'
+		html: 'Paste it before {tag}. In browsers without WebMCP, it adds the W3C polyfill.',
+		standard: {
+			title: 'Standard tools: one line',
+			lead: 'Search, read and page context on every page. No code.'
+		}
 	},
 
 	// For people who use agents (no site, no scan needed): one prompt for the agent itself.
@@ -454,7 +458,7 @@ const en = {
 		// max 45
 		title: 'For your agent',
 		// max 160
-		lead: 'Same answers, a fraction of the tokens. Works in Codex, Claude Code, Cursor and any script: Chrome, Firefox, Safari, Selenium, Playwright.',
+		lead: 'The one MCP every Claude Code and Codex setup should have: same answers on every site, for a fraction of the tokens.',
 		// One line, linked to the leaderboard. {low} and {high} are ratios (2.4×, 5.7×): each model's
 		// tokens without WebMCP over its tokens with WebMCP, over its whole run. {n} (2 or more) is how many
 		// models are on the leaderboard. `best` is used when there is one model, or one did not save.
@@ -478,12 +482,24 @@ const en = {
 				label: 'Agents that drive a browser',
 				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: call {api} in the page. Every site with webmcpx has it.'
 			}
+		},
+		// The big number: "Up to" before a ratio (6.0×), "fewer tokens" after it.
+		hype: { up: 'Up to', fewer: 'fewer tokens', same: 'Same answers.' },
+		worksWith: 'Works with',
+		tabs: { scripts: 'Scripts' },
+		notes: {
+			prompt:
+				'One prompt: your agent sets itself up, uses WebMCP first everywhere, and proves it on webmcpx.dev.',
+			cli: "Run once in a terminal. From then on, every page's WebMCP tools are tools your agent calls.",
+			cursor: 'In .cursor/mcp.json (or Settings → MCP). Same server, any MCP client.',
+			scripts:
+				'Your own Playwright, Selenium or Puppeteer: every site with webmcpx has document.modelContext, in Chrome, Firefox and Safari.'
 		}
 	},
 
 	own: {
-		title: 'Let agents act, not guess',
-		lead: 'An agent that wants to add something to a cart today clicks around and guesses, and often gets it wrong. Hand it the function your button already calls: a typed input, a clear answer, the user’s own session.',
+		title: 'Your site’s own actions',
+		lead: 'Add to cart, book, search your catalog: the functions your buttons already call, as tools agents call directly.',
 		notes: {
 			agent:
 				'Your agent reads what webmcpx does, finds the actions worth exposing in your project, asks you which ones to add, then adds and checks them.',

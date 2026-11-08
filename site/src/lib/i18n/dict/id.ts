@@ -327,15 +327,19 @@ const id: Messages = {
 
 	fix: {
 		title: 'Untuk situs Anda',
-		lead: 'Satu baris membuatnya siap agen: agen memanggil situs Anda, bukan menebak.',
+		lead: 'Dua bagian. Minta agen coding Anda (Claude Code, Codex, Cursor), atau lakukan manual.',
 		alternatives: { npm: 'npm', agent: 'Agent' },
 		facts: '~2,7 KB dimuat · Rust + WebAssembly · lisensi MIT',
-		html: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, ia menambahkan polyfill W3C.'
+		html: 'Tempel sebelum {tag}. Di browser tanpa WebMCP, ia menambahkan polyfill W3C.',
+		standard: {
+			title: 'Alat standar: satu baris',
+			lead: 'Pencarian, membaca, dan konteks halaman di setiap halaman. Tanpa kode.'
+		}
 	},
 
 	agents: {
 		title: 'Untuk agen Anda',
-		lead: 'Jawaban sama, token jauh lebih sedikit. Jalan di Codex, Claude Code, Cursor, dan skrip apa pun: Chrome, Firefox, Safari, Selenium, Playwright.',
+		lead: 'MCP yang wajib ada di setiap setup Claude Code dan Codex: jawaban yang sama di setiap situs, dengan sebagian kecil token.',
 		saving: {
 			range: { other: '{low} hingga {high} lebih sedikit token di semua {n} model peringkat.' },
 			best: 'Hingga {high} lebih sedikit token di peringkat.',
@@ -354,12 +358,23 @@ const id: Messages = {
 				label: 'Agen yang mengendalikan browser',
 				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: panggil {api} di halaman. Setiap situs dengan webmcpx memilikinya.'
 			}
+		},
+		hype: { up: 'Hingga', fewer: 'lebih sedikit token', same: 'Jawaban yang sama.' },
+		worksWith: 'Bekerja dengan',
+		tabs: { scripts: 'Skrip' },
+		notes: {
+			prompt:
+				'Satu prompt: agen Anda menyiapkan dirinya, memakai WebMCP lebih dulu di mana saja, dan membuktikannya di webmcpx.dev.',
+			cli: 'Jalankan sekali di terminal. Setelah itu, alat WebMCP setiap halaman menjadi alat agen Anda.',
+			cursor: 'Di .cursor/mcp.json (atau Settings → MCP). Server yang sama untuk klien MCP apa pun.',
+			scripts:
+				'Playwright, Selenium, atau Puppeteer Anda sendiri: setiap situs dengan webmcpx punya document.modelContext, di Chrome, Firefox, dan Safari.'
 		}
 	},
 
 	own: {
-		title: 'Biarkan agen bertindak, bukan menebak',
-		lead: 'Saat ini, agen yang ingin menambah barang ke keranjang mengeklik ke sana kemari dan menebak, dan sering salah. Berikan fungsi yang sudah dipanggil tombol Anda: input bertipe, jawaban jelas, sesi milik pengguna sendiri.',
+		title: 'Aksi situs Anda sendiri',
+		lead: 'Tambah ke keranjang, pesan, cari di katalog: fungsi yang sudah dipanggil tombol Anda, sebagai alat yang dipanggil agen langsung.',
 		notes: {
 			agent:
 				'Agen Anda membaca apa yang dilakukan webmcpx, menemukan aksi yang layak diekspos di proyek Anda, menanyakan mana yang ingin ditambahkan, lalu menambahkan dan mengeceknya.',

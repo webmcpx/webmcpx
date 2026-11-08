@@ -1,36 +1,52 @@
 <!--
-	For people who use agents (no site, no scan needed): the saving on the leaderboard, computed from the
-	published runs, then one prompt the agent runs on itself, then the two ways it can take (an MCP
-	client, or document.modelContext from any browser automation) as the small print.
+	For people who use agents (no site, no scan needed): the saving as one big number from the published
+	runs (with the range and the losses under it), the tools it works with, then one tab per way to set it
+	up: the prompt first, then the command for each client, then the in-page call for agents that drive
+	a browser themselves.
 -->
 <script lang="ts">
-	import ChartColumn from '@lucide/svelte/icons/chart-column';
-	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
+	import Bot from '@lucide/svelte/icons/bot';
+	import Code from '@lucide/svelte/icons/code';
+	import CodeTabs, { type CodeTab } from '#lib/components/ui/CodeTabs.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
-	import type { Highlighted } from '#lib/content/snippets.ts';
+	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
+	import {
+		CHROME,
+		CLAUDE,
+		CURSOR,
+		FIREFOX,
+		OPENAI,
+		PLAYWRIGHT,
+		PUPPETEER,
+		SAFARI,
+		SELENIUM,
+		type Logo
+	} from '#lib/content/logos.ts';
+	import type { Highlighted, SnippetId } from '#lib/content/snippets.ts';
 	import { ratio, savingIsRange, span, type TokenSaving } from '#lib/features/benchmark/bench.ts';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
-	import Rich from '#lib/i18n/Rich.svelte';
 	import Reveal from '#lib/motion/Reveal.svelte';
+	import { siClaude, siCursor } from 'simple-icons';
 
 	interface Props {
-		prompt: Highlighted;
-		/** Each model's whole-run token saving (null: no run published, and the line is left out). */
+		code: Record<SnippetId, Highlighted>;
+		/** Each model's whole-run token saving (null: no run published, and the number is left out). */
 		saving: TokenSaving | null;
 	}
 
-	let { prompt, saving }: Props = $props();
+	let { code, saving }: Props = $props();
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.agents);
 
-	const proof = $derived.by(() => {
-		if (!saving) return null;
-		const [low, high] = [ratio(saving.low), ratio(saving.high)];
-		return savingIsRange(saving)
-			? i18n.plural(saving.models, m.saving.range, { low, high })
-			: fmt(m.saving.best, { high });
-	});
+	// The range across models, under the big number (the big number is the best of them).
+	const range = $derived(
+		saving
+			? savingIsRange(saving)
+				? i18n.plural(saving.models, m.saving.range, { low: ratio(saving.low), high: ratio(saving.high) })
+				: fmt(m.saving.best, { high: ratio(saving.high) })
+			: null
+	);
 	// The questions where WebMCP used more tokens: said next to the saving, never hidden.
 	const losses = $derived(
 		saving && saving.worse[1] > 0
@@ -38,43 +54,88 @@
 			: null
 	);
 
-	const ways = $derived([
-		{ way: m.ways.mcp, inline: 'npx -y webmcpx mcp' },
-		{ way: m.ways.browser, inline: 'document.modelContext' }
+	const WORKS: { name: string; logo: Logo }[] = [
+		{ name: 'Claude Code', logo: CLAUDE },
+		{ name: 'Codex', logo: OPENAI },
+		{ name: 'Cursor', logo: CURSOR },
+		{ name: 'Chrome', logo: CHROME },
+		{ name: 'Firefox', logo: FIREFOX },
+		{ name: 'Safari', logo: SAFARI },
+		{ name: 'Playwright', logo: PLAYWRIGHT },
+		{ name: 'Selenium', logo: SELENIUM },
+		{ name: 'Puppeteer', logo: PUPPETEER }
+	];
+
+	const agentLabel = $derived(i18n.m.fix.alternatives.agent);
+	// The prompt first (the agent sets itself up), then each client's one command, then scripts.
+	const tabs: CodeTab[] = $derived([
+		{
+			id: 'prompt',
+			label: agentLabel,
+			icon: Bot,
+			snippet: code.mcpPrompt,
+			title: 'prompt',
+			note: m.notes.prompt
+		},
+		{
+			id: 'claude',
+			label: 'Claude Code',
+			icon: siClaude,
+			snippet: code.mcpClaude,
+			title: 'terminal',
+			note: m.notes.cli
+		},
+		{ id: 'codex', label: 'Codex', icon: Code, snippet: code.mcpCodex, title: 'terminal', note: m.notes.cli },
+		{
+			id: 'cursor',
+			label: 'Cursor',
+			icon: siCursor,
+			snippet: code.mcpCursor,
+			title: '.cursor/mcp.json',
+			note: m.notes.cursor
+		},
+		{
+			id: 'scripts',
+			label: m.tabs.scripts,
+			icon: Code,
+			snippet: code.pageScript,
+			title: 'script.js',
+			note: m.notes.scripts
+		}
 	]);
 </script>
 
-<!-- Code inside a sentence: breaks inside a word only when it cannot fit a line (code always wraps). -->
-{#snippet inlineCode(text: string)}<code class="font-mono text-xs wrap-break-word text-ink">{text}</code
-	>{/snippet}
-
 <Section id="for-agents" title={m.title} lead={m.lead} center>
-	{#if proof}
-		<Reveal class="-mt-4 mb-8 text-center sm:-mt-6">
-			<a
-				href="#leaderboard"
-				class="inline-flex items-center gap-2 rounded-2xl bg-marker px-4 py-1.5 font-display font-bold text-pretty text-ink underline-offset-4 hover:underline"
-			>
-				<ChartColumn size={18} strokeWidth={2.25} class="shrink-0" aria-hidden="true" />{proof}
+	{#if saving}
+		<Reveal class="-mt-2 mb-10 text-center">
+			<a href="#leaderboard" class="inline-block font-display font-bold text-ink">
+				<span class="align-middle text-2xl sm:text-3xl">{m.hype.up}</span>
+				<span
+					class="px-1 text-7xl leading-none tracking-tight sm:text-8xl"
+					style="background: linear-gradient(transparent 62%, var(--color-marker) 62%)"
+					>{ratio(saving.high)}</span
+				>
+				<span class="align-middle text-2xl sm:text-3xl">{m.hype.fewer}</span>
 			</a>
-			{#if losses}<p class="mx-auto mt-2 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
+			<p class="mx-auto mt-4 max-w-xl text-pretty text-ink-2">
+				<span class="font-medium text-ink">{m.hype.same}</span>
+				<a
+					href="#leaderboard"
+					class="underline decoration-marker decoration-2 underline-offset-4 hover:decoration-ink">{range}</a
+				>
+			</p>
+			{#if losses}<p class="mx-auto mt-1 max-w-xl text-sm text-pretty text-ink-3">{losses}</p>{/if}
 		</Reveal>
 	{/if}
-	<Reveal class="mx-auto max-w-3xl rounded-card border-2 border-ink bg-card p-5 text-left shadow-hard sm:p-6">
-		<p class="mb-4 text-sm text-pretty text-ink-2">{m.prompt}</p>
-		<CodeBlock snippet={prompt} title="prompt" />
-		<dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
-			{#each ways as { way, inline } (inline)}
-				<div class="rounded-xl bg-paper px-3.5 py-2.5">
-					<dt class="font-display font-bold">{way.label}</dt>
-					<dd class="mt-1 text-pretty text-ink-2">
-						<Rich text={way.text}>
-							{#snippet cmd()}{@render inlineCode(inline)}{/snippet}
-							{#snippet api()}{@render inlineCode(inline)}{/snippet}
-						</Rich>
-					</dd>
-				</div>
+	<Reveal class="mx-auto mb-8 max-w-3xl">
+		<p class="text-center font-mono text-xs tracking-wider text-ink-3 uppercase">{m.worksWith}</p>
+		<ul class="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-3 text-sm text-ink-2">
+			{#each WORKS as w (w.name)}
+				<li class="inline-flex items-center gap-1.5"><SiteLogo logo={w.logo} size={16} />{w.name}</li>
 			{/each}
-		</dl>
+		</ul>
+	</Reveal>
+	<Reveal class="mx-auto max-w-3xl text-left">
+		<CodeTabs label={m.title} {tabs} />
 	</Reveal>
 </Section>

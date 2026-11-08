@@ -335,15 +335,19 @@ const es: Messages = {
 
 	fix: {
 		title: 'Para tu sitio',
-		lead: 'Una línea lo deja listo para agentes: llaman a tu sitio en vez de adivinar.',
+		lead: 'Dos partes. Pídeselo a tu agente de código (Claude Code, Codex, Cursor) o hazlo a mano.',
 		alternatives: { npm: 'npm', agent: 'Agente' },
 		facts: '~2,7 KB al cargar · Rust + WebAssembly · MIT',
-		html: 'Pégalo antes de {tag}. En navegadores sin WebMCP, añade el polyfill del W3C.'
+		html: 'Pégalo antes de {tag}. En navegadores sin WebMCP, añade el polyfill del W3C.',
+		standard: {
+			title: 'Herramientas estándar: una línea',
+			lead: 'Búsqueda, lectura y contexto en todas las páginas. Sin código.'
+		}
 	},
 
 	agents: {
 		title: 'Para tu agente',
-		lead: 'Las mismas respuestas, con una fracción de los tokens. Funciona en Codex, Claude Code, Cursor y cualquier script: Chrome, Firefox, Safari, Selenium, Playwright.',
+		lead: 'El MCP que todo setup de Claude Code y Codex debería tener: las mismas respuestas en cualquier sitio, con una fracción de los tokens.',
 		saving: {
 			range: { other: 'De {low} a {high} menos tokens en los {n} modelos del ranking.' },
 			best: 'Hasta {high} menos tokens en el ranking.',
@@ -361,12 +365,22 @@ const es: Messages = {
 				label: 'Agentes que controlan un navegador',
 				text: 'Playwright, Selenium, Puppeteer, browser-use, CDP; Chrome, Firefox, Safari: llama a {api} en la página. Todo sitio con webmcpx lo tiene.'
 			}
+		},
+		hype: { up: 'Hasta', fewer: 'menos tokens', same: 'Las mismas respuestas.' },
+		worksWith: 'Funciona con',
+		tabs: { scripts: 'Scripts' },
+		notes: {
+			prompt: 'Un prompt: tu agente se configura, usa WebMCP primero en todo y lo prueba en webmcpx.dev.',
+			cli: 'Ejecútalo una vez en la terminal. Desde entonces, las herramientas WebMCP de cada página son herramientas de tu agente.',
+			cursor: 'En .cursor/mcp.json (o Settings → MCP). El mismo servidor, en cualquier cliente MCP.',
+			scripts:
+				'Tu propio Playwright, Selenium o Puppeteer: todo sitio con webmcpx tiene document.modelContext, en Chrome, Firefox y Safari.'
 		}
 	},
 
 	own: {
-		title: 'Que los agentes actúen, no que adivinen',
-		lead: 'Hoy, un agente que quiere añadir algo al carrito va haciendo clic y adivinando, y a menudo se equivoca. Dale la función que ya llama tu botón: entrada tipada, una respuesta clara y la sesión del propio usuario.',
+		title: 'Las acciones de tu sitio',
+		lead: 'Añadir al carrito, reservar, buscar en tu catálogo: las funciones que tus botones ya llaman, como herramientas que los agentes llaman directo.',
 		notes: {
 			agent:
 				'Tu agente lee qué hace webmcpx, encuentra en tu proyecto las acciones que vale la pena exponer, te pregunta cuáles añadir y luego las añade y las comprueba.',

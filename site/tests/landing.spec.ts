@@ -370,7 +370,11 @@ test('switching sites starts the question rotation over', async ({ page }) => {
 	await page.goto('/#leaderboard');
 	const proof = page.locator('#leaderboard');
 	await proof.getByRole('tab', { name: /specification\.website/ }).click();
-	await proof.getByRole('button', { name: 'Question 4 of 5' }).click();
+	// Move off the first question (how many there are depends on the run).
+	await proof
+		.getByRole('button', { name: /^Question \d+ of \d+$/ })
+		.last()
+		.click();
 	await proof.getByRole('tab', { name: /Kiln/ }).click();
 	await expect(proof.getByRole('button', { name: /^Question 1 of \d+$/ })).toHaveAttribute(
 		'aria-current',
@@ -538,11 +542,16 @@ test('for sites: one line, as tabs that open on your coding agent', async ({ pag
 	await page.goto('/#for-sites');
 	const sites = page.locator('#for-sites');
 	await expect(sites.getByRole('heading', { level: 2 })).toHaveText('For your site');
-	const install = sites.getByRole('tablist', { name: 'For your site' }).getByRole('tab');
+	// Two parts under one title: the standard tools, then the site's own actions.
+	await expect(sites.getByRole('heading', { level: 3 })).toHaveText([
+		'1Standard tools: one line',
+		'2Your site’s own actions'
+	]);
+	const install = sites.getByRole('tablist', { name: 'Standard tools: one line' }).getByRole('tab');
 	await expect(install).toHaveText(['Agent', 'HTML', 'npm']);
 	await expect(install.first()).toHaveAttribute('aria-selected', 'true');
 	await expect(sites.getByRole('tabpanel').first()).toContainText('npx skills add webmcpx/webmcpx -y');
-	await expect(sites.getByRole('tablist')).toHaveCount(1);
+	await expect(sites.getByRole('tablist')).toHaveCount(2);
 	// Nothing for the agent side here: that is its own section.
 	await expect(sites.getByText('npx -y webmcpx mcp')).toHaveCount(0);
 });
@@ -552,25 +561,44 @@ test('the old #fix links, printed by published CLIs, still land on the site sect
 	await expect(page.locator('#for-sites').getByRole('heading', { level: 2 })).toBeInViewport();
 });
 
-test('for agents: the measured saving, one prompt, then the two ways', async ({ page }) => {
+test('for agents: the measured saving, the tools it works with, one tab per way to set it up', async ({
+	page
+}) => {
 	await page.goto('/#for-agents');
 	const agents = page.locator('#for-agents');
 	await expect(agents.getByRole('heading', { level: 2 })).toHaveText('For your agent');
-	// Computed from the published runs, linked to them.
-	const saving = agents.getByRole('link', { name: /fewer tokens/ });
-	await expect(saving).toHaveText(
-		/^\d+(\.\d)?× to \d+(\.\d)?× fewer tokens across \d+ models on the leaderboard\.$/
+	// Computed from the published runs, linked to them: the best as the big number, the range under it.
+	await expect(agents.getByRole('link', { name: /^Up to \d+(\.\d)?× fewer tokens$/ })).toHaveAttribute(
+		'href',
+		'#leaderboard'
 	);
-	await expect(saving).toHaveAttribute('href', '#leaderboard');
+	await expect(
+		agents.getByRole('link', {
+			name: /^\d+(\.\d)?× to \d+(\.\d)?× fewer tokens across \d+ models on the leaderboard\.$/
+		})
+	).toBeVisible();
 	// The losses sit right under it, never hidden.
 	await expect(
 		agents.getByText(/^Whole runs: on \d+(–\d+)? of \d+ questions per model, WebMCP used more tokens\.$/)
 	).toBeVisible();
-	const prompt = agents.getByRole('figure').filter({ hasText: 'Use WebMCP first on every web page' });
-	await expect(prompt.getByRole('button', { name: /Copy/ })).toBeVisible();
-	await expect(agents.getByRole('definition').filter({ hasText: 'npx -y webmcpx mcp' })).toBeVisible();
-	await expect(agents.getByRole('definition').filter({ hasText: 'document.modelContext' })).toBeVisible();
-	await expect(agents.getByRole('tablist')).toHaveCount(0);
+	await expect(agents.getByRole('listitem')).toContainText([
+		'Claude Code',
+		'Codex',
+		'Cursor',
+		'Chrome',
+		'Firefox',
+		'Safari'
+	]);
+	const tabs = agents.getByRole('tab');
+	await expect(tabs).toHaveText(['Agent', 'Claude Code', 'Codex', 'Cursor', 'Scripts']);
+	// The prompt first; each client's one command a click away.
+	await expect(agents.getByRole('tabpanel')).toContainText('Use WebMCP first on every web page');
+	await tabs.nth(1).click();
+	await expect(agents.getByRole('tabpanel')).toContainText(
+		'claude mcp add webmcpx -- npx -y webmcpx mcp'
+	);
+	await tabs.nth(4).click();
+	await expect(agents.getByRole('tabpanel')).toContainText('document.modelContext');
 });
 
 test('the hero has a way in for each audience', async ({ page }) => {

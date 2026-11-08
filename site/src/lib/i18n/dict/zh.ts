@@ -322,15 +322,16 @@ const zh: Messages = {
 
 	fix: {
 		title: '给你的网站',
-		lead: '一行代码让它为智能体就绪：智能体直接调用你的网站，而不是猜。',
+		lead: '两部分。让你的编程智能体（Claude Code、Codex、Cursor）来做，或手动完成。',
 		alternatives: { npm: 'npm', agent: '智能体' },
 		facts: '加载约 2.7 KB · Rust + WebAssembly · MIT 许可证',
-		html: '粘贴到 {tag} 之前。浏览器没有 WebMCP 时，它会补上 W3C polyfill。'
+		html: '粘贴到 {tag} 之前。浏览器没有 WebMCP 时，它会补上 W3C polyfill。',
+		standard: { title: '标准工具：一行', lead: '每个页面都有搜索、读取和页面上下文。无需代码。' }
 	},
 
 	agents: {
 		title: '给你的智能体',
-		lead: '答案不变，token 只需一小部分。适用于 Codex、Claude Code、Cursor 和任何脚本：Chrome、Firefox、Safari、Selenium、Playwright。',
+		lead: '每个 Claude Code 和 Codex 都该装的 MCP：在任何网站得到同样的答案，只用一小部分 token。',
 		saving: {
 			range: { other: '排行榜全部 {n} 个模型，token 减少 {low} 到 {high}。' },
 			best: '排行榜上，token 最多减少 {high}。',
@@ -346,12 +347,22 @@ const zh: Messages = {
 				label: '自己驱动浏览器的智能体',
 				text: 'Playwright、Selenium、Puppeteer、browser-use、CDP；Chrome、Firefox、Safari：在页面里调用 {api}。装了 webmcpx 的网站都有它。'
 			}
+		},
+		hype: { up: '最多', fewer: '更少 token', same: '答案相同。' },
+		worksWith: '适用于',
+		tabs: { scripts: '脚本' },
+		notes: {
+			prompt: '一个提示词：智能体自行配置，处处先用 WebMCP，并在 webmcpx.dev 上验证。',
+			cli: '在终端运行一次。之后每个页面的 WebMCP 工具都会成为你智能体的工具。',
+			cursor: '写入 .cursor/mcp.json（或 Settings → MCP）。任何 MCP 客户端都用同一个服务器。',
+			scripts:
+				'你自己的 Playwright、Selenium 或 Puppeteer：任何装了 webmcpx 的网站在 Chrome、Firefox、Safari 中都有 document.modelContext。'
 		}
 	},
 
 	own: {
-		title: '让智能体动手，而不是瞎猜',
-		lead: '如今，智能体想把商品加入购物车时，只能到处点击、靠猜，还常常出错。把你的按钮本来就在调用的函数交给它：类型明确的输入、清晰的结果，用的还是用户自己的会话。',
+		title: '你网站自己的操作',
+		lead: '加入购物车、预订、搜索目录：把按钮已经调用的函数，变成智能体可以直接调用的工具。',
 		notes: {
 			agent: '你的智能体会读懂 webmcpx 做什么，在项目里找出值得开放的操作，问你要加哪些，然后添加并检查。',
 			form: '无需 JavaScript：WebMCP 的声明式 API。浏览器还不支持时，脚本标签会补上。',
