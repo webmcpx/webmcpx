@@ -4,6 +4,8 @@
 	when all is well.
 -->
 <script lang="ts">
+	import Check from '@lucide/svelte/icons/check';
+	import X from '@lucide/svelte/icons/x';
 	import Link from '@lucide/svelte/icons/link';
 	import Wrench from '@lucide/svelte/icons/wrench';
 	import { tick } from 'svelte';
@@ -18,7 +20,17 @@
 	import { tokens as pageTokens } from '#lib/features/benchmark/bench.ts';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
-	import { BADGES, badgeEmbed, errors, errorText, host, shareLink, type BadgeStyle } from './scan.ts';
+	import {
+		BADGES,
+		badgeEmbed,
+		errors,
+		errorText,
+		host,
+		READY_SCORE,
+		SCORE_GROUPS,
+		shareLink,
+		type BadgeStyle
+	} from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
 	import { highlightLite } from './highlight-lite.ts';
 
@@ -149,6 +161,8 @@
 										>{i18n.plural(r.page_tokens, m.result.tokens, { n: pageTokens(r.page_tokens) })}</strong
 									>{/snippet}
 							</Rich>
+						{:else if r.verdict === 'issues' && !errors(r)}
+							{fmt(m.result.basics, { tools: i18n.plural(r.tools.length, m.result.toolCount) })}
 						{:else if r.verdict === 'issues'}
 							{i18n.plural(errors(r), m.result.issues, {
 								tools: i18n.plural(r.tools.length, m.result.toolCount)
@@ -162,6 +176,69 @@
 					</p>
 				</div>
 			</div>
+
+			{#if r.score_items?.length}
+				{@const items = new Map(r.score_items.map((i) => [i.id, i]))}
+				<!-- The agent-ready score: the number, the bar to clear, then every check by group, with how to fix what misses. -->
+				<section class="border-t-2 border-ink px-5 py-5 sm:px-7" aria-labelledby="score-title">
+					<div class="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+						<h3 id="score-title" class="font-mono text-xs tracking-wider text-ink-2 uppercase">
+							{m.result.score.title}
+						</h3>
+						<p class="font-display text-4xl leading-none font-bold tabular-nums">
+							<span class={r.score >= READY_SCORE ? 'marker' : undefined}
+								>{fmt(m.result.score.of, { score: i18n.number(r.score) })}</span
+							>
+						</p>
+						<p class="text-sm text-ink-3">
+							{fmt(m.result.score.need, { min: i18n.number(READY_SCORE) })}
+						</p>
+					</div>
+					<div class="mt-5 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+						{#each SCORE_GROUPS as g (g.id)}
+							<div>
+								<p class="font-mono text-[11px] tracking-wider text-ink-3 uppercase">
+									{m.result.score.groups[g.id]}
+								</p>
+								<ul class="mt-2 space-y-2">
+									{#each g.items as id (id)}
+										{@const it = items.get(id)}
+										{#if it}
+											{@const ok = it.points === it.max}
+											<li class="flex gap-2.5 text-sm">
+												<span
+													class={[
+														'mt-0.5 grid size-5 shrink-0 place-items-center rounded-full border-2 border-ink',
+														ok ? 'bg-marker' : 'bg-card'
+													]}
+													aria-hidden="true"
+													>{#if ok}<Check size={11} strokeWidth={3} />{:else}<X
+															size={11}
+															strokeWidth={3}
+														/>{/if}</span
+												>
+												<span class="min-w-0 flex-1">
+													<span class="flex items-baseline justify-between gap-3">
+														<span class={ok ? 'font-medium' : 'font-medium text-ink-2'}
+															>{m.result.score.items[id].label}</span
+														>
+														<span class="font-mono text-xs text-ink-3 tabular-nums"
+															>{i18n.number(it.points)}/{i18n.number(it.max)}</span
+														>
+													</span>
+													{#if !ok}<span class="mt-0.5 block text-xs text-pretty text-ink-3"
+															>{m.result.score.items[id].fix}</span
+														>{/if}
+												</span>
+											</li>
+										{/if}
+									{/each}
+								</ul>
+							</div>
+						{/each}
+					</div>
+				</section>
+			{/if}
 
 			{#if r.tools.length}
 				<div class="border-t-2 border-ink bg-paper-2 px-5 py-4 sm:px-7">

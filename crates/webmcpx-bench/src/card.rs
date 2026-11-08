@@ -18,6 +18,10 @@ pub struct Summary<'a> {
     pub verdict: Verdict,
     pub tools: usize,
     pub page_tokens: usize,
+    /// The agent-ready score (0 to 100).
+    pub score: u8,
+    /// Whether the linter found errors (an "almost" site with clean tools only misses agent basics).
+    pub lint_errors: bool,
 }
 
 impl<'a> Summary<'a> {
@@ -27,6 +31,8 @@ impl<'a> Summary<'a> {
             verdict: report.verdict,
             tools: report.tools.len(),
             page_tokens: report.page_tokens,
+            score: report.score,
+            lint_errors: report.diagnostics.iter().any(|d| d.severity == "error"),
         }
     }
 }
@@ -64,24 +70,24 @@ fn stamp(verdict: Verdict) -> (&'static str, &'static str) {
     }
 }
 
-/// The card's one line under the site name.
+/// The card's one line under the site name, ending with the score.
 pub fn line(s: Summary<'_>) -> String {
-    match s.verdict {
+    let tools = if s.tools == 1 { "tool" } else { "tools" };
+    let what = match s.verdict {
         Verdict::Missing => format!(
             "No WebMCP tools. Agents read ~{} tokens of this page and guess.",
             short(s.page_tokens)
         ),
-        Verdict::Issues => format!(
-            "{} WebMCP {}, with lint errors agents will trip on.",
-            s.tools,
-            if s.tools == 1 { "tool" } else { "tools" }
-        ),
-        Verdict::Ready => format!(
-            "{} WebMCP {} agents can call directly.",
-            s.tools,
-            if s.tools == 1 { "tool" } else { "tools" }
-        ),
-    }
+        Verdict::Issues if s.lint_errors => {
+            format!(
+                "{} WebMCP {tools}, with lint errors agents will trip on.",
+                s.tools
+            )
+        }
+        Verdict::Issues => format!("{} WebMCP {tools}; a few agent basics missing.", s.tools),
+        Verdict::Ready => format!("{} WebMCP {tools} agents can call directly.", s.tools),
+    };
+    format!("{what} Score {}/100.", s.score)
 }
 
 /// The card as a standalone HTML page, 1200×630.
@@ -250,17 +256,33 @@ mod tests {
             verdict: Verdict::Missing,
             tools: 0,
             page_tokens: 12_345,
+            score: 20,
+            lint_errors: false,
         };
         assert_eq!(
             line(s),
-            "No WebMCP tools. Agents read ~12k tokens of this page and guess."
+            "No WebMCP tools. Agents read ~12k tokens of this page and guess. Score 20/100."
         );
         let s = Summary {
             verdict: Verdict::Ready,
             tools: 1,
+            score: 90,
             ..s
         };
-        assert_eq!(line(s), "1 WebMCP tool agents can call directly.");
+        assert_eq!(
+            line(s),
+            "1 WebMCP tool agents can call directly. Score 90/100."
+        );
+        let s = Summary {
+            verdict: Verdict::Issues,
+            tools: 2,
+            score: 65,
+            ..s
+        };
+        assert_eq!(
+            line(s),
+            "2 WebMCP tools; a few agent basics missing. Score 65/100."
+        );
         assert_eq!(short(2485), "2.5k");
         assert_eq!(short(237), "237");
         assert_eq!(short(999), "999");
@@ -278,6 +300,8 @@ mod tests {
             verdict: Verdict::Ready,
             tools: 2,
             page_tokens: 1,
+            score: 100,
+            lint_errors: false,
         };
         let h = html(s);
         assert!(h.contains("&lt;x&gt;&amp;") && !h.contains("<x>&"));

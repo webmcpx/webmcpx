@@ -464,8 +464,10 @@ const zh: Messages = {
 		lead: '三种判定，规则公开。觉得哪个不对就告诉我们：正是这种反馈让它变得更好。',
 		// {rules} is a list of lint rule names (code).
 		items: {
-			ready: '页面至少注册了一个 WebMCP 工具，且 linter 没有发现错误。名称过长、缺少注解之类的警告不影响。',
-			issues: '页面注册了工具，但至少有一个存在 linter 错误：{rules}，或者大小超过硬性上限。',
+			ready:
+				'页面至少注册了一个 WebMCP 工具，linter 没有发现错误，且智能体就绪评分达到 70 或以上。名称过长之类的警告不影响。',
+			issues:
+				'页面注册了工具，但至少有一个存在 linter 错误（{rules}，或者大小超过硬性上限），或者评分低于 70。',
 			missing: '页面没有注册任何 WebMCP 工具。我们会显示智能体改为阅读页面要花多少 token。'
 		},
 		how: {
@@ -475,6 +477,8 @@ const zh: Messages = {
 				'在页面脚本运行之前，我们加入一个 WebMCP 宿主，让页面像在智能体的浏览器里一样注册工具。它也接受旧的 navigator.modelContext 和 provideContext，基于它们构建的网站也能显示工具。',
 				'页面加载完成、工具稳定后，我们读取每个工具的名称、描述、输入 schema 和注解，并用 linter 检查。',
 				'token 数根据页面文本估算：字符数除以 4。',
+				'为了计算评分，同一个浏览器会获取网站的 robots.txt、llms.txt、站点地图、Markdown 版本、Link 响应头、Agent Skills 索引和 API 目录（每项 3 s，同源，不带 Cookie），只记录每一项是否存在。',
+				'评分满分 100：WebMCP 50（工具 25、无 lint 错误 15、每个工具都有描述 5、每个工具都有注解 5），智能体成本 15（有工具即满分，否则按页面 token 数计），可读性 20，可发现性 15（每项检查 5）。',
 				'结果会复用 10 分钟；每位访客每分钟可以发起一次新的扫描。'
 			]
 		},
@@ -567,6 +571,63 @@ const zh: Messages = {
 			tokens: { other: '{n} 个 token' },
 			issues: { other: '{tools}，但有 {n} 个 lint 错误会让智能体出错。' },
 			toolCount: { other: '{n} 个工具' },
+			basics: '{tools}，没有 lint 错误，但还缺几项面向智能体的基础配置。',
+			score: {
+				title: '智能体就绪评分',
+				of: '{score}/100',
+				need: '达到 {min} 分、有 WebMCP 工具且没有 lint 错误，即为智能体就绪。',
+				groups: { webmcp: 'WebMCP', cost: '智能体成本', readable: '可读性', discoverable: '可发现性' },
+				items: {
+					tools: {
+						label: 'WebMCP 工具',
+						fix: '加一个 script 标签：每个页面都有搜索、读取和页面上下文。'
+					},
+					lint: {
+						label: '无 lint 错误',
+						fix: '修复下面的问题（npx webmcpx lint 能在你的源码中找到它们）。'
+					},
+					descriptions: {
+						label: '每个工具都有描述',
+						fix: '给每个工具写一段智能体能据此行动的描述。'
+					},
+					annotations: {
+						label: '每个工具都有注解',
+						fix: '给每个工具标注 readOnlyHint，会改动内容的则标注 consequentialHint。'
+					},
+					cost: {
+						label: '对智能体成本低',
+						fix: '智能体会读完整个页面：有了工具，它们只需请求所需内容。'
+					},
+					llms_txt: {
+						label: 'llms.txt',
+						fix: '发布 /llms.txt：说明你的网站是什么，以及智能体在哪里找到其余内容。'
+					},
+					markdown: {
+						label: 'Markdown 版本',
+						fix: '以 Markdown 提供页面（Accept: text/markdown），或用 rel="alternate" 链接一个 Markdown 版本。'
+					},
+					robots: {
+						label: '对 AI 智能体开放',
+						fix: '你的 robots.txt 把 AI 智能体挡在门外（对它们设置了 Disallow: /）。'
+					},
+					sitemap: {
+						label: '站点地图',
+						fix: '发布 /sitemap.xml，或在 robots.txt 中加一行 Sitemap:。'
+					},
+					link_headers: {
+						label: 'Link 响应头',
+						fix: '添加 Link 响应头，把智能体引向 llms.txt 和你的文档（RFC 8288）。'
+					},
+					agent_skills: {
+						label: 'Agent Skills 索引',
+						fix: '发布 /.well-known/agent-skills/index.json。'
+					},
+					api_catalog: {
+						label: 'API 目录',
+						fix: '在 /.well-known/api-catalog 中列出你的 API（RFC 9727）。'
+					}
+				}
+			},
 			ready: { other: '{n} 个工具可供智能体直接调用。漂亮。' },
 			readySelf: {
 				other: '{n} 个工具可供智能体直接调用。打铁还需自身硬。'

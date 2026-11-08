@@ -60,6 +60,10 @@ pub struct Report {
     pub diagnostics: Vec<Finding>,
     /// Estimated tokens of the text snapshot a DOM-reading agent gets for this page.
     pub page_tokens: usize,
+    /// The agent-ready score, 0 to 100: the sum of `score_items` (see [`score`]).
+    pub score: u8,
+    /// What the score is made of, item by item, so the page can say what to fix.
+    pub score_items: Vec<ScoreItem>,
     /// The site's icon as a small `data:image/...` URI, fetched by the scan browser (through the egress
     /// proxy), so the page showing the report never requests anything from the scanned site.
     pub favicon: Option<String>,
@@ -69,9 +73,9 @@ pub struct Report {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Verdict {
-    /// Registers tools and the linter finds no errors.
+    /// Registers tools, the linter finds no errors and the score is at least [`READY_SCORE`].
     Ready,
-    /// Registers tools, but the linter finds errors.
+    /// Registers tools, but the linter finds errors or the score is under [`READY_SCORE`].
     Issues,
     /// Registers no WebMCP tools.
     Missing,
@@ -90,6 +94,97 @@ pub struct Finding {
     pub rule: &'static str,
     pub severity: &'static str,
     pub message: String,
+}
+
+/// The lowest score of an agent-ready site (with WebMCP tools and no lint errors).
+pub const READY_SCORE: u8 = 70;
+
+/// What the scan found besides the tools, read from the site by the scan browser (see `AGENT_CHECKS_JS`).
+/// Only booleans: nothing the site wrote travels back.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "independent yes/no checks, one per agent basic; not states of one thing"
+)]
+pub struct Checks {
+    /// `/llms.txt`, not an HTML page.
+    pub llms_txt: bool,
+    /// The page as Markdown: served for `Accept: text/markdown`, or linked as `rel="alternate"`.
+    pub markdown: bool,
+    /// robots.txt lets AI agents fetch the home page (`*` and each known AI agent: effective rules, wildcards and
+    /// Allow precedence included); a 4xx (no robots.txt) allows all, a 5xx or no answer doesn't count (RFC 9309).
+    pub robots_allows_agents: bool,
+    /// A sitemap: `/sitemap.xml` or a `Sitemap:` line in robots.txt.
+    pub sitemap: bool,
+    /// `Link` response headers on the page (RFC 8288).
+    pub link_headers: bool,
+    /// `/.well-known/agent-skills/index.json` (Agent Skills Discovery).
+    pub agent_skills: bool,
+    /// `/.well-known/api-catalog` (RFC 9727).
+    pub api_catalog: bool,
+}
+
+/// One line of the score: what was checked, its points and their maximum.
+#[derive(Debug, Clone, Serialize)]
+pub struct ScoreItem {
+    pub id: &'static str,
+    pub points: u8,
+    pub max: u8,
+}
+
+/// The agent-ready score, item by item (100 in all). WebMCP weighs half: tools (25), no lint errors (15),
+/// every tool described (5) and every tool saying what it does to the page (5: `readOnlyHint`,
+/// `consequentialHint` or `destructiveHint`). Agent cost (15): full with tools, else by
+/// what reading the page costs. Readable (20) and discoverable (15): the agent basics, 5 each.
+pub fn score(
+    tools: &[Tool],
+    diagnostics: &[Finding],
+    page_tokens: usize,
+    annotated: bool,
+    c: &Checks,
+) -> Vec<ScoreItem> {
+    let has = !tools.is_empty();
+    let item = |id, ok: bool, max: u8| ScoreItem {
+        id,
+        points: if ok { max } else { 0 },
+        max,
+    };
+    let cost = if has {
+        15
+    } else {
+        match page_tokens {
+            0..=2_000 => 15,
+            2_001..=5_000 => 10,
+            5_001..=10_000 => 5,
+            _ => 0,
+        }
+    };
+    vec![
+        item("tools", has, 25),
+        item(
+            "lint",
+            has && !diagnostics.iter().any(|d| d.severity == "error"),
+            15,
+        ),
+        item(
+            "descriptions",
+            has && tools.iter().all(|t| !t.description.trim().is_empty()),
+            5,
+        ),
+        item("annotations", has && annotated, 5),
+        ScoreItem {
+            id: "cost",
+            points: cost,
+            max: 15,
+        },
+        item("llms_txt", c.llms_txt, 5),
+        item("markdown", c.markdown, 5),
+        item("robots", c.robots_allows_agents, 5),
+        item("sitemap", c.sitemap, 5),
+        item("link_headers", c.link_headers, 5),
+        item("agent_skills", c.agent_skills, 5),
+        item("api_catalog", c.api_catalog, 5),
+    ]
 }
 
 /// Why a scan did not produce a report; each maps to an HTTP status in `server.rs`.
@@ -450,12 +545,30 @@ impl Scanner {
             .eval_isolated("document.title.slice(0, 300)")
             .await
             .map_err(failed)?;
+        // The agent checks run last, from the site's robots.txt with CSP bypassed (the page's CSP would block
+        // their fetches): the one thing read from the page itself, a Markdown alternate link, comes first.
+        // Best effort and bounded: a site that answers none of them still gets its report, scored without.
+        let markdown_link = page
+            .eval_isolated(
+                r#"!!document.querySelector('link[rel~="alternate" i][type="text/markdown" i]')"#,
+            )
+            .await
+            .ok()
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+        let mut checks = tokio::time::timeout(CHECKS_WAIT, agent_checks(page, &final_url))
+            .await
+            .ok()
+            .and_then(Result::ok)
+            .unwrap_or_default();
+        checks.markdown |= markdown_link;
         let mut report = report(
             url.as_str(),
             final_url,
             title.as_str().unwrap_or_default(),
             &tools,
             usize::try_from(snapshot_chars.as_u64().unwrap_or(0)).unwrap_or(usize::MAX),
+            &checks,
         );
         // Best effort: a site without a readable icon still gets its report.
         report.favicon = tokio::time::timeout(FAVICON_WAIT, page.eval_isolated(FAVICON_JS))
@@ -604,6 +717,139 @@ const FAVICON_JS: &str = r#"(async () => {
   }
 })()"#;
 
+/// Reads the agent basics from the scanned site, same-origin, in the isolated world (the page's scripts
+/// can't change `fetch` there), through the scan browser and its egress proxy like every other request.
+/// Each request is aborted after 3 s and its body dropped past 64 KiB. Only booleans come back.
+const AGENT_CHECKS_JS: &str = r#"(async () => {
+  const get = async (path, init = {}) => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 3000);
+    try {
+      const res = await fetch(new URL(path, location.origin).href, { credentials: 'omit', signal: ctrl.signal, ...init });
+      const out = { status: res.status, ok: res.ok, type: (res.headers.get('content-type') || '').toLowerCase(), link: res.headers.get('link') || '', text: '' };
+      if (res.ok && init.method !== 'HEAD' && res.body) {
+        const reader = res.body.getReader();
+        const dec = new TextDecoder();
+        let size = 0;
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          size += value.length;
+          out.text += dec.decode(value, { stream: true });
+          if (size > 65536) { ctrl.abort(); break; }
+        }
+      }
+      return out;
+    } catch {
+      return null;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+  const [robots, llms, sitemap, md, head, skills, catalog] = await Promise.all([
+    get('/robots.txt'),
+    get('/llms.txt'),
+    get('/sitemap.xml'),
+    get(PAGE, { headers: { accept: 'text/markdown' } }),
+    get(PAGE, { method: 'HEAD' }),
+    get('/.well-known/agent-skills/index.json'),
+    get('/.well-known/api-catalog'),
+  ]);
+  const good = (r) => !!r && r.ok;
+  const html = (r) => r.type.includes('text/html');
+  // robots.txt (RFC 9309): a 4xx means no rules (all allowed); a 5xx or no answer means we can't tell.
+  const robotsText = good(robots) && !html(robots) ? robots.text : '';
+  const groups = [];
+  let group = null;
+  for (const raw of robotsText.split(/\r?\n/)) {
+    const m = /^([a-z-]+)\s*:\s*(.*)$/i.exec(raw.replace(/#.*/, '').trim());
+    if (!m) continue;
+    const key = m[1].toLowerCase();
+    const value = m[2].trim();
+    if (key === 'user-agent') {
+      // A user-agent line after any rule (an empty `Disallow:` included) starts a new group.
+      if (!group || group.closed) groups.push((group = { agents: [], rules: [], closed: false }));
+      group.agents.push(value.toLowerCase());
+    } else if (group && (key === 'allow' || key === 'disallow')) {
+      group.closed = true;
+      if (value) group.rules.push({ allow: key === 'allow', pattern: value });
+    }
+  }
+  const matches = (pattern, path) => {
+    const anchored = pattern.endsWith('$');
+    const body = (anchored ? pattern.slice(0, -1) : pattern).split('*').map((p) => p.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*');
+    return new RegExp('^' + body + (anchored ? '$' : '')).test(path);
+  };
+  // Can this agent fetch the home page? Its own group, else `*`; the longest matching rule wins, Allow on ties.
+  const blocked = (agent) => {
+    const own = groups.filter((g) => g.agents.includes(agent));
+    const rules = (own.length ? own : groups.filter((g) => g.agents.includes('*'))).flatMap((g) => g.rules);
+    let best = null;
+    for (const r of rules) {
+      if (!matches(r.pattern, '/')) continue;
+      if (!best || r.pattern.length > best.pattern.length || (r.pattern.length === best.pattern.length && r.allow)) best = r;
+    }
+    return !!best && !best.allow;
+  };
+  const AI = ['*', 'gptbot', 'chatgpt-user', 'oai-searchbot', 'claudebot', 'claude-user', 'claude-searchbot', 'anthropic-ai', 'perplexitybot', 'perplexity-user', 'google-extended', 'ccbot', 'meta-externalagent', 'applebot-extended'];
+  const robotsMissing = !!robots && robots.status >= 400 && robots.status < 500;
+  return {
+    llms_txt: good(llms) && !html(llms) && llms.text.trim().length > 0,
+    markdown: good(md) && md.type.includes('markdown'),
+    robots_allows_agents: robotsMissing || (good(robots) && !AI.some(blocked)),
+    sitemap: (good(sitemap) && /<(urlset|sitemapindex)\b/i.test(sitemap.text)) || /^\s*sitemap\s*:/im.test(robotsText),
+    link_headers: good(head) && /rel\s*=/i.test(head.link),
+    agent_skills: good(skills) && /"skills"\s*:\s*\[/.test(skills.text),
+    api_catalog: good(catalog) && /"linkset"\s*:\s*\[/.test(catalog.text),
+  };
+})()"#;
+
+/// Longest the scan spends on the agent checks: loading robots.txt, then the probes (each also aborts
+/// itself after 3 s).
+const CHECKS_WAIT: Duration = Duration::from_secs(10);
+
+/// Runs `AGENT_CHECKS_JS` from the scanned site's own robots.txt (else the page), CSP bypassed, so the probes are
+/// same-origin whatever the page's policy; requests still go through the scan browser's egress proxy.
+async fn agent_checks(page: &Page, final_url: &str) -> anyhow::Result<Checks> {
+    let url = Url::parse(final_url)?;
+    let path = format!(
+        "{}{}",
+        url.path(),
+        url.query().map(|q| format!("?{q}")).unwrap_or_default()
+    );
+    page.bypass_csp().await?;
+    // A robots.txt Chrome won't show (a 404 with no body fails the navigation) or shows its own error page
+    // for is not on the site's origin: run from the page itself instead, reloaded with CSP bypassed.
+    let origin = url.origin().ascii_serialization();
+    let landed = page.goto(url.join("/robots.txt")?.as_str()).await.is_ok()
+        && page
+            .eval_isolated("location.origin")
+            .await
+            .is_ok_and(|here| here.as_str() == Some(origin.as_str()));
+    if !landed {
+        page.goto(url.as_str()).await?;
+    }
+    let script = format!(
+        "{}{AGENT_CHECKS_JS}",
+        format_args!("const PAGE = {};\n", serde_json::to_string(&path)?)
+    );
+    Ok(checks_from(&page.eval_isolated(&script).await?))
+}
+
+/// The checks from what `AGENT_CHECKS_JS` returned: only `true` counts.
+fn checks_from(v: &Value) -> Checks {
+    let on = |k: &str| v[k].as_bool() == Some(true);
+    Checks {
+        llms_txt: on("llms_txt"),
+        markdown: on("markdown"),
+        robots_allows_agents: on("robots_allows_agents"),
+        sitemap: on("sitemap"),
+        link_headers: on("link_headers"),
+        agent_skills: on("agent_skills"),
+        api_catalog: on("api_catalog"),
+    }
+}
+
 /// Longest the scan waits for the icon, on top of the page's own 3 s abort; then the report goes out
 /// without one.
 const FAVICON_WAIT: Duration = Duration::from_secs(5);
@@ -632,15 +878,18 @@ pub fn report(
     title: &str,
     tools: &[Value],
     snapshot_chars: usize,
+    checks: &Checks,
 ) -> Report {
     let diagnostics = lint(tools);
-    let verdict = if tools.is_empty() {
-        Verdict::Missing
-    } else if diagnostics.iter().any(|d| d.severity == "error") {
-        Verdict::Issues
-    } else {
-        Verdict::Ready
-    };
+    let has_tools = !tools.is_empty();
+    // Each tool says what it does to the page: read only, consequential or destructive.
+    let annotated = tools.iter().all(|t| {
+        t["annotations"].as_object().is_some_and(|a| {
+            ["readOnlyHint", "consequentialHint", "destructiveHint"]
+                .iter()
+                .any(|k| a.get(*k).is_some_and(Value::is_boolean))
+        })
+    });
     let mut tools: Vec<Tool> = tools
         .iter()
         .map(|t| Tool {
@@ -654,6 +903,17 @@ pub fn report(
         })
         .collect();
     tools.sort_by(|a, b| a.name.cmp(&b.name));
+    let page_tokens = snapshot_chars.div_ceil(CHARS_PER_TOKEN);
+    let score_items = score(&tools, &diagnostics, page_tokens, annotated, checks);
+    let total = score_items.iter().map(|i| u32::from(i.points)).sum::<u32>();
+    let total = u8::try_from(total.min(100)).unwrap_or(100);
+    let verdict = if !has_tools {
+        Verdict::Missing
+    } else if diagnostics.iter().any(|d| d.severity == "error") || total < READY_SCORE {
+        Verdict::Issues
+    } else {
+        Verdict::Ready
+    };
     Report {
         url: url.to_owned(),
         final_url,
@@ -661,7 +921,9 @@ pub fn report(
         verdict,
         tools,
         diagnostics,
-        page_tokens: snapshot_chars.div_ceil(CHARS_PER_TOKEN),
+        page_tokens,
+        score: total,
+        score_items,
         favicon: None,
         elapsed_ms: 0,
     }
@@ -789,6 +1051,7 @@ mod tests {
             " A ",
             &[],
             "abcdefgh".len(),
+            &Checks::default(),
         );
         assert_eq!(r.verdict, Verdict::Missing);
         assert_eq!(r.page_tokens, 2);
@@ -803,8 +1066,15 @@ mod tests {
             "Find passages on the current page that match a query.",
             &json!({ "readOnlyHint": true, "untrustedContentHint": true }),
         )];
-        let r = report("u", "u".into(), "t", &tools, 0);
+        // Clean tools plus the basics (robots.txt and a sitemap): 75, agent-ready.
+        let basics = Checks {
+            robots_allows_agents: true,
+            sitemap: true,
+            ..Checks::default()
+        };
+        let r = report("u", "u".into(), "t", &tools, 0, &basics);
         assert_eq!(r.verdict, Verdict::Ready, "{:?}", r.diagnostics);
+        assert_eq!(r.score, 75);
         assert_eq!(r.tools[0].params, ["query"]);
         assert_eq!(r.tools[0].read_only, Some(true));
     }
@@ -813,7 +1083,7 @@ mod tests {
     fn a_schema_the_host_could_not_read_is_an_error() {
         let mut t = tool("search", "Find a product.", &json!({ "type": "object" }));
         t["schemaError"] = json!("the input schema is over 50,000 chars");
-        let r = report("u", "u".into(), "t", &[t], 0);
+        let r = report("u", "u".into(), "t", &[t], 0, &Checks::default());
         assert_eq!(r.verdict, Verdict::Issues);
         assert!(
             r.diagnostics
@@ -825,11 +1095,58 @@ mod tests {
     #[test]
     fn lint_errors_mean_issues() {
         let tools = [tool("Search Products", "", &json!({}))];
-        let r = report("u", "u".into(), "t", &tools, 0);
+        let r = report("u", "u".into(), "t", &tools, 0, &Checks::default());
         assert_eq!(r.verdict, Verdict::Issues);
         let rules: Vec<_> = r.diagnostics.iter().map(|d| d.rule).collect();
         assert!(rules.contains(&"invalid-name"), "{rules:?}");
         assert!(rules.contains(&"missing-description"), "{rules:?}");
+    }
+
+    #[test]
+    fn clean_tools_without_the_agent_basics_are_almost() {
+        let tools = [tool(
+            "search_page",
+            "Find passages on the current page that match a query.",
+            &json!({ "readOnlyHint": true }),
+        )];
+        let r = report("u", "u".into(), "t", &tools, 0, &Checks::default());
+        assert_eq!(r.score, 65, "{:?}", r.score_items);
+        assert_eq!(r.verdict, Verdict::Issues);
+        let all = Checks {
+            llms_txt: true,
+            markdown: true,
+            robots_allows_agents: true,
+            sitemap: true,
+            link_headers: true,
+            agent_skills: true,
+            api_catalog: true,
+        };
+        let r = report("u", "u".into(), "t", &tools, 0, &all);
+        assert_eq!(r.score, 100);
+        assert_eq!(
+            r.score_items.iter().map(|i| u32::from(i.max)).sum::<u32>(),
+            100
+        );
+    }
+
+    #[test]
+    fn without_tools_the_cost_follows_the_page_and_the_verdict_is_missing() {
+        let all = Checks {
+            llms_txt: true,
+            sitemap: true,
+            ..Checks::default()
+        };
+        let light = report("u", "u".into(), "t", &[], 4_000, &all);
+        let heavy = report("u", "u".into(), "t", &[], 400_000, &all);
+        assert_eq!(light.score, 25);
+        assert_eq!(heavy.score, 10);
+        assert_eq!(heavy.verdict, Verdict::Missing);
+    }
+
+    #[test]
+    fn only_true_counts_in_the_checks() {
+        let c = checks_from(&json!({ "llms_txt": true, "sitemap": "yes", "markdown": 1 }));
+        assert!(c.llms_txt && !c.sitemap && !c.markdown);
     }
 
     #[test]
@@ -850,7 +1167,7 @@ mod tests {
             &"x".repeat(description_len),
             &json!({ "readOnlyHint": true }),
         )];
-        report(url, url.to_owned(), "", &tools, 0)
+        report(url, url.to_owned(), "", &tools, 0, &Checks::default())
     }
 
     #[test]

@@ -24,6 +24,8 @@ const report: Report = {
 		{ rule: 'missing-annotations', severity: 'warning', message: 'y' }
 	],
 	page_tokens: 100,
+	score: 40,
+	score_items: [],
 	favicon: null,
 	elapsed_ms: 1
 };

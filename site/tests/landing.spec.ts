@@ -19,6 +19,21 @@ const REPORT = {
 	tools: [{ name: 'search_docs', description: 'Search.', params: ['query'], read_only: true }],
 	diagnostics: [],
 	page_tokens: 2100,
+	score: 85,
+	score_items: [
+		{ id: 'tools', points: 25, max: 25 },
+		{ id: 'lint', points: 15, max: 15 },
+		{ id: 'descriptions', points: 5, max: 5 },
+		{ id: 'annotations', points: 5, max: 5 },
+		{ id: 'cost', points: 15, max: 15 },
+		{ id: 'llms_txt', points: 5, max: 5 },
+		{ id: 'markdown', points: 0, max: 5 },
+		{ id: 'robots', points: 5, max: 5 },
+		{ id: 'sitemap', points: 5, max: 5 },
+		{ id: 'link_headers', points: 5, max: 5 },
+		{ id: 'agent_skills', points: 0, max: 5 },
+		{ id: 'api_catalog', points: 0, max: 5 }
+	],
 	// A 1x1 transparent PNG, as the scanner would return it.
 	favicon:
 		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
@@ -226,6 +241,18 @@ test('scanning a site shows the verdict and its tools', async ({ page }) => {
 	await expect(page.getByText('Agent-ready').first()).toBeVisible();
 	await expect(page.getByRole('list', { name: 'Tools found' })).toContainText('search_docs');
 	expect(seen).toEqual(['https://docs.example.com/']);
+});
+
+test('the scan shows the agent-ready score, every check, and how to fix what misses', async ({ page }) => {
+	await mockScan(page);
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.getByRole('button', { name: 'Scan my site' }).first().click();
+	const score = page.locator('#scan').getByRole('region', { name: 'Agent-ready score' });
+	await expect(score).toContainText('85/100');
+	await expect(score.getByRole('listitem')).toHaveCount(12);
+	await expect(score).toContainText('Publish /.well-known/agent-skills/index.json.');
+	await expect(score).not.toContainText('Publish /sitemap.xml');
 });
 
 test('a site without WebMCP gets the fix', async ({ page }) => {

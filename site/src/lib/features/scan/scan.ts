@@ -21,6 +21,35 @@ export interface Finding {
 	message: string;
 }
 
+/** One line of the score; `id` names its label and fix in the dictionary (scan.result.score.items). */
+export interface ScoreItem {
+	id: ScoreItemId;
+	points: number;
+	max: number;
+}
+export type ScoreItemId =
+	| 'tools'
+	| 'lint'
+	| 'descriptions'
+	| 'annotations'
+	| 'cost'
+	| 'llms_txt'
+	| 'markdown'
+	| 'robots'
+	| 'sitemap'
+	| 'link_headers'
+	| 'agent_skills'
+	| 'api_catalog';
+/** The checks by group, in the order the page shows them. */
+export const SCORE_GROUPS: { id: 'webmcp' | 'cost' | 'readable' | 'discoverable'; items: ScoreItemId[] }[] = [
+	{ id: 'webmcp', items: ['tools', 'lint', 'descriptions', 'annotations'] },
+	{ id: 'cost', items: ['cost'] },
+	{ id: 'readable', items: ['llms_txt', 'markdown', 'robots', 'sitemap'] },
+	{ id: 'discoverable', items: ['link_headers', 'agent_skills', 'api_catalog'] }
+];
+/** The lowest score of an agent-ready site (scan.rs READY_SCORE). */
+export const READY_SCORE = 70;
+
 export interface Report {
 	url: string;
 	final_url: string;
@@ -29,6 +58,10 @@ export interface Report {
 	tools: ScanTool[];
 	diagnostics: Finding[];
 	page_tokens: number;
+	/** The agent-ready score, 0 to 100 (scan.rs `score`). */
+	score: number;
+	/** What the score is made of: each check's points out of its maximum. */
+	score_items: ScoreItem[];
 	/** The site's icon as a small data:image URI, or null. */
 	favicon: string | null;
 	elapsed_ms: number;

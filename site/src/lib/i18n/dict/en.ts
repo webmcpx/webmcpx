@@ -623,9 +623,9 @@ const en = {
 		// {rules} is a list of lint rule names (code).
 		items: {
 			ready:
-				'The page registers at least one WebMCP tool and the linter finds no errors in them. Warnings, like a long name or missing annotations, don’t block it.',
+				'The page registers at least one WebMCP tool, the linter finds no errors in them, and the agent-ready score is 70 or more. Warnings, like a long name, don’t block it.',
 			issues:
-				'The page registers tools, but at least one has a linter error: {rules}, or a size past its hard limit.',
+				'The page registers tools, but at least one has a linter error ({rules}, or a size past its hard limit), or the score is under 70.',
 			missing:
 				'The page registers no WebMCP tool. We show how many tokens an agent reading the page would spend instead.'
 		},
@@ -636,6 +636,8 @@ const en = {
 				'Before the page’s scripts run, we add a WebMCP host, so the page registers its tools as it would in an agent’s browser. It also takes the older navigator.modelContext and provideContext, so sites built on them still show their tools.',
 				'Once the page has loaded and its tools settle, we read each tool’s name, description, input schema and annotations, and lint them.',
 				'Tokens are estimated from the page’s text snapshot: its characters divided by four.',
+				'For the score, the same browser fetches the site’s robots.txt, llms.txt, sitemap, Markdown version, Link headers, Agent Skills index and API catalog (3 s each, same origin, no cookies), and only keeps whether each is there.',
+				'The score, out of 100: WebMCP 50 (tools 25, no lint errors 15, every tool described 5, every tool annotated 5), agent cost 15 (full with tools; else by the page’s token count), readable 20 and discoverable 15 (5 per check).',
 				'A result is reused for 10 minutes; each visitor can start one new scan a minute.'
 			]
 		},
@@ -747,6 +749,57 @@ const en = {
 				other: '{tools}, but {n} lint errors agents will trip on.'
 			}),
 			toolCount: p({ one: '{n} tool', other: '{n} tools' }),
+			// Tools with no lint errors, but under the agent-ready score: {tools} is the tool count.
+			basics: '{tools} and no lint errors, but a few agent basics are missing.',
+			// The agent-ready score: {score} is 0 to 100, {min} the score an agent-ready site needs (70).
+			score: {
+				title: 'Agent-ready score',
+				of: '{score}/100',
+				need: 'Agent-ready from {min}, with WebMCP tools and no lint errors.',
+				groups: { webmcp: 'WebMCP', cost: 'Agent cost', readable: 'Readable', discoverable: 'Discoverable' },
+				// Each check: a short label (max 24) and, when it misses, how to fix it (one sentence).
+				items: {
+					tools: {
+						label: 'WebMCP tools',
+						fix: 'Add one script tag: every page gets search, read and page context.'
+					},
+					lint: {
+						label: 'No lint errors',
+						fix: 'Fix the findings below (npx webmcpx lint finds them in your source).'
+					},
+					descriptions: {
+						label: 'Every tool described',
+						fix: 'Give each tool a description agents can act on.'
+					},
+					annotations: {
+						label: 'Every tool annotated',
+						fix: 'Mark each tool readOnlyHint, or consequentialHint when it changes something.'
+					},
+					cost: {
+						label: 'Cheap for agents',
+						fix: 'Agents read the whole page: tools let them ask for just what they need.'
+					},
+					llms_txt: {
+						label: 'llms.txt',
+						fix: 'Publish /llms.txt: what your site is and where agents find the rest.'
+					},
+					markdown: {
+						label: 'Markdown version',
+						fix: 'Serve the page as Markdown (Accept: text/markdown) or link one with rel="alternate".'
+					},
+					robots: {
+						label: 'Open to AI agents',
+						fix: 'Your robots.txt shuts AI agents out (Disallow: / for them).'
+					},
+					sitemap: { label: 'Sitemap', fix: 'Publish /sitemap.xml, or a Sitemap: line in robots.txt.' },
+					link_headers: {
+						label: 'Link headers',
+						fix: 'Add Link response headers that point agents to llms.txt and your docs (RFC 8288).'
+					},
+					agent_skills: { label: 'Agent Skills index', fix: 'Publish /.well-known/agent-skills/index.json.' },
+					api_catalog: { label: 'API catalog', fix: 'List your APIs in /.well-known/api-catalog (RFC 9727).' }
+				}
+			},
 			// "Nice." is a short, warm aside; adapt it.
 			ready: p({
 				one: '{n} tool agents can call directly. Nice.',

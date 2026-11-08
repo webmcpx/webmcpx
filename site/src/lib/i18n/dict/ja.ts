@@ -479,9 +479,9 @@ const ja: Messages = {
 		// {rules} is a list of lint rule names (code).
 		items: {
 			ready:
-				'ページが WebMCP ツールを 1 つ以上登録し、リンターがエラーを見つけない状態です。名前が長い、アノテーションがないといった警告は妨げになりません。',
+				'ページが WebMCP ツールを 1 つ以上登録し、リンターがエラーを見つけず、エージェント対応スコアが 70 以上の状態です。名前が長いといった警告は妨げになりません。',
 			issues:
-				'ツールは登録されていますが、少なくとも 1 つにリンターエラーがあります：{rules}、またはサイズが上限を超えています。',
+				'ツールは登録されていますが、少なくとも 1 つにリンターエラーがある（{rules}、またはサイズが上限を超えている）か、スコアが 70 未満です。',
 			missing:
 				'WebMCP ツールが 1 つも登録されていません。代わりにページを読む場合、エージェントが使うトークン数を表示します。'
 		},
@@ -492,6 +492,8 @@ const ja: Messages = {
 				'ページのスクリプトが動く前に WebMCP ホストを追加し、エージェントのブラウザーと同じようにツールを登録させます。古い navigator.modelContext と provideContext も受け付けるので、それらで作られたサイトのツールも表示されます。',
 				'ページが読み込まれ、ツールが出そろったら、各ツールの名前・説明・入力スキーマ・アノテーションを読み取り、リンターにかけます。',
 				'トークン数はページのテキストから見積もります：文字数を 4 で割った値です。',
+				'スコアのために、同じブラウザーがサイトの robots.txt、llms.txt、サイトマップ、Markdown 版、Link ヘッダー、Agent Skills インデックス、API カタログを取得し（各 3 s、同一オリジン、Cookie なし）、それぞれが存在するかどうかだけを記録します。',
+				'スコアは 100 点満点：WebMCP 50（ツール 25、lint エラーなし 15、全ツールに説明 5、全ツールにアノテーション 5）、エージェントのコスト 15（ツールがあれば満点、なければページのトークン数で決定）、読みやすさ 20、見つけやすさ 15（チェックごとに 5）。',
 				'結果は 10 分間再利用され、新しいスキャンは 1 人 1 分に 1 回までです。'
 			]
 		},
@@ -592,6 +594,68 @@ const ja: Messages = {
 				other: '{tools}が見つかりましたが、エージェントがつまずく lint エラーが {n} 件あります。'
 			},
 			toolCount: { other: '{n} 個のツール' },
+			basics: '{tools}があり lint エラーもありませんが、エージェント向けの基本がいくつか足りません。',
+			score: {
+				title: 'エージェント対応スコア',
+				of: '{score}/100',
+				need: '{min} 以上で、WebMCP ツールがあり lint エラーがなければエージェント対応です。',
+				groups: {
+					webmcp: 'WebMCP',
+					cost: 'エージェントのコスト',
+					readable: '読みやすさ',
+					discoverable: '見つけやすさ'
+				},
+				items: {
+					tools: {
+						label: 'WebMCP ツール',
+						fix: 'script タグを 1 つ追加すれば、全ページに検索・読み取り・ページコンテキストが入ります。'
+					},
+					lint: {
+						label: 'lint エラーなし',
+						fix: '下の指摘を修正してください（npx webmcpx lint でソースから見つけられます）。'
+					},
+					descriptions: {
+						label: '全ツールに説明',
+						fix: '各ツールに、エージェントが行動に移せる説明を付けてください。'
+					},
+					annotations: {
+						label: '全ツールにアノテーション',
+						fix: '各ツールに readOnlyHint を、何かを変更するなら consequentialHint を付けてください。'
+					},
+					cost: {
+						label: 'エージェントに低コスト',
+						fix: 'エージェントはページ全体を読みます。ツールがあれば必要なものだけを頼めます。'
+					},
+					llms_txt: {
+						label: 'llms.txt',
+						fix: '/llms.txt を公開し、サイトの概要と、エージェントが残りを見つける場所を示してください。'
+					},
+					markdown: {
+						label: 'Markdown 版',
+						fix: 'ページを Markdown で返す（Accept: text/markdown）か、rel="alternate" で Markdown 版にリンクしてください。'
+					},
+					robots: {
+						label: 'AI エージェントに開放',
+						fix: 'robots.txt が AI エージェントを締め出しています（Disallow: /）。'
+					},
+					sitemap: {
+						label: 'サイトマップ',
+						fix: '/sitemap.xml を公開するか、robots.txt に Sitemap: 行を追加してください。'
+					},
+					link_headers: {
+						label: 'Link ヘッダー',
+						fix: 'llms.txt やドキュメントへ導く Link レスポンスヘッダーを追加してください（RFC 8288）。'
+					},
+					agent_skills: {
+						label: 'Agent Skills インデックス',
+						fix: '/.well-known/agent-skills/index.json を公開してください。'
+					},
+					api_catalog: {
+						label: 'API カタログ',
+						fix: 'API を /.well-known/api-catalog に掲載してください（RFC 9727）。'
+					}
+				}
+			},
 			ready: {
 				other: 'エージェントが直接呼び出せるツールが {n} 個あります。いいですね。'
 			},

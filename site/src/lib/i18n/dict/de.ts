@@ -496,9 +496,9 @@ const de: Messages = {
 		// {rules} is a list of lint rule names (code).
 		items: {
 			ready:
-				'Die Seite registriert mindestens ein WebMCP-Tool, und der Linter findet darin keine Fehler. Warnungen, etwa ein langer Name oder fehlende Annotationen, stehen dem nicht im Weg.',
+				'Die Seite registriert mindestens ein WebMCP-Tool, der Linter findet darin keine Fehler, und der Agentenfähigkeits-Score liegt bei 70 oder mehr. Warnungen, etwa ein langer Name, stehen dem nicht im Weg.',
 			issues:
-				'Die Seite registriert Tools, aber mindestens eins hat einen Linter-Fehler: {rules}, oder eine Größe über dem harten Limit.',
+				'Die Seite registriert Tools, aber mindestens eins hat einen Linter-Fehler ({rules} oder eine Größe über dem harten Limit), oder der Score liegt unter 70.',
 			missing:
 				'Die Seite registriert kein WebMCP-Tool. Wir zeigen, wie viele Tokens ein Agent stattdessen fürs Lesen der Seite verbrauchen würde.'
 		},
@@ -509,6 +509,8 @@ const de: Messages = {
 				'Bevor die Skripte der Seite laufen, fügen wir einen WebMCP-Host hinzu, damit die Seite ihre Tools registriert wie im Browser eines Agenten. Er nimmt auch die älteren navigator.modelContext und provideContext an, damit darauf gebaute Seiten ihre Tools trotzdem zeigen.',
 				'Sobald die Seite geladen ist und ihre Tools stehen, lesen wir Name, Beschreibung, Eingabeschema und Annotationen jedes Tools und prüfen sie mit dem Linter.',
 				'Tokens werden aus dem Text-Snapshot der Seite geschätzt: Zeichenzahl geteilt durch vier.',
+				'Für den Score ruft derselbe Browser robots.txt, llms.txt, Sitemap, Markdown-Version, Link-Header, Agent-Skills-Index und API-Katalog der Website ab (je 3 s, gleiche Origin, ohne Cookies) und merkt sich nur, ob es sie gibt.',
+				'Der Score, von 100: WebMCP 50 (Tools 25, keine Lint-Fehler 15, jedes Tool beschrieben 5, jedes Tool annotiert 5), Kosten für Agenten 15 (voll mit Tools, sonst nach der Tokenzahl der Seite), lesbar 20 und auffindbar 15 (5 pro Prüfung).',
 				'Ein Ergebnis gilt 10 Minuten; jeder Besucher kann einen neuen Scan pro Minute starten.'
 			]
 		},
@@ -609,6 +611,68 @@ const de: Messages = {
 				other: '{tools}, aber {n} Lint-Fehler, über die Agenten stolpern.'
 			},
 			toolCount: { one: '{n} Tool', other: '{n} Tools' },
+			basics: '{tools} und keine Lint-Fehler, aber ein paar Grundlagen für Agenten fehlen.',
+			score: {
+				title: 'Agentenfähigkeits-Score',
+				of: '{score}/100',
+				need: 'Agentenfähig ab {min}, mit WebMCP-Tools und ohne Lint-Fehler.',
+				groups: {
+					webmcp: 'WebMCP',
+					cost: 'Kosten für Agenten',
+					readable: 'Lesbar',
+					discoverable: 'Auffindbar'
+				},
+				items: {
+					tools: {
+						label: 'WebMCP-Tools',
+						fix: 'Fügen Sie ein Script-Tag ein: Jede Seite bekommt Suche, Lesen und Seitenkontext.'
+					},
+					lint: {
+						label: 'Keine Lint-Fehler',
+						fix: 'Beheben Sie die Befunde unten (npx webmcpx lint findet sie in Ihrem Quellcode).'
+					},
+					descriptions: {
+						label: 'Jedes Tool beschrieben',
+						fix: 'Geben Sie jedem Tool eine Beschreibung, mit der Agenten arbeiten können.'
+					},
+					annotations: {
+						label: 'Jedes Tool annotiert',
+						fix: 'Markieren Sie jedes Tool mit readOnlyHint, oder mit consequentialHint, wenn es etwas ändert.'
+					},
+					cost: {
+						label: 'Günstig für Agenten',
+						fix: 'Agenten lesen die ganze Seite: Mit Tools fragen sie nur nach dem, was sie brauchen.'
+					},
+					llms_txt: {
+						label: 'llms.txt',
+						fix: 'Veröffentlichen Sie /llms.txt: was Ihre Website ist und wo Agenten den Rest finden.'
+					},
+					markdown: {
+						label: 'Markdown-Version',
+						fix: 'Liefern Sie die Seite als Markdown aus (Accept: text/markdown) oder verlinken Sie eine mit rel="alternate".'
+					},
+					robots: {
+						label: 'Offen für KI-Agenten',
+						fix: 'Ihre robots.txt sperrt KI-Agenten aus (Disallow: / für sie).'
+					},
+					sitemap: {
+						label: 'Sitemap',
+						fix: 'Veröffentlichen Sie /sitemap.xml oder eine Sitemap:-Zeile in robots.txt.'
+					},
+					link_headers: {
+						label: 'Link-Header',
+						fix: 'Fügen Sie Link-Response-Header hinzu, die Agenten zu llms.txt und Ihrer Doku führen (RFC 8288).'
+					},
+					agent_skills: {
+						label: 'Agent-Skills-Index',
+						fix: 'Veröffentlichen Sie /.well-known/agent-skills/index.json.'
+					},
+					api_catalog: {
+						label: 'API-Katalog',
+						fix: 'Listen Sie Ihre APIs in /.well-known/api-catalog auf (RFC 9727).'
+					}
+				}
+			},
 			ready: {
 				one: '{n} Tool, das Agenten direkt aufrufen können. Gut gemacht.',
 				other: '{n} Tools, die Agenten direkt aufrufen können. Gut gemacht.'

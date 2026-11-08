@@ -493,9 +493,9 @@ const ptBr: Messages = {
 		// {rules} is a list of lint rule names (code).
 		items: {
 			ready:
-				'A página registra ao menos uma ferramenta WebMCP e o linter não acha erros nelas. Avisos, como um nome longo ou anotações faltando, não impedem.',
+				'A página registra ao menos uma ferramenta WebMCP, o linter não acha erros nelas e a nota de prontidão para agentes é 70 ou mais. Avisos, como um nome longo, não impedem.',
 			issues:
-				'A página registra ferramentas, mas ao menos uma tem um erro do linter: {rules}, ou um tamanho acima do limite rígido.',
+				'A página registra ferramentas, mas ao menos uma tem um erro do linter ({rules}, ou um tamanho acima do limite rígido), ou a nota fica abaixo de 70.',
 			missing:
 				'A página não registra nenhuma ferramenta WebMCP. Mostramos quantos tokens um agente gastaria lendo a página no lugar delas.'
 		},
@@ -506,6 +506,8 @@ const ptBr: Messages = {
 				'Antes de os scripts da página rodarem, adicionamos um host WebMCP, para que a página registre as ferramentas como faria no navegador de um agente. Ele também aceita os antigos navigator.modelContext e provideContext, para que sites feitos com eles ainda mostrem suas ferramentas.',
 				'Depois que a página carrega e as ferramentas se estabilizam, lemos nome, descrição, schema de entrada e anotações de cada uma e passamos o linter.',
 				'Os tokens são estimados a partir do texto da página: os caracteres divididos por quatro.',
+				'Para a nota, o mesmo navegador busca o robots.txt, o llms.txt, o sitemap, a versão em Markdown, os headers Link, o índice de Agent Skills e o catálogo de APIs do site (3 s cada, mesma origem, sem cookies) e guarda só se cada um existe.',
+				'A nota, de 0 a 100: WebMCP 50 (ferramentas 25, sem erros de lint 15, toda ferramenta descrita 5, toda ferramenta anotada 5), custo para agentes 15 (cheio com ferramentas; senão, pela contagem de tokens da página), legível 20 e encontrável 15 (5 por verificação).',
 				'Um resultado vale por 10 minutos; cada visitante pode iniciar um scan novo por minuto.'
 			]
 		},
@@ -607,6 +609,68 @@ const ptBr: Messages = {
 				other: '{tools}, mas com {n} erros de lint em que os agentes vão tropeçar.'
 			},
 			toolCount: { one: '{n} ferramenta', other: '{n} ferramentas' },
+			basics: '{tools} e nenhum erro de lint, mas faltam alguns básicos para agentes.',
+			score: {
+				title: 'Nota de prontidão para agentes',
+				of: '{score}/100',
+				need: 'Pronto para agentes a partir de {min}, com ferramentas WebMCP e sem erros de lint.',
+				groups: {
+					webmcp: 'WebMCP',
+					cost: 'Custo para agentes',
+					readable: 'Legível',
+					discoverable: 'Encontrável'
+				},
+				items: {
+					tools: {
+						label: 'Ferramentas WebMCP',
+						fix: 'Adicione uma tag de script: toda página ganha busca, leitura e contexto da página.'
+					},
+					lint: {
+						label: 'Sem erros de lint',
+						fix: 'Corrija os apontamentos abaixo (o npx webmcpx lint os encontra no seu código).'
+					},
+					descriptions: {
+						label: 'Toda ferramenta descrita',
+						fix: 'Dê a cada ferramenta uma descrição com que os agentes consigam agir.'
+					},
+					annotations: {
+						label: 'Toda ferramenta anotada',
+						fix: 'Marque cada ferramenta com readOnlyHint, ou consequentialHint quando ela altera algo.'
+					},
+					cost: {
+						label: 'Barato para agentes',
+						fix: 'Os agentes leem a página inteira: com ferramentas, pedem só o que precisam.'
+					},
+					llms_txt: {
+						label: 'llms.txt',
+						fix: 'Publique /llms.txt: o que é o seu site e onde os agentes encontram o resto.'
+					},
+					markdown: {
+						label: 'Versão em Markdown',
+						fix: 'Sirva a página em Markdown (Accept: text/markdown) ou aponte para uma com rel="alternate".'
+					},
+					robots: {
+						label: 'Aberto a agentes de IA',
+						fix: 'Seu robots.txt bloqueia os agentes de IA (Disallow: / para eles).'
+					},
+					sitemap: {
+						label: 'Sitemap',
+						fix: 'Publique /sitemap.xml, ou uma linha Sitemap: no robots.txt.'
+					},
+					link_headers: {
+						label: 'Headers Link',
+						fix: 'Adicione headers de resposta Link que apontem os agentes para o llms.txt e a sua documentação (RFC 8288).'
+					},
+					agent_skills: {
+						label: 'Índice de Agent Skills',
+						fix: 'Publique /.well-known/agent-skills/index.json.'
+					},
+					api_catalog: {
+						label: 'Catálogo de APIs',
+						fix: 'Liste suas APIs em /.well-known/api-catalog (RFC 9727).'
+					}
+				}
+			},
 			ready: {
 				one: '{n} ferramenta que os agentes chamam direto. Boa.',
 				other: '{n} ferramentas que os agentes chamam direto. Boa.'

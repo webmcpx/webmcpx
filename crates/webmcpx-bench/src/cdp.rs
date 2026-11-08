@@ -387,6 +387,14 @@ impl Page {
         Ok(())
     }
 
+    /// Ignores the Content-Security-Policy of documents this page loads from now on (the scan's agent checks
+    /// run from a document of the scanned site, whose CSP would block their same-origin fetches).
+    pub async fn bypass_csp(&self) -> Result<()> {
+        self.send("Page.setBypassCSP", json!({ "enabled": true }))
+            .await?;
+        Ok(())
+    }
+
     /// Evaluates `expression` (awaiting promises) and returns its JSON value.
     pub async fn eval(&self, expression: &str) -> Result<Value> {
         self.evaluate(

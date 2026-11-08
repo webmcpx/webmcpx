@@ -484,13 +484,28 @@ async fn the_same_site_is_scanned_once_for_everyone() {
     }
     let visits = Arc::new(std::sync::atomic::AtomicUsize::new(0));
     let counter = Arc::clone(&visits);
-    let site = serve_html(axum::Router::new().route(
-        "/",
-        axum::routing::get(move || {
-            counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-            async { axum::response::Html("<title>t</title><p>Hello</p>") }
-        }),
-    ))
+    let site = serve_html(
+        axum::Router::new()
+            .route(
+                "/",
+                axum::routing::get(move |headers: axum::http::HeaderMap| {
+                    // Navigations only: the scan's agent checks fetch the page too (as Markdown, and HEAD).
+                    let accept = headers
+                        .get("accept")
+                        .and_then(|v| v.to_str().ok())
+                        .unwrap_or("");
+                    if accept.contains("text/html") {
+                        counter.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+                    }
+                    async { axum::response::Html("<title>t</title><p>Hello</p>") }
+                }),
+            )
+            // With a robots.txt the agent checks run from it, so a scan loads the page once.
+            .route(
+                "/robots.txt",
+                axum::routing::get(|| async { "User-agent: *\nAllow: /\n" }),
+            ),
+    )
     .await;
     let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
     let url = format!("http://{site}/");
@@ -1287,7 +1302,13 @@ async fn a_page_that_checks_for_its_own_model_context_property_still_registers()
     .await;
     let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
     let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
-    assert_eq!(report.verdict, Verdict::Ready, "{:?}", report.diagnostics);
+    assert_eq!(
+        report.verdict,
+        Verdict::Ready,
+        "{:?} {:?}",
+        report.diagnostics,
+        report.score_items
+    );
 }
 
 #[tokio::test]
@@ -1351,4 +1372,161 @@ async fn a_stalled_or_endless_favicon_never_costs_the_report() {
 
 fn bytes_of(n: usize) -> axum::body::Bytes {
     axum::body::Bytes::from(vec![0u8; n])
+}
+
+#[tokio::test]
+async fn the_score_reads_the_agent_basics_and_a_robots_block_costs_points() {
+    use axum::http::header;
+    use axum::response::{Html, IntoResponse};
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::Scanner;
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let page = || async {
+        (
+            [(header::LINK, r#"</llms.txt>; rel="describedby""#)],
+            Html(r#"<!doctype html><title>basics</title><link rel="alternate" type="text/markdown" href="/index.md">"#),
+        )
+            .into_response()
+    };
+    let text = |body: &'static str, kind: &'static str| {
+        move || async move { ([(header::CONTENT_TYPE, kind)], body).into_response() }
+    };
+    let site = serve_html(
+        axum::Router::new()
+            .route("/", get(page))
+            .route(
+                "/robots.txt",
+                get(text(
+                    "User-agent: GPTBot\nDisallow: /\n\nSitemap: /sitemap.xml\n",
+                    "text/plain",
+                )),
+            )
+            .route("/llms.txt", get(text("# basics\n", "text/plain")))
+            .route(
+                "/.well-known/agent-skills/index.json",
+                get(text(r#"{"skills": []}"#, "application/json")),
+            )
+            .route(
+                "/.well-known/api-catalog",
+                get(text(r#"{"linkset": []}"#, "application/linkset+json")),
+            ),
+    )
+    .await;
+    let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    let got = |id: &str| {
+        report
+            .score_items
+            .iter()
+            .find(|i| i.id == id)
+            .unwrap()
+            .points
+    };
+    for id in [
+        "llms_txt",
+        "markdown",
+        "sitemap",
+        "link_headers",
+        "agent_skills",
+        "api_catalog",
+    ] {
+        assert_eq!(got(id), 5, "{id}: {:?}", report.score_items);
+    }
+    assert_eq!(got("robots"), 0, "GPTBot is shut out");
+    assert_eq!(got("tools"), 0);
+}
+
+#[tokio::test]
+async fn the_agent_checks_follow_robots_rules_and_ignore_the_page_csp() {
+    use axum::http::{StatusCode, header};
+    use axum::response::{Html, IntoResponse};
+    use axum::routing::get;
+    use webmcpx_bench::proxy::Egress;
+    use webmcpx_bench::scan::Scanner;
+
+    // A page whose CSP forbids every fetch: the checks must still read the site's files.
+    async fn site_with(robots: axum::routing::MethodRouter) -> std::net::SocketAddr {
+        serve_html(
+            axum::Router::new()
+                .route(
+                    "/",
+                    get(|| async {
+                        (
+                            [(header::CONTENT_SECURITY_POLICY, "connect-src 'none'")],
+                            Html("<!doctype html><title>csp</title><p>Hi</p>"),
+                        )
+                            .into_response()
+                    }),
+                )
+                .route("/robots.txt", robots)
+                .route(
+                    "/sitemap.xml",
+                    get(|| async {
+                        (
+                            [(header::CONTENT_TYPE, "application/xml")],
+                            "<urlset></urlset>",
+                        )
+                            .into_response()
+                    }),
+                ),
+        )
+        .await
+    }
+
+    if find_chrome().is_none() {
+        eprintln!("skipping: Chrome not found");
+        return;
+    }
+    let text = |body: &'static str| {
+        get(move || async move { ([(header::CONTENT_TYPE, "text/plain")], body).into_response() })
+    };
+    let cases: Vec<(&str, axum::routing::MethodRouter, u8)> = vec![
+        ("open", text("User-agent: *\nDisallow: /private\n"), 5),
+        ("wildcard ban", text("User-agent: *\nDisallow: /*\n"), 0),
+        (
+            "ban, one bot allowed",
+            text("User-agent: *\nDisallow: /\n\nUser-agent: GPTBot\nAllow: /\n"),
+            0,
+        ),
+        (
+            "allow wins a tie",
+            text("User-agent: *\nDisallow: /\nAllow: /\n"),
+            5,
+        ),
+        (
+            "an empty Disallow ends its group",
+            text("User-agent: GPTBot\nDisallow:\n\nUser-agent: ExampleBot\nDisallow: /\n"),
+            5,
+        ),
+        ("missing (404)", get(|| async { StatusCode::NOT_FOUND }), 5),
+        (
+            "down (503)",
+            get(|| async { StatusCode::SERVICE_UNAVAILABLE }),
+            0,
+        ),
+    ];
+    for (name, robots, want) in cases {
+        let site = site_with(robots).await;
+        let scanner = Scanner::with_egress(None, Egress::Only(vec![site]));
+        let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+        let got = |id: &str| {
+            report
+                .score_items
+                .iter()
+                .find(|i| i.id == id)
+                .unwrap()
+                .points
+        };
+        assert_eq!(got("robots"), want, "{name}");
+        assert_eq!(
+            got("sitemap"),
+            5,
+            "{name}: the CSP must not block the checks"
+        );
+    }
 }

@@ -490,9 +490,9 @@ const id: Messages = {
 		// {rules} is a list of lint rule names (code).
 		items: {
 			ready:
-				'Halaman mendaftarkan setidaknya satu tool WebMCP dan linter tidak menemukan error di dalamnya. Peringatan, seperti nama panjang atau anotasi yang kurang, tidak menghalangi.',
+				'Halaman mendaftarkan setidaknya satu tool WebMCP, linter tidak menemukan error di dalamnya, dan skor siap agent mencapai 70 atau lebih. Peringatan, seperti nama panjang, tidak menghalangi.',
 			issues:
-				'Halaman mendaftarkan tool, tetapi setidaknya satu punya error linter: {rules}, atau ukuran di atas batas kerasnya.',
+				'Halaman mendaftarkan tool, tetapi setidaknya satu punya error linter ({rules}, atau ukuran di atas batas kerasnya), atau skornya di bawah 70.',
 			missing:
 				'Halaman tidak mendaftarkan tool WebMCP. Kami tampilkan berapa token yang akan dihabiskan agen untuk membaca halaman sebagai gantinya.'
 		},
@@ -503,6 +503,8 @@ const id: Messages = {
 				'Sebelum skrip halaman berjalan, kami menambahkan host WebMCP, agar halaman mendaftarkan tool-nya seperti di browser agen. Host ini juga menerima navigator.modelContext dan provideContext versi lama, agar situs yang memakainya tetap menampilkan tool-nya.',
 				'Setelah halaman dimuat dan tool-nya stabil, kami membaca nama, deskripsi, skema input, dan anotasi tiap tool, lalu memeriksanya dengan linter.',
 				'Token diperkirakan dari teks halaman: jumlah karakternya dibagi empat.',
+				'Untuk skor, browser yang sama mengambil robots.txt, llms.txt, sitemap, versi Markdown, header Link, indeks Agent Skills, dan katalog API situs (masing-masing 3 s, origin yang sama, tanpa cookie), dan hanya mencatat ada atau tidaknya masing-masing.',
+				'Skor, dari 100: WebMCP 50 (tool 25, tanpa error lint 15, semua tool berdeskripsi 5, semua tool beranotasi 5), biaya agent 15 (penuh jika ada tool; jika tidak, menurut jumlah token halaman), mudah dibaca 20, dan mudah ditemukan 15 (5 per pemeriksaan).',
 				'Hasil dipakai ulang selama 10 menit; setiap pengunjung bisa memulai satu pemindaian baru per menit.'
 			]
 		},
@@ -602,6 +604,68 @@ const id: Messages = {
 				other: '{tools}, tetapi ada {n} error lint yang akan menjegal agent.'
 			},
 			toolCount: { other: '{n} tool' },
+			basics: '{tools} dan tanpa error lint, tetapi beberapa dasar untuk agent masih kurang.',
+			score: {
+				title: 'Skor siap agent',
+				of: '{score}/100',
+				need: 'Siap agent mulai {min}, dengan tool WebMCP dan tanpa error lint.',
+				groups: {
+					webmcp: 'WebMCP',
+					cost: 'Biaya agent',
+					readable: 'Mudah dibaca',
+					discoverable: 'Mudah ditemukan'
+				},
+				items: {
+					tools: {
+						label: 'Tool WebMCP',
+						fix: 'Tambahkan satu tag script: setiap halaman mendapat pencarian, pembacaan, dan konteks halaman.'
+					},
+					lint: {
+						label: 'Tanpa error lint',
+						fix: 'Perbaiki temuan di bawah (npx webmcpx lint menemukannya di kode sumber Anda).'
+					},
+					descriptions: {
+						label: 'Semua tool berdeskripsi',
+						fix: 'Beri setiap tool deskripsi yang bisa ditindaklanjuti agent.'
+					},
+					annotations: {
+						label: 'Semua tool beranotasi',
+						fix: 'Tandai setiap tool dengan readOnlyHint, atau consequentialHint jika ia mengubah sesuatu.'
+					},
+					cost: {
+						label: 'Hemat untuk agent',
+						fix: 'Agent membaca seluruh halaman: dengan tool, mereka cukup meminta yang dibutuhkan.'
+					},
+					llms_txt: {
+						label: 'llms.txt',
+						fix: 'Terbitkan /llms.txt: apa situs Anda dan di mana agent menemukan sisanya.'
+					},
+					markdown: {
+						label: 'Versi Markdown',
+						fix: 'Sajikan halaman sebagai Markdown (Accept: text/markdown) atau tautkan versinya dengan rel="alternate".'
+					},
+					robots: {
+						label: 'Terbuka untuk agent AI',
+						fix: 'robots.txt Anda menutup akses agent AI (Disallow: / untuk mereka).'
+					},
+					sitemap: {
+						label: 'Sitemap',
+						fix: 'Terbitkan /sitemap.xml, atau baris Sitemap: di robots.txt.'
+					},
+					link_headers: {
+						label: 'Header Link',
+						fix: 'Tambahkan header respons Link yang mengarahkan agent ke llms.txt dan dokumentasi Anda (RFC 8288).'
+					},
+					agent_skills: {
+						label: 'Indeks Agent Skills',
+						fix: 'Terbitkan /.well-known/agent-skills/index.json.'
+					},
+					api_catalog: {
+						label: 'Katalog API',
+						fix: 'Daftarkan API Anda di /.well-known/api-catalog (RFC 9727).'
+					}
+				}
+			},
 			ready: {
 				other: '{n} tool yang bisa langsung dipanggil agent. Mantap.'
 			},
