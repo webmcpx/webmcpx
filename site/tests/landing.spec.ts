@@ -594,9 +594,7 @@ test('for agents: the measured saving, the tools it works with, one tab per way 
 	// The prompt first; each client's one command a click away.
 	await expect(agents.getByRole('tabpanel')).toContainText('Use WebMCP first on every web page');
 	await tabs.nth(1).click();
-	await expect(agents.getByRole('tabpanel')).toContainText(
-		'claude mcp add webmcpx -- npx -y webmcpx mcp'
-	);
+	await expect(agents.getByRole('tabpanel')).toContainText('claude mcp add webmcpx -- npx -y webmcpx mcp');
 	await tabs.nth(4).click();
 	await expect(agents.getByRole('tabpanel')).toContainText('document.modelContext');
 });
@@ -670,4 +668,24 @@ test("a model's own page shows its place on the leaderboard, not first", async (
 	await expect(page.locator(`[aria-label="Rank ${total}"]`)).toHaveCount(1);
 	await expect(page.getByLabel('Rank 1')).toHaveCount(0);
 	expect(last).toContain(String(total));
+});
+
+test('a logo takes you up to the scan first, then scans', async ({ page }) => {
+	// A slow scan, so the page can be checked while it runs.
+	let release!: () => void;
+	const held = new Promise<void>((r) => (release = r));
+	await page.route('**/api/scan?**', async (route) => {
+		await held;
+		await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(REPORT) });
+	});
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.goto('/');
+	const logo = page.getByRole('button', { name: /Notion/ }).first();
+	await logo.scrollIntoViewIfNeeded();
+	await logo.click();
+	// Up first (the result box may then nudge itself into view): the scan is in view while it runs.
+	await expect.poll(() => page.evaluate(() => scrollY)).toBeLessThan(100);
+	await expect(page.locator('#scan')).toBeInViewport();
+	release();
+	await expect(page.getByText('Agent-ready').first()).toBeVisible();
 });

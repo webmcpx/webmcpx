@@ -108,7 +108,7 @@ const de: Messages = {
 
 	why: {
 		kicker: 'Warum WebMCP?',
-		title: 'Geben Sie Agenten Verträge, keine Screenshots.',
+		title: 'Was Ihre Website mit WebMCP gewinnt.',
 		lead: 'Mit WebMCP übergibt Ihre Seite KI-Agenten typisierte Tools, die im eigenen Tab des Nutzers laufen. Was sich dadurch ändert, die stärksten Belege zuerst.',
 		today: 'Heute',
 		with: 'Mit WebMCP',
@@ -161,7 +161,7 @@ const de: Messages = {
 
 	proof: {
 		kicker: 'Rangliste',
-		title: 'Gleicher Agent. Gleiche Frage.',
+		title: 'Wie viel WebMCP spart, Modell für Modell.',
 		lead: 'Ein Agent liest, klickt und füllt Formulare anhand von Seiten-Snapshots aus; der andere ruft die WebMCP-Tools der Website auf. Wählen Sie ein Modell; größte Einsparungen zuerst.',
 		byModel: 'Benchmark nach Modell',
 		models: 'Modelle',
@@ -271,7 +271,7 @@ const de: Messages = {
 
 	versus: {
 		kicker: 'WebMCP vs. MCP',
-		title: 'Dieselbe Tool-Idee. Ein anderer Ort.',
+		title: 'Wie sich WebMCP von MCP unterscheidet und warum Sie beides brauchen.',
 		lead: 'WebMCP übernimmt das Tool-Modell von MCP, ist aber eine Browser-API und nicht das MCP-Protokoll. Beide ergänzen sich.',
 		caption: 'WebMCP im Vergleich mit MCP',
 		aspect: 'Aspekt',

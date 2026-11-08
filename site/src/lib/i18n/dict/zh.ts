@@ -107,7 +107,7 @@ const zh: Messages = {
 
 	why: {
 		kicker: '为什么用 WebMCP？',
-		title: '给智能体契约，而不是截图。',
+		title: '你的网站从 WebMCP 获得什么。',
 		lead: 'WebMCP 让页面把带类型的工具交给 AI 智能体，工具就在用户自己的标签页里运行。下面是它带来的改变，证据最强的排在最前。',
 		today: '现在',
 		with: '用上 WebMCP',
@@ -160,7 +160,7 @@ const zh: Messages = {
 
 	proof: {
 		kicker: '排行榜',
-		title: '同一个智能体，同一个问题。',
+		title: 'WebMCP 能省多少，逐个模型对比。',
 		lead: '一个智能体靠页面快照来读、点、填；另一个调用网站的 WebMCP 工具。选一个模型看看，节省最多的排在最前。',
 		byModel: '按模型查看基准测试',
 		models: '模型',
@@ -259,7 +259,7 @@ const zh: Messages = {
 
 	versus: {
 		kicker: 'WebMCP 与 MCP',
-		title: '工具理念相同，运行位置不同。',
+		title: 'WebMCP 与 MCP 有何不同，为什么两者都需要。',
 		lead: 'WebMCP 借鉴了 MCP 的工具模型，但它是浏览器 API，不是 MCP 协议。两者互为补充。',
 		caption: 'WebMCP 与 MCP 对比',
 		aspect: '维度',

@@ -104,7 +104,7 @@ const ja: Messages = {
 
 	why: {
 		kicker: 'なぜ WebMCP なのか',
-		title: 'エージェントに渡すのは、スクショではなく契約。',
+		title: 'WebMCPでサイトが得るもの。',
 		lead: 'WebMCP を使うと、ページは型付きのツールを AI エージェントに渡せます。ツールはユーザー自身のタブの中で動きます。何が変わるのか、根拠の強い順に紹介します。',
 		today: '現状',
 		with: 'WebMCP なら',
@@ -157,7 +157,7 @@ const ja: Messages = {
 
 	proof: {
 		kicker: 'リーダーボード',
-		title: '同じエージェント。同じ質問。',
+		title: 'WebMCPでどれだけ節約できるか、モデル別に。',
 		lead: '一方のエージェントはページのスナップショットを見ながら読み、クリックし、入力します。もう一方はサイトの WebMCP ツールを呼び出します。モデルを選んでください。削減効果の大きい順に並んでいます。',
 		byModel: 'モデル別のベンチマーク',
 		models: 'モデル',
@@ -259,7 +259,7 @@ const ja: Messages = {
 
 	versus: {
 		kicker: 'WebMCP と MCP',
-		title: 'ツールの考え方は同じ。動く場所が違う。',
+		title: 'WebMCPとMCPの違い、そして両方が必要な理由。',
 		lead: 'WebMCP は MCP のツールモデルを借りていますが、MCP プロトコルではなくブラウザー API です。両者は補い合う関係にあります。',
 		caption: 'WebMCP と MCP の比較',
 		aspect: '項目',

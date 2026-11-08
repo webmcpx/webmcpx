@@ -106,7 +106,7 @@ const id: Messages = {
 
 	why: {
 		kicker: 'Mengapa WebMCP?',
-		title: 'Beri agent kontrak yang jelas, bukan screenshot.',
+		title: 'Apa yang didapat situs Anda dengan WebMCP.',
 		lead: 'Dengan WebMCP, halaman Anda menyerahkan tool bertipe kepada agent AI, dan tool itu berjalan di tab milik pengguna sendiri. Inilah yang berubah, dimulai dari bukti terkuat.',
 		today: 'Saat ini',
 		with: 'Dengan WebMCP',
@@ -159,7 +159,7 @@ const id: Messages = {
 
 	proof: {
 		kicker: 'Peringkat',
-		title: 'Agent sama. Pertanyaan sama.',
+		title: 'Seberapa banyak WebMCP menghemat, per model.',
 		lead: 'Satu agent membaca, mengeklik, dan mengisi lewat snapshot halaman; yang lain memanggil tool WebMCP milik situs. Pilih model; penghematan terbesar ditampilkan lebih dulu.',
 		byModel: 'Benchmark per model',
 		models: 'Model',
@@ -263,7 +263,7 @@ const id: Messages = {
 
 	versus: {
 		kicker: 'WebMCP vs MCP',
-		title: 'Konsep tool yang sama. Tempat yang berbeda.',
+		title: 'Beda WebMCP dan MCP, dan mengapa Anda butuh keduanya.',
 		lead: 'WebMCP meminjam model tool dari MCP, tetapi WebMCP adalah API browser, bukan protokol MCP. Keduanya saling melengkapi.',
 		caption: 'Perbandingan WebMCP dan MCP',
 		aspect: 'Aspek',

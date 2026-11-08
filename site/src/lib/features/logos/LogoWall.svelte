@@ -7,6 +7,24 @@
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Rich from '#lib/i18n/Rich.svelte';
 
+	// Up to the scan first, then scan: started together, the result box's own scroll-into-view
+	// (on a new run) cuts the smooth scroll short. So wait for it to end (or 1 s, where
+	// `scrollend` is missing), and the scan's progress is in view from the start.
+	function scanSite(url: string) {
+		if (scrollY === 0) return scanner.run(url);
+		const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+		let started = false;
+		const start = () => {
+			if (started) return;
+			started = true;
+			removeEventListener('scrollend', start);
+			scanner.run(url);
+		};
+		addEventListener('scrollend', start);
+		setTimeout(start, smooth ? 1000 : 0);
+		scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+	}
+
 	const i18n = useI18n();
 	const m = $derived(i18n.m.logos);
 </script>
@@ -26,7 +44,7 @@
 				<li>
 					<button
 						type="button"
-						onclick={() => scanner.run(site.url)}
+						onclick={() => scanSite(site.url)}
 						aria-label={fmt(m.scan, { site: site.name })}
 						class="flex items-center gap-2.5 rounded-lg px-2 py-1 text-ink-2 transition hover:text-ink"
 					>

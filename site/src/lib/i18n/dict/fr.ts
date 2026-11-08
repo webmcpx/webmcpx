@@ -109,7 +109,7 @@ const fr: Messages = {
 
 	why: {
 		kicker: 'Pourquoi WebMCP ?',
-		title: 'Un contrat pour les agents, pas une capture d’écran.',
+		title: 'Ce que WebMCP apporte à votre site.',
 		lead: 'WebMCP permet à votre page de confier aux agents IA des outils typés, exécutés dans l’onglet même de l’utilisateur. Voici ce que cela change, en commençant par les preuves les plus solides.',
 		today: 'Aujourd’hui',
 		with: 'Avec WebMCP',
@@ -162,7 +162,7 @@ const fr: Messages = {
 
 	proof: {
 		kicker: 'Classement',
-		title: 'Même agent. Même question.',
+		title: 'Ce que WebMCP fait économiser, modèle par modèle.',
 		lead: 'Un agent lit, clique et remplit à partir de snapshots de la page ; l’autre appelle les outils WebMCP du site. Choisissez un modèle ; les plus fortes économies d’abord.',
 		byModel: 'Benchmark par modèle',
 		models: 'Modèles',
@@ -273,7 +273,7 @@ const fr: Messages = {
 
 	versus: {
 		kicker: 'WebMCP vs MCP',
-		title: 'Même idée d’outils. Pas au même endroit.',
+		title: 'Ce qui distingue WebMCP de MCP, et pourquoi il vous faut les deux.',
 		lead: 'WebMCP reprend le modèle d’outils de MCP, mais c’est une API du navigateur, pas le protocole MCP. Les deux se complètent.',
 		caption: 'WebMCP comparé à MCP',
 		aspect: 'Critère',
