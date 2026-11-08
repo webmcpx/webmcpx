@@ -215,7 +215,7 @@ export function tool({ name, description, input, inputSchema = schema(input), ru
 
 const TOOL_ATTRIBUTES = ["toolname", "tooldescription", "toolautosubmit"];
 // What a control contributes to the schema (option values included).
-const CONTROL_ATTRIBUTES = ["name", "type", "required", "disabled", "readonly", "min", "max", "multiple", "value", "toolparamdescription", "method", "formmethod"];
+const CONTROL_ATTRIBUTES = ["name", "type", "required", "disabled", "readonly", "min", "max", "multiple", "value", "toolparamdescription", "method", "formmethod", "form"];
 const FORMATS = { email: "email", url: "uri", date: "date", "datetime-local": "date-time", time: "time" };
 const SKIPPED = /^(submit|button|reset|image|file|password|hidden)$/;
 
@@ -304,8 +304,10 @@ function runForm(form) {
   };
 }
 
-/** The form's default submit button: what an agent's submit clicks. */
-const submitter = (form) => form.querySelector(":is(button:not([type]), [type=submit]):not(:disabled)");
+/** The form's default submit button: what an agent's submit clicks. `form.elements` has every control
+ * associated with the form in tree order, buttons outside it (`form="id"`) included. */
+const submitter = (form) =>
+  [...form.elements].find((el) => el.matches(":is(button:not([type]), [type=submit], [type=image]):not(:disabled)"));
 /** How the form is sent: that button's formmethod overrides the form's method. */
 const method = (form) => {
   const button = submitter(form);

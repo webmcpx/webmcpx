@@ -67,9 +67,10 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <input name="limit" type="number" min="1" max="20" toolparamdescription="How many results.">
   <input name="cc" type="email" multiple toolparamdescription="Who else gets the results.">
 </form>
-<form toolname="save_note" tooldescription="Save a note." method="get" toolautosubmit>
-  <input name="note"><button formmethod="post" formaction="/save">Save</button>
+<form id="note-form" toolname="save_note" tooldescription="Save a note." method="get" toolautosubmit>
+  <input name="note">
 </form>
+<button form="note-form" formmethod="post" formaction="/save">Save</button>
 <form toolname="Book a class" tooldescription="Book a pottery class." method="post" toolautosubmit>
   <input type="hidden" name="price" value="40">
   <input name="total" value="40" readonly>
