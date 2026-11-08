@@ -100,11 +100,14 @@ function executors(options) {
       if (!Number.isInteger(limit) || limit < 1 || limit > 20) return err("INVALID_INPUT", "`limit` must be an integer from 1 to 20");
       const found = await options.searchSite(query, { limit, signal });
       if (!found?.length) return err("NOT_FOUND", "no page matches the query", "Try fewer or different words.");
-      // The site's backend sets the sizes: cap each field, then drop the last results past the output budget.
+      // The site's backend sets the sizes: shorten titles and snippets (never URLs, a cut one breaks),
+      // then drop the last results past the output budget.
       const cap = (v, n) => String(v ?? "").slice(0, n);
-      const results = found.slice(0, limit).map((r) => ({ title: cap(r.title, 300), url: cap(r.url, 2000), snippet: cap(r.snippet, 1000) }));
-      while (results.length > 1 && ok({ results }).length > LIMITS.OUTPUT_MAX) results.pop();
-      return ok({ results });
+      const results = found.slice(0, limit).map((r) => ({ title: cap(r.title, 300), url: String(r.url ?? ""), snippet: cap(r.snippet, 1000) }));
+      while (results.length && ok({ results }).length > LIMITS.OUTPUT_MAX) results.pop();
+      return results.length
+        ? ok({ results })
+        : err("RESULT_TOO_LARGE", `the first result is over ${LIMITS.OUTPUT_MAX} chars`, "Return shorter URLs from searchSite.");
     },
   };
 }

@@ -37,7 +37,8 @@
 8. New dependency (Rust or npm) needs a reason in the PR; for wasm, include the size delta from `just size`.
 
 ## Don't
-- Don't touch versions, `CHANGELOG.md` or release workflows (release-plz owns them).
+- Don't touch crate versions, `CHANGELOG.md` or release workflows (release-plz owns them). The npm package
+  (`packages/webmcpx`) is outside release-plz: its version changes only in a release commit the owner asks for.
 - Don't use `#[allow]`; use `#[expect(lint, reason = "...")]`.
 - Don't add options or abstractions "for later": a safe default beats a setting; generalize on the third use.
 

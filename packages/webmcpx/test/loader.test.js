@@ -228,3 +228,15 @@ test("search_site checks limit and keeps the result within the output budget", a
   assert.ok(JSON.stringify(out).length <= 20_000);
   assert.ok(out.data.results.length >= 1 && out.data.results.length < 20);
 });
+
+test("search_site never cuts a URL", async () => {
+  const page = host();
+  const url = `https://pizza.test/file?${"a".repeat(2_130)}&signature=required`;
+  await register({ tools: ["search_site"], searchSite: async () => [{ title: "File", url, snippet: "s" }] });
+  assert.equal((await page.call("search_site", { query: "file" })).data.results[0].url, url);
+  // A URL past the whole budget is an error, not a cut link.
+  const other = host();
+  const huge = `https://pizza.test/?${"a".repeat(30_000)}`;
+  await register({ tools: ["search_site"], searchSite: async () => [{ title: "Huge", url: huge, snippet: "s" }] });
+  assert.equal((await other.call("search_site", { query: "file" })).error.code, "RESULT_TOO_LARGE");
+});
