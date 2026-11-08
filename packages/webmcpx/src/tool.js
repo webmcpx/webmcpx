@@ -246,6 +246,13 @@ export function formSchema(form) {
       // each field's own limits are checked by the browser once filled.
       const items = properties[name]?.items;
       if (items) {
+        // Fields of different kinds (a select and a text input, a number and a text): any value per
+        // position, each field's own checks still apply once filled.
+        if (items.type !== p.type || !items.enum !== !p.enum || !items.items !== !p.items) {
+          properties[name].items = {};
+          if (el.required && !required.includes(name)) required.push(name);
+          continue;
+        }
         if (items.enum) items.enum = [...new Set([...items.enum, ...(p.enum ?? [])])];
         if (items.items?.enum) items.items.enum = [...new Set([...items.items.enum, ...(p.items?.enum ?? [])])];
         for (const [k, pick] of [["minimum", Math.min], ["maximum", Math.max]]) {
