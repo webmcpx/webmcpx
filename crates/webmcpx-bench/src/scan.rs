@@ -383,6 +383,28 @@ impl Scanner {
         lock(&self.cache).put(key, report, CACHE_BYTES);
     }
 
+    /// A browser and a new tab in it, within the deadline: a Chrome that accepts connections but never
+    /// answers must not hold the browser lock (and every slot) forever. On failure the browser is
+    /// unusable (crashed, killed, stuck) and a fresh one starts next time.
+    async fn open_page(&self, scripts: &[&str]) -> Result<(Arc<Session>, Page), ScanError> {
+        let opened = tokio::time::timeout(self.deadline, async {
+            let browser = self.browser().await.map_err(failed)?;
+            let page = browser.browser.page(scripts).await.map_err(failed)?;
+            Ok::<_, ScanError>((browser, page))
+        })
+        .await;
+        match opened {
+            Ok(Ok(opened)) => Ok(opened),
+            failure => {
+                self.browser.lock().await.take();
+                Err(match failure {
+                    Ok(Err(e)) => e,
+                    _ => ScanError::TimedOut,
+                })
+            }
+        }
+    }
+
     /// The share card (1200×630 PNG) for a report, rendered by the scan browser and kept.
     pub async fn card(&self, report: &Report) -> Result<Arc<Vec<u8>>, ScanError> {
         let summary = crate::card::Summary::of(report);
@@ -410,8 +432,7 @@ impl Scanner {
             .await
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
-        let browser = self.browser().await.map_err(failed)?;
-        let page = browser.browser.page(&[]).await.map_err(failed)?;
+        let (_browser, page) = self.open_page(&[]).await?;
         let png = tokio::time::timeout(CLOSE_WAIT, page.render_png(html, 1200, 630)).await;
         let _ = tokio::time::timeout(CLOSE_WAIT, page.close()).await;
         let png = Arc::new(png.map_err(|_| ScanError::TimedOut)?.map_err(failed)?);
@@ -441,27 +462,9 @@ impl Scanner {
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let started = Instant::now();
-        // Getting a browser and a tab counts against the time too: a Chrome that accepts connections but
-        // never answers must not hold the browser lock (and every slot) forever.
         // The browser is held until this scan is done: another scan's recovery (taking the shared slot)
         // must not drop it while this page still runs.
-        let opened = tokio::time::timeout(self.deadline, async {
-            let browser = self.browser().await.map_err(failed)?;
-            let page = browser.browser.page(&INIT_SCRIPTS).await.map_err(failed)?;
-            Ok::<_, ScanError>((browser, page))
-        })
-        .await;
-        let (_browser, page) = match opened {
-            Ok(Ok(opened)) => opened,
-            failure => {
-                // The browser is unusable (crashed, killed, stuck): start a fresh one next time.
-                self.browser.lock().await.take();
-                return Err(match failure {
-                    Ok(Err(e)) => e,
-                    _ => ScanError::TimedOut,
-                });
-            }
-        };
+        let (_browser, page) = self.open_page(&INIT_SCRIPTS).await?;
         let outcome = tokio::time::timeout(self.deadline, self.inspect(&page, &url)).await;
         // Always close, also after a timeout: a page left running (say, an endless script) would keep
         // using CPU and memory after its slot is released. A browser that cannot close it is replaced.

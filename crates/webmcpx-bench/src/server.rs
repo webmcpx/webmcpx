@@ -148,7 +148,6 @@ async fn page(
     response
 }
 
-/// `https://host`, from our proxy's headers (plain `http://` locally).
 /// Whether an `Accept` header names `text/markdown` with a quality above zero and at least that of HTML
 /// (`text/html`, else `text/*`, else `*/*`). Browsers never name Markdown, so they always get HTML.
 fn prefers_markdown(accept: &str) -> bool {
@@ -173,6 +172,7 @@ fn prefers_markdown(accept: &str) -> bool {
     markdown.is_some_and(|md| md > 0.0 && md >= html.or(text).or(any).unwrap_or(0.0))
 }
 
+/// `https://host`, from our proxy's headers (plain `http://` locally).
 fn origin(headers: &HeaderMap) -> String {
     let host = headers
         .get(axum::http::header::HOST)
@@ -341,11 +341,34 @@ async fn scan(
                     StatusCode::GATEWAY_TIMEOUT,
                     "The page took too long to load.".to_owned(),
                 ),
-                ScanError::Failed(m) => (StatusCode::UNPROCESSABLE_ENTITY, m),
+                ScanError::Failed(m) => {
+                    (StatusCode::UNPROCESSABLE_ENTITY, public_reason(&m, &q.url))
+                }
             };
             (status, Json(json!({ "error": message }))).into_response()
         }
     }
+}
+
+/// What a failed scan tells the public: Chrome's network error code when there is one (`net::ERR_…`, which
+/// helps the visitor), never the rest of the chain, which can name our browser's address or DevTools URLs.
+/// The whole message goes to the server log.
+#[expect(
+    clippy::print_stderr,
+    reason = "the server log: the container's stderr"
+)]
+fn public_reason(message: &str, url: &str) -> String {
+    eprintln!("scan failed: {url}: {message}");
+    let code = message.find("net::ERR_").map(|i| {
+        message[i..]
+            .chars()
+            .take_while(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | ':'))
+            .collect::<String>()
+    });
+    code.map_or_else(
+        || "The page couldn't be opened or read.".to_owned(),
+        |code| format!("The page couldn't be opened ({code})."),
+    )
 }
 
 fn too_many(refused: &Refused) -> Response {
@@ -409,6 +432,20 @@ mod tests {
     }
 
     use super::*;
+
+    #[test]
+    fn a_failed_scan_tells_the_public_only_the_network_code() {
+        let leaky = "navigating: Page.navigate failed on ws://chrome:9222/devtools/page/AB12: net::ERR_NAME_NOT_RESOLVED at 10.0.0.5";
+        assert_eq!(
+            public_reason(leaky, "https://nope.example/"),
+            "The page couldn't be opened (net::ERR_NAME_NOT_RESOLVED)."
+        );
+        let inner =
+            "reading tools: TypeError: x is undefined (ws://chrome:9222/devtools/browser/1)";
+        let said = public_reason(inner, "https://a.example/");
+        assert_eq!(said, "The page couldn't be opened or read.");
+        assert!(!said.contains("ws://") && !said.contains("chrome"));
+    }
 
     #[test]
     fn share_pages_replace_the_social_tags_and_escape() {

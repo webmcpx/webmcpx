@@ -33,6 +33,9 @@ jobs:
       - run: cd packages/webmcpx && npm ci
       - run: cd site && npm ci && npx playwright install --with-deps chromium firefox webkit
       - run: just check
+        env:
+          # The scanner's Chrome tests (SSRF, floods, timeouts) must run here, not skip.
+          WEBMCPX_REQUIRE_CHROME: "1"
       - name: Generated files are up to date
         run: just gen && git diff --exit-code
 

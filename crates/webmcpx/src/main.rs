@@ -140,17 +140,26 @@ fn run(command: Command, out: &mut impl Write) -> Result<ExitCode, (Format, Fail
         }
         Command::Explain { code, format } => {
             let parsed = Code::parse(&code).ok_or_else(|| {
-                (format, Failure {
-                    code: Code::InvalidInput,
-                    message: format!("unknown error code `{code}`"),
-                    hint: "Codes: INVALID_INPUT, NOT_FOUND, RESULT_TOO_LARGE, REFUSED, RATE_LIMITED, REQUIRES_USER, UNAVAILABLE.",
-                })
+                (
+                    format,
+                    Failure {
+                        code: Code::InvalidInput,
+                        message: format!("unknown error code `{code}`"),
+                        hint: CODES_HINT.get_or_init(|| {
+                            let names: Vec<_> = Code::ALL.iter().map(|c| c.as_str()).collect();
+                            format!("Codes: {}.", names.join(", "))
+                        }),
+                    },
+                )
             })?;
             output::explain(out, format, parsed).map_err(|e| (format, io(&e)))?;
             Ok(ExitCode::SUCCESS)
         }
     }
 }
+
+/// The hint listing every error code, built from `Code::ALL` so a new code shows up without an edit here.
+static CODES_HINT: std::sync::OnceLock<String> = std::sync::OnceLock::new();
 
 fn unknown_rule(name: &str) -> Failure {
     Failure {

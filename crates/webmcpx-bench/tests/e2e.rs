@@ -75,8 +75,7 @@ async fn run_one<F: Fn(usize, &[Message]) -> Reply + Send + Sync + 'static>(
     arm: Arm,
     f: F,
 ) -> Option<(Run, Arc<Scripted<F>>)> {
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found (set CHROME_PATH)");
+    if no_chrome() {
         return None;
     }
     let root = repo_root();
@@ -311,7 +310,7 @@ async fn store_tools_answer_malformed_input_with_an_envelope() {
 #[tokio::test]
 async fn scan_api_reports_the_tools_of_a_page() {
     let root = repo_root();
-    if find_chrome().is_none() || !built(&root) {
+    if no_chrome() || !built(&root) {
         eprintln!("skipping: needs Chrome and `just wasm js-build`");
         return;
     }
@@ -363,7 +362,7 @@ fn free_port() -> u16 {
 #[tokio::test]
 async fn scans_with_a_remote_chrome_through_the_shared_proxy() {
     let root = repo_root();
-    if find_chrome().is_none() || !built(&root) {
+    if no_chrome() || !built(&root) {
         eprintln!("skipping: needs Chrome and `just wasm js-build`");
         return;
     }
@@ -399,7 +398,7 @@ async fn scans_with_a_remote_chrome_through_the_shared_proxy() {
 /// A Chrome that answers /json/version but never its DevTools socket must not hold the browser lock: each
 /// scan gives up within its deadline, and so does the next one.
 #[tokio::test]
-async fn a_chrome_that_never_answers_times_out_each_scan() {
+async fn a_chrome_that_never_answers_times_out_each_scan_and_card() {
     use tokio::io::{AsyncReadExt as _, AsyncWriteExt as _};
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let port = listener.local_addr().unwrap().port();
@@ -446,13 +445,25 @@ async fn a_chrome_that_never_answers_times_out_each_scan() {
             start.elapsed()
         );
     }
+    // Share cards use the same browser: rendering one gives up within the deadline too, instead of
+    // holding a slot and the card line for minutes.
+    let start = std::time::Instant::now();
+    let card = tokio::time::timeout(
+        std::time::Duration::from_secs(8),
+        scanner.render_html("<p>card</p>"),
+    )
+    .await;
+    assert!(
+        matches!(card, Ok(Err(webmcpx_bench::scan::ScanError::TimedOut))),
+        "{card:?} after {:?}",
+        start.elapsed()
+    );
 }
 
 /// A remote Chrome outlives our connection to it: the pages we opened must not.
 #[tokio::test]
 async fn a_dropped_connection_closes_its_pages_in_a_remote_chrome() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let devtools = free_port();
@@ -478,8 +489,7 @@ async fn a_dropped_connection_closes_its_pages_in_a_remote_chrome() {
 /// within the cache window costs none.
 #[tokio::test]
 async fn the_same_site_is_scanned_once_for_everyone() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let visits = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -526,8 +536,7 @@ async fn the_same_site_is_scanned_once_for_everyone() {
 /// A visitor who gives up while waiting in line (a closed tab) frees their place.
 #[tokio::test]
 async fn a_cancelled_scan_frees_its_place_in_line() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -562,8 +571,7 @@ async fn a_cancelled_scan_frees_its_place_in_line() {
 /// wait once it ends.
 #[tokio::test]
 async fn scan_api_limits_each_visitor() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     // A page that takes a while, so the first scan is still running when the second asks.
@@ -620,8 +628,7 @@ async fn scan_api_limits_each_visitor() {
 /// snapshot must read through it instead of dropping the page (it once measured webmcpx.dev at 16 tokens).
 #[tokio::test]
 async fn the_snapshot_reads_through_display_contents_wrappers() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let words = "Kettles carry a two-year warranty from the date of purchase. ".repeat(20);
@@ -684,8 +691,7 @@ async fn the_snapshot_reads_through_display_contents_wrappers() {
 /// the next scan works.
 #[tokio::test]
 async fn a_hostile_page_cannot_flood_the_scanner() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let tampered = r#"<!doctype html><title>t</title><main><p>Hello.</p></main><script>
@@ -808,8 +814,7 @@ async fn a_hostile_page_cannot_flood_the_scanner() {
 /// verdict, and a repeat scan comes from the cache without counting against the visitor's limit.
 #[tokio::test]
 async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -915,8 +920,7 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
 /// A burst of requests for one unrendered card renders it once; nobody waits forever.
 #[tokio::test]
 async fn a_burst_of_card_requests_renders_once() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -960,8 +964,7 @@ fn the_generic_preview_image_ships_with_the_site() {
 /// plain http on another host, as in the browsers.
 #[tokio::test]
 async fn an_insecure_page_has_no_model_context() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: needs Chrome");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -1032,6 +1035,20 @@ async fn scan_api_refuses_private_hosts_by_default() {
     );
 }
 
+/// No Chrome here: skip (and say so), unless `WEBMCPX_REQUIRE_CHROME` is set (the main CI job), where a
+/// missing Chrome would otherwise turn the scanner's safety tests (SSRF, floods, timeouts) into silent passes.
+fn no_chrome() -> bool {
+    if find_chrome().is_some() {
+        return false;
+    }
+    assert!(
+        std::env::var_os("WEBMCPX_REQUIRE_CHROME").is_none(),
+        "Chrome not found, and WEBMCPX_REQUIRE_CHROME says these tests must run (set CHROME_PATH)"
+    );
+    eprintln!("skipping: Chrome not found (set CHROME_PATH)");
+    true
+}
+
 /// Serves `routes` on a free loopback port.
 async fn serve_html(routes: axum::Router) -> std::net::SocketAddr {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -1047,8 +1064,7 @@ async fn scan_browser_never_reaches_refused_hosts() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::{ScanError, Scanner};
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     // The "private" endpoint: any connection to it is a failure.
@@ -1085,8 +1101,7 @@ async fn scan_browser_never_reaches_refused_hosts() {
 /// its 30 s of wall-clock time, not 1,200 checks of 60 s each.
 #[tokio::test]
 async fn goto_gives_up_on_a_page_stuck_while_loading() {
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -1116,8 +1131,7 @@ async fn timed_out_scans_leave_no_page_running() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::{ScanError, Scanner};
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -1141,8 +1155,7 @@ async fn a_cancelled_scan_leaves_no_page_running() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::Scanner;
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -1175,8 +1188,7 @@ async fn tools_registered_in_a_same_origin_frame_count() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::{Scanner, Verdict};
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(
@@ -1202,8 +1214,7 @@ async fn a_page_cannot_send_the_scanner_megabytes() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::Scanner;
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -1234,8 +1245,7 @@ async fn a_huge_title_or_text_never_breaks_the_shared_connection() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::Scanner;
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(axum::Router::new().route(
@@ -1266,8 +1276,7 @@ async fn a_frame_tool_named_like_the_pages_is_still_checked() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::{Scanner, Verdict};
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(
@@ -1298,8 +1307,7 @@ async fn a_page_that_checks_for_its_own_model_context_property_still_registers()
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::{Scanner, Verdict};
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     // Like Shopify storefronts (which broke when the host moved to Document.prototype): register only
@@ -1333,8 +1341,7 @@ async fn a_stalled_or_endless_favicon_never_costs_the_report() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::Scanner;
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let endless = || async {
@@ -1396,8 +1403,7 @@ async fn the_score_reads_the_agent_basics_and_a_robots_block_costs_points() {
     use webmcpx_bench::proxy::Egress;
     use webmcpx_bench::scan::Scanner;
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let page = || async {
@@ -1492,8 +1498,7 @@ async fn the_agent_checks_follow_robots_rules_and_ignore_the_page_csp() {
         .await
     }
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let text = |body: &'static str| {
@@ -1572,8 +1577,7 @@ async fn the_agent_checks_keep_the_page_icon() {
         0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
     ];
 
-    if find_chrome().is_none() {
-        eprintln!("skipping: Chrome not found");
+    if no_chrome() {
         return;
     }
     let site = serve_html(

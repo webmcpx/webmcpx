@@ -102,8 +102,31 @@ async fn is_client(client: &str, peer: IpAddr) -> bool {
         .is_ok_and(|mut addrs| addrs.any(|a| canonical(a.ip()) == canonical(peer)))
 }
 
+/// The pause after a failed accept, so a persistent failure doesn't spin.
+const ACCEPT_RETRY: Duration = Duration::from_millis(50);
+
+/// Where the proxy's connections come from: a [`TcpListener`], or a stand-in in tests.
+trait Accept: Send + 'static {
+    fn accept(&mut self) -> impl Future<Output = std::io::Result<(TcpStream, SocketAddr)>> + Send;
+}
+
+impl Accept for TcpListener {
+    fn accept(&mut self) -> impl Future<Output = std::io::Result<(TcpStream, SocketAddr)>> + Send {
+        TcpListener::accept(self)
+    }
+}
+
 fn serve(listener: TcpListener, egress: Egress, client: Option<Arc<String>>) -> Result<Proxy> {
     let addr = listener.local_addr()?;
+    Ok(serve_from(listener, addr, egress, client))
+}
+
+fn serve_from(
+    mut listener: impl Accept,
+    addr: SocketAddr,
+    egress: Egress,
+    client: Option<Arc<String>>,
+) -> Proxy {
     let egress = Arc::new(egress);
     let task = tokio::spawn(async move {
         // Connections live in this set: aborting the accept loop drops it, which aborts them all.
@@ -111,7 +134,12 @@ fn serve(listener: TcpListener, egress: Egress, client: Option<Arc<String>>) -> 
         loop {
             tokio::select! {
                 accepted = listener.accept() => {
-                    let Ok((stream, peer)) = accepted else { break };
+                    // A failed accept (out of descriptors, a client gone first) is transient: pause and
+                    // keep serving, as axum::serve does. Ending the loop would fail every later scan.
+                    let Ok((stream, peer)) = accepted else {
+                        tokio::time::sleep(ACCEPT_RETRY).await;
+                        continue;
+                    };
                     let egress = Arc::clone(&egress);
                     let allowed = client.clone();
                     connections.spawn(async move {
@@ -128,7 +156,7 @@ fn serve(listener: TcpListener, egress: Egress, client: Option<Arc<String>>) -> 
             }
         }
     });
-    Ok(Proxy { addr, task })
+    Proxy { addr, task }
 }
 
 const MAX_HEAD: usize = 32 * 1024;
@@ -344,6 +372,54 @@ mod tests {
         assert!(only.allows(local));
         assert!(only.allows("[::ffff:127.0.0.1]:80".parse().unwrap()));
         assert!(!only.allows("127.0.0.1:81".parse().unwrap()));
+    }
+
+    /// Accepts that fail first (`EMFILE`, `ECONNABORTED`: out of descriptors, a client gone before accept),
+    /// then work.
+    struct Flaky {
+        listener: TcpListener,
+        failures: usize,
+    }
+
+    impl Accept for Flaky {
+        async fn accept(&mut self) -> std::io::Result<(TcpStream, SocketAddr)> {
+            if self.failures > 0 {
+                self.failures -= 1;
+                return Err(std::io::Error::other("too many open files"));
+            }
+            self.listener.accept().await
+        }
+    }
+
+    /// A failed accept is transient: the proxy keeps serving (it once ended its loop, and every scan
+    /// after failed until a restart).
+    #[tokio::test]
+    async fn a_failed_accept_does_not_stop_the_proxy() {
+        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let _proxy = serve_from(
+            Flaky {
+                listener,
+                failures: 3,
+            },
+            addr,
+            Egress::Public,
+            None,
+        );
+        let mut c = TcpStream::connect(addr).await.unwrap();
+        c.write_all(b"CONNECT 127.0.0.1:9 HTTP/1.1\r\n\r\n")
+            .await
+            .unwrap();
+        let mut reply = Vec::new();
+        tokio::time::timeout(Duration::from_secs(5), c.read_to_end(&mut reply))
+            .await
+            .expect("the proxy stopped answering")
+            .unwrap();
+        assert!(
+            reply.starts_with(b"HTTP/1.1 403"),
+            "{:?}",
+            String::from_utf8_lossy(&reply)
+        );
     }
 
     /// The regression the review asked for: a refused destination receives no connection at all.
