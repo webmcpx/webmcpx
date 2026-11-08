@@ -88,7 +88,8 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   <button name="action" value="book">Book</button>
 </form>
 <form id="cart" toolname="update_cart" tooldescription="Set each row's quantity." method="post" toolautosubmit>
-  <input name="quantity[]" type="number" value="1"><input name="quantity[]" type="number" value="3">
+  <input name="quantity[]" type="number" value="1" max="5"><input name="quantity[]" type="number" value="3" max="10">
+  <select name="variant[]"><option>red</option><option>blue</option></select><select name="variant[]"><option>large</option></select>
   <button>Update</button>
 </form>
 <script>
@@ -111,7 +112,8 @@ const FORMS = `<!doctype html><html><head><title>Kiln Bookings</title>
   setTimeout(() => (document.getElementById("old-form").id = "new-form"), 1700);
   document.getElementById("cart").addEventListener("submit", (event) => {
     event.preventDefault();
-    event.respondWith?.(Promise.resolve({ quantities: new FormData(event.target).getAll("quantity[]") }));
+    const data = new FormData(event.target);
+    event.respondWith?.(Promise.resolve({ quantities: data.getAll("quantity[]"), variants: data.getAll("variant[]") }));
   });
   document.querySelector('form[method=post]').addEventListener("submit", (event) => {
     event.preventDefault();
@@ -343,9 +345,15 @@ test("<form toolname> becomes a tool an agent fills and submits", { skip, timeou
     assert.equal(updated.inputSchema.properties.kiln.description, "Which kiln.");
     // Same-named fields that are not choices (cart rows) take one value each, in order.
     const cart = (await session.tools()).find((t) => t.name === "update_cart");
-    assert.deepEqual(cart.inputSchema.properties["quantity[]"], { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 });
-    const updatedCart = JSON.parse(await session.call(cart, { "quantity[]": [2, 3] }));
-    assert.deepEqual(updatedCart.data.quantities, ["2", "3"]);
+    // Rows may differ (options, bounds): the schema joins them, each field checks its own once filled.
+    assert.deepEqual(cart.inputSchema.properties["quantity[]"], { type: "array", items: { type: "number", maximum: 10 }, minItems: 2, maxItems: 2 });
+    assert.deepEqual(cart.inputSchema.properties["variant[]"].items.enum, ["red", "blue", "large"]);
+    const updatedCart = JSON.parse(await session.call(cart, { "quantity[]": [2, 3], "variant[]": ["blue", "large"] }));
+    assert.deepEqual(updatedCart.data, { quantities: ["2", "3"], variants: ["blue", "large"] });
+    const overStock = JSON.parse(await session.call(cart, { "quantity[]": [7, 3], "variant[]": ["red", "large"] }));
+    assert.equal(overStock.error.code, "INVALID_INPUT");
+    const swapped = JSON.parse(await session.call(cart, { "quantity[]": [1, 1], "variant[]": ["large", "red"] }));
+    assert.equal(swapped.error.code, "INVALID_INPUT");
     const reassociated = (await session.tools()).find((t) => t.name === "reassociated");
     assert.equal(reassociated.annotations.consequentialHint, true, "a form id change re-registers the tool");
   } finally {

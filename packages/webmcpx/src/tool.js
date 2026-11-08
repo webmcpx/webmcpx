@@ -228,7 +228,6 @@ export function formSchema(form) {
     if (!fillable(el)) continue;
     // Several fields with one name that are not choices (cart rows' quantity[]): one value each, in order.
     const group = choice(el) ? 1 : [...form.elements].filter((e) => e.name === name && fillable(e)).length;
-    if (group > 1 && properties[name]) continue;
     let p;
     // Several checkboxes with one name: a set of choices.
     if (type === "checkbox" && [...form.elements].filter((e) => e.name === name && fillable(e)).length > 1) {
@@ -242,7 +241,21 @@ export function formSchema(form) {
     } else if (type === "number" || type === "range") {
       p = { type: "number", ...(el.min && { minimum: +el.min }), ...(el.max && { maximum: +el.max }) };
     } else p = { type: "string", ...(FORMATS[type] && { format: FORMATS[type] }) };
-    if (group > 1) p = { type: "array", items: p, minItems: group, maxItems: group };
+    if (group > 1) {
+      // One schema for every position, wide enough for each field (their options and bounds joined);
+      // each field's own limits are checked by the browser once filled.
+      const items = properties[name]?.items;
+      if (items) {
+        if (items.enum) items.enum = [...new Set([...items.enum, ...(p.enum ?? [])])];
+        for (const [k, pick] of [["minimum", Math.min], ["maximum", Math.max]]) {
+          if (k in items && k in p) items[k] = pick(items[k], p[k]);
+          else delete items[k];
+        }
+        if (el.required && !required.includes(name)) required.push(name);
+        continue;
+      }
+      p = { type: "array", items: p, minItems: group, maxItems: group };
+    }
     const description =
       el.getAttribute("toolparamdescription") || (!p.items && (el.labels?.[0]?.textContent.trim() || el.getAttribute("placeholder")));
     if (description) p.description = description;
@@ -276,7 +289,13 @@ function fill(form, args) {
       }
       // Only a select has options: <input type="email" multiple> takes "a@x.com,b@x.com" as text.
       if (el.tagName === "SELECT" && el.multiple) for (const o of el.options) o.selected = !o.matches(":disabled") && [].concat(value).includes(o.value);
-      else Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
+      else {
+        Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set.call(el, String(value));
+        // A select keeps no value it doesn't offer (a repeated field's joined options may include one).
+        if (el.tagName === "SELECT" && el.value !== String(value)) {
+          throw Object.assign(new Error(`\`${name}\`: "${value}" is not an option there`), { code: "INVALID_INPUT" });
+        }
+      }
       // Frameworks listen for these, not for property writes.
       el.dispatchEvent(new Event("input", { bubbles: true }));
       el.dispatchEvent(new Event("change", { bubbles: true }));

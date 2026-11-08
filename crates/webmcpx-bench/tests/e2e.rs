@@ -897,6 +897,18 @@ async fn an_insecure_page_has_no_model_context() {
         .await
         .unwrap();
     assert!(insecure.is_empty(), "{insecure:?}");
+    // A page can rebind `globalThis`, never `window`: the list still comes from the real host.
+    page.goto(&format!("http://{site}/")).await.unwrap();
+    page.eval(
+        r#"globalThis = { __webmcpHost: { list: () => JSON.stringify([{ name: "fake", description: "", annotations: {}, document: "0" }]) } }"#,
+    )
+    .await
+    .unwrap();
+    let real = webmcpx_bench::arm::registered_tools(&page, wait)
+        .await
+        .unwrap();
+    assert_eq!(real.len(), 1);
+    assert_eq!(real[0]["name"], "t");
 }
 
 #[tokio::test]

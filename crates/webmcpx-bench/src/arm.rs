@@ -169,8 +169,17 @@ pub async fn registered_tools(page: &Page, wait: Duration) -> Result<Vec<Value>>
     let deadline = tokio::time::Instant::now() + wait;
     while tokio::time::Instant::now() < deadline {
         // One bounded JSON string (host.js): parsed here, never trusted to be small by shape alone.
-        // No host on an insecure page (host.js): that page has no tools.
-        let now = page.eval("globalThis.__webmcpHost?.list() ?? null").await?;
+        // An insecure page has no host (host.js) and so no tools. Asked in an isolated world, where
+        // the page can't fake the answer; on a secure page `window.__webmcpHost` is the host's own,
+        // non-configurable property (`window` itself can't be replaced, unlike `globalThis`).
+        if page.eval_isolated("isSecureContext").await? != true {
+            return Ok(Vec::new());
+        }
+        let now = page.eval("window.__webmcpHost.list()").await?;
+        // Bounded before parsing, whatever produced it (host.js caps it at 1,000,000 chars).
+        if now.as_str().is_some_and(|t| t.len() > 4_000_000) {
+            anyhow::bail!("the tool list is over 1,000,000 chars");
+        }
         let now: Value = match now.as_str() {
             Some(text) => serde_json::from_str(text).context("the tool list is not JSON")?,
             None if now.is_null() => Value::Null,
