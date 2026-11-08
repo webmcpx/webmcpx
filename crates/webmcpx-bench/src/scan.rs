@@ -336,13 +336,16 @@ impl Scanner {
         let started = Instant::now();
         // Getting a browser and a tab counts against the time too: a Chrome that accepts connections but
         // never answers must not hold the browser lock (and every slot) forever.
+        // The browser is held until this scan is done: another scan's recovery (taking the shared slot)
+        // must not drop it while this page still runs.
         let opened = tokio::time::timeout(self.deadline, async {
             let browser = self.browser().await.map_err(failed)?;
-            browser.browser.page(&INIT_SCRIPTS).await.map_err(failed)
+            let page = browser.browser.page(&INIT_SCRIPTS).await.map_err(failed)?;
+            Ok::<_, ScanError>((browser, page))
         })
         .await;
-        let page = match opened {
-            Ok(Ok(page)) => page,
+        let (_browser, page) = match opened {
+            Ok(Ok(opened)) => opened,
             failure => {
                 // The browser is unusable (crashed, killed, stuck): start a fresh one next time.
                 self.browser.lock().await.take();
