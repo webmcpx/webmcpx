@@ -7,8 +7,8 @@ WORKDIR /src
 COPY . .
 RUN --mount=type=cache,target=/usr/local/cargo/registry \
     --mount=type=cache,target=/src/target \
-    cargo build --release --locked -p webmcpx-bench \
- && cp target/release/webmcpx-bench /webmcpx
+    cargo build --profile release-server --locked -p webmcpx-bench \
+ && cp target/release-server/webmcpx-bench /webmcpx
 
 FROM node:26.13.0-trixie-slim AS site
 WORKDIR /site

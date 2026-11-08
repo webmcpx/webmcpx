@@ -34,6 +34,7 @@ libm = "0.2.16"
 oxc_allocator = "=0.157.0"
 oxc_ast = "=0.157.0"
 oxc_ast_visit = "=0.157.0"
+oxc_diagnostics = "=0.157.0"
 oxc_parser = "=0.157.0"
 oxc_span = "=0.157.0"
 serde_json = "1.0.154"
@@ -76,6 +77,12 @@ lto = "fat"
 codegen-units = 1
 strip = true
 panic = "abort"
+
+# The public server (deploy/web.Dockerfile): a panic ends only its own request, not every scan in flight
+# and the caches, so it unwinds.
+[profile.release-server]
+inherits = "release"
+panic = "unwind"
 
 # Browser module. No `strip` here: wasm-bindgen needs the target_features section; wasm-opt strips later.
 [profile.release-wasm]

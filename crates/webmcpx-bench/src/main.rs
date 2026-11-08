@@ -9,7 +9,7 @@ use std::io::Write as _;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use anyhow::{Context as _, Result, bail};
 use clap::{Parser, Subcommand};
@@ -265,10 +265,20 @@ async fn main() -> Result<()> {
             }
             let served = served.unwrap_or(root);
             let visitors = one_scan_per_visitor.then(|| Arc::new(Visitors::new(behind_proxy)));
-            let bound =
-                server::spawn_with(&served, addr, Some(Arc::new(scanner)), visitors).await?;
+            let (stop, stopped) = tokio::sync::oneshot::channel::<()>();
+            let (bound, serving) =
+                server::serve_until(&served, addr, Some(Arc::new(scanner)), visitors, async {
+                    stopped.await.ok();
+                })
+                .await?;
             eprintln!("serving http://{bound}/ (sites under /sites/); Ctrl-C to stop");
             shutdown().await?;
+            // A deploy stops us: finish the scans in flight (a scan's worst case fits; compose waits 60 s).
+            eprintln!("stopping: letting requests in flight finish");
+            stop.send(()).ok();
+            tokio::time::timeout(Duration::from_secs(55), serving)
+                .await
+                .ok();
         }
         Command::Run {
             tasks,

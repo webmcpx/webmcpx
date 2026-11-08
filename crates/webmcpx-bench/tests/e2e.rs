@@ -460,6 +460,88 @@ async fn a_chrome_that_never_answers_times_out_each_scan_and_card() {
     );
 }
 
+/// One deadline for the whole scan: when a site's icon and robots.txt never answer, those best-effort steps
+/// get the time that is left and the report still arrives, instead of the scan timing out after them.
+#[tokio::test]
+async fn slow_extras_never_cost_the_report() {
+    if no_chrome() {
+        return;
+    }
+    let hang = || async {
+        tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+        ""
+    };
+    let site = serve_html(
+        axum::Router::new()
+            .route(
+                "/",
+                axum::routing::get(|| async {
+                    axum::response::Html(
+                        r#"<title>t</title><link rel="icon" href="/slow.png"><p>Hello there</p>"#,
+                    )
+                }),
+            )
+            .route("/slow.png", axum::routing::get(hang))
+            .route("/robots.txt", axum::routing::get(hang)),
+    )
+    .await;
+    let scanner =
+        webmcpx_bench::scan::Scanner::new(None, true).deadline(std::time::Duration::from_secs(9));
+    let start = std::time::Instant::now();
+    let report = scanner.scan(&format!("http://{site}/")).await;
+    assert!(report.is_ok(), "{report:?} after {:?}", start.elapsed());
+    assert!(
+        start.elapsed() < std::time::Duration::from_secs(12),
+        "{:?}",
+        start.elapsed()
+    );
+}
+
+/// A deploy stops the server: it stops accepting, and a scan already running still gets its report.
+#[tokio::test]
+async fn stopping_the_server_lets_running_scans_finish() {
+    if no_chrome() {
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(|| async {
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+            axum::response::Html("<title>t</title><p>Slow page</p>")
+        }),
+    ))
+    .await;
+    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true));
+    let (stop, stopped) = tokio::sync::oneshot::channel::<()>();
+    let (addr, serving) = server::serve_until(
+        &repo_root(),
+        ([127, 0, 0, 1], 0).into(),
+        Some(scanner),
+        None,
+        async {
+            stopped.await.ok();
+        },
+    )
+    .await
+    .unwrap();
+    let scan = tokio::spawn(reqwest::get(format!(
+        "http://{addr}/api/scan?url=http://{site}/"
+    )));
+    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+    stop.send(()).unwrap();
+    let response = scan.await.unwrap().unwrap();
+    assert_eq!(response.status().as_u16(), 200);
+    tokio::time::timeout(std::time::Duration::from_secs(10), serving)
+        .await
+        .expect("the server did not stop")
+        .unwrap()
+        .unwrap();
+    assert!(
+        reqwest::get(format!("http://{addr}/")).await.is_err(),
+        "still accepting after stop"
+    );
+}
+
 /// A remote Chrome outlives our connection to it: the pages we opened must not.
 #[tokio::test]
 async fn a_dropped_connection_closes_its_pages_in_a_remote_chrome() {

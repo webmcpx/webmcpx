@@ -7,6 +7,7 @@ use oxc_ast::ast::{
     ArrayExpressionElement, CallExpression, Expression, ObjectPropertyKind, StaticMemberExpression,
 };
 use oxc_ast_visit::{Visit, walk};
+use oxc_diagnostics::OxcDiagnostic;
 use oxc_parser::Parser;
 use oxc_span::{GetSpan, SourceType};
 
@@ -29,30 +30,28 @@ pub(crate) fn extract(path: &Path, source: &str) -> Extracted {
     if is_json {
         match Parser::new(&allocator, source, SourceType::mjs()).parse_expression() {
             Ok(expr) => manifest(convert(&expr), &mut out),
-            Err(errors) => out
-                .errors
-                .extend(errors.iter().map(|e| syntax_error(e.to_string()))),
+            Err(errors) => out.errors.extend(errors.iter().map(syntax_error)),
         }
         return out;
     }
     let source_type = SourceType::from_path(path).unwrap_or_else(|_| SourceType::mjs());
     let parsed = Parser::new(&allocator, source, source_type).parse();
-    out.errors.extend(
-        parsed
-            .diagnostics
-            .iter()
-            .map(|e| syntax_error(e.to_string())),
-    );
+    out.errors
+        .extend(parsed.diagnostics.iter().map(syntax_error));
     Finder { out: &mut out }.visit_program(&parsed.program);
     out
 }
 
-fn syntax_error(message: String) -> Diagnostic {
+/// A parse error, where the parser points (its first label; the file's start when it gives none).
+fn syntax_error(e: &OxcDiagnostic) -> Diagnostic {
+    let span = e.labels.first().map_or_else(Span::default, |label| {
+        Span::new(label.offset(), label.offset().saturating_add(label.len()))
+    });
     Diagnostic {
         rule: "syntax-error",
         severity: Severity::Error,
-        message,
-        span: Span::default(),
+        message: e.to_string(),
+        span,
         fix: None,
     }
 }

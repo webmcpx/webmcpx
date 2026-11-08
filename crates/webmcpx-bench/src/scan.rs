@@ -43,6 +43,10 @@ const CARD_WAITERS: usize = 8;
 const CACHE_ENTRY_MAX: usize = 256 * 1024;
 /// Whole scan, navigation included.
 const DEADLINE: Duration = Duration::from_secs(45);
+/// Resolving the site's host before a scan (and after its redirects).
+const RESOLVE_WAIT: Duration = Duration::from_secs(5);
+/// Kept free at the end of a scan's deadline for building the report after the best-effort steps.
+const REPORT_MARGIN: Duration = Duration::from_secs(1);
 /// Closing a context after a scan; longer means the browser is stuck and gets replaced.
 const CLOSE_WAIT: Duration = Duration::from_secs(10);
 /// How long to wait for tools after the page loaded (sites register them after hydration).
@@ -386,8 +390,12 @@ impl Scanner {
     /// A browser and a new tab in it, within the deadline: a Chrome that accepts connections but never
     /// answers must not hold the browser lock (and every slot) forever. On failure the browser is
     /// unusable (crashed, killed, stuck) and a fresh one starts next time.
-    async fn open_page(&self, scripts: &[&str]) -> Result<(Arc<Session>, Page), ScanError> {
-        let opened = tokio::time::timeout(self.deadline, async {
+    async fn open_page(
+        &self,
+        scripts: &[&str],
+        within: Duration,
+    ) -> Result<(Arc<Session>, Page), ScanError> {
+        let opened = tokio::time::timeout(within, async {
             let browser = self.browser().await.map_err(failed)?;
             let page = browser.browser.page(scripts).await.map_err(failed)?;
             Ok::<_, ScanError>((browser, page))
@@ -432,7 +440,7 @@ impl Scanner {
             .await
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
-        let (_browser, page) = self.open_page(&[]).await?;
+        let (_browser, page) = self.open_page(&[], self.deadline).await?;
         let png = tokio::time::timeout(CLOSE_WAIT, page.render_png(html, 1200, 630)).await;
         let _ = tokio::time::timeout(CLOSE_WAIT, page.close()).await;
         let png = Arc::new(png.map_err(|_| ScanError::TimedOut)?.map_err(failed)?);
@@ -462,10 +470,14 @@ impl Scanner {
             .map_err(|_| ScanError::Busy)?
             .map_err(|_| ScanError::Busy)?;
         let started = Instant::now();
+        // One deadline for the whole scan, browser and tab included; best-effort steps inside get what is
+        // left of it (see `inspect`).
+        let until = started + self.deadline;
+        let left = || until.saturating_duration_since(Instant::now());
         // The browser is held until this scan is done: another scan's recovery (taking the shared slot)
         // must not drop it while this page still runs.
-        let (_browser, page) = self.open_page(&INIT_SCRIPTS).await?;
-        let outcome = tokio::time::timeout(self.deadline, self.inspect(&page, &url)).await;
+        let (_browser, page) = self.open_page(&INIT_SCRIPTS, left()).await?;
+        let outcome = tokio::time::timeout(left(), self.inspect(&page, &url, until)).await;
         // Always close, also after a timeout: a page left running (say, an endless script) would keep
         // using CPU and memory after its slot is released. A browser that cannot close it is replaced.
         if !matches!(
@@ -491,11 +503,15 @@ impl Scanner {
     async fn check(&self, url: &Url) -> Result<(), ScanError> {
         let host = url.host_str().unwrap_or_default();
         let port = url.port_or_known_default().unwrap_or(443);
-        self.egress
-            .resolve(host, port)
-            .await
-            .map(drop)
-            .map_err(|e| ScanError::BadUrl(format!("{e:#}")))
+        // Bounded: a resolver that never answers must not hold the visitor's place outside any deadline.
+        match tokio::time::timeout(RESOLVE_WAIT, self.egress.resolve(host, port)).await {
+            Ok(resolved) => resolved
+                .map(drop)
+                .map_err(|e| ScanError::BadUrl(format!("{e:#}"))),
+            Err(_) => Err(ScanError::BadUrl(format!(
+                "{host} took too long to resolve"
+            ))),
+        }
     }
 
     async fn browser(&self) -> Result<Arc<Session>> {
@@ -534,7 +550,10 @@ impl Scanner {
         Ok(session)
     }
 
-    async fn inspect(&self, page: &Page, url: &Url) -> Result<Report, ScanError> {
+    /// Reads the page into a report. The best-effort steps (icon, agent checks) stop in time to leave
+    /// `REPORT_MARGIN` before `until`, so a site that never answers them costs its score, not its report.
+    async fn inspect(&self, page: &Page, url: &Url, until: Instant) -> Result<Report, ScanError> {
+        let left = || until.saturating_duration_since(Instant::now() + REPORT_MARGIN);
         page.goto(url.as_str()).await.map_err(failed)?;
         // Everything read from the page is bounded inside Chrome: the CDP connection is shared by every
         // scan, and a message past its size limit would end it for all of them. Reads run in an isolated
@@ -573,17 +592,19 @@ impl Scanner {
             .unwrap_or(false);
         // Best effort: a site without a readable icon still gets its report. Read from the page itself,
         // before the agent checks move this tab to robots.txt.
-        let favicon = tokio::time::timeout(FAVICON_WAIT, page.eval_isolated(FAVICON_JS))
-            .await
-            .ok()
-            .and_then(Result::ok)
-            .and_then(|v| v.as_str().map(str::to_owned))
-            .filter(|uri| is_icon_data_uri(uri));
-        let mut checks = tokio::time::timeout(CHECKS_WAIT, agent_checks(page, &final_url))
-            .await
-            .ok()
-            .and_then(Result::ok)
-            .unwrap_or_default();
+        let favicon =
+            tokio::time::timeout(FAVICON_WAIT.min(left()), page.eval_isolated(FAVICON_JS))
+                .await
+                .ok()
+                .and_then(Result::ok)
+                .and_then(|v| v.as_str().map(str::to_owned))
+                .filter(|uri| is_icon_data_uri(uri));
+        let mut checks =
+            tokio::time::timeout(CHECKS_WAIT.min(left()), agent_checks(page, &final_url))
+                .await
+                .ok()
+                .and_then(Result::ok)
+                .unwrap_or_default();
         checks.markdown |= markdown_link;
         let mut report = report(
             url.as_str(),

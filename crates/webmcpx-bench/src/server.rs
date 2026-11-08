@@ -401,19 +401,34 @@ pub async fn spawn_with(
     scanner: Option<Arc<Scanner>>,
     visitors: Option<Arc<Visitors>>,
 ) -> Result<SocketAddr> {
+    let (bound, _served) =
+        serve_until(root, addr, scanner, visitors, std::future::pending()).await?;
+    Ok(bound)
+}
+
+/// Like [`spawn_with`], until `stop` resolves: then it stops accepting and lets requests in flight (scans
+/// included) finish. The handle resolves once they have.
+pub async fn serve_until(
+    root: &Path,
+    addr: SocketAddr,
+    scanner: Option<Arc<Scanner>>,
+    visitors: Option<Arc<Visitors>>,
+    stop: impl Future<Output = ()> + Send + 'static,
+) -> Result<(SocketAddr, tokio::task::JoinHandle<std::io::Result<()>>)> {
     let listener = TcpListener::bind(addr)
         .await
         .with_context(|| format!("binding {addr}"))?;
     let bound = listener.local_addr()?;
     let app = router_with(root, scanner, visitors);
-    tokio::spawn(async move {
+    let served = tokio::spawn(async move {
         axum::serve(
             listener,
             app.into_make_service_with_connect_info::<SocketAddr>(),
         )
+        .with_graceful_shutdown(stop)
         .await
     });
-    Ok(bound)
+    Ok((bound, served))
 }
 
 #[cfg(test)]

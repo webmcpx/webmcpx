@@ -70,12 +70,15 @@ document.modelContext.registerTool(buildTool());
 "#), @"tools=1 unresolved=1");
 }
 
+/// A syntax error points where the parser stopped, not at the top of the file.
 #[test]
-fn syntax_errors_are_reported() {
-    insta::assert_snapshot!(render("bad.js", "registerTool({"), @r"
+fn syntax_errors_are_reported_where_they_are() {
+    insta::assert_snapshot!(render("bad.js", "const ok = 1;\nregisterTool({ name: });"), @r"
     tools=0 unresolved=0
-    1:1 error [syntax-error] Expected `}` but found `EOF`
-    ");
+    2:22 error [syntax-error] Unexpected token
+    "); // A manifest too.
+    let manifest = render("shop.webmcp.json", "{\n  \"name\": }");
+    assert!(manifest.contains("2:11 error [syntax-error]"), "{manifest}");
 }
 
 /// A spread can supply any field (`{ ...TOOLS[name], execute }`, as the webmcpx loader does): what it

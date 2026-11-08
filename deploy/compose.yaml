@@ -46,8 +46,10 @@ services:
   web:
     <<: *hardening
     build: { context: .., dockerfile: deploy/web.Dockerfile }
-    # 12 scans at once; each visitor (IPv4 address or IPv6 /64, from nginx) one a minute, one at a time.
+    # 12 scans at once; each visitor (IPv4 address or IPv6 /64, from nginx) one at a time.
     command: [--scan-parallel, "12", --one-scan-per-visitor, --behind-proxy]
+    # On a deploy, scans in flight finish (the server stops accepting, then waits up to 55 s).
+    stop_grace_period: 60s
     read_only: true
     networks: [edge, scan]
     depends_on: [chrome]
