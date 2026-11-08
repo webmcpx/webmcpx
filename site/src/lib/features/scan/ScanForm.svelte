@@ -71,11 +71,12 @@
 			size === 'lg' ? 'h-14 text-lg sm:h-16 sm:text-xl' : 'h-12 text-base'
 		]}
 	/>
+	<!-- The main CTA: it glows softly (cta-glow in base.css) to draw the eye; still for reduced motion. -->
 	<Button
 		type="submit"
 		size={size === 'lg' ? 'lg' : 'md'}
 		disabled={scanner.status === 'loading'}
-		class={['bg-marker text-ink', size === 'lg' && 'sm:h-16']}
+		class={['cta-glow bg-marker text-ink', size === 'lg' && 'sm:h-16']}
 	>
 		<ScanSearch aria-hidden="true" />{scanner.status === 'loading' ? m.scanning : m.submit}
 	</Button>

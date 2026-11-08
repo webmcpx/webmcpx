@@ -12,8 +12,9 @@ export default defineConfig({
 				runes: ({ filename }) => (filename.split(/[/\\]/).includes('node_modules') ? undefined : true)
 			},
 			adapter: adapter(),
-			// Inline the stylesheet (~8 KB gzip) into the prerendered HTML: no render-blocking request.
-			inlineStyleThreshold: 48_000
+			// Inline the stylesheet (~10 KB gzip, ~50 KB raw) into the prerendered HTML: no render-blocking
+			// request. Raise it with the stylesheet: past the threshold the CSS silently becomes a blocking file.
+			inlineStyleThreshold: 64_000
 		})
 	],
 	// In `vite dev`, the scan API comes from `just serve` (the Rust server).

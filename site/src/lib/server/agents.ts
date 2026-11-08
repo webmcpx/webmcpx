@@ -13,7 +13,7 @@ import { VERSUS as VERSUS_ROWS } from '#lib/content/versus.ts';
 import { REASONS } from '#lib/content/why.ts';
 import { ratio, savingIsRange, span, tokenSaving, type ArmSummary } from '#lib/features/benchmark/bench.ts';
 import { bySite } from '#lib/features/benchmark/sites.ts';
-import { loadRuns } from './bench.ts';
+import { fullResults, loadRuns } from './bench.ts';
 
 // The build runs in site/; README.md and the skill live at the repository root (deploy copies them too).
 const read = (path: string) => readFile(resolve(process.cwd(), '..', path), 'utf8');
@@ -33,7 +33,7 @@ function benchmarkLines(model?: string): string[] {
 			// On the leaderboard (every model), each one with its place.
 			`### ${model ? '' : `${i + 1}. `}${results.model} (reasoning ${results.reasoning_effort ?? 'default'})`,
 			'',
-			...bySite(results).flatMap((site) => [
+			...bySite(fullResults(results.model)).flatMap((site) => [
 				`- ${site.name}`,
 				...site.tasks.map(
 					(t) => `  - "${t.prompt}": without WebMCP ${arm(t.baseline)}; with WebMCP ${arm(t.webmcp)}`
