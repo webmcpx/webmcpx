@@ -3,7 +3,7 @@
 // engine runs here in Node. Nothing is injected into the page besides the W3C polyfill.
 import { readFileSync } from "node:fs";
 import { CODES, TOOLS } from "../src/generated.js";
-import { readPage } from "../src/loader.js";
+import { contextEnvelope, readPage } from "../src/loader.js";
 
 export const STANDARD = ["get_page_context", "search_page", "fetch_as_markdown"];
 
@@ -39,7 +39,7 @@ export const standardTools = () =>
 export async function runStandard(name, input, read) {
   const args = input && typeof input === "object" && !Array.isArray(input) ? input : {};
   try {
-    if (name === "get_page_context") return envelope({ ok: true, data: await read("context") });
+    if (name === "get_page_context") return contextEnvelope(await read("context"));
     if (name === "search_page" && typeof args.query !== "string") return err("INVALID_INPUT", "`query` must be a string");
     const page = await read("blocks");
     let m;

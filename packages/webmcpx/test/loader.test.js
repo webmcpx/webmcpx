@@ -240,3 +240,17 @@ test("search_site never cuts a URL", async () => {
   await register({ tools: ["search_site"], searchSite: async () => [{ title: "Huge", url: huge, snippet: "s" }] });
   assert.equal((await other.call("search_site", { query: "file" })).error.code, "RESULT_TOO_LARGE");
 });
+
+test("get_page_context keeps page-set fields to size and never cuts a URL", async () => {
+  const page = host();
+  document.head.innerHTML = `<title>${"T".repeat(5_000)}</title><meta name="description" content="${"d".repeat(2_000_000)}">`;
+  document.body.innerHTML = `<main><h2 id="${"i".repeat(500)}">Long id</h2><h2 id="ok">Short</h2></main>`;
+  await register({ wasm: WASM });
+  const out = await page.call("get_page_context");
+  assert.equal(out.ok, true);
+  assert.ok(JSON.stringify(out).length < 20_000);
+  assert.equal(out.data.title.length, 300);
+  assert.equal(out.data.description.length, 500);
+  assert.equal(out.data.headings[0].url, undefined, "a giant id gets no URL rather than a cut one");
+  assert.match(out.data.headings[1].url, /#ok$/);
+});

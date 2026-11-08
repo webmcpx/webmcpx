@@ -8,6 +8,10 @@ const ok = (data) => envelope({ ok: true, data });
 const err = (code, message, hint) =>
   envelope({ ok: false, error: { code, message, retryable: CODES[code] }, ...(hint && { hint }) });
 
+/** get_page_context's envelope from what readPage("context") gave (agent/ uses it too). */
+export const contextEnvelope = (context) =>
+  context?.tooLarge ? err("RESULT_TOO_LARGE", "the page context is over 20,000 chars") : ok(context);
+
 let wasm;
 const engine = (source) =>
   (wasm ??= import("../wasm/webmcpx_wasm.js")
@@ -31,18 +35,21 @@ export function readPage(what, root) {
   const base = location.href.split("#")[0];
   const text = (s) => (s ?? "").replace(/\s+/g, " ").trim();
   if (what === "context") {
-    return {
-      title: document.title,
+    // Page-set fields are cut to size; URLs never are (a heading with a giant id gets no URL), and a
+    // context still past the output budget (20,000 chars) comes back as { tooLarge: true }.
+    const context = {
+      title: text(document.title).slice(0, 300),
       url: location.href,
-      lang: document.documentElement.lang || undefined,
-      description: document.querySelector('meta[name="description"]')?.getAttribute("content") || undefined,
+      lang: document.documentElement.lang.slice(0, 35) || undefined,
+      description: text(document.querySelector('meta[name="description"]')?.getAttribute("content")).slice(0, 500) || undefined,
       headings: [...document.querySelectorAll("h1, h2, h3")].slice(0, 30).map((h) => ({
         level: Number(h.tagName[1]),
         text: text(h.textContent).slice(0, 120),
-        url: h.id ? `${base}#${h.id}` : undefined,
+        url: h.id && h.id.length <= 200 ? `${base}#${h.id}` : undefined,
       })),
       selection: text(globalThis.getSelection?.()?.toString()).slice(0, 1000) || undefined,
     };
+    return JSON.stringify(context).length > 20_000 ? { tooLarge: true } : context;
   }
   const css = (el) => globalThis.getComputedStyle?.(el) ?? {};
   const hidden = (el) => el.hasAttribute("hidden") || el.getAttribute("aria-hidden") == "true" || css(el).display == "none";
@@ -91,7 +98,7 @@ function executors(options) {
     return run(m, readPage("blocks", contentRoot(options.root)), input);
   };
   return {
-    get_page_context: async () => ok(readPage("context")),
+    get_page_context: async () => contextEnvelope(readPage("context")),
     search_page: withEngine((m, page, { query, limit }) =>
       typeof query === "string" ? m.search(page, query, limit ?? 0) : err("INVALID_INPUT", "`query` must be a string")),
     fetch_as_markdown: withEngine((m, page, { cursor, max_chars }) => m.markdown(page, String(cursor ?? ""), max_chars ?? 0)),
