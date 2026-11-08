@@ -44,7 +44,7 @@ const hi: Messages = {
 			vsMcp: 'बनाम MCP',
 			sites: 'साइट के लिए',
 			agents: 'एजेंट के लिए',
-			issues: 'समस्याएँ',
+			issues: 'कमियाँ',
 			docs: 'डॉक्स'
 		}
 	},
@@ -60,7 +60,7 @@ const hi: Messages = {
 			proof: 'लीडरबोर्ड',
 			sites: 'साइट के लिए',
 			agents: 'एजेंट के लिए',
-			issues: 'कौन-सी समस्याएँ हल हुईं',
+			issues: 'कमियाँ',
 			brand: 'ब्रैंड और डिज़ाइन',
 			trademark: 'ट्रेडमार्क नीति',
 			spec: 'स्पेसिफ़िकेशन ड्राफ़्ट',
@@ -114,6 +114,18 @@ const hi: Messages = {
 		kicker: 'WebMCP क्या है?',
 		title: 'WebMCP बन रहा है AI एजेंट के लिए वेब का स्टैंडर्ड। हम पूरी तरह इसके साथ हैं',
 		lead: 'Google और Microsoft के इंजीनियर इसका ड्राफ़्ट W3C में तैयार कर रहे हैं, जो वेब के स्टैंडर्ड्स के पीछे की संस्था है, और Chrome और Edge इसे पहले से टेस्ट कर रहे हैं। आज Claude Code, Codex और बाकी सभी एजेंट आपकी साइट को एक स्क्रीनशॉट की तरह इस्तेमाल करते हैं: देखते हैं, अंदाज़ा लगाते हैं कि कौन-सा बटन दबाना है, और फिर से कोशिश करते हैं। धीमा, महँगा, आसानी से टूटने वाला। WebMCP के साथ आपकी साइट एजेंट को साफ़-साफ़ बताती है कि वे क्या कर सकते हैं, जैसे सर्च करना, पढ़ना या कार्ट में डालना, और वे बस माँग लेते हैं। हमें यकीन है कि हर साइट WebMCP बोलेगी, इसलिए हमने webmcpx बनाया, ताकि आपकी साइट आज ही ऐसा कर सके।',
+		sources: {
+			mind2web: 'Online-Mind2Web: एजेंट लाइव कामों में लगभग 10 में से 4 बार नाकाम',
+			snapshot: 'एक पेज स्नैपशॉट पर 12k से 77k टोकन खर्च',
+			windtunnel: 'WindTunnel: टूल बनाम क्लिक, समय मापकर',
+			draft: 'WebMCP ड्राफ़्ट, W3C Web Machine Learning CG (एडिटर Google और Microsoft से)',
+			status: 'इम्प्लीमेंटेशन स्टेटस (Chrome और Edge में ऑरिजिन ट्रायल)',
+			chromeTrial: 'Chrome: WebMCP ऑरिजिन ट्रायल',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge: WebMCP ऑरिजिन ट्रायल',
+			edgeExplainer: 'Microsoft Edge एक्सप्लेनर',
+			method: 'हमारे बेंचमार्क का तरीका'
+		},
 		steps: {
 			register: {
 				title: 'आपका पेज टूल रजिस्टर करता है',
@@ -292,7 +304,8 @@ const hi: Messages = {
 		open: 'खोलें',
 		opens: '({site} पर जाता है)',
 		rotator: {
-			label: 'सवाल'
+			label: 'सवाल',
+			role: 'कैरसेल'
 		},
 		details: '{site} का विवरण',
 		tabs: {
@@ -457,13 +470,7 @@ const hi: Messages = {
 		},
 		hype: { up: 'तक', fewer: 'कम टोकन', same: 'वही जवाब।', bestCase: 'सबसे अच्छा मामला: {site}, {model}' },
 		worksWith: 'हर एजेंट और ब्राउज़र के साथ चलता है',
-		tabs: { scripts: 'स्क्रिप्ट' },
-		notes: {
-			prompt:
-				'एक प्रॉम्प्ट: आपका एजेंट खुद सेट होता है, हर जगह पहले WebMCP इस्तेमाल करता है और webmcpx.dev पर साबित करता है।',
-			cli: 'टर्मिनल में एक बार चलाएँ। उसके बाद हर पेज के WebMCP टूल आपके एजेंट के टूल बन जाते हैं।',
-			cursor: '.cursor/mcp.json में (या Settings → MCP)। हर MCP क्लाइंट के लिए वही सर्वर।'
-		}
+		note: 'एक प्रॉम्प्ट: आपका एजेंट खुद सेट होता है, हर जगह पहले WebMCP इस्तेमाल करता है और webmcpx.dev पर साबित करता है।'
 	},
 
 	own: {
@@ -861,7 +868,9 @@ const hi: Messages = {
 		copied: 'कॉपी हुआ',
 		copyLabel: 'क्लिपबोर्ड पर कॉपी करें',
 		copyNamed: '{title} कॉपी करें',
-		code: '{title} कोड'
+		code: '{title} कोड',
+		prompt: 'प्रॉम्प्ट',
+		terminal: 'टर्मिनल'
 	}
 };
 

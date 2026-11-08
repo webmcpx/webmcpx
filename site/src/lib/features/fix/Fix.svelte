@@ -26,7 +26,7 @@
 			label: capital(m.alternatives.agent),
 			icon: Bot,
 			snippet: code.agentPrompt,
-			title: 'prompt'
+			title: i18n.m.ui.prompt
 		},
 		{
 			id: 'html',

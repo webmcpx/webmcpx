@@ -1,13 +1,10 @@
 <!--
 	For people who use agents (no site, no scan needed): the saving as one big number from the published
-	runs (with the range and the losses under it), the tools it works with, then one tab per way to set it
-	up: the prompt first, then the command for each client, then the in-page call for agents that drive
-	a browser themselves.
+	runs (with the range and the losses under it), the tools it works with, then the one prompt that sets it
+	up (owner's decision 2026-11-08: no list of options; the agent reads llms.txt and picks its own way).
 -->
 <script lang="ts">
-	import Bot from '@lucide/svelte/icons/bot';
-	import Code from '@lucide/svelte/icons/code';
-	import CodeTabs, { type CodeTab } from '#lib/components/ui/CodeTabs.svelte';
+	import CodeBlock from '#lib/components/ui/CodeBlock.svelte';
 	import Section from '#lib/components/ui/Section.svelte';
 	import SiteLogo from '#lib/components/ui/SiteLogo.svelte';
 	import {
@@ -38,7 +35,6 @@
 	import { ratio, savingIsRange, span, type TokenSaving } from '#lib/features/benchmark/bench.ts';
 	import { fmt, useI18n } from '#lib/i18n/index.svelte.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
-	import { siClaude, siCursor } from 'simple-icons';
 
 	interface Props {
 		code: Record<SnippetId, Highlighted>;
@@ -95,43 +91,6 @@
 		{ name: 'Cypress', logo: CYPRESS },
 		{ name: 'WebdriverIO', logo: WEBDRIVERIO }
 	];
-
-	const agentLabel = $derived(i18n.m.fix.alternatives.agent);
-	// The prompt first (the agent sets itself up), then each client's one command, then scripts.
-	const tabs: CodeTab[] = $derived([
-		{
-			id: 'prompt',
-			label: agentLabel,
-			icon: Bot,
-			snippet: code.mcpPrompt,
-			title: 'prompt',
-			note: m.notes.prompt
-		},
-		{
-			id: 'claude',
-			label: 'Claude Code',
-			icon: siClaude,
-			snippet: code.mcpClaude,
-			title: 'terminal',
-			note: m.notes.cli
-		},
-		{ id: 'codex', label: 'Codex', icon: Code, snippet: code.mcpCodex, title: 'terminal', note: m.notes.cli },
-		{
-			id: 'cursor',
-			label: 'Cursor',
-			icon: siCursor,
-			snippet: code.mcpCursor,
-			title: '.cursor/mcp.json',
-			note: m.notes.cursor
-		},
-		{
-			id: 'scripts',
-			label: m.tabs.scripts,
-			icon: Code,
-			snippet: code.pageScript,
-			title: 'script.js'
-		}
-	]);
 </script>
 
 <Section id="for-agents" title={m.title} lead={m.lead}>
@@ -181,7 +140,8 @@
 					</ul>
 				{/each}
 			</div>
-			<CodeTabs label={m.title} {tabs} />
+			<CodeBlock snippet={code.mcpPrompt} title={i18n.m.ui.prompt} />
+			<p class="mt-3 text-left text-sm text-pretty text-ink-2">{m.note}</p>
 		</Reveal>
 	</div>
 </Section>

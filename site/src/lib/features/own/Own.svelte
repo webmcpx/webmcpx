@@ -38,7 +38,7 @@
 			label: label.charAt(0).toLocaleUpperCase(i18n.code) + label.slice(1),
 			icon: Bot,
 			snippet: samples.agent,
-			title: 'prompt',
+			title: i18n.m.ui.prompt,
 			note: m.notes.agent
 		},
 		...(Object.keys(OWN_TABS) as Exclude<OwnId, 'agent'>[]).map((id) => ({

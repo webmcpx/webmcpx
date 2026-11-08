@@ -1,16 +1,18 @@
-// Runs at build time only (the site is prerendered): highlight every code sample once and load the
-// published benchmark runs (see lib/server/bench.ts).
+// Runs at build time only (the site is prerendered): highlight every code sample once per language and load
+// the published benchmark runs (see lib/server/bench.ts).
 import { existsSync } from 'node:fs';
 import { modelLook } from '#lib/content/models.ts';
-import { OWN, SNIPPETS } from '#lib/content/snippets.ts';
 import { tokenSaving } from '#lib/features/benchmark/bench.ts';
 import { bestGain } from '#lib/features/benchmark/sites.ts';
 import { loadRuns } from '#lib/server/bench.ts';
 import { highlightAll } from '#lib/server/highlight.ts';
+import { localizedSnippets, localizeRuns } from '#lib/server/localize.ts';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-	const runs = loadRuns();
+export const load: PageServerLoad = async ({ params }) => {
+	// The questions and the copy-to-agent prompts in the page's language (see server/localize.ts).
+	const runs = localizeRuns(loadRuns(), params.lang);
+	const { snippets, own } = localizedSnippets(params.lang);
 	// The best case on the whole leaderboard: the biggest saving on one question, over every model's
 	// showcased sites (each solved at least as often with WebMCP). Shown as a best case, never an average.
 	const peaks = runs.flatMap((r) =>
@@ -26,8 +28,8 @@ export const load: PageServerLoad = async () => {
 		null
 	);
 	return {
-		code: await highlightAll(SNIPPETS),
-		own: await highlightAll(OWN),
+		code: await highlightAll(snippets),
+		own: await highlightAll(own),
 		runs,
 		// For "For agents": each model's whole-run token saving, lowest to highest (null: nothing published).
 		saving: tokenSaving(runs),

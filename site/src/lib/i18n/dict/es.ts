@@ -44,7 +44,7 @@ const es: Messages = {
 			vsMcp: 'vs MCP',
 			sites: 'Para sitios',
 			agents: 'Para agentes',
-			issues: 'Problemas',
+			issues: 'Huecos',
 			docs: 'Docs'
 		}
 	},
@@ -60,7 +60,7 @@ const es: Messages = {
 			proof: 'Ranking',
 			sites: 'Para sitios',
 			agents: 'Para agentes',
-			issues: 'Problemas que resuelve',
+			issues: 'Huecos',
 			brand: 'Marca y diseño',
 			trademark: 'Política de marca',
 			spec: 'Borrador de la spec',
@@ -114,6 +114,18 @@ const es: Messages = {
 		kicker: '¿Qué es WebMCP?',
 		title: 'WebMCP se está convirtiendo en el estándar de la web para agentes de IA. Vamos con todo',
 		lead: 'Ingenieros de Google y Microsoft lo están redactando en el W3C, el organismo detrás de los estándares de la web, y Chrome y Edge ya lo están probando. Hoy, Claude Code, Codex y todos los demás agentes usan tu sitio como si fuera una captura de pantalla: miran, adivinan qué botón pulsar y vuelven a intentarlo. Lento, caro y fácil de romper. Con WebMCP, tu sitio les dice a los agentes exactamente qué pueden hacer, como buscar, leer o añadir al carrito, y ellos simplemente lo piden. Creemos que todos los sitios lo hablarán, así que creamos webmcpx para que el tuyo lo haga hoy mismo.',
+		sources: {
+			mind2web: 'Online-Mind2Web: los agentes fallan en unas 4 de cada 10 tareas reales',
+			snapshot: 'Un snapshot de página cuesta de 12k a 77k tokens',
+			windtunnel: 'WindTunnel: tools frente a clics, cronometrado',
+			draft: 'Borrador de WebMCP, W3C Web Machine Learning CG (editores de Google y Microsoft)',
+			status: 'Estado de implementación (origin trials en Chrome y Edge)',
+			chromeTrial: 'Chrome: origin trial de WebMCP',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge: origin trial de WebMCP',
+			edgeExplainer: 'Explainer de Microsoft Edge',
+			method: 'Nuestro método de benchmark'
+		},
 		steps: {
 			register: {
 				title: 'Tu página registra herramientas',
@@ -293,7 +305,8 @@ const es: Messages = {
 		open: 'Abrir',
 		opens: '(abre {site})',
 		rotator: {
-			label: 'Preguntas'
+			label: 'Preguntas',
+			role: 'carrusel'
 		},
 		details: 'Detalles de {site}',
 		tabs: {
@@ -468,12 +481,7 @@ const es: Messages = {
 			bestCase: 'Mejor caso: {site}, {model}'
 		},
 		worksWith: 'Funciona con cualquier agente y navegador',
-		tabs: { scripts: 'Scripts' },
-		notes: {
-			prompt: 'Un prompt: tu agente se configura, usa WebMCP primero en todo y lo prueba en webmcpx.dev.',
-			cli: 'Ejecútalo una vez en la terminal. Desde entonces, las herramientas WebMCP de cada página son herramientas de tu agente.',
-			cursor: 'En .cursor/mcp.json (o Settings → MCP). El mismo servidor, en cualquier cliente MCP.'
-		}
+		note: 'Un prompt: tu agente se configura, usa WebMCP primero en todo y lo prueba en webmcpx.dev.'
 	},
 
 	own: {
@@ -702,7 +710,7 @@ const es: Messages = {
 		},
 		badges: {
 			card: { name: 'Tarjeta', fits: 'Páginas claras' },
-			flat: { name: 'Plana', fits: 'Footers' },
+			flat: { name: 'Plana', fits: 'Pies de página' },
 			readme: { name: 'README', fits: 'GitHub y npm' },
 			dark: { name: 'Oscura', fits: 'Páginas oscuras' }
 		},
@@ -885,7 +893,9 @@ const es: Messages = {
 		copied: 'Copiado',
 		copyLabel: 'Copiar al portapapeles',
 		copyNamed: 'Copiar {title}',
-		code: 'Código de {title}'
+		code: 'Código de {title}',
+		prompt: 'prompt',
+		terminal: 'terminal'
 	}
 };
 

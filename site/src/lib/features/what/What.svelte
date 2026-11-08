@@ -28,42 +28,31 @@
 	const STEPS = ['register', 'list', 'call'] as const;
 	// Every claim in the lead, sourced (checked 2026-11-08): why agents need it (fail, cost, time), who
 	// drafts it and where, who tests it.
+	// Labels in the dictionary (`what.sources`), in this order.
 	const SOURCES = [
+		{ id: 'mind2web', href: 'https://arxiv.org/abs/2504.01382' },
 		{
-			label: 'Online-Mind2Web: agents fail about 4 in 10 live tasks',
-			href: 'https://arxiv.org/abs/2504.01382'
-		},
-		{
-			label: 'A page snapshot costs 12k to 77k tokens',
+			id: 'snapshot',
 			href: 'https://dev.to/nitai_aharoni_1006318cb51/what-a-browser-mcp-snapshot-actually-costs-i-measured-it-46if'
 		},
-		{ label: 'WindTunnel: tools vs clicking, timed', href: 'https://webmcp.com/benchmark' },
+		{ id: 'windtunnel', href: 'https://webmcp.com/benchmark' },
+		{ id: 'draft', href: 'https://webmachinelearning.github.io/webmcp/' },
 		{
-			label: 'WebMCP draft, W3C Web Machine Learning CG (editors from Google and Microsoft)',
-			href: 'https://webmachinelearning.github.io/webmcp/'
-		},
-		{
-			label: 'Implementation status (Chrome and Edge origin trials)',
+			id: 'status',
 			href: 'https://github.com/webmachinelearning/webmcp/blob/main/implementation-status.md'
 		},
+		{ id: 'chromeTrial', href: 'https://developer.chrome.com/blog/ai-webmcp-origin-trial' },
+		{ id: 'chromeStatus', href: 'https://chromestatus.com/feature/5117755740913664' },
 		{
-			label: 'Chrome: WebMCP origin trial',
-			href: 'https://developer.chrome.com/blog/ai-webmcp-origin-trial'
-		},
-		{ label: 'Chrome Platform Status', href: 'https://chromestatus.com/feature/5117755740913664' },
-		{
-			label: 'Microsoft Edge: WebMCP origin trial',
+			id: 'edgeTrial',
 			href: 'https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/trials/0b76fe60-b266-458e-a285-04e375c0c31a'
 		},
 		{
-			label: 'Microsoft Edge explainer',
+			id: 'edgeExplainer',
 			href: 'https://microsoftedge.github.io/MSEdgeExplainers/WebModelContext/explainer.html'
 		},
-		{
-			label: 'Our benchmark method',
-			href: 'https://github.com/webmcpx/webmcpx/blob/main/bench/METHODOLOGY.md'
-		}
-	];
+		{ id: 'method', href: 'https://github.com/webmcpx/webmcpx/blob/main/bench/METHODOLOGY.md' }
+	] as const satisfies { id: keyof typeof m.sources; href: string }[];
 	const withWebmcpx = (id: (typeof ROWS)[number]) => {
 		if (id !== 'proof') return m.webmcpx.items[id].webmcpx;
 		const p = m.webmcpx.items.proof;
@@ -94,7 +83,7 @@
 			<a
 				href={s.href}
 				class="inline-block py-1 text-ink-2 underline decoration-ink/30 underline-offset-2 hover:text-ink hover:decoration-ink"
-				>{s.label}</a
+				>{m.sources[s.id]}</a
 			>
 		{/each}
 	</p>

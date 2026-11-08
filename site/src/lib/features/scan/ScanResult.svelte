@@ -172,7 +172,9 @@
 						{#if r.verdict === 'missing'}
 							<Rich text={m.result.missing}>
 								{#snippet tokens()}<strong class="text-ink"
-										>{i18n.plural(r.page_tokens, m.result.tokens, { n: pageTokens(r.page_tokens) })}</strong
+										>{i18n.plural(r.page_tokens, m.result.tokens, {
+											n: pageTokens(r.page_tokens, i18n.intl)
+										})}</strong
 									>{/snippet}
 							</Rich>
 						{:else if r.verdict === 'issues' && !errors(r)}

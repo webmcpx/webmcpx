@@ -4,9 +4,11 @@ import {
 	compare,
 	headline,
 	losses,
+	METRICS,
 	parse,
 	perRun,
 	ratio,
+	seconds,
 	rows,
 	tokens,
 	savingIsRange,
@@ -62,6 +64,17 @@ describe('formatting', () => {
 		expect(perRun(0.05419)).toBe('$0.054');
 		expect(perRun(0.0075712)).toBe('$0.0076');
 		expect(perRun(null)).toBe('n/a');
+	});
+
+	it('uses the reader’s decimal separator and keeps the k, s and $ style', () => {
+		expect(tokens(1540, 'pt-BR')).toBe('1,5k');
+		expect(tokens(123_400, 'de-DE')).toBe('123k');
+		expect(seconds(12_345)).toBe('12.3s');
+		expect(seconds(12_345, 'fr-FR')).toBe('12,3s');
+		expect(perRun(0.05419, 'es')).toBe('$0,054');
+		expect(perRun(1.5, 'ru-RU')).toBe('$1,50');
+		expect(METRICS.find((m) => m.id === 'steps')!.format(4.25, 'id-ID')).toBe('4,3');
+		expect(tokens(1540, 'ja-JP')).toBe('1.5k');
 	});
 });
 

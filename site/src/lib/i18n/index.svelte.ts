@@ -13,6 +13,8 @@ export { fmt, plural };
 export interface I18n {
 	readonly code: LocaleCode;
 	readonly m: Messages;
+	/** The current language's `Intl` tag, for formatters that take one (`tokens(x, i18n.intl)`). */
+	readonly intl: string;
 	/** The path of an English page (`/`, `/brand/`) in the current language. */
 	href(path: string): string;
 	/** A number formatted for the current language (8,500 / 8.500 / 8 500). */
@@ -30,6 +32,9 @@ export function provideI18n(get: () => { code: LocaleCode; m: Messages }): I18n 
 		},
 		get m() {
 			return get().m;
+		},
+		get intl() {
+			return localeOf(get().code).intl;
 		},
 		href: (path) => localized(path, get().code),
 		number: (n) => n.toLocaleString(localeOf(get().code).intl),

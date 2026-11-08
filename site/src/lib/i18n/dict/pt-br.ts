@@ -42,11 +42,11 @@ const ptBr: Messages = {
 		language: 'Idioma',
 		links: {
 			why: 'Por quê',
-			proof: 'Leaderboard',
+			proof: 'Ranking',
 			vsMcp: 'vs MCP',
 			sites: 'Para sites',
 			agents: 'Para agentes',
-			issues: 'Issues',
+			issues: 'Lacunas',
 			docs: 'Docs'
 		}
 	},
@@ -59,10 +59,10 @@ const ptBr: Messages = {
 		links: {
 			scan: 'Escaneie seu site',
 			verdicts: 'Como funcionam os vereditos',
-			proof: 'Leaderboard',
+			proof: 'Ranking',
 			sites: 'Para sites',
 			agents: 'Para agentes',
-			issues: 'Issues resolvidas',
+			issues: 'Lacunas',
 			brand: 'Marca e design',
 			trademark: 'Política de marca',
 			spec: 'Rascunho da spec',
@@ -113,6 +113,18 @@ const ptBr: Messages = {
 		kicker: 'O que é WebMCP?',
 		title: 'O WebMCP está virando o padrão da web para agentes de IA. Estamos dentro',
 		lead: 'Engenheiros do Google e da Microsoft estão redigindo o WebMCP no W3C, a organização por trás dos padrões da web, e o Chrome e o Edge já estão testando. Hoje, o Claude Code, o Codex e todos os outros agentes usam o seu site como se fosse um screenshot: olham, chutam qual botão apertar e tentam de novo. Lento, caro e fácil de quebrar. Com WebMCP, o seu site diz aos agentes exatamente o que eles podem fazer, como buscar, ler ou adicionar ao carrinho, e eles só precisam pedir. Acreditamos que todo site vai falar WebMCP, por isso criamos o webmcpx para o seu site falar hoje mesmo.',
+		sources: {
+			mind2web: 'Online-Mind2Web: agentes falham em cerca de 4 de 10 tarefas reais',
+			snapshot: 'Um snapshot de página custa de 12k a 77k tokens',
+			windtunnel: 'WindTunnel: tools contra cliques, cronometrado',
+			draft: 'Rascunho do WebMCP, W3C Web Machine Learning CG (editores do Google e da Microsoft)',
+			status: 'Status de implementação (origin trials no Chrome e no Edge)',
+			chromeTrial: 'Chrome: origin trial do WebMCP',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge: origin trial do WebMCP',
+			edgeExplainer: 'Explainer do Microsoft Edge',
+			method: 'Nosso método de benchmark'
+		},
 		steps: {
 			register: {
 				title: 'Sua página registra ferramentas',
@@ -256,7 +268,7 @@ const ptBr: Messages = {
 	},
 
 	proof: {
-		kicker: 'Leaderboard',
+		kicker: 'Ranking',
 		title: 'Quanto o WebMCP economiza, modelo a modelo',
 		lead: 'Um agente lê, clica e preenche a partir de snapshots da página; o outro chama as ferramentas WebMCP do site. Escolha um modelo; as maiores economias vêm primeiro.',
 		byModel: 'Benchmark por modelo',
@@ -292,7 +304,8 @@ const ptBr: Messages = {
 		open: 'Abrir',
 		opens: '(abre {site})',
 		rotator: {
-			label: 'Perguntas'
+			label: 'Perguntas',
+			role: 'carrossel'
 		},
 		details: 'Detalhes de {site}',
 		tabs: {
@@ -443,8 +456,8 @@ const ptBr: Messages = {
 		title: 'Para o seu agente',
 		lead: 'Seu agente lê cada página do jeito caro. Dê a ele as ferramentas da página: nos sites que medimos, as mesmas respostas com uma fração dos tokens. Funciona em qualquer site, e é o MCP que todo setup de Claude Code e Codex deveria ter.',
 		saving: {
-			range: { other: 'De {low} a {high} menos tokens nos {n} modelos do leaderboard.' },
-			best: 'Até {high} menos tokens no leaderboard.',
+			range: { other: 'De {low} a {high} menos tokens nos {n} modelos do ranking.' },
+			best: 'Até {high} menos tokens no ranking.',
 			losses: {
 				other: 'Execuções completas: em {worse} de {total} perguntas por modelo, o WebMCP usou mais tokens.'
 			}
@@ -467,12 +480,7 @@ const ptBr: Messages = {
 			bestCase: 'Melhor caso: {site}, {model}'
 		},
 		worksWith: 'Funciona com qualquer agente e navegador',
-		tabs: { scripts: 'Scripts' },
-		notes: {
-			prompt: 'Um prompt: seu agente se configura, usa WebMCP primeiro em tudo e prova no webmcpx.dev.',
-			cli: 'Rode uma vez no terminal. A partir daí, as ferramentas WebMCP de cada página viram ferramentas do seu agente.',
-			cursor: 'Em .cursor/mcp.json (ou Settings → MCP). O mesmo servidor, em qualquer cliente MCP.'
-		}
+		note: 'Um prompt: seu agente se configura, usa WebMCP primeiro em tudo e prova no webmcpx.dev.'
 	},
 
 	own: {
@@ -878,7 +886,9 @@ const ptBr: Messages = {
 		copied: 'Copiado',
 		copyLabel: 'Copiar para a área de transferência',
 		copyNamed: 'Copiar {title}',
-		code: 'Código de {title}'
+		code: 'Código de {title}',
+		prompt: 'prompt',
+		terminal: 'terminal'
 	}
 };
 

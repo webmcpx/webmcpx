@@ -586,7 +586,7 @@ test('the old #fix links, printed by published CLIs, still land on the site sect
 	await expect(page.locator('#for-sites').getByRole('heading', { level: 2 })).toBeInViewport();
 });
 
-test('for agents: the measured saving, the tools it works with, one tab per way to set it up', async ({
+test('for agents: the measured saving, the tools it works with, one prompt to set it up', async ({
 	page
 }) => {
 	await page.goto('/#for-agents');
@@ -614,14 +614,11 @@ test('for agents: the measured saving, the tools it works with, one tab per way 
 		'Firefox',
 		'Safari'
 	]);
-	const tabs = agents.getByRole('tab');
-	await expect(tabs).toHaveText(['Agent', 'Claude Code', 'Codex', 'Cursor', 'Scripts']);
-	// The prompt first; each client's one command a click away.
-	await expect(agents.getByRole('tabpanel')).toContainText('Use WebMCP first on every web page');
-	await tabs.nth(1).click();
-	await expect(agents.getByRole('tabpanel')).toContainText('claude mcp add webmcpx -- npx -y webmcpx mcp');
-	await tabs.nth(4).click();
-	await expect(agents.getByRole('tabpanel')).toContainText('document.modelContext');
+	// One prompt and nothing to choose from (owner's decision 2026-11-08): no tabs.
+	await expect(agents.getByRole('tab')).toHaveCount(0);
+	await expect(agents.getByRole('figure')).toHaveCount(1);
+	await expect(agents.getByRole('figure')).toContainText('Use WebMCP first on every web page');
+	await expect(agents.getByRole('button', { name: 'Copy prompt' })).toBeVisible();
 });
 
 test('the scan is the one action in the hero; people with no site get a link to set up their agent', async ({
@@ -644,7 +641,7 @@ test('the menus name both audiences, in page order', async ({ page }) => {
 		'For agents',
 		'For sites',
 		'vs MCP',
-		'Issues',
+		'Gaps',
 		'Docs'
 	]);
 	// tests/i18n.spec.ts checks that the pill fits one line at 1024 px in every language.
@@ -725,4 +722,18 @@ test('the sections carry the Junction as a faint watermark that never blocks a c
 	expect(style.opacity).toBeLessThan(0.1);
 	expect(style.events).toBe('none');
 	expect(style.hidden).toBe('true');
+});
+
+test('each language shows the benchmark questions and the agent prompts in its own words', async ({
+	page
+}) => {
+	await page.goto('/pt-br/');
+	const agents = page.locator('#for-agents');
+	await expect(agents.getByRole('figure')).toContainText('Use WebMCP primeiro em toda página web');
+	await expect(agents.getByRole('figure')).toContainText('https://webmcpx.dev/llms.txt');
+	await expect(page.locator('#leaderboard')).toContainText('Ranking');
+	// The question on screen is in Portuguese (the run files stay English).
+	const quoted = page.locator('#leaderboard [role=tabpanel] p.text-lg').first();
+	await expect(quoted).toBeVisible();
+	await expect(quoted).not.toContainText(/\b(What|Which|How|When|Add|Put|Is)\b/);
 });

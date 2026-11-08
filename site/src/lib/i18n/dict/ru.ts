@@ -50,7 +50,7 @@ const ru: Messages = {
 			vsMcp: 'vs MCP',
 			sites: 'Сайтам',
 			agents: 'Агентам',
-			issues: 'Проблемы',
+			issues: 'Пробелы',
 			docs: 'Справка'
 		}
 	},
@@ -66,7 +66,7 @@ const ru: Messages = {
 			proof: 'Рейтинг',
 			sites: 'Для сайтов',
 			agents: 'Для агентов',
-			issues: 'Какие проблемы решает',
+			issues: 'Пробелы',
 			brand: 'Бренд и дизайн',
 			trademark: 'Товарные знаки',
 			spec: 'Черновик спецификации',
@@ -125,6 +125,18 @@ const ru: Messages = {
 		kicker: 'Что такое WebMCP?',
 		title: 'WebMCP становится веб-стандартом для ИИ-агентов. Мы в деле',
 		lead: 'Инженеры Google и Microsoft готовят его черновик в W3C — организации, которая стоит за веб-стандартами, а Chrome и Edge уже его тестируют. Сегодня Claude Code, Codex и все остальные агенты пользуются вашим сайтом как скриншотом: смотрят, угадывают, какую кнопку нажать, и пробуют снова. Медленно, дорого, легко ломается. С WebMCP ваш сайт прямо говорит агентам, что они могут сделать, например найти, прочитать или добавить в корзину, и им остаётся просто попросить. Мы верим, что на WebMCP заговорит каждый сайт, поэтому сделали webmcpx, чтобы ваш заговорил уже сегодня.',
+		sources: {
+			mind2web: 'Online-Mind2Web: агенты проваливают около 4 из 10 реальных задач',
+			snapshot: 'Снимок страницы стоит от 12k до 77k токенов',
+			windtunnel: 'WindTunnel: инструменты против кликов, по секундомеру',
+			draft: 'Черновик WebMCP, W3C Web Machine Learning CG (редакторы из Google и Microsoft)',
+			status: 'Статус реализации (origin trial в Chrome и Edge)',
+			chromeTrial: 'Chrome: origin trial WebMCP',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge: origin trial WebMCP',
+			edgeExplainer: 'Explainer Microsoft Edge',
+			method: 'Наша методика бенчмарка'
+		},
 		steps: {
 			register: {
 				title: 'Сайт регистрирует инструменты',
@@ -306,7 +318,8 @@ const ru: Messages = {
 		open: 'Открыть',
 		opens: '(откроется {site})',
 		rotator: {
-			label: 'Вопросы'
+			label: 'Вопросы',
+			role: 'карусель'
 		},
 		details: 'Подробности: {site}',
 		tabs: {
@@ -491,13 +504,7 @@ const ru: Messages = {
 			bestCase: 'Лучший случай: {site}, {model}'
 		},
 		worksWith: 'Работает с любым агентом и браузером',
-		tabs: { scripts: 'Скрипты' },
-		notes: {
-			prompt:
-				'Один промпт: агент настраивается, везде сначала использует WebMCP и доказывает это на webmcpx.dev.',
-			cli: 'Запустите один раз в терминале. Дальше инструменты WebMCP каждой страницы станут инструментами вашего агента.',
-			cursor: 'В .cursor/mcp.json (или Settings → MCP). Тот же сервер для любого MCP-клиента.'
-		}
+		note: 'Один промпт: агент настраивается, везде сначала использует WebMCP и доказывает это на webmcpx.dev.'
 	},
 
 	own: {
@@ -922,7 +929,9 @@ const ru: Messages = {
 		copied: 'Готово',
 		copyLabel: 'Скопировать в буфер обмена',
 		copyNamed: 'Скопировать {title}',
-		code: 'Код: {title}'
+		code: 'Код: {title}',
+		prompt: 'промпт',
+		terminal: 'терминал'
 	}
 };
 

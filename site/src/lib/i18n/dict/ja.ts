@@ -44,7 +44,7 @@ const ja: Messages = {
 			vsMcp: 'MCP 比較',
 			sites: 'サイト',
 			agents: 'エージェント',
-			issues: '課題',
+			issues: 'ギャップ',
 			docs: 'Docs'
 		}
 	},
@@ -60,7 +60,7 @@ const ja: Messages = {
 			proof: 'リーダーボード',
 			sites: 'サイト向け',
 			agents: 'エージェント向け',
-			issues: '解決する課題',
+			issues: 'ギャップ',
 			brand: 'ブランドとデザイン',
 			trademark: '商標ポリシー',
 			spec: '仕様ドラフト',
@@ -111,6 +111,18 @@ const ja: Messages = {
 		kicker: 'WebMCP とは',
 		title: 'WebMCP は AI エージェントのための Web 標準になりつつある。私たちは全力で賭ける',
 		lead: 'Google と Microsoft のエンジニアが、Web 標準を策定する団体である W3C でドラフトを書いており、Chrome と Edge ではすでにテストが始まっています。今、Claude Code や Codex をはじめとするあらゆるエージェントは、あなたのサイトをスクリーンショットのように扱っています。眺めて、押すべきボタンを推測し、また試す。遅く、コストがかかり、壊れやすい。WebMCP があれば、サイトが「検索」「読み取り」「カートに追加」など、できることをエージェントに正確に伝え、エージェントはそれを頼むだけです。私たちは、すべてのサイトが WebMCP を話すようになると信じています。だから、あなたのサイトが今日からそうできるよう webmcpx を作りました。',
+		sources: {
+			mind2web: 'Online-Mind2Web：エージェントは実サイトのタスクの約 4 割で失敗',
+			snapshot: 'ページのスナップショット 1 回で 12k〜77k トークン',
+			windtunnel: 'WindTunnel：ツールとクリック操作の所要時間を比較',
+			draft: 'WebMCP ドラフト、W3C Web Machine Learning CG（エディターは Google と Microsoft）',
+			status: '実装状況（Chrome と Edge のオリジントライアル）',
+			chromeTrial: 'Chrome：WebMCP オリジントライアル',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge：WebMCP オリジントライアル',
+			edgeExplainer: 'Microsoft Edge の Explainer',
+			method: '当プロジェクトのベンチマーク手法'
+		},
 		steps: {
 			register: {
 				title: 'ページがツールを登録',
@@ -287,7 +299,8 @@ const ja: Messages = {
 		open: '開く',
 		opens: '（{site} を開きます）',
 		rotator: {
-			label: '質問'
+			label: '質問',
+			role: 'カルーセル'
 		},
 		details: '{site} の詳細',
 		tabs: {
@@ -452,13 +465,7 @@ const ja: Messages = {
 			bestCase: '最良ケース：{site}、{model}'
 		},
 		worksWith: 'あらゆるエージェントとブラウザで動作',
-		tabs: { scripts: 'スクリプト' },
-		notes: {
-			prompt:
-				'1 つのプロンプトで、エージェントが自分で設定し、どこでも WebMCP を先に使い、webmcpx.dev で確認します。',
-			cli: 'ターミナルで 1 回実行するだけ。以降、各ページの WebMCP ツールがエージェントのツールになります。',
-			cursor: '.cursor/mcp.json (または Settings → MCP) に。どの MCP クライアントでも同じサーバー。'
-		}
+		note: '1 つのプロンプトで、エージェントが自分で設定し、どこでも WebMCP を先に使い、webmcpx.dev で確認します。'
 	},
 
 	own: {
@@ -855,7 +862,9 @@ const ja: Messages = {
 		copied: 'コピー済',
 		copyLabel: 'クリップボードにコピー',
 		copyNamed: '{title} をコピー',
-		code: '{title} のコード'
+		code: '{title} のコード',
+		prompt: 'プロンプト',
+		terminal: 'ターミナル'
 	}
 };
 

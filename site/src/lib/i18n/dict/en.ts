@@ -71,7 +71,7 @@ const en = {
 			agents: 'For agents',
 			// "vs" = versus: the section comparing WebMCP with MCP.
 			vsMcp: 'vs MCP',
-			issues: 'Issues',
+			issues: 'Gaps',
 			docs: 'Docs'
 		}
 	},
@@ -91,7 +91,7 @@ const en = {
 			proof: 'Leaderboard',
 			sites: 'For sites',
 			agents: 'For agents',
-			issues: 'Issues it solves',
+			issues: 'Gaps',
 			brand: 'Brand and design',
 			trademark: 'Trademark policy',
 			spec: 'Specification draft',
@@ -161,6 +161,20 @@ const en = {
 		// draft, not a W3C Recommendation. No final period.
 		title: 'WebMCP is becoming the web’s standard for AI agents. We’re all in',
 		lead: 'Engineers from Google and Microsoft are drafting it at the W3C, the body behind the web’s standards, and Chrome and Edge are already testing it. Today Claude Code, Codex and every other agent use your site like a screenshot: they look, guess which button to press and try again. Slow, costly, easy to break. With WebMCP your site tells agents exactly what they can do, like search, read or add to cart, and they just ask. We believe every site will speak it, so we built webmcpx to let yours do it today.',
+		// The links under the lead, one per claim: what each source shows, in a few words (max 80; a line
+		// of small mono type that wraps). Keep product names, "Online-Mind2Web", "WindTunnel" and the W3C as is.
+		sources: {
+			mind2web: 'Online-Mind2Web: agents fail about 4 in 10 live tasks',
+			snapshot: 'A page snapshot costs 12k to 77k tokens',
+			windtunnel: 'WindTunnel: tools vs clicking, timed',
+			draft: 'WebMCP draft, W3C Web Machine Learning CG (editors from Google and Microsoft)',
+			status: 'Implementation status (Chrome and Edge origin trials)',
+			chromeTrial: 'Chrome: WebMCP origin trial',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge: WebMCP origin trial',
+			edgeExplainer: 'Microsoft Edge explainer',
+			method: 'Our benchmark method'
+		},
 		// Three steps, each a short title (max 32) and one sentence.
 		steps: {
 			register: {
@@ -382,7 +396,9 @@ const en = {
 		opens: '(opens {site})',
 		rotator: {
 			/** Names the rotating questions for screen readers. */
-			label: 'Questions'
+			label: 'Questions',
+			/** What screen readers call the rotating block (`aria-roledescription`): one lowercase word. */
+			role: 'carousel'
 		},
 		/** Names the detail tabs under a site's questions. */
 		details: 'Details for {site}',
@@ -596,13 +612,8 @@ const en = {
 			bestCase: 'Best case: {site}, {model}'
 		},
 		worksWith: 'Works with any agent and browser',
-		tabs: { scripts: 'Scripts' },
-		notes: {
-			prompt:
-				'One prompt: your agent sets itself up, uses WebMCP first everywhere, and proves it on webmcpx.dev.',
-			cli: "Run once in a terminal. From then on, every page's WebMCP tools are tools your agent calls.",
-			cursor: 'In .cursor/mcp.json (or Settings → MCP). Same server, any MCP client.'
-		}
+		// Under the prompt: what it does (one sentence).
+		note: 'One prompt: your agent sets itself up, uses WebMCP first everywhere, and proves it on webmcpx.dev.'
 	},
 
 	own: {
@@ -1047,7 +1058,10 @@ const en = {
 		/** "Copy index.html": {title} is the code block's title. */
 		copyNamed: 'Copy {title}',
 		/** Names a scrollable code block: "index.html code". */
-		code: '{title} code'
+		code: '{title} code',
+		// Code block titles (max 12, small mono type): text to paste into an AI agent, and a shell command.
+		prompt: 'prompt',
+		terminal: 'terminal'
 	}
 };
 

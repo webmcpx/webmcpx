@@ -45,7 +45,7 @@ const bn: Messages = {
 			vsMcp: 'বনাম MCP',
 			sites: 'সাইটের জন্য',
 			agents: 'এজেন্টের জন্য',
-			issues: 'সমস্যা',
+			issues: 'ফাঁক',
 			docs: 'ডকস'
 		}
 	},
@@ -61,7 +61,7 @@ const bn: Messages = {
 			proof: 'লিডারবোর্ড',
 			sites: 'সাইটের জন্য',
 			agents: 'এজেন্টের জন্য',
-			issues: 'যেসব সমস্যার সমাধান',
+			issues: 'ফাঁক',
 			brand: 'ব্র্যান্ড ও ডিজাইন',
 			trademark: 'ট্রেডমার্ক নীতি',
 			spec: 'স্পেসিফিকেশনের খসড়া',
@@ -115,6 +115,18 @@ const bn: Messages = {
 		kicker: 'WebMCP কী?',
 		title: 'WebMCP হয়ে উঠছে AI এজেন্টের জন্য ওয়েবের স্ট্যান্ডার্ড। আমরা পুরোপুরি এর সঙ্গে',
 		lead: 'Google আর Microsoft-এর ইঞ্জিনিয়াররা W3C-তে এর খসড়া লিখছেন, যে সংস্থা ওয়েবের স্ট্যান্ডার্ডের পেছনে, আর Chrome ও Edge এরই মধ্যে এটি পরীক্ষা করছে। আজ Claude Code, Codex আর বাকি সব এজেন্ট আপনার সাইট ব্যবহার করে একটা স্ক্রিনশটের মতো: তাকায়, আন্দাজ করে কোন বাটন চাপতে হবে, তারপর আবার চেষ্টা করে। ধীর, খরচসাপেক্ষ, সহজেই ভাঙে। WebMCP দিয়ে আপনার সাইট এজেন্টদের ঠিকঠাক বলে দেয় তারা কী কী করতে পারে, যেমন সার্চ, পড়া বা কার্টে যোগ করা, আর তারা শুধু সেটা চায়। আমরা বিশ্বাস করি প্রতিটি সাইট WebMCP-তে কথা বলবে, তাই আমরা webmcpx বানিয়েছি, যাতে আপনার সাইট আজই সেটা পারে।',
+		sources: {
+			mind2web: 'Online-Mind2Web: লাইভ কাজের প্রায় 10টির 4টিতে এজেন্ট ব্যর্থ হয়',
+			snapshot: 'একটি পেজ স্ন্যাপশটে খরচ 12k থেকে 77k টোকেন',
+			windtunnel: 'WindTunnel: টুল বনাম ক্লিক, সময় মেপে',
+			draft: 'WebMCP খসড়া, W3C Web Machine Learning CG (এডিটর Google ও Microsoft থেকে)',
+			status: 'ইমপ্লিমেন্টেশন স্ট্যাটাস (Chrome ও Edge-এ অরিজিন ট্রায়াল)',
+			chromeTrial: 'Chrome: WebMCP অরিজিন ট্রায়াল',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge: WebMCP অরিজিন ট্রায়াল',
+			edgeExplainer: 'Microsoft Edge এক্সপ্লেইনার',
+			method: 'আমাদের বেঞ্চমার্কের পদ্ধতি'
+		},
 		steps: {
 			register: {
 				title: 'আপনার পেজ টুল রেজিস্টার করে',
@@ -292,7 +304,8 @@ const bn: Messages = {
 		open: 'খুলুন',
 		opens: '({site} খুলবে)',
 		rotator: {
-			label: 'প্রশ্নগুলো'
+			label: 'প্রশ্নগুলো',
+			role: 'ক্যারোসেল'
 		},
 		details: '{site}-এর বিস্তারিত',
 		tabs: {
@@ -466,13 +479,7 @@ const bn: Messages = {
 			bestCase: 'সেরা ক্ষেত্র: {site}, {model}'
 		},
 		worksWith: 'যেকোনো এজেন্ট ও ব্রাউজারে চলে',
-		tabs: { scripts: 'স্ক্রিপ্ট' },
-		notes: {
-			prompt:
-				'একটি প্রম্পট: আপনার এজেন্ট নিজেই সেট আপ হয়, সব জায়গায় আগে WebMCP ব্যবহার করে এবং webmcpx.dev-এ প্রমাণ করে।',
-			cli: 'টার্মিনালে একবার চালান। তারপর প্রতিটি পেজের WebMCP টুল আপনার এজেন্টের টুল হয়ে যায়।',
-			cursor: '.cursor/mcp.json-এ (বা Settings → MCP)। যেকোনো MCP ক্লায়েন্টের জন্য একই সার্ভার।'
-		}
+		note: 'একটি প্রম্পট: আপনার এজেন্ট নিজেই সেট আপ হয়, সব জায়গায় আগে WebMCP ব্যবহার করে এবং webmcpx.dev-এ প্রমাণ করে।'
 	},
 
 	own: {
@@ -602,7 +609,7 @@ const bn: Messages = {
 		failed: 'এটি স্ক্যান করা গেল না।',
 		result: {
 			missing: 'কোনো WebMCP টুল নেই। এজেন্টকে এই পেজের প্রায় {tokens} পড়ে আন্দাজ করতে হয়।',
-			tokens: { other: '{n} টোকেন' },
+			tokens: { one: '{n} টোকেন', other: '{n} টোকেন' },
 			issues: {
 				one: '{tools}, কিন্তু {n}টি লিন্ট এরর, যাতে এজেন্ট হোঁচট খাবে।',
 				other: '{tools}, কিন্তু {n}টি লিন্ট এরর, যাতে এজেন্ট হোঁচট খাবে।'
@@ -875,7 +882,9 @@ const bn: Messages = {
 		copied: 'কপি হলো',
 		copyLabel: 'ক্লিপবোর্ডে কপি করুন',
 		copyNamed: '{title} কপি করুন',
-		code: '{title} কোড'
+		code: '{title} কোড',
+		prompt: 'প্রম্পট',
+		terminal: 'টার্মিনাল'
 	}
 };
 

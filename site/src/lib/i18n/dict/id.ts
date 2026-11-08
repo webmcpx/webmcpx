@@ -46,7 +46,7 @@ const id: Messages = {
 			vsMcp: 'vs MCP',
 			sites: 'Untuk situs',
 			agents: 'Untuk agen',
-			issues: 'Masalah',
+			issues: 'Celah',
 			docs: 'Docs'
 		}
 	},
@@ -62,7 +62,7 @@ const id: Messages = {
 			proof: 'Peringkat',
 			sites: 'Untuk situs',
 			agents: 'Untuk agen',
-			issues: 'Masalah yang diatasi',
+			issues: 'Celah',
 			brand: 'Merek dan desain',
 			trademark: 'Kebijakan merek dagang',
 			spec: 'Draf spesifikasi',
@@ -113,6 +113,18 @@ const id: Messages = {
 		kicker: 'Apa itu WebMCP?',
 		title: 'WebMCP sedang menjadi standar web untuk agen AI. Kami all in',
 		lead: 'Para engineer dari Google dan Microsoft sedang menyusunnya di W3C, lembaga di balik standar-standar web, dan Chrome serta Edge sudah mengujinya. Saat ini, Claude Code, Codex, dan semua agen lain memakai situs Anda seperti screenshot: melihat, menebak tombol mana yang harus ditekan, lalu mencoba lagi. Lambat, mahal, gampang rusak. Dengan WebMCP, situs Anda memberi tahu agen dengan tepat apa yang bisa mereka lakukan, seperti mencari, membaca, atau menambahkan ke keranjang, dan mereka tinggal meminta. Kami yakin setiap situs akan berbicara WebMCP, jadi kami membuat webmcpx agar situs Anda bisa melakukannya hari ini.',
+		sources: {
+			mind2web: 'Online-Mind2Web: agent gagal di sekitar 4 dari 10 tugas live',
+			snapshot: 'Satu snapshot halaman memakan 12k hingga 77k token',
+			windtunnel: 'WindTunnel: tool vs klik, diukur waktunya',
+			draft: 'Draf WebMCP, W3C Web Machine Learning CG (editor dari Google dan Microsoft)',
+			status: 'Status implementasi (origin trial di Chrome dan Edge)',
+			chromeTrial: 'Chrome: origin trial WebMCP',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge: origin trial WebMCP',
+			edgeExplainer: 'Explainer Microsoft Edge',
+			method: 'Metode benchmark kami'
+		},
 		steps: {
 			register: {
 				title: 'Halaman Anda mendaftarkan tool',
@@ -293,7 +305,8 @@ const id: Messages = {
 		open: 'Buka',
 		opens: '(membuka {site})',
 		rotator: {
-			label: 'Pertanyaan'
+			label: 'Pertanyaan',
+			role: 'karusel'
 		},
 		details: 'Detail untuk {site}',
 		tabs: {
@@ -463,13 +476,7 @@ const id: Messages = {
 			bestCase: 'Kasus terbaik: {site}, {model}'
 		},
 		worksWith: 'Bekerja dengan agen dan browser apa pun',
-		tabs: { scripts: 'Skrip' },
-		notes: {
-			prompt:
-				'Satu prompt: agen Anda menyiapkan dirinya, memakai WebMCP lebih dulu di mana saja, dan membuktikannya di webmcpx.dev.',
-			cli: 'Jalankan sekali di terminal. Setelah itu, alat WebMCP setiap halaman menjadi alat agen Anda.',
-			cursor: 'Di .cursor/mcp.json (atau Settings → MCP). Server yang sama untuk klien MCP apa pun.'
-		}
+		note: 'Satu prompt: agen Anda menyiapkan dirinya, memakai WebMCP lebih dulu di mana saja, dan membuktikannya di webmcpx.dev.'
 	},
 
 	own: {
@@ -867,7 +874,9 @@ const id: Messages = {
 		copied: 'Disalin',
 		copyLabel: 'Salin ke clipboard',
 		copyNamed: 'Salin {title}',
-		code: 'Kode {title}'
+		code: 'Kode {title}',
+		prompt: 'prompt',
+		terminal: 'terminal'
 	}
 };
 

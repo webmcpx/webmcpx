@@ -31,7 +31,7 @@
 	);
 	const value = (row: Row, arm: (typeof ARMS)[number]['arm']) => {
 		const v = metricValue(row[arm], metric.id);
-		return v == null ? '–' : metric.format(v);
+		return v == null ? '–' : metric.format(v, i18n.intl);
 	};
 </script>
 

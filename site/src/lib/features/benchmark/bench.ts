@@ -60,9 +60,22 @@ export function headline(r: Results): Headline | null {
 }
 
 export const percent = (x: number) => `${Math.round(x * 100)}%`;
-export const tokens = (x: number) =>
-	x >= 10_000 ? `${(x / 1000).toFixed(0)}k` : x >= 1000 ? `${(x / 1000).toFixed(1)}k` : `${Math.round(x)}`;
-export const seconds = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
+/** `x` with exactly `digits` decimals, in `intl`'s digits and decimal separator (1.5 / 1,5), no grouping. */
+const fixed = (x: number, digits: number, intl: string) =>
+	x.toLocaleString(intl, {
+		minimumFractionDigits: digits,
+		maximumFractionDigits: digits,
+		useGrouping: false
+	});
+// The visible numbers take the reader's locale (`intl`, an `Intl` tag; English by default): only the
+// decimal separator changes, the short "k" and "s" suffixes and the dollar sign stay.
+export const tokens = (x: number, intl = 'en-US') =>
+	x >= 10_000
+		? `${fixed(x / 1000, 0, intl)}k`
+		: x >= 1000
+			? `${fixed(x / 1000, 1, intl)}k`
+			: fixed(x, 0, intl);
+export const seconds = (ms: number, intl = 'en-US') => `${fixed(ms / 1000, 1, intl)}s`;
 export const ratio = (x: number) => `${x >= 10 ? x.toFixed(0) : x.toFixed(1)}×`;
 /** A tile for webmcp vs baseline that names the direction: "2.5× fewer tokens" or "1.4× slower". */
 export function compare(baseline: number, webmcp: number, better: string, worse: string) {
@@ -71,10 +84,15 @@ export function compare(baseline: number, webmcp: number, better: string, worse:
 		: { value: ratio(webmcp / Math.max(baseline, Number.MIN_VALUE)), label: worse };
 }
 
-/** Cost per 1,000 tasks, easier to read than fractions of a cent. */
-/** Dollars for one run, to two significant digits ($0.054, $0.0076, $0.00031). */
-export const perRun = (usd: number | null) =>
-	usd == null ? 'n/a' : `$${usd >= 1 ? usd.toFixed(2) : Number(usd.toPrecision(2)).toString()}`;
+/** Dollars for one run, to two significant digits ($0.054, $0.0076, $0.00031), in `intl`'s decimals. */
+export const perRun = (usd: number | null, intl = 'en-US') =>
+	usd == null
+		? 'n/a'
+		: `$${
+				usd >= 1
+					? fixed(usd, 2, intl)
+					: usd.toLocaleString(intl, { maximumSignificantDigits: 2, useGrouping: false })
+			}`;
 
 /** One model's published run as the landing gets it: runs stripped, sites selected (see sites.ts). */
 export interface ModelRun {
@@ -115,14 +133,15 @@ export function leaderboard<T extends { results: Results }>(runs: T[]): T[] {
  * dictionary (`proof.metrics.<id>`). */
 export interface Metric {
 	id: 'tokens' | 'duration_ms' | 'steps' | 'cost_usd';
-	format: (x: number) => string;
+	/** The value as shown, in the reader's locale (`intl`, an `Intl` tag; English by default). */
+	format: (x: number, intl?: string) => string;
 }
 
 export const METRICS: Metric[] = [
 	{ id: 'tokens', format: tokens },
 	{ id: 'duration_ms', format: seconds },
-	{ id: 'steps', format: (x) => x.toFixed(1) },
-	{ id: 'cost_usd', format: (x) => perRun(x) }
+	{ id: 'steps', format: (x, intl = 'en-US') => fixed(x, 1, intl) },
+	{ id: 'cost_usd', format: (x, intl) => perRun(x, intl) }
 ];
 
 export interface Row {

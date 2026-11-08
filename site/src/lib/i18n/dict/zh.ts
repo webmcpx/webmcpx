@@ -46,7 +46,7 @@ const zh: Messages = {
 			vsMcp: '对比 MCP',
 			sites: '网站接入',
 			agents: '智能体接入',
-			issues: '社区诉求',
+			issues: '缺口',
 			docs: '文档'
 		}
 	},
@@ -62,7 +62,7 @@ const zh: Messages = {
 			proof: '排行榜',
 			sites: '网站接入',
 			agents: '智能体接入',
-			issues: '解决了哪些问题',
+			issues: '缺口',
 			brand: '品牌与设计',
 			trademark: '商标政策',
 			spec: '规范草案',
@@ -113,6 +113,18 @@ const zh: Messages = {
 		kicker: 'WebMCP 是什么？',
 		title: 'WebMCP 正在成为\u200b面向 AI 智能体的 Web 标准。我们全力投入',
 		lead: 'Google 和 Microsoft 的工程师正在 W3C（制定 Web 标准的组织）起草它，Chrome 和 Edge 已经在测试。如今，Claude Code、Codex 以及其他所有智能体使用你的网站，就像在看一张截图：看一看，猜该点哪个按钮，不行再试。又慢又贵，还容易出错。有了 WebMCP，你的网站会直接告诉智能体它们能做什么，比如搜索、读取或加入购物车，智能体只需开口请求。我们相信每个网站都会支持 WebMCP，所以做了 webmcpx，让你的网站今天就能做到。',
+		sources: {
+			mind2web: 'Online-Mind2Web：智能体在约 4 成真实任务中失败',
+			snapshot: '一次页面快照要花 12k 到 77k token',
+			windtunnel: 'WindTunnel：工具调用与点击操作的耗时对比',
+			draft: 'WebMCP 草案，W3C Web Machine Learning CG（编辑来自 Google 和 Microsoft）',
+			status: '实现状态（Chrome 与 Edge 源试用）',
+			chromeTrial: 'Chrome：WebMCP 源试用',
+			chromeStatus: 'Chrome Platform Status',
+			edgeTrial: 'Microsoft Edge：WebMCP 源试用',
+			edgeExplainer: 'Microsoft Edge 说明文档',
+			method: '我们的基准测试方法'
+		},
 		steps: {
 			register: {
 				title: '页面注册工具',
@@ -287,7 +299,8 @@ const zh: Messages = {
 		open: '打开',
 		opens: '（打开 {site}）',
 		rotator: {
-			label: '问题'
+			label: '问题',
+			role: '轮播'
 		},
 		details: '{site} 的详情',
 		tabs: {
@@ -440,12 +453,7 @@ const zh: Messages = {
 		},
 		hype: { up: '最多', fewer: '更少 token', same: '答案相同。', bestCase: '最佳案例：{site}，{model}' },
 		worksWith: '适用于任何智能体和浏览器',
-		tabs: { scripts: '脚本' },
-		notes: {
-			prompt: '一个提示词：智能体自行配置，处处先用 WebMCP，并在 webmcpx.dev 上验证。',
-			cli: '在终端运行一次。之后每个页面的 WebMCP 工具都会成为你智能体的工具。',
-			cursor: '写入 .cursor/mcp.json（或 Settings → MCP）。任何 MCP 客户端都用同一个服务器。'
-		}
+		note: '一个提示词：智能体自行配置，处处先用 WebMCP，并在 webmcpx.dev 上验证。'
 	},
 
 	own: {
@@ -816,7 +824,9 @@ const zh: Messages = {
 		copied: '已复制',
 		copyLabel: '复制到剪贴板',
 		copyNamed: '复制 {title}',
-		code: '{title} 代码'
+		code: '{title} 代码',
+		prompt: '提示词',
+		terminal: '终端'
 	}
 };
 

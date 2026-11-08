@@ -6,6 +6,7 @@ import { DEFAULT_LOCALE, LOCALE_CODES } from '#lib/i18n/locales.ts';
 import { reproduceFor } from '#lib/content/snippets.ts';
 import { loadRuns } from '#lib/server/bench.ts';
 import { highlight } from '#lib/server/highlight.ts';
+import { localizeRuns } from '#lib/server/localize.ts';
 import type { EntryGenerator, PageServerLoad } from './$types';
 
 /** Every model in every language (English at the root). */
@@ -15,7 +16,7 @@ export const entries: EntryGenerator = () =>
 	);
 
 export const load: PageServerLoad = async ({ params }) => {
-	const runs = loadRuns();
+	const runs = localizeRuns(loadRuns(), params.lang);
 	const run = runs.find((r) => r.results.model === params.model);
 	if (!run) error(404, `No published run for ${params.model}`);
 	// The run's preview image (its best case), made by `just bench`; the generic one until then.

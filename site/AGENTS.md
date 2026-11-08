@@ -21,7 +21,8 @@ any site today, one command, the larger audience; their use is what pulls sites 
 
 - For agents (`#for-agents`, `features/agents`; no site or scan needed): the big number is the leaderboard's
   best case (one question; computed in `+page.server.ts`, named with its site and model), the whole-run
-  range across models under it (`tokenSaving()`), then the setup tabs (prompt first).
+  range across models under it (`tokenSaving()`), then the one setup prompt (no tabs, no list of clients:
+  the agent reads llms.txt and picks its own way; owner's decision 2026-11-08).
 - For sites (`#for-sites`, `features/fix`, where a scan's "Fix it" lands): install tabs (coding agent,
   HTML, npm), then your own tools (`#own`: `tool()`, forms, React/Vue/Svelte as tabs).
 
@@ -29,7 +30,7 @@ Then WebMCP vs MCP → what the community asked for → FAQ (`features/faq`: pla
 FAQPage and SoftwareApplication JSON-LD) → the footer (giant lockup, every link with its icon,
 notices). The header and footer menus name both audiences ("For sites", "For agents"), in page order.
 Tabs list "Agent" (the coding agent) first, always, then the most used options; the first opens by default
-(`CodeTabs`, built on `Tabs`). The agent section is one prompt, not a list of clients.
+(`CodeTabs`, built on `Tabs`). The agent section is one prompt block, with no tabs.
 Few words per section; numbers over adjectives.
 
 ## Layout
@@ -99,7 +100,9 @@ tests/                       Playwright e2e against the prerendered build
 - Motion: wrap blocks in `<Reveal>` (stagger with `delay`); transitions use `ease-out-expo`. Everything must
   respect `prefers-reduced-motion` (base.css has the global switch) and stay readable without JavaScript.
 - No count-up numbers: figures are prerendered text, so crawlers and agents read them.
-- Code samples live in `content/snippets.ts` and are highlighted at build time. Code always wraps and shows
+- Code samples live in `content/snippets.ts` and are highlighted at build time, once per language: the
+  copy-to-agent prompts and the benchmark questions are transcreated in `i18n/build/<code>.ts` (build-time
+  only, so they add nothing to a dictionary chunk; `server/localize.ts`), while agent files stay English. Code always wraps and shows
   whole (`CodeBlock`, `code.css`): never a sideways scroll that hides part of a command (owner's rule). The one
   exception is a long one-off a reader copies, not reads (a badge's markup): `CodeBlock compact` shows two
   wrapped lines and scrolls down; Copy takes it whole.

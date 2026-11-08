@@ -165,7 +165,7 @@
 				</p>
 				<p class="mt-3 font-mono text-xs font-bold tracking-wider uppercase">{r.label}</p>
 				<p class="mt-1 font-mono text-xs text-ink-3 tabular-nums">
-					{tokens(task.baseline.tokens)} → {tokens(task.webmcp.tokens)}
+					{tokens(task.baseline.tokens, i18n.intl)} → {tokens(task.webmcp.tokens, i18n.intl)}
 					{m.tokens}
 				</p>
 			</div>
@@ -263,7 +263,7 @@
 		onfocusin={() => (focused = true)}
 		onfocusout={() => (focused = false)}
 		role="group"
-		aria-roledescription="carousel"
+		aria-roledescription={m.rotator.role}
 		aria-label={m.rotator.label}
 	>
 		<Tabs
