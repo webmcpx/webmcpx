@@ -407,7 +407,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00020182499999999999,
+      "cost_usd": 0.000201825,
       "answer": "You can pick one of three rollout strategies with `orbit deploy --strategy`:\n\n- **rolling** (the default)\n- **blue-green**\n- **canary**, which sends a share of traffic to the new release. That share is set with `--canary-percent`, which defaults to 10.\n\nThe default can also be changed in `orbit.toml` under `deploy.strategy`.",
       "stop": "answered",
       "steps": 2,
@@ -473,7 +473,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00019835500000000002,
+      "cost_usd": 0.000198355,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -513,7 +513,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00019835500000000002,
+      "cost_usd": 0.000198355,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -711,7 +711,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00019804000000000002,
+      "cost_usd": 0.00019804,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -975,7 +975,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00010628999999999999,
+      "cost_usd": 0.00010629,
       "answer": "By default, Orbit keeps **10** past releases for rollback. This is the default for `deploy.retain_releases` in the configuration table, and the changelog notes it was raised from 5 to 10 in version 3.5. Older releases are deleted and can no longer be rolled back to.",
       "stop": "answered",
       "steps": 2,
@@ -1107,7 +1107,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00009949000000000001,
+      "cost_usd": 0.00009949,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -1389,7 +1389,7 @@
       "task": "live-allbirds-exchange-country",
       "arm": "webmcp",
       "attempt": 2,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.00030478499999999996,
       "tools": [
@@ -1579,7 +1579,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0009791700000000001,
+      "cost_usd": 0.00097917,
       "answer": "Allbirds processes orders within **6 business days** at most, according to its Shipping policy (\"All orders are processed within 1-6 business days\"). The policy also warns that orders may be slightly delayed during sale seasons.\n\nThe homepage banner says orders \"may take up to 30 days to ship\" due to increased demand. That is a separate, calendar-day figure, so it doesn't answer the business-day question.",
       "stop": "answered",
       "steps": 3,
@@ -1727,7 +1727,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00020512999999999998,
+      "cost_usd": 0.00020513,
       "tools": [
         {
           "name": "ask_business",
@@ -2658,7 +2658,7 @@
       "attempt": 3,
       "success": false,
       "harness_error": null,
-      "cost_usd": 0.00037290999999999995,
+      "cost_usd": 0.0003729099999999999,
       "answer": "I couldn't get the return policy. The Allbirds Returns & Exchanges page is stuck on a bot-verification check (\"Your connection needs to be verified before you can proceed\"), and I can't complete that check for you.\n\nI also couldn't find the return conditions on the homepage. The policy is probably on the Returns & Exchanges page, or under the \"Refund policy\" button in the site footer, so you could check there. If you can open the page yourself, the item condition requirements will be listed there. Allbirds' customer service is at help@allbirds.com if you need a direct answer.",
       "stop": "answered",
       "steps": 4,
@@ -3203,7 +3203,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0017685350000000001,
+      "cost_usd": 0.001768535,
       "answer": "The maximum key size in Workers KV is **512 bytes**, on both Free and Paid plans. This is from the Limits page in the Cloudflare Workers KV docs.\n\nNote that the limit is in bytes, not characters, so a key with multi-byte UTF-8 characters will hit the limit sooner. The docs also list a separate limit for key metadata, 1024 bytes. Workers KV Instant, which is in private beta, has a smaller key limit of 300 bytes.",
       "stop": "answered",
       "steps": 6,
@@ -3249,7 +3249,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0017312200000000001,
+      "cost_usd": 0.00173122,
       "answer": "The maximum key size in Workers KV is **512 bytes**, the same on both Free and Paid plans. This comes from the KV Limits page (developers.cloudflare.com/kv/platform/limits/).\n\nWorkers KV Instant, which is in private beta, has a smaller limit of **300 bytes**.",
       "stop": "answered",
       "steps": 6,
@@ -3305,7 +3305,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0013181949999999999,
+      "cost_usd": 0.001318195,
       "answer": "The maximum key size in Workers KV is **512 bytes** on both Free and Paid plans. This comes from the Cloudflare Limits page for Workers KV, which lists \"Key size: 512 bytes\" for each plan. The limit is in bytes, so a key with multi-byte characters will hit it sooner than its character count suggests.\n\nThe page also lists a separate Workers KV Instant product (private beta), which has a 300-byte key limit.",
       "stop": "answered",
       "steps": 6,
@@ -3852,7 +3852,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0013199800000000001,
+      "cost_usd": 0.00131998,
       "answer": "The maximum message size for a Cloudflare Queue is **128 KB**, according to the Limits page in the Cloudflare Queues docs (developers.cloudflare.com/queues/platform/limits/). The docs define 1 KB as 1000 bytes, so that is 128,000 bytes. Messages can also carry about 100 bytes of internal metadata that counts toward the limit, so your usable payload is slightly less than 128 KB.",
       "stop": "answered",
       "steps": 6,
@@ -3908,7 +3908,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00037265999999999997,
+      "cost_usd": 0.00037266,
       "tools": [
         {
           "name": "list-directories",
@@ -4576,7 +4576,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00016387000000000001,
+      "cost_usd": 0.00016387,
       "tools": [
         {
           "name": "get_site_overview",
@@ -4877,7 +4877,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0011090050000000001,
+      "cost_usd": 0.001109005,
       "tools": [
         {
           "name": "get_site_overview",
@@ -5218,7 +5218,7 @@
       "attempt": 3,
       "success": false,
       "harness_error": null,
-      "cost_usd": 0.0017675899999999999,
+      "cost_usd": 0.00176759,
       "answer": "I couldn't find this figure. The current page, \"Connections and tokens,\" compares connection types and does not mention rate limits. The site search returned no results, and the docs assistant box didn't return an answer. The rate-limits page is probably a separate guide, but I have no way to navigate to a URL directly, so I couldn't check it. You could look for a \"Rate limits\" page in the Notion API docs, or try the assistant panel again.",
       "stop": "answered",
       "steps": 6,
@@ -5597,7 +5597,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00022030000000000002,
+      "cost_usd": 0.0002203,
       "tools": [
         {
           "name": "get_site_overview",
@@ -6602,7 +6602,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0010833099999999999,
+      "cost_usd": 0.00108331,
       "answer": "The spec sets the INP target for good responsiveness at **≤ 200 ms**, measured at the 75th percentile of real users. The Core Web Vitals topic gives \"needs improvement\" as ≤ 500 ms and \"poor\" as above 500 ms.",
       "stop": "answered",
       "steps": 4,
@@ -6858,7 +6858,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0015015150000000001,
+      "cost_usd": 0.001501515,
       "answer": "According to the spec's `<meta name=\"description\">` topic, a page's meta description should be **120–160 characters**, which it calls \"the sweet spot.\" It notes that Google typically truncates around 920 pixels on desktop, roughly 155–160 characters.",
       "stop": "answered",
       "steps": 8,
@@ -9375,7 +9375,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00043407000000000005,
+      "cost_usd": 0.0004340700000000001,
       "tools": [
         {
           "name": "add_to_cart",
@@ -9439,7 +9439,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00021559000000000001,
+      "cost_usd": 0.00021559,
       "tools": [
         {
           "name": "add_to_cart",
@@ -9754,7 +9754,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00021047999999999998,
+      "cost_usd": 0.00021048,
       "tools": [
         {
           "name": "add_to_cart",
@@ -9904,7 +9904,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00019482999999999998,
+      "cost_usd": 0.00019483,
       "answer": "The only green item under $30 that you can buy right now is the **Fern Espresso Cup** at $15.00 (20 in stock).\n\nTwo other green pieces are out of your price range or unavailable:\n- **Moss Mug** ($22.00) is out of stock until 12 December.\n- **Moss Serving Bowl** ($58.00) and **Moss Tall Vase** ($69.00) are in stock but over $30.\n\nI haven't added anything to your cart. Shipping is $9 on orders under $80, so the espresso cup alone would cost $24 with shipping.",
       "stop": "answered",
       "steps": 2,
@@ -10018,7 +10018,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00015958000000000001,
+      "cost_usd": 0.00015958,
       "tools": [
         {
           "name": "add_to_cart",
@@ -10134,7 +10134,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00044247000000000004,
+      "cost_usd": 0.00044247,
       "answer": "I added the Cobalt Teapot ($82.00) to your cart. It's the most expensive teapot we sell, ahead of the Stoneware Teapot at $74.00. Your cart now has 1 item with a total of $82.00. Only one is in stock.",
       "stop": "answered",
       "steps": 3,
@@ -10483,7 +10483,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.00011546000000000001,
+      "cost_usd": 0.00011546,
       "tools": [
         {
           "name": "add_to_cart",
@@ -10537,7 +10537,7 @@
       },
       "webmcp": {
         "runs": 105,
-        "success_rate": 0.9904761904761905,
+        "success_rate": 1.0,
         "tokens": 6446.057142857143,
         "input_tokens": 6189.285714285715,
         "output_tokens": 256.77142857142854,
@@ -10593,7 +10593,7 @@
           "steps": 2.0,
           "tool_calls": 1.0,
           "duration_ms": 2498.6666666666665,
-          "cost_usd": 0.00022912500000000003
+          "cost_usd": 0.00022912499999999997
         }
       },
       "docs-deploy-timeout": {
@@ -10682,7 +10682,7 @@
         },
         "webmcp": {
           "runs": 3,
-          "success_rate": 0.6666666666666666,
+          "success_rate": 1.0,
           "tokens": 11629.0,
           "input_tokens": 11284.666666666666,
           "output_tokens": 344.3333333333333,
@@ -10953,7 +10953,7 @@
           "steps": 3.3333333333333335,
           "tool_calls": 2.3333333333333335,
           "duration_ms": 4478.0,
-          "cost_usd": 0.0007822650000000002
+          "cost_usd": 0.000782265
         }
       },
       "live-notion-request-limit": {

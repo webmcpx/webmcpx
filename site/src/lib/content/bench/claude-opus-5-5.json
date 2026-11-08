@@ -275,7 +275,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.009302600000000001,
+      "cost_usd": 0.0093026,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -433,7 +433,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.010557799999999999,
+      "cost_usd": 0.0105578,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -553,7 +553,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.023302200000000002,
+      "cost_usd": 0.0233022,
       "answer": "The default timeout for `orbit deploy` is **90 seconds**. Use the **`--timeout`** flag to change it, for example `orbit deploy --env production --timeout 180`.\n\nThis timeout is how long Orbit waits for health checks to pass. If they don't pass in time, the deploy fails with exit code 5 and traffic stays on the previous release. The default went up from 60 to 90 seconds in version 3.6.",
       "stop": "answered",
       "steps": 2,
@@ -631,7 +631,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.011623399999999999,
+      "cost_usd": 0.0116234,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -983,7 +983,7 @@
       "task": "docs-retained-releases",
       "arm": "baseline",
       "attempt": 2,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.0038378,
       "answer": "By default, Orbit keeps **10** past releases for rollback. The `deploy.retain_releases` setting in `orbit.toml` controls this. Older releases are deleted, and you can't roll back to them.\n\nThe default went up from 5 to 10 in version 3.5. To keep more, set it under `[deploy]`, for example `retain_releases = 25`.",
@@ -1077,7 +1077,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.009427399999999999,
+      "cost_usd": 0.0094274,
       "tools": [
         {
           "name": "fetch_as_markdown",
@@ -1308,7 +1308,7 @@
       "task": "live-allbirds-exchange-country",
       "arm": "webmcp",
       "attempt": 1,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.0426196,
       "tools": [
@@ -1462,7 +1462,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.011140200000000001,
+      "cost_usd": 0.0111402,
       "tools": [
         {
           "name": "ask_business",
@@ -1574,7 +1574,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.036634400000000004,
+      "cost_usd": 0.0366344,
       "answer": "Allbirds takes up to **6 business days** to process an order. Its shipping policy says all orders are processed within 1–6 business days, and sale seasons may add a slight delay.\n\nThere's a conflict on the site: a banner at the top says \"Due to increased demand, orders may take up to 30 days to ship.\" That banner counts days, not business days, so real waits may be longer than the 6 business days in the policy.",
       "stop": "answered",
       "steps": 3,
@@ -1966,7 +1966,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.022509599999999998,
+      "cost_usd": 0.0225096,
       "answer": "You get the refund back on the payment method you used, not as store credit. Allbirds' refund policy says: \"Refunds will only be applied to the original form of payment.\"\n\nOther rules from the policy that apply to your return:\n- **Time limit:** You have 30 days from the day your order was delivered.\n- **Condition:** The shoes must be unworn and unwashed, with the original tags still attached. Final Sale items can't be returned.\n- **Shipping costs:** The shipping you paid on the order won't be refunded. You also pay for return shipping, unless you bought return coverage at checkout, which includes a free return label.\n- **Where to return:** Returns only work in the country where you bought the shoes. If you bought them from another store, you have to return them to that store.\n- **Rejected returns:** If a return doesn't meet these rules, it can be rejected, and you won't get a refund or the item back.",
       "stop": "answered",
       "steps": 3,
@@ -2459,7 +2459,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.015329200000000001,
+      "cost_usd": 0.0153292,
       "tools": [
         {
           "name": "ask_business",
@@ -3170,7 +3170,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.013961600000000001,
+      "cost_usd": 0.0139616,
       "tools": [
         {
           "name": "list-directories",
@@ -3242,7 +3242,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.010219200000000001,
+      "cost_usd": 0.0102192,
       "tools": [
         {
           "name": "list-directories",
@@ -3794,7 +3794,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0038055999999999997,
+      "cost_usd": 0.0038056,
       "tools": [
         {
           "name": "list-directories",
@@ -4284,7 +4284,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.015166200000000001,
+      "cost_usd": 0.0151662,
       "tools": [
         {
           "name": "list-directories",
@@ -4356,7 +4356,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.012223399999999999,
+      "cost_usd": 0.0122234,
       "tools": [
         {
           "name": "list-directories",
@@ -4438,7 +4438,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.044661400000000004,
+      "cost_usd": 0.0446614,
       "answer": "The largest `page_size` you can request is **100**. According to Notion's Pagination reference, most list endpoints accept values from 1 to 100, and 100 is also the default.\n\nSome things to know:\n- The docs say \"most\" list endpoints, so a few may have different limits. Check the reference page for any specific endpoint you use.\n- A response can contain fewer items than you asked for even when more remain. Use `has_more` to tell whether there's another page, then pass `next_cursor` as `start_cursor` in your next request.\n- For GET endpoints, put `page_size` and `start_cursor` in the query string. For search and data source queries, put them in the POST body.\n- Keep the same filters and sort order on every request.\n- A query on a very large data source can reach its result limit even when `has_more` is false. The docs cover this on the \"Query large data sources\" page.",
       "stop": "answered",
       "steps": 4,
@@ -5067,7 +5067,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.039992599999999996,
+      "cost_usd": 0.0399926,
       "answer": "On plans other than Business and Enterprise, the Notion API allows **180 requests per minute** per connection, which works out to about 3 per second. Business and Enterprise get 600 per minute.\n\nThe limit is a fixed budget for each 60-second window. You can use it evenly or all at once. There's also a separate per-workspace limit that all of a workspace's connections share, so requests can get rate-limited even when a connection is under its own limit. This comes from Notion's Request limits page.",
       "stop": "answered",
       "steps": 4,
@@ -5113,7 +5113,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.040672599999999996,
+      "cost_usd": 0.0406726,
       "answer": "On plans other than Business and Enterprise, the Notion API allows **180 requests per minute per connection**, or an average of 3 per second. This comes from the \"Request limits\" page in Notion's API docs. Business and Enterprise get 600 per minute.\n\nYou can use those requests at any pace within the 60-second window, including all at once. Two other limits can also apply:\n- **Data source queries:** these have their own limit of about 3 requests per second per connection.\n- **Workspace limit:** all connections in a workspace share one budget, so you can be rate limited even if a single connection is under 180.",
       "stop": "answered",
       "steps": 4,
@@ -5369,7 +5369,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.040709800000000004,
+      "cost_usd": 0.0407098,
       "answer": "In a single request, a rich text object's `text.content` can be up to **2,000 characters**. A request that goes over this returns HTTP 400 with a `validation_error`.\n\nFor long paragraphs, split the text across several rich text objects in the same block. Other limits on the Request limits page that apply here:\n- A rich text array can have up to **100 elements**, so one paragraph block can carry up to about 200,000 characters.\n- `text.link.url` can be up to 2,000 characters.\n- A request can have up to 1,000 block elements and be up to 500 KB in total.",
       "stop": "answered",
       "steps": 4,
@@ -6735,7 +6735,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.010307799999999999,
+      "cost_usd": 0.0103078,
       "tools": [
         {
           "name": "get_topic",
@@ -7187,7 +7187,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.010702399999999999,
+      "cost_usd": 0.0107024,
       "answer": "The minimum is **24×24 CSS pixels**, based on WCAG 2.2's Level AA rule 2.5.8. The spec lists this as a Required item on its \"Touch target size\" page in the Accessibility section.\n\n- **Size to aim for:** 44×44 CSS px, the stricter Level AAA target (WCAG 2.5.5). The spec's example code uses 44px as the minimum height and width.\n- **Small controls:** A control can be smaller than 24px, for example in a dense table, as long as a 24px circle around its center doesn't overlap any other control.\n- **Links in text:** Links inside a paragraph don't have to meet either size.",
       "stop": "answered",
       "steps": 4,
@@ -7392,7 +7392,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.019692599999999998,
+      "cost_usd": 0.0196926,
       "answer": "The store has **3 products** in its Apparel category:\n\n1. **Agent Field Jacket**: $64.00–$72.00, in stock, comes in 3 size options\n2. **Context Tote**: $28.00, in stock\n3. **Discovery Tee**: $32.00, in stock\n\nI counted these from the full list of 7 products on the Storefront page, which shows each product's category. I didn't use the category filter.",
       "stop": "answered",
       "steps": 3,
@@ -7586,7 +7586,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.011475200000000001,
+      "cost_usd": 0.0114752,
       "tools": [
         {
           "name": "browse_products_api",
@@ -9432,7 +9432,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.029739599999999998,
+      "cost_usd": 0.0297396,
       "answer": "I added 2 Harbor Mugs to your cart. At $19.00 each, it's the cheapest blue mug in the shop, ahead of the Tide Mug at $23.00 and the Cobalt Mug at $28.00.\n\nYour cart now holds 2 × Harbor Mug, for a total of $38.00. Orders under $80 get a $9 shipping charge, so this order would cost $47.00 with shipping.",
       "stop": "answered",
       "steps": 3,
@@ -10148,7 +10148,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0045856000000000004,
+      "cost_usd": 0.0045856,
       "tools": [
         {
           "name": "add_to_cart",
@@ -10223,7 +10223,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.013678200000000001,
+      "cost_usd": 0.0136782,
       "answer": "The Ash Glaze Vase is out of stock. The store says it will be back on **3 January**.",
       "stop": "answered",
       "steps": 2,
@@ -10406,7 +10406,7 @@
     "arms": {
       "baseline": {
         "runs": 105,
-        "success_rate": 0.9809523809523809,
+        "success_rate": 0.9904761904761905,
         "tokens": 16020.67619047619,
         "input_tokens": 15694.771428571428,
         "output_tokens": 325.9047619047619,
@@ -10417,7 +10417,7 @@
       },
       "webmcp": {
         "runs": 105,
-        "success_rate": 0.9904761904761905,
+        "success_rate": 1.0,
         "tokens": 6813.057142857143,
         "input_tokens": 6526.542857142857,
         "output_tokens": 286.51428571428573,
@@ -10449,7 +10449,7 @@
           "steps": 2.0,
           "tool_calls": 1.0,
           "duration_ms": 2945.0,
-          "cost_usd": 0.007204466666666667
+          "cost_usd": 0.007204466666666666
         }
       },
       "docs-deploy-strategies": {
@@ -10497,7 +10497,7 @@
           "steps": 2.6666666666666665,
           "tool_calls": 1.6666666666666667,
           "duration_ms": 8541.666666666666,
-          "cost_usd": 0.010744466666666666
+          "cost_usd": 0.010744466666666667
         }
       },
       "docs-exit-code": {
@@ -10527,7 +10527,7 @@
       "docs-retained-releases": {
         "baseline": {
           "runs": 3,
-          "success_rate": 0.6666666666666666,
+          "success_rate": 1.0,
           "tokens": 4808.333333333333,
           "input_tokens": 4675.0,
           "output_tokens": 133.33333333333334,
@@ -10562,7 +10562,7 @@
         },
         "webmcp": {
           "runs": 3,
-          "success_rate": 0.6666666666666666,
+          "success_rate": 1.0,
           "tokens": 12122.0,
           "input_tokens": 11712.333333333334,
           "output_tokens": 409.6666666666667,
@@ -10582,7 +10582,7 @@
           "steps": 3.0,
           "tool_calls": 3.0,
           "duration_ms": 5074.0,
-          "cost_usd": 0.0271376
+          "cost_usd": 0.027137599999999998
         },
         "webmcp": {
           "runs": 3,
@@ -10785,7 +10785,7 @@
           "steps": 2.0,
           "tool_calls": 1.0,
           "duration_ms": 5538.333333333333,
-          "cost_usd": 0.011196999999999999
+          "cost_usd": 0.011197
         }
       },
       "live-notion-page-size": {
@@ -11038,7 +11038,7 @@
           "steps": 3.0,
           "tool_calls": 3.0,
           "duration_ms": 6405.666666666667,
-          "cost_usd": 0.010417666666666665
+          "cost_usd": 0.010417666666666667
         },
         "webmcp": {
           "runs": 3,
@@ -11241,7 +11241,7 @@
           "steps": 3.0,
           "tool_calls": 2.0,
           "duration_ms": 3564.0,
-          "cost_usd": 0.006758133333333335
+          "cost_usd": 0.0067581333333333335
         }
       },
       "store-restock-date": {

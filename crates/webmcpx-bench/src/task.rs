@@ -364,4 +364,26 @@ mod tests {
             assert!(!check.answer_passes(wrong), "{wrong}");
         }
     }
+
+    /// Real answers a check once graded wrong (2026-11-07 runs), and the wrong ones it must still fail.
+    #[test]
+    fn bundled_checks_grade_real_answers() {
+        let tasks = load_dir(&crate::repo_root().join("bench/tasks")).unwrap();
+        let task = |id: &str| &tasks.iter().find(|t| t.id == id).unwrap().check;
+        let exchange = task("live-allbirds-exchange-country");
+        for ok in [
+            "The store's policy only allows returns and exchanges in the country where the item was bought.",
+            "Returns and exchanges can only be done in the country they were bought in.",
+            "Items must be returned or exchanged in the country where they were originally purchased (the US).",
+        ] {
+            assert!(exchange.answer_passes(ok), "{ok}");
+        }
+        assert!(!exchange.answer_passes("Yes, you can exchange them in any country."));
+        let releases = task("docs-retained-releases");
+        assert!(releases.answer_passes(
+            "By default, Orbit keeps **10** past releases. To keep more, set `retain_releases = 25`."
+        ));
+        assert!(!releases.answer_passes("Orbit keeps 25 releases; the old default was 10."));
+        assert!(!releases.answer_passes("The default is 25 (it was 10 before 3.5)."));
+    }
 }

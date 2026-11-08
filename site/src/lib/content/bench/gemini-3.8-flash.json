@@ -1190,7 +1190,7 @@
       "task": "live-allbirds-exchange-country",
       "arm": "baseline",
       "attempt": 1,
-      "success": false,
+      "success": true,
       "harness_error": null,
       "cost_usd": 0.02206125,
       "answer": "No, you cannot exchange them in London. Allbirds does not process cross-border or international returns or exchanges, either online or in-store. Items must be returned or exchanged in the country where they were originally purchased (the US). \n\nYou should exchange them for the correct size before you leave the US.",
@@ -2785,7 +2785,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.0051938999999999996,
+      "cost_usd": 0.0051939,
       "tools": [
         {
           "name": "ask_business",
@@ -3358,7 +3358,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.015217950000000001,
+      "cost_usd": 0.01521795,
       "answer": "On the Workers Paid plan, the maximum size a single Cloudflare D1 database can grow to is **10 GB** (which cannot be further increased).",
       "stop": "answered",
       "steps": 6,
@@ -3404,7 +3404,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.015262350000000001,
+      "cost_usd": 0.01526235,
       "answer": "On the Workers Paid plan, the maximum size a single Cloudflare D1 database can grow to is **10 GB** (this limit cannot be increased).",
       "stop": "answered",
       "steps": 6,
@@ -3896,7 +3896,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.015316950000000001,
+      "cost_usd": 0.01531695,
       "answer": "The maximum size of a single value stored in Cloudflare Workers KV is **25 MiB** (for both Free and Paid plans).",
       "stop": "answered",
       "steps": 6,
@@ -4306,7 +4306,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.057434849999999996,
+      "cost_usd": 0.05743485,
       "answer": "On the Cloudflare Workers Free plan, your account can handle up to **100,000 requests per day** before hitting the limit (which resets daily at midnight UTC).",
       "stop": "answered",
       "steps": 8,
@@ -5914,7 +5914,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.011402174999999999,
+      "cost_usd": 0.011402175,
       "tools": [
         {
           "name": "get_site_overview",
@@ -6845,7 +6845,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.026554724999999998,
+      "cost_usd": 0.026554725,
       "answer": "Per this specification, you should set `max-age=63072000` (two years) in your HSTS header for production. \n\nThe recommended production header is:\n```http\nStrict-Transport-Security: max-age=63072000; includeSubDomains\n```",
       "stop": "answered",
       "steps": 10,
@@ -7529,7 +7529,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.026280150000000002,
+      "cost_usd": 0.02628015,
       "answer": "According to the spec, **120–160 characters** is the sweet spot (Google typically truncates around 920 pixels on desktop, roughly 155–160 characters).",
       "stop": "answered",
       "steps": 10,
@@ -7886,7 +7886,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.024952349999999998,
+      "cost_usd": 0.02495235,
       "answer": "According to this specification, the required minimum touch/tap target size is **24×24 CSS pixels** (based on WCAG 2.2 Level AA criterion 2.5.8), with **44×44 CSS pixels** recommended as the enhanced target (WCAG Level AAA).",
       "stop": "answered",
       "steps": 11,
@@ -7957,7 +7957,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.023985674999999998,
+      "cost_usd": 0.023985675,
       "answer": "Based on the specification's **Touch target size** topic (aligned with WCAG 2.2 Level AA):\n\n* **Minimum required size:** **24×24 CSS pixels** (the absolute floor for interactive targets).\n* **Enhanced/recommended target:** **44×44 CSS pixels** (Level AAA / touch-optimized).",
       "stop": "answered",
       "steps": 10,
@@ -11326,7 +11326,7 @@
     "arms": {
       "baseline": {
         "runs": 105,
-        "success_rate": 0.9714285714285714,
+        "success_rate": 0.9809523809523809,
         "tokens": 26052.904761904763,
         "input_tokens": 25431.019047619047,
         "output_tokens": 621.8857142857142,
@@ -11471,7 +11471,7 @@
       "live-allbirds-exchange-country": {
         "baseline": {
           "runs": 3,
-          "success_rate": 0.6666666666666666,
+          "success_rate": 1.0,
           "tokens": 25926.333333333332,
           "input_tokens": 24898.333333333332,
           "output_tokens": 1028.0,
@@ -11934,7 +11934,7 @@
           "steps": 9.666666666666666,
           "tool_calls": 8.666666666666666,
           "duration_ms": 31955.333333333332,
-          "cost_usd": 0.022509149999999995
+          "cost_usd": 0.022509150000000002
         },
         "webmcp": {
           "runs": 3,

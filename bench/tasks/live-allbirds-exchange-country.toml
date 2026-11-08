@@ -16,4 +16,11 @@ answer_any = [
   "country where it was purchased",
   "country where they were purchased",
   "country where you made the purchase",
+  # Added 2026-11-07 after runs graded correct answers as wrong (Haiku, Opus, Flash).
+  "country where the item was bought",
+  "country where it was bought",
+  "country where they were bought",
+  "country they were bought in",
+  "country it was bought in",
+  "where they were originally purchased",
 ]

@@ -3,4 +3,6 @@ prompt = "By default, how many past releases does Orbit keep for rollback?"
 
 [check]
 answer_contains = ["10"]
-answer_excludes = ["25"]
+# The distractor is 25 claimed as the default; an answer may still show 25 as a value to set
+# (a correct Opus answer did, 2026-11-07).
+answer_excludes = ["keeps 25", "keep 25", "default is 25", "25 by default", "default of 25", "default: 25", "default, 25"]

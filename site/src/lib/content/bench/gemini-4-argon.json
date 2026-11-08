@@ -1666,7 +1666,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.014262700000000001,
+      "cost_usd": 0.0142627,
       "tools": [
         {
           "name": "ask_business",
@@ -1742,7 +1742,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.011997899999999999,
+      "cost_usd": 0.0119979,
       "tools": [
         {
           "name": "ask_business",
@@ -2032,7 +2032,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.015497299999999999,
+      "cost_usd": 0.0154973,
       "tools": [
         {
           "name": "ask_business",
@@ -2393,7 +2393,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.014294399999999999,
+      "cost_usd": 0.0142944,
       "tools": [
         {
           "name": "ask_business",
@@ -2469,7 +2469,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.010822799999999999,
+      "cost_usd": 0.0108228,
       "tools": [
         {
           "name": "ask_business",
@@ -2545,7 +2545,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.009906799999999999,
+      "cost_usd": 0.0099068,
       "tools": [
         {
           "name": "ask_business",
@@ -2906,7 +2906,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.010681399999999999,
+      "cost_usd": 0.0106814,
       "tools": [
         {
           "name": "ask_business",
@@ -3228,7 +3228,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.025848299999999998,
+      "cost_usd": 0.0258483,
       "answer": "In Cloudflare Workers KV, the maximum key size is **512 bytes** (for both Free and Paid plans). \n\n*(Note: For **Workers KV Instant**, which is currently in private beta, the maximum key size is **300 bytes**.)*",
       "stop": "answered",
       "steps": 6,
@@ -4998,7 +4998,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.029475599999999998,
+      "cost_usd": 0.0294756,
       "answer": "On plans other than Business and Enterprise, the Notion API allows **180 requests per minute** per connection (an average of 3 requests per second).",
       "stop": "answered",
       "steps": 6,
@@ -5188,7 +5188,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.029773900000000002,
+      "cost_usd": 0.0297739,
       "answer": "In a Notion API request, the maximum length for a single rich text object's text content (`text.content`) is **2,000 characters**. (Note that an array of rich text objects within a block or property can contain up to 100 elements per request.)",
       "stop": "answered",
       "steps": 6,
@@ -5234,7 +5234,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.029590099999999998,
+      "cost_usd": 0.0295901,
       "answer": "A single rich text object's `text.content` property can have a maximum of **2,000 characters** in a request.",
       "stop": "answered",
       "steps": 6,
@@ -6053,7 +6053,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.029226099999999998,
+      "cost_usd": 0.0292261,
       "answer": "Per the specification, you should set `max-age` to **`63072000`** (two years) for production (after starting with a short duration of a few hours to verify).\n\nThe recommended production header is:\n```http\nStrict-Transport-Security: max-age=63072000; includeSubDomains\n```\n*(Note: the spec explicitly recommends skipping the `preload` directive unless you have a specific reason.)*",
       "stop": "answered",
       "steps": 6,
@@ -6099,7 +6099,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.027351900000000002,
+      "cost_usd": 0.0273519,
       "answer": "Per the specification, you should set `max-age=63072000` (two years) in production, after starting with a short duration (a few hours) to verify everything works.\n\nThe recommended production header is:\n```http\nStrict-Transport-Security: max-age=63072000; includeSubDomains\n```\n*(Note: the spec advises including `includeSubDomains` after auditing your subdomains, and skipping the `preload` directive.)*",
       "stop": "answered",
       "steps": 6,
@@ -6442,7 +6442,7 @@
       "attempt": 3,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.027283099999999998,
+      "cost_usd": 0.0272831,
       "answer": "The specification sets the target for good responsiveness (Interaction to Next Paint) at **INP ≤ 200ms**, measured at the 75th percentile of page loads across mobile and desktop.",
       "stop": "answered",
       "steps": 6,
@@ -6944,7 +6944,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.026658400000000002,
+      "cost_usd": 0.0266584,
       "answer": "According to the **Touch target size** topic in the Accessibility section of the specification:\n\n- **Minimum required size:** **24×24 CSS pixels** (aligned with WCAG 2.2 Level AA criterion 2.5.8 *Target Size (Minimum)*).\n- **Enhanced / recommended target size:** **44×44 CSS pixels** (aligned with WCAG 2.5.5 Level AAA, and recommended in the spec's implementation examples for buttons and coarse pointers).\n- **Exceptions:** \n  - Targets smaller than 24×24 CSS px are allowed in dense UIs as long as a 24 px diameter circle centered on the target does not overlap any other target.\n  - Inline links within running prose are exempt.",
       "stop": "answered",
       "steps": 6,
@@ -7349,7 +7349,7 @@
       "attempt": 1,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.023236299999999998,
+      "cost_usd": 0.0232363,
       "tools": [
         {
           "name": "browse_products_api",
@@ -8127,7 +8127,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.009460399999999999,
+      "cost_usd": 0.0094604,
       "tools": [
         {
           "name": "browse_products_api",
@@ -8997,7 +8997,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.025612299999999998,
+      "cost_usd": 0.0256123,
       "answer": "I have added one Stoneware Teapot ($74.00) and one Speckled Bowl ($32.00) to your cart. Your cart total is **$106.00**.",
       "stop": "answered",
       "steps": 6,
@@ -9782,7 +9782,7 @@
       "attempt": 2,
       "success": true,
       "harness_error": null,
-      "cost_usd": 0.012093600000000001,
+      "cost_usd": 0.0120936,
       "answer": "I have added the most expensive teapot—the **Cobalt Teapot** ($82.00)—to your cart.",
       "stop": "answered",
       "steps": 4,
@@ -10431,7 +10431,7 @@
           "steps": 2.0,
           "tool_calls": 1.0,
           "duration_ms": 73637.33333333333,
-          "cost_usd": 0.012266699999999998
+          "cost_usd": 0.0122667
         }
       },
       "live-allbirds-return-window": {
@@ -10863,7 +10863,7 @@
           "steps": 4.0,
           "tool_calls": 3.0,
           "duration_ms": 77866.0,
-          "cost_usd": 0.02258943333333333
+          "cost_usd": 0.022589433333333336
         }
       },
       "live-woo-cheapest-in-stock": {
