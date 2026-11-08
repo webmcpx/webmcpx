@@ -523,3 +523,19 @@ test("naming stays fast when a page churns names: suffixes only grow per base", 
   assert.ok(Date.now() - start < 3_000, `${Date.now() - start} ms`);
   assert.equal(new Set([...reserved.keys()]).size, reserved.size);
 });
+
+test("a DevTools endpoint that accepts but never answers fails within the limit", async () => {
+  const { createServer: tcp } = await import("node:net");
+  const sockets = [];
+  const silent = tcp((s) => sockets.push(s)).listen(0);
+  await new Promise((resolve) => silent.once("listening", resolve));
+  const { port } = silent.address();
+  try {
+    const start = Date.now();
+    await assert.rejects(Cdp.connect(`ws://127.0.0.1:${port}/devtools/browser/x`, 200), /did not answer within 0.2 s/);
+    assert.ok(Date.now() - start < 2_000);
+  } finally {
+    for (const s of sockets) s.destroy();
+    silent.close();
+  }
+});

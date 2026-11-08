@@ -175,11 +175,12 @@ fn convert(expr: &Expression<'_>) -> Node {
             span,
         },
         Expression::ObjectExpression(obj) => {
-            // Fields before the last spread may be overridden by it: only those after it are known.
-            let last_spread = obj
-                .properties
-                .iter()
-                .rposition(|p| matches!(p, ObjectPropertyKind::SpreadProperty(_)));
+            // A spread, or a key computed at runtime, may set any field: fields before the last such
+            // property may be overridden by it, so only those after it are known.
+            let last_spread = obj.properties.iter().rposition(|p| match p {
+                ObjectPropertyKind::SpreadProperty(_) => true,
+                ObjectPropertyKind::ObjectProperty(p) => p.key.static_name().is_none(),
+            });
             Node::Obj(Obj {
                 span,
                 open: last_spread.is_some(),

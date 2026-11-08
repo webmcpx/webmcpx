@@ -55,12 +55,22 @@ export class Cdp {
   #onClose = new Set();
   #timeout;
 
-  static async connect(url) {
+  /** Connects within `ms`: an endpoint that accepts the socket but never upgrades it must not hang us. */
+  static async connect(url, ms = 10_000) {
     const ws = new WebSocket(url);
-    await new Promise((resolve, reject) => {
-      ws.addEventListener("open", resolve, { once: true });
-      ws.addEventListener("error", () => reject(new Error(`cannot connect to the browser at ${url}`)), { once: true });
-    });
+    let timer;
+    try {
+      await new Promise((resolve, reject) => {
+        timer = setTimeout(() => reject(new Error(`the browser at ${url} did not answer within ${ms / 1000} s`)), ms);
+        ws.addEventListener("open", resolve, { once: true });
+        ws.addEventListener("error", () => reject(new Error(`cannot connect to the browser at ${url}`)), { once: true });
+      });
+    } catch (e) {
+      ws.close();
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
     return new Cdp(ws);
   }
 
@@ -222,9 +232,12 @@ export async function launch({ headed = false, executable = findBrowser() } = {}
 export async function attach(url) {
   let endpoint = url;
   if (/^https?:/.test(url)) {
-    const res = await fetch(new URL("/json/version", url)).catch(() => undefined);
+    // Discovery, body included, within 10 s.
+    const signal = AbortSignal.timeout(10_000);
+    const res = await fetch(new URL("/json/version", url), { signal }).catch(() => undefined);
     if (!res?.ok) throw new Error(`no browser answers at ${url}; start it with --remote-debugging-port`);
-    endpoint = (await res.json()).webSocketDebuggerUrl;
+    endpoint = (await res.json().catch(() => ({}))).webSocketDebuggerUrl;
+    if (typeof endpoint !== "string") throw new Error(`the browser at ${url} did not give its DevTools URL`);
   }
   const cdp = await Cdp.connect(endpoint);
   return { cdp, close: () => cdp.close() };

@@ -91,6 +91,9 @@ fn spreads_hide_missing_fields_not_known_ones() {
     let source = r#"document.modelContext.registerTool({ name: "search", description: "Search.", inputSchema: { ...defaults, type: 42 } });"#;
     let out = render("tool.js", source);
     assert!(out.contains("[invalid-input-schema]"), "{out}");
+    // A key computed at runtime is a spread of one: it may be `description`.
+    let source = r#"const key = "description"; document.modelContext.registerTool({ name: "search", [key]: "Search.", inputSchema: { type: "object" } });"#;
+    assert_eq!(render("tool.js", source), "tools=1 unresolved=0\n");
     // A field before the spread may be overridden by it: unknown, not checked.
     let source = r#"document.modelContext.registerTool({ name: "bad name", ...defaults });"#;
     assert_eq!(render("tool.js", source), "tools=1 unresolved=0\n");
