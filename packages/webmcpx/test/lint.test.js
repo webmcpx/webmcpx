@@ -68,6 +68,8 @@ test("Windows: a path on another drive or share is refused, never mapped onto th
     pwd: "/repo"
   });
   assert.equal(mapArgs(["lint", "c:\\Repo\\a.js"], cwd, win32).args[1], "/Repo/a.js", "drive letters ignore case");
+  assert.equal(mapArgs(["lint", "C:/repo/src/tools.js"], cwd, win32).args[1], "/repo/src/tools.js", "forward slashes");
+  assert.equal(mapArgs(["lint", "\\repo\\src"], cwd, win32).args[1], "/repo/src", "a bare root is this drive");
   for (const other of ["D:\\repo\\src\\tools.js", "D:src", "\\\\server\\share\\a.js"]) {
     assert.match(mapArgs(["lint", other, "--fix"], cwd, win32).error, /not on the same drive/, other);
   }

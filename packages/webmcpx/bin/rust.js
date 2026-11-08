@@ -38,8 +38,11 @@ export async function runRust(args) {
  */
 export function mapArgs(args, cwd, p = path) {
   const root = p.parse(cwd).root;
-  const same = (r) => (p.sep === "\\" ? r.toLowerCase() === root.toLowerCase() : r === root);
-  const posix = (abs) => "/" + abs.slice(p.parse(abs).root.length).split(p.sep).filter(Boolean).join("/");
+  // Roots compare with either slash (C:/ is C:\\) and, on Windows, any case. A bare root ("\\repo") is the
+  // working directory's drive, as it is natively.
+  const norm = (r) => (p.sep === "\\" ? r.replaceAll("/", "\\").toLowerCase() : r);
+  const same = (r) => norm(r) === norm(root) || /^[\\/]+$/.test(r);
+  const posix = (abs) => "/" + abs.slice(p.parse(abs).root.length).split(/[\\/]/).filter(Boolean).join("/");
   const out = [];
   for (const arg of args) {
     const argRoot = p.parse(arg).root;
