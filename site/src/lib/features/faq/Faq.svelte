@@ -1,22 +1,62 @@
 <!--
-	Short answers to what people ask about WebMCP, in plain text: readable without JavaScript, and the same
-	text is published as FAQPage structured data (see faqJsonLd), so search and answer engines can quote it.
+	Short answers to what people ask about WebMCP: readable without JavaScript, and the same text is
+	published as FAQPage structured data (see jsonld.ts), so search and answer engines can quote it.
+	Cards like the community section's; the agent one (the main audience, with the longest commands) spans
+	two columns, so both rows are full.
 -->
 <script lang="ts">
+	import AppWindow from '@lucide/svelte/icons/app-window';
+	import Bot from '@lucide/svelte/icons/bot';
+	import Globe from '@lucide/svelte/icons/globe';
+	import Lightbulb from '@lucide/svelte/icons/lightbulb';
+	import Scale from '@lucide/svelte/icons/scale';
+	import type { Component } from 'svelte';
 	import Section from '#lib/components/ui/Section.svelte';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import Reveal from '#lib/motion/Reveal.svelte';
+	import { codeParts } from './code.ts';
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.faq);
+	const ICONS: Record<keyof typeof m.items, Component> = {
+		what: Lightbulb,
+		agent: Bot,
+		site: AppWindow,
+		browsers: Globe,
+		mcp: Scale
+	};
+	const ORDER = ['what', 'agent', 'site', 'browsers', 'mcp'] as const;
 </script>
 
 <Section id="faq" kicker={m.kicker} title={m.title}>
-	<dl class="grid gap-x-10 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
-		{#each Object.entries(m.items) as [id, item], i (id)}
-			<Reveal delay={(i % 3) * 70}>
-				<dt class="font-display text-lg leading-tight font-bold">{item.q}</dt>
-				<dd class="mt-2 text-pretty text-ink-2">{item.a}</dd>
+	<dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		{#each ORDER as id, i (id)}
+			{@const item = m.items[id]}
+			{@const Icon = ICONS[id]}
+			<Reveal delay={(i % 3) * 70} class={['h-full min-w-0', id === 'agent' && 'lg:col-span-2']}>
+				<div class="flex h-full flex-col gap-3 rounded-card border-2 border-ink bg-card p-6 shadow-hard-sm">
+					<span class="flex items-center justify-between">
+						<span class="grid size-9 place-items-center rounded-full border-2 border-ink bg-marker">
+							<Icon size={18} strokeWidth={2} aria-hidden="true" />
+						</span>
+						<span class="font-mono text-xs text-ink-3" aria-hidden="true">Q{i + 1}</span>
+					</span>
+					<dt
+						class={[
+							'font-display text-xl leading-tight font-bold tracking-tight',
+							id === 'agent' && 'lg:text-2xl'
+						]}
+					>
+						{item.q}
+					</dt>
+					<dd
+						class={['text-pretty text-ink-2', id === 'agent' && 'lg:text-lg lg:[&_code]:whitespace-nowrap']}
+					>
+						{#each codeParts(item.a) as part, j (j)}{#if part.code}<code
+									class="rounded bg-ink/[0.06] px-1 py-0.5 font-mono text-[0.88em] text-ink">{part.text}</code
+								>{:else}{part.text}{/if}{/each}
+					</dd>
+				</div>
 			</Reveal>
 		{/each}
 	</dl>
