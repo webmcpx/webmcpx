@@ -21,6 +21,11 @@ WebMCP (best case: a Notion docs question, GPT-6 Luna, 64.7k → 1.0k tokens;
 [**Scan your site**](https://webmcpx.dev) · [Leaderboard](https://webmcpx.dev/#leaderboard) ·
 [How verdicts work](https://webmcpx.dev/verdicts/) · [llms.txt](https://webmcpx.dev/llms.txt)
 
+🌐 English · [中文](https://webmcpx.dev/zh/) · [हिन्दी](https://webmcpx.dev/hi/) ·
+[Español](https://webmcpx.dev/es/) · [Français](https://webmcpx.dev/fr/) · [বাংলা](https://webmcpx.dev/bn/) ·
+[Português](https://webmcpx.dev/pt-br/) · [Русский](https://webmcpx.dev/ru/) ·
+[Bahasa Indonesia](https://webmcpx.dev/id/) · [Deutsch](https://webmcpx.dev/de/) · [日本語](https://webmcpx.dev/ja/)
+
 </div>
 
 ## See it work
