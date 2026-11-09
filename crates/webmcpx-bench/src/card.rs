@@ -257,12 +257,18 @@ struct Card<'a> {
 
 fn render(c: &Card<'_>) -> String {
     let (label, fill, stamp_ink) = c.stamp.unwrap_or(("", "transparent", "inherit"));
-    // A check for agent-ready, a cross for not agent-ready: the verdict reads before its words do.
-    let icon = c.verdict.map_or("", |v| match v {
-        Verdict::Ready => r#"<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5L19.5 7"/></svg>"#,
-        Verdict::Missing => r#"<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>"#,
-        Verdict::Issues => "",
-    });
+    // A cross on the not agent-ready stamp: the verdict reads before its words do. An agent-ready site
+    // gets the agent-ready badge itself, the seal only approved sites carry.
+    let badge = if c.verdict == Some(Verdict::Ready) {
+        STYLED[0].1.trim()
+    } else {
+        ""
+    };
+    let icon = if c.verdict == Some(Verdict::Missing) {
+        r#"<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>"#
+    } else {
+        ""
+    };
     let stamp_display = if c.stamp.is_some() { "block" } else { "none" };
     let host = escape(c.title);
     let height = c.height;
@@ -276,6 +282,11 @@ fn render(c: &Card<'_>) -> String {
         _ => 27,
     };
     let score_label = escape(t.score);
+    let top_right = if badge.is_empty() {
+        format!(r#"<div class="stamp">{icon}{label}</div>"#)
+    } else {
+        format!(r#"<div class="seal">{badge}</div>"#)
+    };
     // The link preview is 45 px shorter than the post image: its text and padding give way first.
     let (text_size, pad) = if height < 650 { (32, 44) } else { (36, 56) };
     let cta = escape(t.cta).replace("{site}", "<span>webmcpx.dev</span>");
@@ -306,6 +317,7 @@ background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1p
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .lockup svg{{height:44px;width:auto}}
 .stamp .icon{{width:1.05em;height:1.05em;margin-right:.35em;vertical-align:-.15em;fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}}
+.seal svg{{display:block;height:88px;width:auto}}
 .stamp{{display:{stamp_display};border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:10px 28px;font-size:{stamp_size}px;white-space:nowrap;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
 .mark{{position:absolute;right:-110px;top:50%;width:600px;height:600px;transform:translateY(-50%) rotate(-12deg);opacity:.06}}
 .top,.main,.foot{{position:relative}}
@@ -327,7 +339,7 @@ background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1p
 :lang(zh) *,:lang(ja) *,:lang(hi) *,:lang(bn) *{{letter-spacing:0!important}}
 </style></head><body><div class="frame">
 <div class="mark">{mark}</div>
-<div class="top"><div class="lockup">{lockup}</div><div class="stamp">{icon}{label}</div></div>
+<div class="top"><div class="lockup">{lockup}</div>{top_right}</div>
 <div class="main"><div class="host">{host}</div><div class="row"><div class="text"><div class="line">{line}</div>{hook}</div>{score}</div></div>
 <div class="foot">{date}<span class="cta">{cta}</span></div>
 </div></body></html>"#,
@@ -562,7 +574,7 @@ mod tests {
         let en = Text::of(None);
         let h = html(s, Format::Link, en);
         assert!(h.contains("&lt;x&gt;&amp;") && !h.contains("<x>&"));
-        assert!(h.contains("AGENT-READY") || h.contains("Agent-ready"));
+        assert!(h.contains("Agent-ready: WebMCP tools checked with webmcpx"));
         assert!(h.contains("Scanned Nov 9, 2026"));
         assert!(h.contains("height:630px"));
         // The post image is 16:9, laid out at 1200×675.
@@ -579,11 +591,12 @@ mod tests {
         );
         assert!(missing.contains(">Not agent-ready<"));
         assert!(missing.contains("oklch(0.58 0.21 27)"));
-        // A cross on the red stamp, a check on the green one, neither on "almost".
+        // A cross on the red stamp; an agent-ready site carries the agent-ready badge itself instead of
+        // a stamp; "almost" gets neither.
         let cross = r#"<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>"#;
-        let check = r#"<path d="M4.5 12.5l5 5L19.5 7"/>"#;
+        let check = r#"<div class="seal"><svg"#;
         assert!(missing.contains(cross) && !missing.contains(check));
-        assert!(h.contains(check) && !h.contains(cross));
+        assert!(h.contains(check) && !h.contains(cross) && !h.contains(r#"class="stamp""#));
         let almost = html(
             Summary {
                 verdict: Verdict::Issues,
