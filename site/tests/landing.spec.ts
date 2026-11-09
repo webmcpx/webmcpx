@@ -183,7 +183,7 @@ test('an agent-ready site picks one of three badges and gets it as HTML and as M
 	// READMEs can't hold inline SVG: Markdown for an image we serve in that style, linking to a live scan.
 	await expect(readme).toContainText('[![');
 	await expect(readme).toContainText('/badge/docs.example.com.svg?style=dark)](');
-	await expect(readme).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan)');
+	await expect(readme).toContainText('/scan/docs.example.com#scan)');
 });
 
 test('the menu marks the section in view and opens on phones', async ({ page }) => {
@@ -581,7 +581,7 @@ test('an agent-ready site gets its favicon and a badge to embed that links to a 
 		3
 	);
 	const embed = result.getByRole('figure').filter({ hasText: 'badge.html' });
-	await expect(embed).toContainText('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');
+	await expect(embed).toContainText('/scan/docs.example.com#scan');
 	// The badge SVG is inlined: the embed loads nothing from our server.
 	await expect(embed).toContainText('<svg');
 	await expect(embed).not.toContainText('<img');
@@ -801,4 +801,40 @@ test('Save PNG asks for the share image in the page language', async ({ page }) 
 		'href',
 		`/og/scan.png?url=${encodeURIComponent(REPORT.url)}&size=post&lang=pt-br`
 	);
+});
+
+test('Share copies a link that reads as the site on a computer', async ({ page, context }) => {
+	await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+	await mockScan(page);
+	await page.goto('/pt-br/');
+	await page.getByLabel('Endereço do seu site').first().fill('docs.example.com');
+	await page.keyboard.press('Enter');
+	await page.locator('#scan').getByRole('button', { name: 'Compartilhar' }).click();
+	const copied = await page.evaluate(() => navigator.clipboard.readText());
+	expect(copied).toBe(`${new URL(page.url()).origin}/pt-br/scan/docs.example.com`);
+});
+
+test('Share opens the phone share sheet when there is one', async ({ browser }) => {
+	const context = await browser.newContext({
+		hasTouch: true,
+		isMobile: true,
+		viewport: { width: 390, height: 844 }
+	});
+	const page = await context.newPage();
+	await page.addInitScript(() => {
+		const w = window as unknown as { sharedWith: ShareData[] };
+		w.sharedWith = [];
+		navigator.share = async (data?: ShareData) => {
+			w.sharedWith.push(data ?? {});
+		};
+	});
+	await mockScan(page);
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.keyboard.press('Enter');
+	await page.locator('#scan').getByRole('button', { name: 'Share' }).click();
+	const shared = await page.evaluate(() => (window as unknown as { sharedWith: ShareData[] }).sharedWith);
+	expect(shared).toHaveLength(1);
+	expect(shared[0].url).toBe(`${new URL(page.url()).origin}/scan/docs.example.com`);
+	await context.close();
 });

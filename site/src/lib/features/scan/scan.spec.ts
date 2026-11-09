@@ -108,11 +108,20 @@ describe('helpers', () => {
 	it('counts, names and links', () => {
 		expect(errors(report)).toBe(1);
 		expect(host('https://www.allbirds.com/x')).toBe('allbirds.com');
-		expect(shareLink('https://webmcp.zone', 'https://a.example/')).toBe(
-			'https://webmcp.zone/?scan=https%3A%2F%2Fa.example%2F'
+		// A plain https address reads as itself; the server sends it on to /?scan=.
+		expect(shareLink('https://webmcp.zone', 'https://a.example/')).toBe('https://webmcp.zone/scan/a.example');
+		expect(shareLink('https://webmcp.zone', 'https://developers.notion.com/docs/x', '/pt-br/')).toBe(
+			'https://webmcp.zone/pt-br/scan/developers.notion.com/docs/x'
 		);
-		expect(shareLink('https://webmcp.zone', 'https://a.example/', '/ja/')).toBe(
-			'https://webmcp.zone/ja/?scan=https%3A%2F%2Fa.example%2F'
+		// Anything the path can't carry keeps the query form.
+		expect(shareLink('https://webmcp.zone', 'https://a.example/?q=1', '/ja/')).toBe(
+			'https://webmcp.zone/ja/?scan=https%3A%2F%2Fa.example%2F%3Fq%3D1'
+		);
+		expect(shareLink('https://webmcp.zone', 'http://a.example/')).toBe(
+			'https://webmcp.zone/?scan=http%3A%2F%2Fa.example%2F'
+		);
+		expect(shareLink('https://webmcp.zone', 'https://a.example:8443/')).toBe(
+			'https://webmcp.zone/?scan=https%3A%2F%2Fa.example%3A8443%2F'
 		);
 	});
 });
@@ -138,7 +147,7 @@ describe('badgeEmbed', () => {
 	it('gives READMEs a Markdown image of the live verdict in the chosen style, linked to a re-scan', () => {
 		const md = badgeMarkdown('https://webmcpx.dev', 'https://www.a.example/docs', 'dark', '[Agent]-ready');
 		expect(md).toBe(
-			'[![Agent-ready](https://webmcpx.dev/badge/a.example.svg?style=dark)](https://webmcpx.dev/?scan=https%3A%2F%2Fwww.a.example%2Fdocs#scan)'
+			'[![Agent-ready](https://webmcpx.dev/badge/a.example.svg?style=dark)](https://webmcpx.dev/scan/www.a.example/docs#scan)'
 		);
 	});
 });

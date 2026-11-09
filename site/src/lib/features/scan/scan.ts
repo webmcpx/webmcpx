@@ -177,9 +177,22 @@ export async function scan(url: string, fetcher: typeof fetch = fetch): Promise<
 export const errors = (r: Report) => r.diagnostics.filter((d) => d.severity === 'error').length;
 export const warnings = (r: Report) => r.diagnostics.filter((d) => d.severity === 'warning').length;
 
-/** The link that re-runs this scan when opened: `/?scan=<url>` (`home` is the landing in the reader's language). */
-export const shareLink = (origin: string, url: string, home = '/') =>
-	`${origin}${home}?scan=${encodeURIComponent(url)}`;
+/**
+ * The link that re-runs this scan when opened (`home` is the landing in the reader's language). A plain
+ * https address reads as itself, `/scan/notion.com/docs`, which the server sends on to `/?scan=<url>`
+ * (server.rs, `pretty_scan`); anything else (http, a port, a query or a fragment) keeps `/?scan=<url>`.
+ */
+export function shareLink(origin: string, url: string, home = '/'): string {
+	let u: URL | undefined;
+	try {
+		u = new URL(url);
+	} catch {
+		u = undefined;
+	}
+	if (u && u.protocol === 'https:' && !u.port && !u.username && !u.password && !u.search && !u.hash)
+		return `${origin}${home}scan/${u.hostname}${u.pathname === '/' ? '' : u.pathname}`;
+	return `${origin}${home}?scan=${encodeURIComponent(url)}`;
+}
 
 /**
  * The badge styles. All but `readme` are inlined into the embed code, so those sites load nothing from our server. Their names

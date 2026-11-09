@@ -85,6 +85,14 @@ async fn page(
             .map(|(_, v)| v.into_owned())
     });
     let path = request.uri().path().to_owned();
+    // A shared scan link that reads as itself (`/scan/notion.com`): on to the scan, `/?scan=<url>`.
+    // Crawlers follow, and read the preview tags there.
+    if let Some((home, target)) = pretty_scan(&path) {
+        let query = reqwest::Url::parse_with_params("http://x/", [("scan", target.as_str())])
+            .map(|u| u.query().unwrap_or_default().to_owned())
+            .unwrap_or_default();
+        return axum::response::Redirect::temporary(&format!("{home}?{query}")).into_response();
+    }
     if let Some(target) = scanned.filter(|t| !t.is_empty())
         && path.ends_with('/')
         && !path.contains("..")
@@ -200,6 +208,55 @@ fn attr(s: &str) -> String {
         .replace('>', "&gt;")
 }
 
+/// `/scan/<host>[/<path>]` (or `/<lang>/scan/...`): the landing to scan on and the https address. None
+/// for any other path, or for an address that isn't a plain https one.
+fn pretty_scan(path: &str) -> Option<(String, String)> {
+    let rest = path.strip_prefix('/')?;
+    let (home, rest) = match rest.split_once('/') {
+        Some((lang, after))
+            if lang != "en" && crate::card::LANGUAGES.iter().any(|t| t.code == lang) =>
+        {
+            (format!("/{lang}/"), after)
+        }
+        _ => ("/".to_owned(), rest),
+    };
+    let site = rest.strip_prefix("scan/")?;
+    let url = reqwest::Url::parse(&format!("https://{site}")).ok()?;
+    let plain = url.host_str().is_some_and(|h| h.contains('.'))
+        && url.username().is_empty()
+        && url.password().is_none()
+        && url.port().is_none();
+    plain.then(|| (home, url.to_string()))
+}
+
+/// The link that re-runs a scan, as the site's Share button copies it (scan.ts, `shareLink`): a plain https
+/// address reads as itself (`/pt-br/scan/notion.com/docs`), anything else is `/?scan=<url>`.
+fn share_link(origin: &str, home: &str, target: &str) -> String {
+    match reqwest::Url::parse(target) {
+        Ok(u)
+            if u.scheme() == "https"
+                && u.port().is_none()
+                && u.username().is_empty()
+                && u.password().is_none()
+                && u.query().is_none()
+                && u.fragment().is_none()
+                && u.host_str().is_some() =>
+        {
+            let path = if u.path() == "/" { "" } else { u.path() };
+            format!(
+                "{origin}{home}scan/{}{path}",
+                u.host_str().unwrap_or_default()
+            )
+        }
+        _ => {
+            let query = reqwest::Url::parse_with_params("http://x/", [("scan", target)])
+                .map(|u| u.query().unwrap_or_default().to_owned())
+                .unwrap_or_default();
+            format!("{origin}{home}?{query}")
+        }
+    }
+}
+
 /// The site language of a page path: its first segment (`/pt-br/` is `pt-br`); English otherwise.
 fn language_of(path: &str) -> &'static crate::card::Text {
     crate::card::Text::of(path.trim_start_matches('/').split('/').next())
@@ -242,7 +299,7 @@ pub fn share_page(
     } else {
         format!("/{}/", text.code)
     };
-    let url = format!("{origin}{page}?scan={}", encoded.trim_start_matches("url="));
+    let url = share_link(origin, &page, target);
     let tags = format!(
         r#"<meta property="og:type" content="website"><meta property="og:site_name" content="webmcpx"><meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{u}"><meta property="og:image" content="{i}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{a}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{d}"><meta name="twitter:image" content="{i}"><meta name="twitter:image:alt" content="{a}">"#,
         t = attr(&title),
@@ -596,17 +653,47 @@ mod tests {
             "{en}"
         );
         assert!(
-            out.contains(
-                r#"og:url" content="https://webmcpx.dev/pt-br/?scan=https%3A%2F%2Fa.example%2F""#
-            ),
+            out.contains(r#"og:url" content="https://webmcpx.dev/pt-br/scan/a.example""#),
             "{out}"
         );
         assert!(
-            en.contains(
-                r#"og:url" content="https://webmcpx.dev/?scan=https%3A%2F%2Fa.example%2F""#
-            ),
+            en.contains(r#"og:url" content="https://webmcpx.dev/scan/a.example""#),
             "{en}"
         );
         assert_eq!(language_of("/brand/").code, "en");
+    }
+
+    /// `/scan/<site>` is the scan of that https address, in the page's language; nothing else is.
+    #[test]
+    fn pretty_scan_links() {
+        let scan = |p: &str| pretty_scan(p);
+        assert_eq!(
+            scan("/scan/developers.notion.com"),
+            Some(("/".to_owned(), "https://developers.notion.com/".to_owned()))
+        );
+        assert_eq!(
+            scan("/pt-br/scan/a.example/docs/x"),
+            Some(("/pt-br/".to_owned(), "https://a.example/docs/x".to_owned()))
+        );
+        assert_eq!(scan("/en/scan/a.example"), None);
+        assert_eq!(scan("/xx/scan/a.example"), None);
+        assert_eq!(scan("/scan/localhost"), None);
+        assert_eq!(scan("/scan/u@a.example"), None);
+        assert_eq!(scan("/scan/a.example:8443"), None);
+        assert_eq!(scan("/scan/"), None);
+        assert_eq!(scan("/brand/"), None);
+        // What the Share button copies, and what the share page names as its URL.
+        assert_eq!(
+            share_link(
+                "https://webmcpx.dev",
+                "/pt-br/",
+                "https://developers.notion.com/"
+            ),
+            "https://webmcpx.dev/pt-br/scan/developers.notion.com"
+        );
+        assert_eq!(
+            share_link("https://webmcpx.dev", "/", "https://a.example/?q=1"),
+            "https://webmcpx.dev/?scan=https%3A%2F%2Fa.example%2F%3Fq%3D1"
+        );
     }
 }

@@ -138,8 +138,19 @@
 	}
 
 	async function share(url: string) {
+		const link = shareLink(location.origin, url, i18n.href('/'));
+		// On a phone, the system share sheet (WhatsApp, X, Instagram...); on a computer, the link copied.
+		if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+			try {
+				await navigator.share({ title: `${host(url)} · webmcpx`, url: link });
+				return;
+			} catch (e) {
+				// Closed by the reader: nothing to do. Refused (no gesture, policy): copy instead.
+				if (e instanceof DOMException && e.name === 'AbortError') return;
+			}
+		}
 		try {
-			await navigator.clipboard.writeText(shareLink(location.origin, url, i18n.href('/')));
+			await navigator.clipboard.writeText(link);
 			shared = true;
 			setTimeout(() => (shared = false), 1600);
 		} catch {
