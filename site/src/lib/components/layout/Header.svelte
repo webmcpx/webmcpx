@@ -20,14 +20,14 @@
 	import Menu from '@lucide/svelte/icons/menu';
 	import Scale from '@lucide/svelte/icons/scale';
 	import X from '@lucide/svelte/icons/x';
-	import { siGithub } from 'simple-icons';
+	import { siGithub, siX } from 'simple-icons';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { onDestroy, type Component } from 'svelte';
 	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Stamp from '#lib/components/ui/Stamp.svelte';
-	import { REPO, VERSION } from '#lib/content/site.ts';
+	import { REPO, VERSION, X_URL } from '#lib/content/site.ts';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import { LOCALES, localized, unlocalized } from '#lib/i18n/locales.ts';
 	import Logo from './Logo.svelte';
@@ -153,6 +153,13 @@
 		</ul>
 
 		<div class="flex items-center gap-2">
+			<a
+				href={X_URL}
+				aria-label="webmcpx on X"
+				data-x-link
+				class="grid size-10 place-items-center rounded-full border-2 border-ink bg-card shadow-hard-sm transition-transform hover:-translate-y-0.5"
+				><BrandIcon icon={siX} size={15} /></a
+			>
 			<Button href={REPO} variant="outline" size="sm"><BrandIcon icon={siGithub} size={16} />GitHub</Button>
 			<details bind:this={menu} class="group relative lg:hidden">
 				<summary

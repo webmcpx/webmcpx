@@ -1,5 +1,6 @@
 <!-- A page's title and description, also as its social preview text (og: and twitter:). -->
 <script lang="ts">
+	import { X_HANDLE } from '#lib/content/site.ts';
 	let { title, description }: { title: string; description: string } = $props();
 </script>
 
@@ -10,4 +11,5 @@
 	<meta property="og:description" content={description} />
 	<meta name="twitter:title" content={title} />
 	<meta name="twitter:description" content={description} />
+	<meta name="twitter:site" content={X_HANDLE} />
 </svelte:head>

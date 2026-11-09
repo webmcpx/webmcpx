@@ -16,10 +16,10 @@
 	import Scale from '@lucide/svelte/icons/scale';
 	import ScanSearch from '@lucide/svelte/icons/scan-search';
 	import ScrollText from '@lucide/svelte/icons/scroll-text';
-	import { siGithub, siNpm } from 'simple-icons';
+	import { siGithub, siNpm, siX } from 'simple-icons';
 	import type { Component } from 'svelte';
 	import BrandIcon from '#lib/components/ui/BrandIcon.svelte';
-	import { NPM, REPO, SPEC, SPEC_ISSUES } from '#lib/content/site.ts';
+	import { NPM, REPO, SPEC, SPEC_ISSUES, X_URL } from '#lib/content/site.ts';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import Logo from './Logo.svelte';
 
@@ -51,6 +51,7 @@
 			title: m.columns.project,
 			links: [
 				{ label: 'GitHub', href: REPO, icon: { brand: siGithub } },
+				{ label: 'X', href: X_URL, icon: { brand: siX } },
 				{ label: 'npm', href: NPM, icon: { brand: siNpm } },
 				{ label: 'crates.io', href: 'https://crates.io/crates/webmcpx', icon: { lucide: Package } },
 				{ label: m.links.brand, href: i18n.href('/brand/'), icon: { lucide: Palette } },

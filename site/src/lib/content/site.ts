@@ -4,6 +4,9 @@
 
 export const REPO = 'https://github.com/webmcpx/webmcpx';
 export const NPM = 'https://www.npmjs.com/package/webmcpx';
+/** The project on X. */
+export const X_HANDLE = '@webmcpx';
+export const X_URL = 'https://x.com/webmcpx';
 export const SPEC = 'https://webmachinelearning.github.io/webmcp/';
 export const SPEC_ISSUES = 'https://github.com/webmachinelearning/webmcp/issues';
 /** The public site, for absolute links (hreflang, canonical). */

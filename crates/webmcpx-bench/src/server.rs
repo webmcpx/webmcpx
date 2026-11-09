@@ -301,7 +301,7 @@ pub fn share_page(
     };
     let url = share_link(origin, &page, target);
     let tags = format!(
-        r#"<meta property="og:type" content="website"><meta property="og:site_name" content="webmcpx"><meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{u}"><meta property="og:image" content="{i}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{a}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{d}"><meta name="twitter:image" content="{i}"><meta name="twitter:image:alt" content="{a}">"#,
+        r#"<meta property="og:type" content="website"><meta property="og:site_name" content="webmcpx"><meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{u}"><meta property="og:image" content="{i}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{a}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:site" content="@webmcpx"><meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{d}"><meta name="twitter:image" content="{i}"><meta name="twitter:image:alt" content="{a}">"#,
         t = attr(&title),
         d = attr(&description),
         u = attr(&url),
@@ -604,6 +604,12 @@ mod tests {
         assert!(out.contains("summary_large_image"));
         assert!(!out.contains(r#""x""#), "unescaped quotes: {out}");
         assert_eq!(out.matches("og:image\"").count(), 1);
+        // Cards on X credit the project's account, once.
+        assert_eq!(
+            out.matches(r#"<meta name="twitter:site" content="@webmcpx">"#)
+                .count(),
+            1
+        );
     }
 
     /// A scan link shared from `/pt-br/` previews in Portuguese: title, description and card image.
