@@ -50,9 +50,8 @@ test("a tool result that can't be serialized becomes an error, not a crash", asy
   const input = new PassThrough();
   const output = new PassThrough();
   serve({}, { input, output });
-  let deep = [];
-  for (let i = 0; i < 20_000; i++) deep = [deep];
-  session.result = { content: [{ type: "text", text: "x" }], structuredContent: { deep } };
+  // A BigInt never serializes, on any Node (a deeply nested array only overflows smaller stacks).
+  session.result = { content: [{ type: "text", text: "x" }], structuredContent: { n: 1n } };
   session.next = Promise.resolve([{ name: "deep", description: "", annotations: {}, origin: "o", owner: "0" }]);
   session.options.onChange();
   await new Promise((resolve) => setTimeout(resolve, 10));

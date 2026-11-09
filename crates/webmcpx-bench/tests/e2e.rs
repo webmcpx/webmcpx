@@ -1322,6 +1322,8 @@ async fn a_page_cannot_send_the_scanner_megabytes() {
     );
 }
 
+/// 25 MB of title and text: far more than one read may bring back over the shared connection, and light
+/// enough for a slow CI runner to load.
 #[tokio::test]
 async fn a_huge_title_or_text_never_breaks_the_shared_connection() {
     use axum::response::Html;
@@ -1337,7 +1339,7 @@ async fn a_huge_title_or_text_never_breaks_the_shared_connection() {
         get(|| {
             std::future::ready(Html(
                 r#"<!doctype html><main id="m"></main><script>
-              const big = "word ".repeat(15_000_000);
+              const big = "word ".repeat(5_000_000);
               document.title = big;
               document.getElementById("m").textContent = big;
             </script>"#,
