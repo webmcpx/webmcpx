@@ -917,3 +917,18 @@ test('Post on X opens a post with the result in the page language and the scan l
 	// The only social button: no LinkedIn.
 	await expect(page.locator('#scan').getByRole('link', { name: /linkedin/i })).toHaveCount(0);
 });
+
+test('the skip link shows on focus inside the frame, below the logo, and leads to the content', async ({
+	page
+}) => {
+	await page.goto('/');
+	const skip = page.locator('[data-skip-link]');
+	await skip.focus();
+	await expect(skip).toBeVisible();
+	const box = (await skip.boundingBox())!;
+	const logo = (await page.locator('header a').first().boundingBox())!;
+	expect(box.y).toBeGreaterThan(logo.y + logo.height);
+	expect(box.x).toBeGreaterThan(20);
+	await skip.press('Enter');
+	await expect(page).toHaveURL(/#main$/);
+});

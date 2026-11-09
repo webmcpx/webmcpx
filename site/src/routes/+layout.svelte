@@ -54,9 +54,11 @@
 	<script type="module" src={LOADER_URL}></script>
 </svelte:head>
 
+<!-- Skip link (WCAG 2.4.1): shown on the first Tab only, inside the page frame under the logo, as a button. -->
 <a
 	href="#main"
-	class="sr-only z-50 rounded-full border-2 border-ink bg-marker px-4 py-2 font-display font-bold focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+	data-skip-link
+	class="sr-only z-50 rounded-full border-2 border-ink bg-marker text-sm font-bold shadow-hard-sm focus:not-sr-only focus:fixed focus:top-20 focus:left-7 focus:px-4 focus:py-1.5 sm:focus:top-24 sm:focus:left-12"
 >
 	{i18n.m.layout.skip}
 </a>
