@@ -42,7 +42,8 @@ jobs:
   test-os:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        # Pinned: since 2026-11-09 ~14:00 UTC no macos-latest job was acquired by a hosted runner.
+        os: [macos-15, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
