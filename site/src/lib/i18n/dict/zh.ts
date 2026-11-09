@@ -658,13 +658,13 @@ const zh: Messages = {
 			fix: '修复 WebMCP',
 			lint: '找出源码里的所有问题，并给出修复方案：',
 			terminal: '终端',
-			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
-			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
+			// host; keep the URL and the command as written.
 			agentFix: {
 				title: '给你的编程智能体的提示词',
-				intro: '这里还没有 WebMCP 工具。在网站的代码仓库里，把这段粘贴给 Claude Code、Codex 或 Cursor：',
+				intro: '把这段提示词粘贴给你的编程智能体，它会为你的网站加上 WebMCP：',
 				prompt:
-					'为 {host} 添加 WebMCP 工具：阅读 https://webmcpx.dev/llms.txt，然后把 {tag} 加到共用的页面布局里。用 npx webmcpx tools <本地 URL> 检查；部署后在 {rescan} 重新扫描。',
+					'用 webmcpx 为 {host} 添加 WebMCP 工具：按 https://webmcpx.dev/llms.txt 操作，再用 npx webmcpx tools <本地 URL> 检查。',
 				note: '这会添加 WebMCP 工具；是否就绪还取决于上面的其他检查。'
 			},
 			badge: '你的网站获得了 agent-ready 徽章',

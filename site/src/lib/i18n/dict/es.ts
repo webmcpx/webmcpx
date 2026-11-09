@@ -706,14 +706,13 @@ const es: Messages = {
 			fix: 'Corregir WebMCP',
 			lint: 'Encuentra todos los problemas en tu código fuente, con su corrección:',
 			terminal: 'terminal',
-			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
-			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
+			// host; keep the URL and the command as written.
 			agentFix: {
 				title: 'Prompt para tu agente de código',
-				intro:
-					'Aún no hay herramientas WebMCP aquí. Pega esto en Claude Code, Codex o Cursor, en el repositorio del sitio:',
+				intro: 'Pega este prompt en tu agente de código y añadirá WebMCP a tu sitio:',
 				prompt:
-					'Añade herramientas WebMCP a {host}: lee https://webmcpx.dev/llms.txt y añade {tag} al layout compartido. Compruébalo con npx webmcpx tools <URL local>; tras desplegar, vuelve a escanear en {rescan}.',
+					'Añade herramientas WebMCP a {host} con webmcpx: sigue https://webmcpx.dev/llms.txt y compruébalo con npx webmcpx tools <URL local>.',
 				note: 'Esto añade herramientas WebMCP; las demás comprobaciones de arriba deciden el veredicto.'
 			},
 			badge: 'Tu sitio ganó la insignia agent-ready',

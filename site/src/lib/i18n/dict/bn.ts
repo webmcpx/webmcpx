@@ -703,14 +703,13 @@ const bn: Messages = {
 			fix: 'WebMCP ঠিক করুন',
 			lint: 'সোর্সের প্রতিটি সমস্যা খুঁজুন, সমাধানসহ:',
 			terminal: 'টার্মিনাল',
-			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
-			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
+			// host; keep the URL and the command as written.
 			agentFix: {
 				title: 'আপনার কোডিং এজেন্টের জন্য প্রম্পট',
-				intro:
-					'এখানে এখনো কোনো WebMCP টুল নেই। সাইটের রিপোজিটরিতে এটি Claude Code, Codex বা Cursor-এ পেস্ট করুন:',
+				intro: 'এই প্রম্পটটি আপনার কোডিং এজেন্টে পেস্ট করুন, সে আপনার সাইটে WebMCP যোগ করে দেবে:',
 				prompt:
-					'{host}-এ WebMCP টুল যোগ করো: https://webmcpx.dev/llms.txt পড়ো, তারপর {tag} শেয়ার করা লেআউটে যোগ করো। npx webmcpx tools <লোকাল URL> দিয়ে যাচাই করো; ডিপ্লয়ের পর {rescan}-এ আবার স্ক্যান করো।',
+					'webmcpx দিয়ে {host}-এ WebMCP টুল যোগ করো: https://webmcpx.dev/llms.txt অনুসরণ করো, তারপর npx webmcpx tools <লোকাল URL> দিয়ে যাচাই করো।',
 				note: 'এতে WebMCP টুল যোগ হয়; রায় ওপরের অন্য যাচাইগুলোর ওপরও নির্ভর করে।'
 			},
 			badge: 'আপনার সাইট agent-ready ব্যাজ পেয়েছে',

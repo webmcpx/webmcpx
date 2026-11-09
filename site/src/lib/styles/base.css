@@ -317,6 +317,10 @@
 		print-color-adjust: exact;
 		-webkit-print-color-adjust: exact;
 	}
+	/* A block never splits across pages: the agent's prompt, a score item, a code sample. */
+	html[data-printing] [data-print-area] :is([data-agent-fix], figure, li) {
+		break-inside: avoid;
+	}
 	html[data-printing] [data-print-hide],
 	html[data-printing] [data-print-area] figcaption button {
 		display: none !important;

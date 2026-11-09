@@ -868,9 +868,12 @@ test('a site without WebMCP tools gets a prompt for its coding agent, in the pag
 	await page.keyboard.press('Enter');
 	const fix = page.locator('#scan [data-agent-fix]');
 	await expect(fix).toContainText('Prompt para o seu agente de código');
+	await expect(fix).toContainText(
+		'Cole este prompt no seu agente de código e ele coloca WebMCP no seu site:'
+	);
 	// Prose in the page's language; the URLs, the command and the tag as they are.
 	await expect(fix).toContainText(
-		'Adicione ferramentas WebMCP a docs.example.com: leia https://webmcpx.dev/llms.txt e adicione <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js"></script> ao layout compartilhado. Confira com npx webmcpx tools <URL local>; depois do deploy, escaneie de novo em https://webmcpx.dev/scan/docs.example.com.'
+		'Adicione ferramentas WebMCP a docs.example.com com o webmcpx: siga https://webmcpx.dev/llms.txt e confira com npx webmcpx tools <URL local>.'
 	);
 	// In the PDF: inside the printed card, its copy button gone.
 	await expect(page.locator('[data-print-area] [data-agent-fix]')).toHaveCount(1);
@@ -878,6 +881,8 @@ test('a site without WebMCP tools gets a prompt for its coding agent, in the pag
 	await page.emulateMedia({ media: 'print' });
 	await expect(fix).toBeVisible();
 	await expect(fix.getByRole('button')).toBeHidden();
+	// Never split across two pages.
+	expect(await fix.evaluate((el) => getComputedStyle(el).breakInside)).toBe('avoid');
 });
 
 test('an agent-ready or almost result gets no fix prompt', async ({ page }) => {

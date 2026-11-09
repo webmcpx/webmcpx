@@ -694,14 +694,13 @@ const hi: Messages = {
 			fix: 'WebMCP ठीक करें',
 			lint: 'अपने सोर्स की हर समस्या खोजें, सुधार के साथ:',
 			terminal: 'टर्मिनल',
-			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
-			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
+			// host; keep the URL and the command as written.
 			agentFix: {
 				title: 'आपके कोडिंग एजेंट के लिए प्रॉम्प्ट',
-				intro:
-					'यहाँ अभी कोई WebMCP टूल नहीं है। साइट की रिपॉज़िटरी में इसे Claude Code, Codex या Cursor में पेस्ट करें:',
+				intro: 'यह प्रॉम्प्ट अपने कोडिंग एजेंट में पेस्ट करें, और वह आपकी साइट में WebMCP जोड़ देगा:',
 				prompt:
-					'{host} में WebMCP टूल जोड़ो: https://webmcpx.dev/llms.txt पढ़ो, फिर {tag} को साझा लेआउट में जोड़ो। npx webmcpx tools <लोकल URL> से जाँचो; डिप्लॉय के बाद {rescan} पर फिर से स्कैन करो।',
+					'webmcpx से {host} में WebMCP टूल जोड़ो: https://webmcpx.dev/llms.txt के मुताबिक करो, फिर npx webmcpx tools <लोकल URL> से जाँचो।',
 				note: 'इससे WebMCP टूल जुड़ते हैं; फ़ैसला ऊपर की बाकी जाँचों पर भी निर्भर है।'
 			},
 			badge: 'आपकी साइट ने agent-ready बैज जीत लिया',
