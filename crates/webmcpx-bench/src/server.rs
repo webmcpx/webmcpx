@@ -242,7 +242,13 @@ pub fn share_page(
     } else {
         format!("{origin}/og.png")
     };
-    let url = format!("{origin}/?scan={}", encoded.trim_start_matches("url="));
+    // The page's own address (`/pt-br/?scan=`): each language is its own object for the networks' caches.
+    let page = if text.code == "en" {
+        "/".to_owned()
+    } else {
+        format!("/{}/", text.code)
+    };
+    let url = format!("{origin}{page}?scan={}", encoded.trim_start_matches("url="));
     let tags = format!(
         r#"<meta property="og:type" content="website"><meta property="og:site_name" content="webmcpx"><meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{u}"><meta property="og:image" content="{i}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{d}"><meta name="twitter:image" content="{i}">"#,
         t = attr(&title),
@@ -583,6 +589,18 @@ mod tests {
         );
         assert!(
             en.contains("a.example · Not agent-ready") && !en.contains("lang="),
+            "{en}"
+        );
+        assert!(
+            out.contains(
+                r#"og:url" content="https://webmcpx.dev/pt-br/?scan=https%3A%2F%2Fa.example%2F""#
+            ),
+            "{out}"
+        );
+        assert!(
+            en.contains(
+                r#"og:url" content="https://webmcpx.dev/?scan=https%3A%2F%2Fa.example%2F""#
+            ),
             "{en}"
         );
         assert_eq!(language_of("/brand/").code, "en");

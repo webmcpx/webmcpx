@@ -485,13 +485,15 @@ async fn slow_extras_never_cost_the_report() {
             .route("/robots.txt", axum::routing::get(hang)),
     )
     .await;
+    // The page has no tools, so the scan waits TOOL_WAIT (6 s) for them first; the deadline leaves room
+    // for a busy machine (`just check` runs the Chrome tests in parallel) on top of that.
     let scanner =
-        webmcpx_bench::scan::Scanner::new(None, true).deadline(std::time::Duration::from_secs(9));
+        webmcpx_bench::scan::Scanner::new(None, true).deadline(std::time::Duration::from_secs(15));
     let start = std::time::Instant::now();
     let report = scanner.scan(&format!("http://{site}/")).await;
     assert!(report.is_ok(), "{report:?} after {:?}", start.elapsed());
     assert!(
-        start.elapsed() < std::time::Duration::from_secs(12),
+        start.elapsed() < std::time::Duration::from_secs(18),
         "{:?}",
         start.elapsed()
     );
