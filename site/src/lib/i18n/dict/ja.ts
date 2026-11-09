@@ -687,6 +687,16 @@ const ja: Messages = {
 			fix: 'WebMCP を修正',
 			lint: 'ソース内の問題をすべて洗い出し、修正案も示します：',
 			terminal: 'ターミナル',
+			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
+			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			agentFix: {
+				title: 'コーディングエージェント用のプロンプト',
+				intro:
+					'まだ WebMCP ツールがありません。サイトのリポジトリで、これを Claude Code、Codex、Cursor に貼り付けてください:',
+				prompt:
+					'{host} に WebMCP ツールを追加して: https://webmcpx.dev/llms.txt を読み、{tag} を共通レイアウトに追加する。npx webmcpx tools <ローカル URL> で確認し、デプロイ後に {rescan} で再スキャンする。',
+				note: 'これで WebMCP ツールが追加されます。判定は上のほかのチェックにも左右されます。'
+			},
 			badge: 'あなたのサイトは agent-ready バッジを獲得しました',
 			badgeNote:
 				'SVG はコードに直接埋め込まれるので、こちらからは何も読み込みません。リンク先はそのサイトのライブスキャンなので、誰でも確認できます。',

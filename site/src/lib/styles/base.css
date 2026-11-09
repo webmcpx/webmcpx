@@ -317,7 +317,8 @@
 		print-color-adjust: exact;
 		-webkit-print-color-adjust: exact;
 	}
-	html[data-printing] [data-print-hide] {
+	html[data-printing] [data-print-hide],
+	html[data-printing] [data-print-area] figcaption button {
 		display: none !important;
 	}
 }

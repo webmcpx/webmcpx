@@ -711,6 +711,16 @@ const fr: Messages = {
 			fix: 'Corriger WebMCP',
 			lint: 'Trouvez chaque problème dans votre code source, avec sa correction :',
 			terminal: 'terminal',
+			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
+			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			agentFix: {
+				title: 'Prompt pour votre agent de code',
+				intro:
+					'Pas encore d’outils WebMCP ici. Collez ceci dans Claude Code, Codex ou Cursor, dans le dépôt du site :',
+				prompt:
+					'Ajoute des outils WebMCP à {host} : lis https://webmcpx.dev/llms.txt, puis ajoute {tag} au layout commun. Vérifie avec npx webmcpx tools <URL locale> ; après le déploiement, relance le scan sur {rescan}.',
+				note: 'Cela ajoute des outils WebMCP ; les autres vérifications ci-dessus décident du verdict.'
+			},
 			badge: 'Votre site a gagné le badge agent-ready',
 			badgeNote:
 				'Le SVG est inclus dans le code : rien ne se charge depuis chez nous. Il renvoie vers un scan en direct de votre site, que chacun peut vérifier.',

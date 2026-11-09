@@ -47,6 +47,8 @@ pub struct Text {
     pub no_tools_light: &'static str,
     /// No tools: what tools gave agents in the benchmark; `{best}` is its best case (62×), always "up to".
     pub hook: &'static str,
+    /// No tools: where the fix starts, for the site's owner (or an agent reading the image).
+    pub fix: &'static str,
     /// Almost: `{n}` points short of agent-ready.
     distance: Forms,
     /// `{tools}` is the tool count (`tools`).
@@ -130,6 +132,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "No WebMCP tools: agents read ~{n} tokens of this page instead.",
         no_tools_light: "No WebMCP tools for agents to call.",
         hook: "With WebMCP: up to {best} fewer tokens in our benchmark.",
+        fix: "Add WebMCP tools: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "{n} point to agent-ready.",
             few: "{n} points to agent-ready.",
@@ -160,6 +163,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "没有 WebMCP 工具：智能体只能读这个页面约 {n} 个 token。",
         no_tools_light: "没有可供智能体调用的 WebMCP 工具。",
         hook: "用上 WebMCP：在我们的基准测试中最多少用 {best} 的 token。",
+        fix: "添加 WebMCP 工具：webmcpx.dev/llms.txt",
         distance: Forms {
             one: "距离智能体就绪还差 {n} 分。",
             few: "距离智能体就绪还差 {n} 分。",
@@ -203,6 +207,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "कोई WebMCP टूल नहीं: एजेंट को इस पेज के ~{n} टोकन पढ़ने पड़ते हैं।",
         no_tools_light: "एजेंट के कॉल करने लायक कोई WebMCP टूल नहीं।",
         hook: "WebMCP के साथ: हमारे बेंचमार्क में {best} तक कम टोकन।",
+        fix: "WebMCP टूल जोड़ें: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "एजेंट-रेडी होने में बस {n} अंक बाकी।",
             few: "एजेंट-रेडी होने में बस {n} अंक बाकी।",
@@ -235,6 +240,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "Sin herramientas WebMCP: los agentes leen ~{n} tokens de esta página.",
         no_tools_light: "Sin herramientas WebMCP que los agentes puedan llamar.",
         hook: "Con WebMCP: hasta {best} menos tokens en nuestro benchmark.",
+        fix: "Añade herramientas WebMCP: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "Falta {n} punto para estar listo para agentes.",
             few: "Faltan {n} puntos para estar listo para agentes.",
@@ -268,6 +274,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "Aucun outil WebMCP\u{a0}: les agents lisent ~{n} tokens de cette page.",
         no_tools_light: "Aucun outil WebMCP que les agents peuvent appeler.",
         hook: "Avec WebMCP\u{a0}: jusqu’à {best} moins de tokens dans notre benchmark.",
+        fix: "Ajoutez des outils WebMCP\u{a0}: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "Plus que {n} point avant d’être prêt pour les agents.",
             few: "Plus que {n} points avant d’être prêt pour les agents.",
@@ -311,6 +318,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "কোনো WebMCP টুল নেই: এজেন্টকে এই পেজের ~{n} টোকেন পড়তে হয়।",
         no_tools_light: "এজেন্ট কল করতে পারে এমন কোনো WebMCP টুল নেই।",
         hook: "WebMCP দিয়ে: আমাদের বেঞ্চমার্কে {best} পর্যন্ত কম টোকেন।",
+        fix: "WebMCP টুল যোগ করুন: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "এজেন্ট-রেডি হতে আর {n} পয়েন্ট বাকি।",
             few: "এজেন্ট-রেডি হতে আর {n} পয়েন্ট বাকি।",
@@ -344,6 +352,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "Nenhuma ferramenta WebMCP: os agentes leem ~{n} tokens desta página.",
         no_tools_light: "Nenhuma ferramenta WebMCP para os agentes chamarem.",
         hook: "Com WebMCP: até {best} menos tokens no nosso benchmark.",
+        fix: "Adicione ferramentas WebMCP: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "Falta {n} ponto para ficar pronto para agentes.",
             few: "Faltam {n} pontos para ficar pronto para agentes.",
@@ -387,6 +396,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "Инструментов WebMCP нет: агенты читают около {n} токенов этой страницы.",
         no_tools_light: "Нет инструментов WebMCP, которые могли бы вызвать агенты.",
         hook: "С WebMCP: до {best} меньше токенов в нашем бенчмарке.",
+        fix: "Добавьте инструменты WebMCP: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "До готовности к агентам: {n} балл.",
             few: "До готовности к агентам: {n} балла.",
@@ -419,6 +429,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "Tidak ada tool WebMCP: agent membaca ~{n} token halaman ini.",
         no_tools_light: "Tidak ada tool WebMCP yang bisa dipanggil agent.",
         hook: "Dengan WebMCP: hingga {best} lebih sedikit token di benchmark kami.",
+        fix: "Tambahkan tool WebMCP: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "Tinggal {n} poin lagi menuju siap agent.",
             few: "Tinggal {n} poin lagi menuju siap agent.",
@@ -452,6 +463,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "Keine WebMCP-Tools: Agenten lesen ~{n} Tokens dieser Seite.",
         no_tools_light: "Keine WebMCP-Tools, die Agenten aufrufen können.",
         hook: "Mit WebMCP: bis zu {best} weniger Tokens in unserem Benchmark.",
+        fix: "WebMCP-Tools hinzufügen: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "Noch {n} Punkt bis agentenfähig.",
             few: "Noch {n} Punkte bis agentenfähig.",
@@ -482,6 +494,7 @@ pub const ALL: [Text; 11] = [
         no_tools: "WebMCP ツールなし。エージェントはこのページの約 {n} トークンを読みます。",
         no_tools_light: "エージェントが呼び出せる WebMCP ツールがありません。",
         hook: "WebMCP なら、私たちのベンチマークでトークンが最大{best}削減。",
+        fix: "WebMCP ツールを追加: webmcpx.dev/llms.txt",
         distance: Forms {
             one: "エージェント対応まであと {n} ポイント。",
             few: "エージェント対応まであと {n} ポイント。",

@@ -37,6 +37,7 @@
 	} from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
 	import { highlightLite } from './highlight-lite.ts';
+	import { SCRIPT_TAG } from '#lib/content/snippets.ts';
 
 	const i18n = useI18n();
 	const m = $derived(i18n.m.scan);
@@ -372,7 +373,22 @@
 			{/if}
 
 			{#if r.verdict === 'missing'}
-				<!-- The fix lives in one place, the #for-sites section; the result only points there. -->
+				<!-- No WebMCP tools: a prompt the site's coding agent can act on, in the PDF too (an agent reading the
+				     page or the PDF finds the fix right here). The full setup stays in #for-sites and llms.txt. -->
+				{@const prompt = fmt(m.result.agentFix.prompt, {
+					host: host(r.url),
+					tag: SCRIPT_TAG,
+					rescan: shareLink('https://webmcpx.dev', r.url)
+				})}
+				<div class="border-t-2 border-ink p-5 sm:px-7" data-agent-fix>
+					<p class="mb-3 font-medium">{m.result.agentFix.intro}</p>
+					<CodeBlock
+						snippet={highlightLite(prompt, 'text')}
+						title={m.result.agentFix.title}
+						class="shadow-none"
+					/>
+					<p class="mt-3 text-sm text-ink-3">{m.result.agentFix.note}</p>
+				</div>
 			{:else if r.verdict === 'issues'}
 				<div class="border-t-2 border-ink p-5 sm:px-7">
 					<p class="mb-3 font-medium">{m.result.lint}</p>

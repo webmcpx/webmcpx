@@ -68,7 +68,10 @@ function shell(code: string): string {
 		.join('\n');
 }
 
-const BY_LANG = { html, md: markdown, sh: shell };
+/** Plain text (a prompt): escaped, one color. */
+const text = (code: string) => span(C.text, code);
+
+const BY_LANG = { html, md: markdown, sh: shell, text };
 
 /** A code block for code made in the browser, styled like the prerendered ones. */
 export function highlightLite(code: string, lang: keyof typeof BY_LANG): Highlighted {

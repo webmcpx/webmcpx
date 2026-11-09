@@ -189,11 +189,17 @@ pub fn share_text(s: Summary<'_>, t: &Text) -> (String, String, String) {
         .flatten()
         .collect::<Vec<_>>()
         .join(" ");
-    let alt = [Some(format!("webmcpx · {title}.")), Some(what(s, t)), hook]
-        .into_iter()
-        .flatten()
-        .collect::<Vec<_>>()
-        .join(" ");
+    let fix = (s.verdict == Verdict::Missing).then(|| t.fix.to_owned());
+    let alt = [
+        Some(format!("webmcpx · {title}.")),
+        Some(what(s, t)),
+        hook,
+        fix,
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<_>>()
+    .join(" ");
     (title, description, alt)
 }
 
@@ -216,8 +222,8 @@ pub fn html(s: Summary<'_>, format: Format, t: &Text) -> String {
     let size = match s.host.chars().count() {
         0..=18 => 104,
         19..=26 => 80,
-        27..=36 => 60,
-        _ => 46,
+        27..=36 => 54,
+        _ => 44,
     };
     let (_, fill, ink) = stamp(s.verdict);
     render(&Card {
@@ -225,6 +231,7 @@ pub fn html(s: Summary<'_>, format: Format, t: &Text) -> String {
         size,
         line: &what(s, t),
         hook: hook(s, t),
+        fix: (s.verdict == Verdict::Missing).then_some(t.fix),
         stamp: Some((verdict_label(s.verdict, t), fill, ink)),
         verdict: Some(s.verdict),
         score: Some(s.score),
@@ -242,6 +249,8 @@ struct Card<'a> {
     line: &'a str,
     /// A bold second line (see [`hook`]).
     hook: Option<String>,
+    /// A small line under it, where the fix starts (no WebMCP tools only).
+    fix: Option<&'a str>,
     /// The verdict the stamp shows, for its icon.
     verdict: Option<Verdict>,
     /// Label, fill and text color of the verdict stamp.
@@ -288,7 +297,13 @@ fn render(c: &Card<'_>) -> String {
         format!(r#"<div class="seal">{badge}</div>"#)
     };
     // The link preview is 45 px shorter than the post image: its text and padding give way first.
-    let (text_size, pad) = if height < 650 { (32, 44) } else { (36, 56) };
+    let (text_size, pad, foot_gap) = if height < 650 {
+        (30, 40, 20)
+    } else {
+        (34, 52, 26)
+    };
+    // The fix line, about 70% of the hook: there to read, never competing with it.
+    let fix_size = text_size * 7 / 10;
     let cta = escape(t.cta).replace("{site}", "<span>webmcpx.dev</span>");
     // The score, big at the bottom right; highlighted from the agent-ready bar up.
     let score = c.score.map_or_else(String::new, |n| {
@@ -303,6 +318,9 @@ fn render(c: &Card<'_>) -> String {
     });
     let hook = c.hook.as_deref().map_or_else(String::new, |h| {
         format!(r#"<div class="hook">{}</div>"#, escape(h))
+    });
+    let fix = c.fix.map_or_else(String::new, |f| {
+        format!(r#"<div class="fix">{}</div>"#, escape(f))
     });
     let date = c.date.as_deref().map_or_else(String::new, |d| {
         format!(r#"<span class="date">{}</span>"#, escape(d))
@@ -326,13 +344,14 @@ background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1p
 .text{{flex:1;min-width:0}}
 .host{{font-size:{size}px;font-weight:800;letter-spacing:-.04em;line-height:1;overflow-wrap:anywhere}}
 .line{{margin-top:16px;font-size:{text_size}px;font-weight:500;line-height:1.2;color:oklch(0.38 0.006 95);max-width:1000px}}
+.fix{{margin-top:8px;font-family:ui-monospace,"SFMono-Regular",Menlo,"DejaVu Sans Mono",monospace;font-size:{fix_size}px;font-weight:600;color:oklch(0.38 0.006 95)}}
 .hook{{margin-top:10px;font-size:{text_size}px;font-weight:700;line-height:1.2;color:oklch(0.18 0.004 95)}}
-.score{{text-align:right;flex:none}}
-.score .label{{font-size:24px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.38 0.006 95);margin-bottom:6px}}
+.score{{text-align:right;flex:none;max-width:300px}}
+.score .label{{font-size:22px;line-height:1.25;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.38 0.006 95);margin-bottom:6px}}
 .num b{{font-size:150px;font-weight:800;letter-spacing:-.05em;line-height:.85}}
 .num small{{font-size:46px;font-weight:700;color:oklch(0.38 0.006 95)}}
 .num.marked b{{background:linear-gradient(transparent 45%,oklch(0.89 0.16 95) 45%,oklch(0.89 0.16 95) 80%,transparent 80%)}}
-.foot{{margin-top:28px;display:flex;justify-content:space-between;align-items:baseline;gap:32px}}
+.foot{{margin-top:{foot_gap}px;display:flex;justify-content:space-between;align-items:baseline;gap:32px}}
 .cta{{flex:none;font-size:44px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}}
 .cta span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
 .date{{min-width:0;font-size:22px;font-weight:600;letter-spacing:.06em;color:oklch(0.38 0.006 95)}}
@@ -340,7 +359,7 @@ background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1p
 </style></head><body><div class="frame">
 <div class="mark">{mark}</div>
 <div class="top"><div class="lockup">{lockup}</div>{top_right}</div>
-<div class="main"><div class="host">{host}</div><div class="row"><div class="text"><div class="line">{line}</div>{hook}</div>{score}</div></div>
+<div class="main"><div class="host">{host}</div><div class="row"><div class="text"><div class="line">{line}</div>{hook}{fix}</div>{score}</div></div>
 <div class="foot">{date}<span class="cta">{cta}</span></div>
 </div></body></html>"#,
         font = base64(FONT),
@@ -370,6 +389,7 @@ pub fn generic_html() -> String {
         size: 104,
         line: &generic_line(),
         hook: None,
+        fix: None,
         stamp: None,
         verdict: None,
         score: None,
@@ -398,6 +418,7 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
         size: 104,
         line: &line,
         hook: None,
+        fix: None,
         stamp: None,
         verdict: None,
         score: None,
@@ -597,6 +618,7 @@ mod tests {
         let check = r#"<div class="seal"><svg"#;
         assert!(missing.contains(cross) && !missing.contains(check));
         assert!(h.contains(check) && !h.contains(cross) && !h.contains(r#"class="stamp""#));
+        assert!(!h.contains(r#"class="fix""#) && missing.contains(r#"class="fix""#));
         let almost = html(
             Summary {
                 verdict: Verdict::Issues,
@@ -636,6 +658,13 @@ mod tests {
         );
         assert!(h.contains(">Nota para agentes<"), "{h}");
         assert!(h.contains("E o seu site? <span>webmcpx.dev</span>"), "{h}");
+        // No tools: where the fix starts, small, under the hook.
+        assert!(
+            h.contains(
+                r#"<div class="fix">Adicione ferramentas WebMCP: webmcpx.dev/llms.txt</div>"#
+            ),
+            "{h}"
+        );
         assert!(h.contains("Escaneado em 9 de nov. de 2026"), "{h}");
         assert!(!h.contains("Scan yours") && !h.contains("adivinh"), "{h}");
         let ja = html(s, Format::Post, Text::of(Some("ja")));

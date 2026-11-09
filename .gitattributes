@@ -1,0 +1,7 @@
+# One line ending everywhere: Windows checkouts would otherwise turn LF into CRLF, which moves byte
+# offsets in lint fixtures and snapshots (and changes what the linter's --fix edits).
+* text=auto eol=lf
+*.png binary
+*.woff2 binary
+*.wasm binary
+*.ico binary

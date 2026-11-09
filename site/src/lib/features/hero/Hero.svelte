@@ -16,12 +16,15 @@
 
 	interface Props {
 		/** The leaderboard's best case, quoted in the lead with its site and model; null: no run published. */
-		best: { saving: number; site: string; model: string } | null;
+		best: { saving: number; site: string; model: string; id: string } | null;
 	}
 
 	let { best }: Props = $props();
 	const i18n = useI18n();
 	const m = $derived(i18n.m.hero);
+	// "{site}, {model}" in the lead is one link to that run's page, which opens on its best case. The
+	// separator is the language's own (", ", "，", "、").
+	const bestSeparator = $derived(/\{site\}(.*?)\{model\}/.exec(m.lead)?.[1] ?? ', ');
 	/** Letters in the headline's longer line from sm up: the text before the mark, or the mark and what follows. */
 	const lineLen = $derived.by(() => {
 		const [before, after = ''] = m.title.text.split('{mark}');
@@ -68,9 +71,14 @@
 			<Reveal delay={120}>
 				<p class="mx-auto mt-7 max-w-5xl text-lg text-balance text-ink-2 sm:text-xl">
 					{#if best}
-						<Rich text={fmt(m.lead, { site: best.site, model: best.model })}>
+						<Rich text={m.lead.replace(/\{site\}.*?\{model\}/, '{bestCase}')}>
 							{#snippet mark()}<span class="marker text-ink"
 									>{fmt(m.leadMark, { best: ratio(best.saving) })}</span
+								>{/snippet}
+							{#snippet bestCase()}<a
+									href="{i18n.href(`/benchmark/${best.id}/`)}#leaderboard"
+									class="underline decoration-ink/30 underline-offset-4 hover:decoration-ink"
+									>{best.site}{bestSeparator}{best.model}</a
 								>{/snippet}
 						</Rich>
 					{:else}{m.leadPlain}{/if}

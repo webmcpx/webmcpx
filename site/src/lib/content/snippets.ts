@@ -14,7 +14,7 @@ export interface Highlighted extends CodeSample {
 
 /** The loader every site pastes (and this site runs itself). */
 export const LOADER_URL = 'https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js';
-const SCRIPT_TAG = `<script type="module" src="${LOADER_URL}"></` + 'script>';
+export const SCRIPT_TAG = `<script type="module" src="${LOADER_URL}"></` + 'script>';
 
 export const SNIPPETS = {
 	scriptTag: { lang: 'html', code: SCRIPT_TAG },

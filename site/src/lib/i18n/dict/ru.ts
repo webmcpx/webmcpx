@@ -740,6 +740,16 @@ const ru: Messages = {
 			fix: 'Исправить WebMCP',
 			lint: 'Найдите все проблемы в исходниках — сразу с исправлениями:',
 			terminal: 'терминал',
+			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
+			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			agentFix: {
+				title: 'Промпт для вашего агента-программиста',
+				intro:
+					'Инструментов WebMCP здесь пока нет. Вставьте это в Claude Code, Codex или Cursor в репозитории сайта:',
+				prompt:
+					'Добавь инструменты WebMCP на {host}: прочитай https://webmcpx.dev/llms.txt и добавь {tag} в общий шаблон страниц. Проверь командой npx webmcpx tools <локальный URL>; после деплоя запусти проверку снова: {rescan}.',
+				note: 'Это добавит инструменты WebMCP; вердикт зависит и от остальных проверок выше.'
+			},
 			badge: 'Ваш сайт получил бейдж agent-ready',
 			badgeNote:
 				'SVG встроен прямо в код, поэтому с наших серверов ничего не загружается. Бейдж ведёт на живую проверку вашего сайта — убедиться может любой.',

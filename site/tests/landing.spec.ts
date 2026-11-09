@@ -289,10 +289,10 @@ test('Save PDF prints the result card alone, named after the site', async ({ pag
 	await expect(png).toHaveAttribute('href', `/og/scan.png?url=${encodeURIComponent(REPORT.url)}&size=post`);
 	await expect(png).toHaveAttribute('download', 'webmcpx-scan-docs.example.com.png');
 	await page.locator('#scan').getByRole('button', { name: 'Save PDF' }).click();
-	expect(await page.evaluate(() => (window as unknown as { printed: object }).printed)).toEqual({
-		title: 'webmcpx scan · docs.example.com',
-		printing: true
-	});
+	// The dialog opens after the page has re-rendered for print: wait for it.
+	await expect
+		.poll(() => page.evaluate(() => (window as unknown as { printed?: object }).printed))
+		.toEqual({ title: 'webmcpx scan · docs.example.com', printing: true });
 	// Back to normal after the dialog.
 	expect(await page.evaluate(() => 'printing' in document.documentElement.dataset)).toBe(false);
 	// In print, only the card is laid out.
@@ -848,4 +848,43 @@ test('the site says it sets no cookies, and sets none', async ({ page, context }
 	await page.keyboard.press('Enter');
 	await expect(page.locator('#scan').getByRole('button', { name: 'Compartilhar' })).toBeVisible();
 	expect(await context.cookies()).toEqual([]);
+});
+
+test("the hero's best case links to that run, which opens on it", async ({ page }) => {
+	await page.goto('/pt-br/');
+	const link = page.getByRole('link', { name: 'Notion, GPT-6 Luna' });
+	await expect(link).toHaveAttribute('href', '/pt-br/benchmark/gpt-6-luna/#leaderboard');
+	await link.click();
+	await expect(page).toHaveURL(/\/pt-br\/benchmark\/gpt-6-luna\/#leaderboard$/);
+	await expect(page.locator('#leaderboard')).toContainText('Notion');
+});
+
+test('a site without WebMCP tools gets a prompt for its coding agent, in the page and the PDF', async ({
+	page
+}) => {
+	await mockScan(page, { ...REPORT, verdict: 'missing', tools: [] });
+	await page.goto('/pt-br/');
+	await page.getByLabel('Endereço do seu site').first().fill('docs.example.com');
+	await page.keyboard.press('Enter');
+	const fix = page.locator('#scan [data-agent-fix]');
+	await expect(fix).toContainText('Prompt para o seu agente de código');
+	// Prose in the page's language; the URLs, the command and the tag as they are.
+	await expect(fix).toContainText(
+		'Adicione ferramentas WebMCP a docs.example.com: leia https://webmcpx.dev/llms.txt e adicione <script type="module" src="https://cdn.jsdelivr.net/npm/webmcpx@0.2/dist/auto.js"></script> ao layout compartilhado. Confira com npx webmcpx tools <URL local>; depois do deploy, escaneie de novo em https://webmcpx.dev/scan/docs.example.com.'
+	);
+	// In the PDF: inside the printed card, its copy button gone.
+	await expect(page.locator('[data-print-area] [data-agent-fix]')).toHaveCount(1);
+	await page.evaluate(() => (document.documentElement.dataset.printing = ''));
+	await page.emulateMedia({ media: 'print' });
+	await expect(fix).toBeVisible();
+	await expect(fix.getByRole('button')).toBeHidden();
+});
+
+test('an agent-ready or almost result gets no fix prompt', async ({ page }) => {
+	await mockScan(page);
+	await page.goto('/');
+	await page.getByLabel("Your site's address").first().fill('docs.example.com');
+	await page.keyboard.press('Enter');
+	await expect(page.locator('#scan').getByRole('button', { name: 'Share' })).toBeVisible();
+	await expect(page.locator('#scan [data-agent-fix]')).toHaveCount(0);
 });

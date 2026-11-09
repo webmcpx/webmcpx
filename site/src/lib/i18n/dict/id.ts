@@ -698,6 +698,16 @@ const id: Messages = {
 			fix: 'Perbaiki WebMCP',
 			lint: 'Temukan semua masalah di source Anda, lengkap dengan perbaikannya:',
 			terminal: 'terminal',
+			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
+			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			agentFix: {
+				title: 'Prompt untuk coding agent Anda',
+				intro:
+					'Belum ada tool WebMCP di sini. Tempel ini ke Claude Code, Codex, atau Cursor di repositori situs:',
+				prompt:
+					'Tambahkan tool WebMCP ke {host}: baca https://webmcpx.dev/llms.txt, lalu tambahkan {tag} ke layout bersama. Cek dengan npx webmcpx tools <URL lokal>; setelah deploy, pindai ulang di {rescan}.',
+				note: 'Ini menambahkan tool WebMCP; pemeriksaan lain di atas menentukan verdiknya.'
+			},
 			badge: 'Situs Anda meraih badge agent-ready',
 			badgeNote:
 				'SVG-nya ada di dalam kode, jadi tidak ada yang dimuat dari server kami. Badge ini menautkan ke scan langsung situs Anda, jadi siapa pun bisa mengeceknya.',

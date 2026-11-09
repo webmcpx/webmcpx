@@ -633,6 +633,11 @@ mod tests {
         assert!(out.contains("Nota 25/100."), "{out}");
         // The text beside the image adds the bold line and the way to scan your own; the image gets alt text.
         assert!(out.contains("E o seu site? webmcpx.dev"), "{out}");
+        // The alt text carries the fix line too, for whoever (or whatever) reads it.
+        assert!(
+            out.contains("Adicione ferramentas WebMCP: webmcpx.dev/llms.txt"),
+            "{out}"
+        );
         assert!(
             out.contains(r#"twitter:image:alt" content="webmcpx · a.example"#),
             "{out}"

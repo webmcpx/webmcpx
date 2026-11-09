@@ -705,6 +705,16 @@ const ptBr: Messages = {
 			fix: 'Corrigir WebMCP',
 			lint: 'Encontre todos os problemas no seu código-fonte, com as correções:',
 			terminal: 'terminal',
+			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
+			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			agentFix: {
+				title: 'Prompt para o seu agente de código',
+				intro:
+					'Ainda não há ferramentas WebMCP aqui. Cole isto no Claude Code, Codex ou Cursor, no repositório do site:',
+				prompt:
+					'Adicione ferramentas WebMCP a {host}: leia https://webmcpx.dev/llms.txt e adicione {tag} ao layout compartilhado. Confira com npx webmcpx tools <URL local>; depois do deploy, escaneie de novo em {rescan}.',
+				note: 'Isso adiciona ferramentas WebMCP; as outras verificações acima decidem o veredito.'
+			},
 			badge: 'Seu site ganhou o selo agent-ready',
 			badgeNote:
 				'O SVG vai dentro do código, então nada é carregado de nós. Ele aponta para um scan ao vivo do seu site, e qualquer pessoa pode conferir.',

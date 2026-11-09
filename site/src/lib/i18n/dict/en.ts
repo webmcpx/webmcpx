@@ -845,6 +845,16 @@ const en = {
 			lint: 'Find every issue in your source, with fixes:',
 			// A code block's title: max 12.
 			terminal: 'terminal',
+			// No WebMCP tools: a prompt for the site's coding agent (also in the PDF). {host} is the scanned host,
+			// {tag} the script tag and {rescan} the re-scan link, both literal; keep URLs and commands as written.
+			agentFix: {
+				title: 'Prompt for your coding agent',
+				intro:
+					"No WebMCP tools here yet. Paste this into Claude Code, Codex or Cursor, in the site's repository:",
+				prompt:
+					'Add WebMCP tools to {host}: read https://webmcpx.dev/llms.txt, then add {tag} to the shared layout. Check with npx webmcpx tools <local URL>; after deploying, re-scan {rescan}.',
+				note: 'This adds WebMCP tools; the other checks above decide the agent-ready verdict.'
+			},
 			badge: 'Your site earned the agent-ready badge',
 			badgeNote:
 				'The SVG is in the code, so nothing loads from us. It links to a live scan of your site, so anyone can check it.',
