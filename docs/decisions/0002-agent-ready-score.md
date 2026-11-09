@@ -22,7 +22,7 @@ A score out of 100, every item in `score_items` (id, points, max):
 
 | Area | Points | Checks |
 |---|---|---|
-| WebMCP | 50 | tools registered (25), no lint errors (15), every tool described (5), every tool says what it does to the page: `readOnlyHint`, `consequentialHint` or `destructiveHint` (5) |
+| WebMCP | 50 | tools registered (25), no lint errors (15), every tool described (5), every tool says what it does to the page in WebMCP's terms: `readOnlyHint` or `consequentialHint` (5) |
 | Agent cost | 15 | full when the page has tools (agents call them); else by the page's token estimate: ≤ 2,000 → 15, ≤ 5,000 → 10, ≤ 10,000 → 5 |
 | Readable | 20 | `/llms.txt` ([llmstxt.org](https://llmstxt.org/)), a Markdown version (served for `Accept: text/markdown` or linked `rel="alternate"`), robots.txt not shutting AI agents out, a sitemap (5 each) |
 | Discoverable | 15 | `Link` headers ([RFC 8288](https://www.rfc-editor.org/rfc/rfc8288)), `/.well-known/agent-skills/index.json` ([Agent Skills Discovery RFC v0.2.0](https://github.com/cloudflare/agent-skills-discovery-rfc)), `/.well-known/api-catalog` ([RFC 9727](https://www.rfc-editor.org/rfc/rfc9727)) (5 each) |
@@ -55,3 +55,10 @@ gets its effective group (its own, else `*`), and the longest rule matching the 
   scanner says which.
 - The share card and the scan API carry the score; `/verdicts` documents the weights and the bar.
 - The weights are ours, stated here and on `/verdicts`; a change to them is a new decision record.
+
+## Changes
+
+- **2026-11-09:** `destructiveHint` no longer counts toward "every tool annotated". It is an MCP annotation
+  that WebMCP does not define and browsers ignore (`webmcpx-core`, `Annotation::MCP_ONLY`; the linter warns on
+  it), so it told the agent's host nothing. A site whose tools carried only `destructiveHint` loses those 5
+  points; the check now uses the same definitions as the linter.

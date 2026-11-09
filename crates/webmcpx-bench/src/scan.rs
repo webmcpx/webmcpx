@@ -1136,12 +1136,16 @@ pub fn report(
 ) -> Report {
     let diagnostics = lint(tools);
     let has_tools = !tools.is_empty();
-    // Each tool says what it does to the page: read only, consequential or destructive.
+    // Each tool says what it does to the page, in WebMCP's own words: read only or consequential (the
+    // linter's definitions). MCP-only hints such as destructiveHint are ignored by browsers, so they don't count.
     let annotated = tools.iter().all(|t| {
         t["annotations"].as_object().is_some_and(|a| {
-            ["readOnlyHint", "consequentialHint", "destructiveHint"]
-                .iter()
-                .any(|k| a.get(*k).is_some_and(Value::is_boolean))
+            [
+                webmcpx_core::Annotation::ReadOnly,
+                webmcpx_core::Annotation::Consequential,
+            ]
+            .iter()
+            .any(|k| a.get(k.key()).is_some_and(Value::is_boolean))
         })
     });
     let mut tools: Vec<Tool> = tools
@@ -1331,6 +1335,29 @@ mod tests {
             "inputSchema": { "type": "object", "properties": { "query": { "type": "string", "description": "Words to find." } } },
             "annotations": annotations,
         })
+    }
+
+    /// Only WebMCP's own effect hints earn the annotation points: a browser ignores MCP-only ones, so a tool
+    /// marked only destructiveHint says nothing to the agent's host.
+    #[test]
+    fn only_webmcp_hints_count_as_annotated() {
+        let item = |annotations: Value| {
+            let r = report(
+                "https://a.example/",
+                "https://a.example/".to_owned(),
+                "t",
+                &[tool("find", "Find products by name.", &annotations)],
+                400,
+                &Checks::default(),
+            );
+            r.score_items
+                .iter()
+                .find(|i| i.id == "annotations")
+                .map(|i| i.points)
+        };
+        assert_eq!(item(json!({ "readOnlyHint": true })), Some(5));
+        assert_eq!(item(json!({ "consequentialHint": true })), Some(5));
+        assert_eq!(item(json!({ "destructiveHint": true })), Some(0));
     }
 
     #[test]

@@ -150,3 +150,9 @@ test('the language suggestion is a card clear of the logo and menu', async ({ br
 	await expect(card).toHaveCount(0);
 	await context.close();
 });
+
+test('changing the language keeps a shared scan', async ({ page }) => {
+	await page.goto('/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');
+	const pt = page.locator('header a[hreflang="pt-BR"]').first();
+	await expect(pt).toHaveAttribute('href', '/pt-br/?scan=https%3A%2F%2Fdocs.example.com%2F#scan');
+});

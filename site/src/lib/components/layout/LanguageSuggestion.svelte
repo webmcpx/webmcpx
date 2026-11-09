@@ -9,7 +9,7 @@
 	import { page } from '$app/state';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
 	import { loadMessages } from '#lib/i18n/load.ts';
-	import { localized, preferred, unlocalized, type LocaleCode } from '#lib/i18n/locales.ts';
+	import { inLanguage, preferred, type LocaleCode } from '#lib/i18n/locales.ts';
 
 	const i18n = useI18n();
 	const KEY = 'webmcpx:language-suggestion';
@@ -51,7 +51,7 @@
 	>
 		<span class="min-w-0 flex-1">{offer.text}</span>
 		<a
-			href={localized(unlocalized(page.url.pathname), offer.code)}
+			href={inLanguage(page.url.pathname, offer.code, page.url.search, page.url.hash)}
 			onclick={remember}
 			data-sveltekit-reload
 			class="shrink-0 font-bold underline underline-offset-4">{offer.action}</a

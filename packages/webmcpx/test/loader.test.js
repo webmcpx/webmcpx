@@ -276,3 +276,24 @@ test("nested blocks keep their words apart", async () => {
   }
   assert.match((await page.call("fetch_as_markdown", {})).data.markdown, /Refunds Contact support\./);
 });
+
+test("flex and grid items stay separate words, as they are on screen", async () => {
+  const page = host();
+  document.body.innerHTML =
+    '<main><div class="row"><span class="item">Delivery</span><span class="item">Monday</span></div><p>Price <b>$20</b> today.</p></main>';
+  // Flex items are blockified (getComputedStyle says "block"); inline elements stay inline.
+  const display = { row: "flex", item: "block" };
+  globalThis.getComputedStyle = (el) => ({
+    display: display[el.getAttribute("class")] ?? (/^(MAIN|DIV|P)$/.test(el.tagName) ? "block" : "inline"),
+    visibility: "visible",
+  });
+  try {
+    await register({ wasm: WASM });
+    const md = (await page.call("fetch_as_markdown", {})).data.markdown;
+    assert.match(md, /Delivery Monday/);
+    assert.match(md, /Price \$20 today\./, "inline elements still join the text around them");
+    assert.equal((await page.call("search_page", { query: "Delivery" })).ok, true);
+  } finally {
+    delete globalThis.getComputedStyle;
+  }
+});

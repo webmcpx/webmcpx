@@ -42,6 +42,14 @@ export function localized(path: string, code: LocaleCode): string {
 	return code === DEFAULT_LOCALE ? path : `/${code}${path}`;
 }
 
+/**
+ * This page in language `code`, keeping its query and fragment (a shared scan, `?scan=<url>#scan`, stays that
+ * scan). `url` is the current page's URL; pass `search` and `hash` only in the browser (prerendering has none).
+ */
+export function inLanguage(path: string, code: LocaleCode, search = '', hash = ''): string {
+	return localized(unlocalized(path), code) + search + hash;
+}
+
 /** The English path of a localized one (`/pt-br/brand/` → `/brand/`). */
 export function unlocalized(path: string): string {
 	const [, first, ...rest] = path.split('/');

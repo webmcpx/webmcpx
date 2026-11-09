@@ -29,7 +29,7 @@
 	import Stamp from '#lib/components/ui/Stamp.svelte';
 	import { REPO, VERSION, X_URL } from '#lib/content/site.ts';
 	import { useI18n } from '#lib/i18n/index.svelte.ts';
-	import { LOCALES, localized, unlocalized } from '#lib/i18n/locales.ts';
+	import { LOCALES, unlocalized, inLanguage } from '#lib/i18n/locales.ts';
 	import Logo from './Logo.svelte';
 
 	interface Item {
@@ -55,6 +55,13 @@
 	]);
 	/** This page in every language (the English path is the shared key). */
 	const english = $derived(unlocalized(page.url.pathname));
+	// A shared scan's query and fragment survive a change of language. Read in an effect: it runs in the
+	// browser only (a prerendered page has no query).
+	// eslint-disable-next-line svelte/prefer-writable-derived -- a $derived would read the query while prerendering
+	let keep = $state({ search: '', hash: '' });
+	$effect(() => {
+		keep = { search: page.url.search, hash: page.url.hash };
+	});
 
 	/** The landing section in view, if any (sections absent from this page are ignored). */
 	let current: string | undefined = $state();
@@ -94,7 +101,7 @@
 		{#each LOCALES as l (l.code)}
 			<li>
 				<a
-					href={localized(english, l.code)}
+					href={inLanguage(english, l.code, keep.search, keep.hash)}
 					hreflang={l.tag}
 					lang={l.tag}
 					data-sveltekit-reload

@@ -53,9 +53,12 @@ export function readPage(what, root) {
   const skipped = (el) => SKIP.has(el.tagName) || hidden(el);
   // visibility is inherited and a child can undo it, so it is checked per text node.
   const data = (n) => (css(n.parentNode).visibility == "hidden" ? "" : n.data);
+  // A box of its own on screen (a block, or a flex or grid item, which the browser blockifies): its text
+  // stays a separate word from its neighbors'. Inline elements join the text around them.
+  const boxed = (el) => el.matches(BLOCKS) || /^(block|flex|grid|list-item|table|flow-root)/.test(css(el).display ?? "");
   // Visible text; an element with no block inside is one block.
   const textOf = (el) =>
-    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? (n.matches(BLOCKS) ? ` ${textOf(n)} ` : textOf(n)) : "")).join("");
+    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? (boxed(n) ? ` ${textOf(n)} ` : textOf(n)) : "")).join("");
   const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   if (what === "context") {
     // Page-set fields are cut to size; URLs never are (a heading with a giant id gets no URL), and a
