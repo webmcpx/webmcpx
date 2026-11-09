@@ -696,6 +696,17 @@ const hi: Messages = {
 			terminal: 'टर्मिनल',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'X पर पोस्ट करें',
+				text: {
+					ready:
+						'{host} एजेंट-रेडी है: webmcpx पर {score}/100, ऐसे WebMCP टूल्स के साथ जिन्हें एजेंट सीधे कॉल कर सकते हैं। और आपकी साइट?',
+					issues: '{host} को एजेंट-रेडी स्कोर में {score}/100 मिले: लगभग तैयार। और आपकी साइट?',
+					missing: '{host} को एजेंट-रेडी स्कोर में {score}/100 मिले: अभी कोई WebMCP टूल नहीं। और आपकी साइट?'
+				}
+			},
 			agentFix: {
 				title: 'आपके कोडिंग एजेंट के लिए प्रॉम्प्ट',
 				intro: 'यह प्रॉम्प्ट अपने कोडिंग एजेंट में पेस्ट करें, और वह आपकी साइट में WebMCP जोड़ देगा:',

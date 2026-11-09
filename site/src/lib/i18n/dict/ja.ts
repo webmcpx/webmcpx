@@ -689,6 +689,17 @@ const ja: Messages = {
 			terminal: 'ターミナル',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'X に投稿',
+				text: {
+					ready:
+						'{host} はエージェント対応: webmcpx で {score}/100、エージェントが直接呼び出せる WebMCP ツールあり。あなたのサイトは？',
+					issues: '{host} のエージェント対応スコアは {score}/100: あと少し。あなたのサイトは？',
+					missing: '{host} のエージェント対応スコアは {score}/100: まだ WebMCP ツールなし。あなたのサイトは？'
+				}
+			},
 			agentFix: {
 				title: 'コーディングエージェント用のプロンプト',
 				intro: 'このプロンプトをコーディングエージェントに貼り付けると、サイトに WebMCP を追加してくれます:',

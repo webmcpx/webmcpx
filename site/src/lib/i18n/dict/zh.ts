@@ -660,6 +660,17 @@ const zh: Messages = {
 			terminal: '终端',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: '发到 X',
+				text: {
+					ready:
+						'{host} 已为智能体就绪：在 webmcpx 得分 {score}/100，提供智能体可直接调用的 WebMCP 工具。你的网站呢？',
+					issues: '{host} 的智能体就绪评分为 {score}/100：差一点就绪。你的网站呢？',
+					missing: '{host} 的智能体就绪评分为 {score}/100：还没有 WebMCP 工具。你的网站呢？'
+				}
+			},
 			agentFix: {
 				title: '给你的编程智能体的提示词',
 				intro: '把这段提示词粘贴给你的编程智能体，它会为你的网站加上 WebMCP：',

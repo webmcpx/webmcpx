@@ -707,6 +707,18 @@ const ptBr: Messages = {
 			terminal: 'terminal',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'Postar no X',
+				text: {
+					ready:
+						'{host} está pronto para agentes: {score}/100 no webmcpx, com ferramentas WebMCP que os agentes chamam direto. E o seu site?',
+					issues: '{host} tirou {score}/100 na nota para agentes: quase lá. E o seu site?',
+					missing:
+						'{host} tirou {score}/100 na nota para agentes: ainda sem ferramentas WebMCP. E o seu site?'
+				}
+			},
 			agentFix: {
 				title: 'Prompt para o seu agente de código',
 				intro: 'Cole este prompt no seu agente de código e ele coloca WebMCP no seu site:',

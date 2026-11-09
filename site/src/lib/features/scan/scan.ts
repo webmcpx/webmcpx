@@ -194,6 +194,10 @@ export function shareLink(origin: string, url: string, home = '/'): string {
 	return `${origin}${home}?scan=${encodeURIComponent(url)}`;
 }
 
+/** A post on X with `text` and the scan's link (X shortens and previews it: the share card). */
+export const postOnX = (text: string, link: string) =>
+	`https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}`;
+
 /**
  * The badge styles. All but `readme` are inlined into the embed code, so those sites load nothing from our server. Their names
  * are in the dictionary (`scan.badges.<id>`); the artwork's own <title> stays English, like the logo.

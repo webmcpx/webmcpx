@@ -708,6 +708,17 @@ const de: Messages = {
 			terminal: 'Terminal',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'Auf X posten',
+				text: {
+					ready:
+						'{host} ist agentenfähig: {score}/100 bei webmcpx, mit WebMCP-Tools, die Agenten direkt aufrufen. Und deine Seite?',
+					issues: '{host} hat {score}/100 im Agenten-Score: fast agentenfähig. Und deine Seite?',
+					missing: '{host} hat {score}/100 im Agenten-Score: noch keine WebMCP-Tools. Und deine Seite?'
+				}
+			},
 			agentFix: {
 				title: 'Prompt für deinen Coding-Agenten',
 				intro: 'Gib diesen Prompt deinem Coding-Agenten, und er baut WebMCP in deine Website ein:',

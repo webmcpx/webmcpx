@@ -128,12 +128,9 @@
 			<ul class="space-y-1 text-xs">
 				{#each m.notices as n (n)}<li>{n}</li>{/each}
 			</ul>
-			<!-- Our own badge: a link to a live scan of this site, like the one we offer everyone. -->
-			<a
-				href="{i18n.href('/')}?scan={encodeURIComponent('https://webmcpx.dev/')}#scan"
-				class="shrink-0"
-				title={m.badge}
-			>
+			<!-- Our own badge: a link to a live scan of this site, like the one we offer everyone. Absolute: /scan/<host> is
+			     answered by the server (a redirect), not a prerendered page, so the build must not crawl it. -->
+			<a href="https://webmcpx.dev{i18n.href('/')}scan/webmcpx.dev#scan" class="shrink-0" title={m.badge}>
 				<!-- Our own artwork (content/badges/flat.svg), not user input. -->
 				<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 				{@html FLAT_BADGE}

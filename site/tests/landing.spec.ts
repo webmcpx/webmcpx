@@ -900,3 +900,20 @@ test('an agent-ready or almost result gets no fix prompt', async ({ page }) => {
 	await expect(page.locator('#scan').getByRole('button', { name: 'Share' })).toBeVisible();
 	await expect(page.locator('#scan [data-agent-fix]')).toHaveCount(0);
 });
+
+test('Post on X opens a post with the result in the page language and the scan link', async ({ page }) => {
+	await mockScan(page, { ...REPORT, verdict: 'missing', tools: [], score: 25 });
+	await page.goto('/pt-br/');
+	await page.getByLabel('Endereço do seu site').first().fill('docs.example.com');
+	await page.keyboard.press('Enter');
+	const post = page.locator('#scan').getByRole('link', { name: 'Postar no X' });
+	await expect(post).toHaveAttribute('target', '_blank');
+	const url = new URL((await post.getAttribute('href'))!);
+	expect(url.origin + url.pathname).toBe('https://x.com/intent/post');
+	expect(url.searchParams.get('text')).toBe(
+		'docs.example.com tirou 25/100 na nota para agentes: ainda sem ferramentas WebMCP. E o seu site?'
+	);
+	expect(url.searchParams.get('url')).toBe('https://webmcpx.dev/pt-br/scan/docs.example.com');
+	// The only social button: no LinkedIn.
+	await expect(page.locator('#scan').getByRole('link', { name: /linkedin/i })).toHaveCount(0);
+});

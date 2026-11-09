@@ -847,6 +847,19 @@ const en = {
 			terminal: 'terminal',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'Post on X',
+				text: {
+					ready:
+						'{host} is agent-ready: {score}/100 on webmcpx, with WebMCP tools agents can call. Is your site?',
+					issues:
+						'{host} scored {score}/100 on the agent-ready score: almost there. Is your site agent-ready?',
+					missing:
+						'{host} scored {score}/100 on the agent-ready score: no WebMCP tools for agents yet. Is your site agent-ready?'
+				}
+			},
 			agentFix: {
 				title: 'Prompt for your coding agent',
 				intro: 'Paste this prompt into your coding agent, and it adds WebMCP to your site:',

@@ -33,6 +33,7 @@
 		READY_SCORE,
 		SCORE_COLUMNS,
 		shareLink,
+		postOnX,
 		type BadgeStyle
 	} from './scan.ts';
 	import { scanner } from './scanner.svelte.ts';
@@ -442,6 +443,24 @@
 						><Wrench aria-hidden="true" />{m.result.fix}</Button
 					>
 				{/if}
+				<!-- One click to a post with this result, in the page's language; the link previews as the share card. -->
+				<Button
+					variant="outline"
+					size="sm"
+					href={postOnX(
+						fmt(m.result.post.text[r.verdict], { host: host(r.final_url), score: String(r.score ?? 0) }),
+						shareLink('https://webmcpx.dev', r.url, i18n.href('/'))
+					)}
+					target="_blank"
+					rel="noopener"
+					data-post-x
+				>
+					<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"
+						><path
+							d="M18.9 1.2h3.7l-8 9.2L24 22.8h-7.4l-5.8-7.6-6.6 7.6H.5L9 13 0 1.2h7.6l5.2 6.9 6.1-6.9Zm-1.3 19.5h2L6.5 3.2H4.3l13.3 17.5Z"
+						/></svg
+					>{m.result.post.x}
+				</Button>
 				<Button variant="outline" size="sm" onclick={() => share(r.url)}>
 					<Link aria-hidden="true" />{shared ? m.result.shared : m.result.share}
 				</Button>

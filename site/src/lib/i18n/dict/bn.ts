@@ -705,6 +705,17 @@ const bn: Messages = {
 			terminal: 'টার্মিনাল',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'X-এ পোস্ট করুন',
+				text: {
+					ready:
+						'{host} এজেন্ট-রেডি: webmcpx-এ {score}/100, এমন WebMCP টুলসহ যা এজেন্ট সরাসরি কল করতে পারে। আর আপনার সাইট?',
+					issues: '{host} এজেন্ট-রেডি স্কোরে পেয়েছে {score}/100: প্রায় তৈরি। আর আপনার সাইট?',
+					missing: '{host} এজেন্ট-রেডি স্কোরে পেয়েছে {score}/100: এখনো কোনো WebMCP টুল নেই। আর আপনার সাইট?'
+				}
+			},
 			agentFix: {
 				title: 'আপনার কোডিং এজেন্টের জন্য প্রম্পট',
 				intro: 'এই প্রম্পটটি আপনার কোডিং এজেন্টে পেস্ট করুন, সে আপনার সাইটে WebMCP যোগ করে দেবে:',

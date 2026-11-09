@@ -742,6 +742,17 @@ const ru: Messages = {
 			terminal: 'терминал',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'Опубликовать в X',
+				text: {
+					ready:
+						'{host} готов к агентам: {score}/100 в webmcpx, с инструментами WebMCP, которые агенты вызывают напрямую. А ваш сайт?',
+					issues: '{host}: {score}/100 по готовности к агентам — почти готов. А ваш сайт?',
+					missing: '{host}: {score}/100 по готовности к агентам — инструментов WebMCP пока нет. А ваш сайт?'
+				}
+			},
 			agentFix: {
 				title: 'Промпт для вашего агента-программиста',
 				intro: 'Вставьте этот промпт в своего агента-программиста, и он добавит WebMCP на ваш сайт:',

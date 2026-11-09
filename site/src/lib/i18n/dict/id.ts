@@ -700,6 +700,17 @@ const id: Messages = {
 			terminal: 'terminal',
 			// No WebMCP tools: a short prompt for the site's coding agent (also in the PDF). {host} is the scanned
 			// host; keep the URL and the command as written.
+			// One-click posts of this result: {host} is the scanned site, {score} its score; the link to the scan is
+			// added after the text. Max 200 characters each (X counts the link too).
+			post: {
+				x: 'Posting di X',
+				text: {
+					ready:
+						'{host} siap agent: {score}/100 di webmcpx, dengan tool WebMCP yang bisa dipanggil agent langsung. Situsmu bagaimana?',
+					issues: '{host} dapat skor {score}/100 untuk agent: hampir siap. Situsmu bagaimana?',
+					missing: '{host} dapat skor {score}/100 untuk agent: belum ada tool WebMCP. Situsmu bagaimana?'
+				}
+			},
 			agentFix: {
 				title: 'Prompt untuk coding agent Anda',
 				intro: 'Tempel prompt ini ke coding agent Anda, dan ia akan menambahkan WebMCP ke situs Anda:',

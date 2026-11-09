@@ -73,4 +73,4 @@ A server-rendered form needs no JavaScript: add `toolname`, `tooldescription` an
    mc.getTools()).find((t) => t.name === "search_page"); JSON.parse(JSON.parse(await mc.executeTool(t,
    { query: "pricing" })))`. `executeTool()` resolves with JSON text and webmcpx tools return their
    envelope as JSON text, so parse twice; a tool returning an object needs one parse.
-4. **Scan the live site.** Once deployed, `https://webmcpx.dev/?scan=<site>` (or `GET https://webmcpx.dev/api/scan?url=<site>` for JSON) should say agent-ready.
+4. **Scan the live site.** Once deployed, `https://webmcpx.dev/scan/<site>` (or `GET https://webmcpx.dev/api/scan?url=<site>` for JSON) should say agent-ready.
