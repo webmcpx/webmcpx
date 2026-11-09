@@ -46,7 +46,7 @@
 	const VERDICT = {
 		ready: { tone: 'good', icon: CircleCheck, fill: 'bg-good-soft' },
 		issues: { tone: 'marker', icon: CircleAlert, fill: 'bg-marker' },
-		missing: { tone: 'bad', icon: CircleX, fill: 'bg-bad-soft' }
+		missing: { tone: 'alert', icon: CircleX, fill: 'bg-bad-soft' }
 	} as const;
 	const error = $derived(
 		scanner.error === 'invalid' ? m.errors.invalid : scanner.error ? errorText(scanner.error, m.errors) : ''
@@ -196,7 +196,12 @@
 				<div class="min-w-0 flex-1">
 					<div class="flex flex-wrap items-center gap-3">
 						<p class="truncate font-display text-2xl font-bold tracking-tight">{host(r.final_url)}</p>
-						<Stamp tone={v.tone} size="lg">{m.verdicts[r.verdict]}</Stamp>
+						<!-- Not agent-ready reads as the share card does: red, with a cross. -->
+						<Stamp tone={v.tone} size="lg"
+							>{#if r.verdict === 'missing'}<X aria-hidden="true" strokeWidth={3} />{/if}{m.verdicts[
+								r.verdict
+							]}</Stamp
+						>
 						<a
 							href={i18n.href('/verdicts/')}
 							class="text-sm text-ink-3 underline decoration-ink/30 underline-offset-4 hover:text-ink"

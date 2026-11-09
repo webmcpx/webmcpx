@@ -866,6 +866,13 @@ test('a site without WebMCP tools gets a prompt for its coding agent, in the pag
 	await page.goto('/pt-br/');
 	await page.getByLabel('Endereço do seu site').first().fill('docs.example.com');
 	await page.keyboard.press('Enter');
+	// The verdict reads as on the share card: the whole phrase, red, with a cross.
+	const stamp = page.locator('#scan').getByText('Não pronto para agentes', { exact: true });
+	await expect(stamp).toBeVisible();
+	expect(await stamp.evaluate((el) => getComputedStyle(el).backgroundColor)).not.toBe(
+		await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+	);
+	await expect(stamp.locator('svg')).toHaveCount(1);
 	const fix = page.locator('#scan [data-agent-fix]');
 	await expect(fix).toContainText('Prompt para o seu agente de código');
 	await expect(fix).toContainText(

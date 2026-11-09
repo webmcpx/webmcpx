@@ -611,7 +611,7 @@ const es: Messages = {
 			'Leyéndola como un agente…',
 			'Analizando con el linter…'
 		],
-		verdicts: { ready: 'Listo', issues: 'Casi', missing: 'No listo' },
+		verdicts: { ready: 'Listo para agentes', issues: 'Casi', missing: 'No listo para agentes' },
 		failed: 'No se pudo escanear.',
 		result: {
 			missing:

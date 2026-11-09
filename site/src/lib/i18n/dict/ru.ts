@@ -634,7 +634,7 @@ const ru: Messages = {
 			'Читаем её глазами агента…',
 			'Проверяем инструменты линтером…'
 		],
-		verdicts: { ready: 'Готов', issues: 'Почти', missing: 'Не готов' },
+		verdicts: { ready: 'Готов к агентам', issues: 'Почти', missing: 'Не готов к агентам' },
 		failed: 'Не удалось проверить.',
 		result: {
 			missing:

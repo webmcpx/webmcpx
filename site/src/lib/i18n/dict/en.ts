@@ -751,7 +751,7 @@ const en = {
 			'Reading it like an agent…',
 			'Linting the tools…'
 		],
-		// Verdict stamps: max 12 each. "Agent-ready" is the key term (see hero.title).
+		// Verdict stamps, as the share card words them (card/text.rs): max 26 each. "Agent-ready" is the key term (see hero.title).
 		verdicts: { ready: 'Agent-ready', issues: 'Almost', missing: 'Not agent-ready' },
 		failed: "Couldn't scan that.",
 		result: {

@@ -617,7 +617,7 @@ const fr: Messages = {
 			'Lecture comme un agent…',
 			'Lint des outils…'
 		],
-		verdicts: { ready: 'Prêt', issues: 'Presque', missing: 'Pas prêt' },
+		verdicts: { ready: 'Prêt pour les agents', issues: 'Presque', missing: 'Pas prêt pour les agents' },
 		failed: 'Impossible de scanner ce site.',
 		result: {
 			missing: 'Aucun outil WebMCP. Les agents doivent lire environ {tokens} de cette page à la place.',

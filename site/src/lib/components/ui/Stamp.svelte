@@ -10,6 +10,7 @@
 				marker: 'bg-marker text-ink',
 				good: 'bg-good-soft text-ink',
 				bad: 'bg-bad-soft text-ink',
+				alert: 'bg-bad text-paper',
 				ink: 'bg-ink text-paper'
 			},
 			size: {

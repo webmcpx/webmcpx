@@ -610,7 +610,7 @@ const ptBr: Messages = {
 			'Lendo como um agente…',
 			'Rodando o lint nas ferramentas…'
 		],
-		verdicts: { ready: 'Pronto', issues: 'Quase', missing: 'Não pronto' },
+		verdicts: { ready: 'Pronto para agentes', issues: 'Quase', missing: 'Não pronto para agentes' },
 		failed: 'Não foi possível escanear.',
 		result: {
 			missing:
