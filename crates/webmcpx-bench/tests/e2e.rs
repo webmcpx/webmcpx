@@ -631,12 +631,12 @@ async fn a_cancelled_scan_frees_its_place_in_line() {
         }),
     ))
     .await;
-    // One scan at a time, one more in line. A short deadline keeps the first scan well within the 30 s a
-    // scan may wait in line, however slow the machine (this tests the freed place, not scan length).
+    // One scan at a time, one more in line. The deadline (20 s) keeps the first scan within the 30 s the next
+    // one may wait in line; on a slow machine a scan may still time out, which is not what this tests.
     let scanner = Arc::new(
         webmcpx_bench::scan::Scanner::new(None, true)
             .capacity(1, 1)
-            .deadline(std::time::Duration::from_secs(12)),
+            .deadline(std::time::Duration::from_secs(20)),
     );
     let scan = |page: &str| {
         let (scanner, url) = (Arc::clone(&scanner), format!("http://{site}/{page}"));
@@ -649,10 +649,13 @@ async fn a_cancelled_scan_frees_its_place_in_line() {
     gave_up.abort();
     let _ = gave_up.await;
     let next = scan("c");
-    assert!(running.await.unwrap().is_ok());
+    // The first scan ends (done or timed out); the next one then gets the line's only place. Busy would mean
+    // the cancelled scan still held it.
+    let _ = running.await.unwrap();
+    let next = next.await.unwrap();
     assert!(
-        next.await.unwrap().is_ok(),
-        "the place the cancelled scan held was not freed"
+        !matches!(next, Err(webmcpx_bench::scan::ScanError::Busy)),
+        "the place the cancelled scan held was not freed: {next:?}"
     );
 }
 
