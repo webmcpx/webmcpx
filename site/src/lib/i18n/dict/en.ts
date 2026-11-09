@@ -126,8 +126,8 @@ const en = {
 		// {sites} is a row of three site names (buttons that start a scan).
 		try: 'Try {sites}',
 		// Under the scan, for people who use agents but run no site: a question, then a link.
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'Free · no sign-up · no cookies',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'Open source · no sign-up · no cookies',
 		entry: { question: 'Not running a site, just using agents?', agent: 'Set up your agent' }
 	},
 

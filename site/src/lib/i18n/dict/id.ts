@@ -88,8 +88,8 @@ const id: Messages = {
 		leadPlain:
 			'Agent AI sudah membaca halaman Anda. Lihat apa yang mereka dapat, lalu beri mereka tool sungguhan dengan satu baris.',
 		try: 'Coba {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'Gratis · tanpa daftar · tanpa cookie',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'Open source · tanpa daftar · tanpa cookie',
 		entry: { question: 'Tidak punya situs, hanya pakai agen?', agent: 'Siapkan agen Anda' }
 	},
 

@@ -63,6 +63,7 @@
 						{#snippet mark()}<br class="max-sm:hidden" /><span class="marker">{m.title.mark}</span>{/snippet}
 					</Rich>
 				</h1>
+				<p class="mt-5 font-mono text-sm tracking-wide text-ink-3">{m.trust}</p>
 			</Reveal>
 			<Reveal delay={120}>
 				<p class="mx-auto mt-7 max-w-5xl text-lg text-balance text-ink-2 sm:text-xl">
@@ -91,7 +92,6 @@
 								{/snippet}
 							</Rich>
 						</p>
-						<p class="mt-2 text-center font-mono text-xs tracking-wide text-ink-3">{m.trust}</p>
 					{/snippet}
 				</ScanForm>
 			</Reveal>

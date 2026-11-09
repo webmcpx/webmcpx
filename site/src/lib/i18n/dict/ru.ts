@@ -92,8 +92,8 @@ const ru: Messages = {
 		leadPlain:
 			'ИИ-агенты уже читают ваши страницы. Посмотрите, что они видят, и дайте им настоящие инструменты одной строкой.',
 		try: 'Попробуйте: {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'Бесплатно · без регистрации · без cookie',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'Открытый код · без регистрации · без cookie',
 		entry: { question: 'Нет сайта, только агенты?', agent: 'Настроить агента' }
 	},
 

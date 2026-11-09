@@ -87,8 +87,8 @@ const bn: Messages = {
 		leadPlain:
 			'AI এজেন্টরা এরই মধ্যে আপনার পেজ পড়ছে। দেখুন তারা কী পায়, তারপর এক লাইনেই তাদের হাতে দিন আসল টুল।',
 		try: 'দেখে নিন: {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'ফ্রি · সাইন-আপ নেই · কোনো কুকি নেই',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'ওপেন সোর্স · সাইন-আপ নেই · কোনো কুকি নেই',
 		entry: { question: 'সাইট নেই, শুধু এজেন্ট ব্যবহার করেন?', agent: 'আপনার এজেন্ট সেট আপ করুন' }
 	},
 

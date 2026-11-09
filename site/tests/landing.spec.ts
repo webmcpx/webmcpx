@@ -842,7 +842,7 @@ test('Share opens the phone share sheet when there is one', async ({ browser }) 
 test('the site says it sets no cookies, and sets none', async ({ page, context }) => {
 	await mockScan(page);
 	await page.goto('/pt-br/');
-	await expect(page.getByText('Grátis · sem cadastro · sem cookies')).toBeVisible();
+	await expect(page.locator('#hero-title + p')).toHaveText('Open source · sem cadastro · sem cookies');
 	await expect(page.locator('footer')).toContainText('Sem cookies, sem scripts de rastreamento.');
 	await page.getByLabel('Endereço do seu site').first().fill('docs.example.com');
 	await page.keyboard.press('Enter');

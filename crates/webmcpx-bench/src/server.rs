@@ -422,7 +422,7 @@ async fn scan(
 ) -> Response {
     // A recent report costs nothing: shared links and repeat visits never count against the limit, and the
     // report says it is cached and when it expires.
-    if let Some(report) = state.scanner.recent(&q.url) {
+    if let Some(report) = state.scanner.reuse(&q.url) {
         return Json(report).into_response();
     }
     let _scanning = match &state.visitors {

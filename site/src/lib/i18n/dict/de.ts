@@ -87,8 +87,8 @@ const de: Messages = {
 		leadPlain:
 			'KI-Agenten lesen Ihre Seiten längst. Sehen Sie, was bei ihnen ankommt, und geben Sie ihnen mit einer Zeile echte Tools.',
 		try: 'Testen Sie {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'Kostenlos · ohne Anmeldung · ohne Cookies',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'Open Source · ohne Anmeldung · ohne Cookies',
 		entry: { question: 'Keine Website, nur Agenten?', agent: 'Agent einrichten' }
 	},
 

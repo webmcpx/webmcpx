@@ -261,11 +261,10 @@ async fn main() -> Result<()> {
             writeln!(std::io::stdout().lock(), "{result}")?;
         }
         Command::Stats { data_dir, days } => {
-            let entries = webmcpx_bench::ledger::read(&data_dir.join("scans.jsonl"));
             write!(
                 std::io::stdout().lock(),
                 "{}",
-                webmcpx_bench::ledger::stats(&entries, days)
+                webmcpx_bench::ledger::stats(&data_dir.join("scans.jsonl"), days)
             )?;
         }
         Command::Serve {

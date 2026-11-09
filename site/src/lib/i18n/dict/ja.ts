@@ -86,8 +86,8 @@ const ja: Messages = {
 		leadPlain:
 			'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',
 		try: 'お試し：{sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: '無料 · 登録不要 · Cookie なし',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'オープンソース · 登録不要 · Cookie なし',
 		entry: { question: 'サイトはなく、エージェントだけ使う？', agent: 'エージェントを設定' }
 	},
 

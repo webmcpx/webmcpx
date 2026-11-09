@@ -88,8 +88,8 @@ const zh: Messages = {
 		// Without a published run (no number to quote).
 		leadPlain: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
 		try: '试试 {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: '免费 · 无需注册 · 不用 Cookie',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: '开源 · 无需注册 · 不用 Cookie',
 		entry: { question: '没有网站，只用智能体？', agent: '配置你的智能体' }
 	},
 

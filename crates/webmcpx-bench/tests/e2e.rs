@@ -1778,20 +1778,38 @@ async fn the_scan_log_counts_scans_and_survives_a_restart() {
     let _ = std::fs::remove_dir_all(&dir);
     let open = || webmcpx_bench::ledger::Ledger::open(&dir).unwrap();
     {
-        let scanner = webmcpx_bench::scan::Scanner::new(None, true).ledger(open());
-        scanner.scan(&url).await.unwrap();
-        // The second ask within minutes is the cached report: counted as such.
-        scanner.scan(&url).await.unwrap();
+        // Through the public API, as visitors ask: the second ask within minutes is the cached report,
+        // counted as such.
+        let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true).ledger(open()));
+        let (stop, stopped) = tokio::sync::oneshot::channel::<()>();
+        let (addr, serving) = server::serve_until(
+            &repo_root(),
+            ([127, 0, 0, 1], 0).into(),
+            Some(scanner),
+            None,
+            async {
+                stopped.await.ok();
+            },
+        )
+        .await
+        .unwrap();
+        // Two at once share one browser scan, and a third comes after: every ask is counted.
+        let ask = || reqwest::get(format!("http://{addr}/api/scan?url={url}"));
+        let (a, b) = tokio::join!(ask(), ask());
+        for response in [a.unwrap(), b.unwrap(), ask().await.unwrap()] {
+            assert_eq!(response.status().as_u16(), 200);
+        }
+        stop.send(()).unwrap();
+        serving.await.unwrap().unwrap();
     }
     let restarted = webmcpx_bench::scan::Scanner::new(None, true).ledger(open());
     let kept = restarted
         .latest(&url)
         .expect("the result survives a restart");
     assert_eq!(kept.verdict, webmcpx_bench::scan::Verdict::Missing);
-    let entries = webmcpx_bench::ledger::read(&dir.join("scans.jsonl"));
-    let stats = webmcpx_bench::ledger::stats(&entries, 1);
+    let stats = webmcpx_bench::ledger::stats(&dir.join("scans.jsonl"), 1);
     assert!(
-        stats.starts_with("all time: 2 scans (1 fresh, 1 cached, 0 failed), 1 sites;"),
+        stats.starts_with("all time: 3 scans (1 fresh, 2 cached, 0 failed), 1 sites;"),
         "{stats}"
     );
     let _ = std::fs::remove_dir_all(&dir);

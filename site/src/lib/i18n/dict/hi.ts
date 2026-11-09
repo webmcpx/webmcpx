@@ -86,8 +86,8 @@ const hi: Messages = {
 		leadPlain:
 			'AI एजेंट आपके पेज पहले से पढ़ रहे हैं। देखिए उन्हें क्या मिलता है, फिर एक लाइन से उन्हें असली टूल्स दीजिए।',
 		try: 'आज़माएँ: {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'मुफ़्त · साइन-अप नहीं · कोई कुकी नहीं',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'ओपन सोर्स · साइन-अप नहीं · कोई कुकी नहीं',
 		entry: { question: 'साइट नहीं, सिर्फ़ एजेंट इस्तेमाल करते हैं?', agent: 'अपना एजेंट सेट करें' }
 	},
 

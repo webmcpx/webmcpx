@@ -449,21 +449,32 @@ impl Scanner {
             return Ok(report);
         }
         let caller = Caller::join(&self.inflight, key.clone());
-        caller
+        // One browser scan for everyone asking meanwhile; each asker is logged: the one who ran it as
+        // fresh, the others as the result they shared (cached, or failed).
+        let ran = std::sync::atomic::AtomicBool::new(false);
+        let result = caller
             .cell
             .get_or_init(|| async {
+                ran.store(true, std::sync::atomic::Ordering::Relaxed);
                 let result = self.scan_now(url).await;
                 match &result {
                     Ok(report) => {
                         self.log(&key, crate::ledger::Outcome::Fresh, Some(report));
-                        self.remember(key, report.clone());
+                        self.remember(key.clone(), report.clone());
                     }
                     Err(_) => self.log(&key, crate::ledger::Outcome::Failed, None),
                 }
                 result
             })
             .await
-            .clone()
+            .clone();
+        if !ran.load(std::sync::atomic::Ordering::Relaxed) {
+            match &result {
+                Ok(report) => self.log(&key, crate::ledger::Outcome::Cached, Some(report)),
+                Err(_) => self.log(&key, crate::ledger::Outcome::Failed, None),
+            }
+        }
+        result
     }
 
     /// URLs being scanned right now (tests).
@@ -473,6 +484,14 @@ impl Scanner {
 
     fn cached(&self, key: &str) -> Option<Report> {
         lock(&self.cache).get(key)
+    }
+
+    /// A report of `raw` from the last few minutes, for someone asking to scan it: logged as a cached scan.
+    pub fn reuse(&self, raw: &str) -> Option<Report> {
+        let key = parse_url(raw).ok()?;
+        let report = self.cached(key.as_str())?;
+        self.log(key.as_str(), crate::ledger::Outcome::Cached, Some(&report));
+        Some(report)
     }
 
     /// A report of `raw` from the last few minutes, without scanning: what a shared link shows.

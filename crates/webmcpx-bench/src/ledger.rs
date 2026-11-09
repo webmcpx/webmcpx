@@ -65,10 +65,22 @@ impl Ledger {
     pub fn open(dir: &Path) -> std::io::Result<Self> {
         std::fs::create_dir_all(dir)?;
         let path = dir.join("scans.jsonl");
-        let file = std::fs::OpenOptions::new()
+        let mut file = std::fs::OpenOptions::new()
             .create(true)
             .append(true)
+            .read(true)
             .open(&path)?;
+        // A crash mid-write leaves a torn last line: end it, so the next entry starts a line of its own.
+        let len = file.metadata()?.len();
+        if len > 0 {
+            use std::io::{Read, Seek, SeekFrom};
+            let mut last = [0u8];
+            file.seek(SeekFrom::Start(len - 1))?;
+            file.read_exact(&mut last)?;
+            if last[0] != b'\n' {
+                file.write_all(b"\n")?;
+            }
+        }
         Ok(Self {
             path,
             file: std::sync::Mutex::new(file),
@@ -94,79 +106,119 @@ impl Ledger {
         }
     }
 
-    /// Every readable entry, oldest first (a torn or unknown line is skipped).
-    pub fn entries(&self) -> Vec<Entry> {
-        read(&self.path)
+    /// Every readable entry, oldest first (tests).
+    #[cfg(test)]
+    fn entries(&self) -> Vec<Entry> {
+        let mut all = Vec::new();
+        each(&self.path, |e| all.push(e));
+        all
     }
 
-    /// The newest result of each address within `within` of now, with its age: what a restart brings back.
+    /// The newest result of each address within `within` of now, with its age, oldest first: what a
+    /// restart brings back, in the order the scans ran (a host's badge ends on its latest verdict). The log
+    /// is streamed: only the week's results are held, however long its history.
     pub fn recent(&self, within: Duration) -> Vec<(Entry, Duration)> {
         let now = now();
         let mut latest = std::collections::HashMap::new();
-        for entry in self.entries() {
-            if entry.outcome == Outcome::Fresh && entry.found.is_some() {
-                let age = Duration::from_secs(now.saturating_sub(entry.at));
-                if age < within {
-                    latest.insert(entry.url.clone(), (entry, age));
+        let mut seq = 0usize;
+        each(&self.path, |entry| {
+            seq += 1;
+            let age = Duration::from_secs(now.saturating_sub(entry.at));
+            if entry.outcome == Outcome::Fresh && entry.found.is_some() && age < within {
+                latest.insert(entry.url.clone(), (seq, entry, age));
+            }
+        });
+        let mut kept: Vec<_> = latest.into_values().collect();
+        kept.sort_by_key(|(seq, _, _)| *seq);
+        kept.into_iter()
+            .map(|(_, entry, age)| (entry, age))
+            .collect()
+    }
+}
+
+/// Calls `f` with each readable entry of a log file, oldest first, one line in memory at a time (a torn or
+/// unknown line is skipped; a missing file has none).
+pub fn each(path: &Path, mut f: impl FnMut(Entry)) {
+    let Ok(file) = std::fs::File::open(path) else {
+        return;
+    };
+    for line in std::io::BufReader::new(file).lines().map_while(Result::ok) {
+        if let Ok(entry) = serde_json::from_str(&line) {
+            f(entry);
+        }
+    }
+}
+
+/// Counts for one span of the log.
+#[derive(Default)]
+struct Tally {
+    scans: usize,
+    fresh: usize,
+    cached: usize,
+    failed: usize,
+    sites: std::collections::HashSet<String>,
+    ready: usize,
+    almost: usize,
+    missing: usize,
+}
+
+impl Tally {
+    fn add(&mut self, e: &Entry) {
+        self.scans += 1;
+        match e.outcome {
+            Outcome::Fresh => self.fresh += 1,
+            Outcome::Cached => self.cached += 1,
+            Outcome::Failed => self.failed += 1,
+        }
+        if let Some(found) = &e.found {
+            if !self.sites.contains(&found.host) {
+                self.sites.insert(found.host.clone());
+            }
+            if e.outcome == Outcome::Fresh {
+                match found.verdict {
+                    Verdict::Ready => self.ready += 1,
+                    Verdict::Issues => self.almost += 1,
+                    Verdict::Missing => self.missing += 1,
                 }
             }
         }
-        latest.into_values().collect()
     }
 }
 
-/// The entries of a log file, oldest first; none when it can't be read.
-pub fn read(path: &Path) -> Vec<Entry> {
-    let Ok(file) = std::fs::File::open(path) else {
-        return Vec::new();
-    };
-    std::io::BufReader::new(file)
-        .lines()
-        .map_while(Result::ok)
-        .filter_map(|line| serde_json::from_str(&line).ok())
-        .collect()
+impl std::fmt::Display for Tally {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} scans ({} fresh, {} cached, {} failed), {} sites; fresh: {} agent-ready, {} almost, {} not agent-ready",
+            self.scans,
+            self.fresh,
+            self.cached,
+            self.failed,
+            self.sites.len(),
+            self.ready,
+            self.almost,
+            self.missing
+        )
+    }
 }
 
-/// The counts `webmcpx-bench stats` prints: all time, and per UTC day for the last `days`.
-pub fn stats(entries: &[Entry], days: u64) -> String {
-    use std::collections::{BTreeMap, HashSet};
+/// What `webmcpx-bench stats` prints for the log at `path`: all time, and per UTC day for the last `days`.
+/// Streamed: memory grows with the number of sites, not of scans.
+pub fn stats(path: &Path, days: u64) -> String {
     use std::fmt::Write as _;
-    let count = |list: &[&Entry]| {
-        let of = |o: Outcome| list.iter().filter(|e| e.outcome == o).count();
-        let sites: HashSet<&str> = list
-            .iter()
-            .filter_map(|e| e.found.as_ref().map(|f| f.host.as_str()))
-            .collect();
-        let verdict = |v: Verdict| {
-            list.iter()
-                .filter(|e| e.outcome == Outcome::Fresh)
-                .filter(|e| e.found.as_ref().is_some_and(|f| f.verdict == v))
-                .count()
-        };
-        format!(
-            "{} scans ({} fresh, {} cached, {} failed), {} sites; fresh: {} agent-ready, {} almost, {} not agent-ready",
-            list.len(),
-            of(Outcome::Fresh),
-            of(Outcome::Cached),
-            of(Outcome::Failed),
-            sites.len(),
-            verdict(Verdict::Ready),
-            verdict(Verdict::Issues),
-            verdict(Verdict::Missing),
-        )
-    };
-    let all: Vec<&Entry> = entries.iter().collect();
-    let mut out = format!("all time: {}\n", count(&all));
     let today = now() / 86_400;
-    let mut by_day: BTreeMap<u64, Vec<&Entry>> = BTreeMap::new();
-    for e in entries {
+    let mut all = Tally::default();
+    let mut by_day: std::collections::BTreeMap<u64, Tally> = std::collections::BTreeMap::new();
+    each(path, |e| {
+        all.add(&e);
         let day = e.at / 86_400;
         if today.saturating_sub(day) < days {
-            by_day.entry(day).or_default().push(e);
+            by_day.entry(day).or_default().add(&e);
         }
-    }
-    for (day, list) in by_day.iter().rev() {
-        let _ = writeln!(out, "{}: {}", crate::scan::civil(*day), count(list));
+    });
+    let mut out = format!("all time: {all}\n");
+    for (day, tally) in by_day.iter().rev() {
+        let _ = writeln!(out, "{}: {tally}", crate::scan::civil(*day));
     }
     out
 }
@@ -233,15 +285,49 @@ mod tests {
             .write_all(b"{\"at\":1,")
             .unwrap();
         let ledger = Ledger::open(&dir).unwrap();
-        assert_eq!(ledger.entries().len(), 4);
+        // The next entry after a torn line is kept whole.
+        ledger.append(&Entry {
+            at,
+            url: "https://d.example/".to_owned(),
+            outcome: Outcome::Failed,
+            found: None,
+        });
+        assert_eq!(ledger.entries().len(), 5);
+        assert_eq!(ledger.entries()[4].url, "https://d.example/");
         let recent = ledger.recent(Duration::from_hours(168));
         assert_eq!(recent.len(), 1);
         assert_eq!(recent[0].0.url, "https://a.example/");
-        let stats = stats(&ledger.entries(), 7);
+        let stats = stats(&dir.join("scans.jsonl"), 7);
         assert!(
-            stats.starts_with("all time: 4 scans (2 fresh, 1 cached, 1 failed), 2 sites;"),
+            stats.starts_with("all time: 5 scans (2 fresh, 1 cached, 2 failed), 2 sites;"),
             "{stats}"
         );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// Two pages of one site: a restart brings both back in the order they ran, so the site's badge shows
+    /// the latest verdict, whatever the hash order.
+    #[test]
+    fn a_restart_replays_scans_in_order() {
+        let dir = std::env::temp_dir().join(format!("webmcpx-ledger-order-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let ledger = Ledger::open(&dir).unwrap();
+        let at = now();
+        for i in 0..20 {
+            ledger.append(&Entry {
+                at: at - 100 + i,
+                url: format!("https://a.example/{i}"),
+                outcome: Outcome::Fresh,
+                found: Some(found("a.example")),
+            });
+        }
+        let urls: Vec<String> = ledger
+            .recent(Duration::from_hours(1))
+            .into_iter()
+            .map(|(e, _)| e.url)
+            .collect();
+        let expected: Vec<String> = (0..20).map(|i| format!("https://a.example/{i}")).collect();
+        assert_eq!(urls, expected);
         // Nothing about who scanned is written.
         let raw = std::fs::read_to_string(dir.join("scans.jsonl")).unwrap();
         assert!(!raw.contains("ip") && !raw.contains("agent\""), "{raw}");

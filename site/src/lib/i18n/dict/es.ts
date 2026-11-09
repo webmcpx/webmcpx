@@ -86,8 +86,8 @@ const es: Messages = {
 		leadPlain:
 			'Los agentes de IA ya leen tus páginas. Mira qué obtienen y dales herramientas de verdad con una sola línea.',
 		try: 'Prueba {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'Gratis · sin registro · sin cookies',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'Open source · sin registro · sin cookies',
 		entry: { question: '¿No tienes sitio y solo usas agentes?', agent: 'Configura tu agente' }
 	},
 

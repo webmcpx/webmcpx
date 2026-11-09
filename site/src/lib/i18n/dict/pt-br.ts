@@ -88,8 +88,8 @@ const ptBr: Messages = {
 		leadPlain:
 			'Agentes de IA já leem suas páginas. Veja o que eles recebem e entregue ferramentas de verdade com uma linha.',
 		try: 'Experimente {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'Grátis · sem cadastro · sem cookies',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'Open source · sem cadastro · sem cookies',
 		entry: { question: 'Não tem site, só usa agentes?', agent: 'Configure seu agente' }
 	},
 

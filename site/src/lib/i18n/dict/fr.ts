@@ -88,8 +88,8 @@ const fr: Messages = {
 		leadPlain:
 			'Les agents IA lisent déjà vos pages. Voyez ce qu’ils en retirent, puis donnez-leur de vrais outils en une ligne.',
 		try: 'Essayez {sites}',
-		// Under the scan form: why it's safe to try. Short items joined by ' · '.
-		trust: 'Gratuit · sans inscription · sans cookies',
+		// Under the headline: why it's safe to try. Short items joined by ' · '.
+		trust: 'Open source · sans inscription · sans cookies',
 		entry: { question: 'Pas de site, juste des agents ?', agent: 'Configurer votre agent' }
 	},
 
