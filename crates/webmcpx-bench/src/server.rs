@@ -696,4 +696,46 @@ mod tests {
             "https://webmcpx.dev/?scan=https%3A%2F%2Fa.example%2F%3Fq%3D1"
         );
     }
+
+    /// The site says scans are logged without who ran them: the production access log names no visitor
+    /// (no address, user agent or referrer), and nothing else is logged by nginx.
+    #[test]
+    fn the_access_log_names_no_visitor() {
+        let conf = include_str!("../../../deploy/nginx.conf");
+        let logs: Vec<&str> = conf
+            .lines()
+            .map(str::trim)
+            .filter(|l| l.starts_with("access_log"))
+            .collect();
+        assert_eq!(logs, ["access_log /dev/stdout anonymous;"]);
+        // nginx's request errors name the client and can't be redacted: the http block discards them all;
+        // only the main context (nginx itself, no request) logs errors.
+        let http = conf.split_once("http {").expect("an http block").1;
+        let errors: Vec<&str> = http
+            .lines()
+            .map(str::trim)
+            .filter(|l| l.starts_with("error_log"))
+            .collect();
+        assert_eq!(errors, ["error_log /dev/null;"]);
+        assert!(
+            !http.contains("server {")
+                || !http
+                    .split("server {")
+                    .skip(1)
+                    .any(|b| b.contains("error_log"))
+        );
+        let format = conf
+            .lines()
+            .find(|l| l.trim().starts_with("log_format anonymous"))
+            .expect("the anonymous log format");
+        for field in [
+            "$remote_addr",
+            "$http_user_agent",
+            "$http_referer",
+            "$http_x_forwarded_for",
+            "$realip",
+        ] {
+            assert!(!format.contains(field), "{field} in {format}");
+        }
+    }
 }
