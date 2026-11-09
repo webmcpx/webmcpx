@@ -631,8 +631,13 @@ async fn a_cancelled_scan_frees_its_place_in_line() {
         }),
     ))
     .await;
-    // One scan at a time, one more in line.
-    let scanner = Arc::new(webmcpx_bench::scan::Scanner::new(None, true).capacity(1, 1));
+    // One scan at a time, one more in line. A short deadline keeps the first scan well within the 30 s a
+    // scan may wait in line, however slow the machine (this tests the freed place, not scan length).
+    let scanner = Arc::new(
+        webmcpx_bench::scan::Scanner::new(None, true)
+            .capacity(1, 1)
+            .deadline(std::time::Duration::from_secs(12)),
+    );
     let scan = |page: &str| {
         let (scanner, url) = (Arc::clone(&scanner), format!("http://{site}/{page}"));
         tokio::spawn(async move { scanner.scan(&url).await.map(|r| r.verdict) })

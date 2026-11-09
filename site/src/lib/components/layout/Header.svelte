@@ -153,11 +153,12 @@
 		</ul>
 
 		<div class="flex items-center gap-2">
+			<!-- Hidden from 1024 to 1535 px, where the full menu pill needs the room (the footer links X too). -->
 			<a
 				href={X_URL}
 				aria-label="webmcpx on X"
 				data-x-link
-				class="grid size-10 place-items-center rounded-full border-2 border-ink bg-card shadow-hard-sm transition-transform hover:-translate-y-0.5"
+				class="grid size-10 place-items-center rounded-full border-2 border-ink bg-card shadow-hard-sm transition-transform hover:-translate-y-0.5 lg:hidden 2xl:grid"
 				><BrandIcon icon={siX} size={15} /></a
 			>
 			<Button href={REPO} variant="outline" size="sm"><BrandIcon icon={siGithub} size={16} />GitHub</Button>

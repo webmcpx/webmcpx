@@ -936,7 +936,9 @@ test('the skip link shows on focus inside the frame, below the logo, and leads t
 test('the site links to the project on X, from the header and the footer, and credits it on cards', async ({
 	page
 }) => {
+	await page.setViewportSize({ width: 1600, height: 900 });
 	await page.goto('/');
+	await expect(page.locator('header [data-x-link]')).toBeVisible();
 	await expect(page.locator('header [data-x-link]')).toHaveAttribute('href', 'https://x.com/webmcpx');
 	await expect(page.locator('footer').getByRole('link', { name: 'X', exact: true })).toHaveAttribute(
 		'href',
