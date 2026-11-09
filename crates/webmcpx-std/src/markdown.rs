@@ -31,10 +31,11 @@ pub fn markdown(stream: &str, cursor: &str, max_chars: usize) -> String {
     let mut chunk = chunk.as_str();
     let mut end = start + chunk.chars().count();
     if end < total {
-        // Prefer ending at a line break when one is in the second half of the chunk.
+        // Prefer ending at a line break when one is in the second half of the chunk; the break stays in
+        // this page, so the pages put back together are the document (code keeps its lines).
         if let Some(i) = chunk.rfind('\n').filter(|&i| i > chunk.len() / 2) {
-            chunk = &chunk[..i];
-            end = start + chunk.chars().count() + 1;
+            chunk = &chunk[..=i];
+            end = start + chunk.chars().count();
         }
     }
 
@@ -157,7 +158,6 @@ mod tests {
 
     #[test]
     fn pages_through_long_content() {
-        let squash = |s: &str| s.split_whitespace().collect::<String>();
         let full = parse(&markdown(PAGE, "", 0))["data"]["markdown"]
             .as_str()
             .unwrap()
@@ -175,7 +175,8 @@ mod tests {
             }
         }
         assert!(calls > 2);
-        assert_eq!(squash(&joined), squash(&full));
+        // Pages put back together are the document, line breaks included (code stays code).
+        assert_eq!(joined, full);
     }
 
     #[test]

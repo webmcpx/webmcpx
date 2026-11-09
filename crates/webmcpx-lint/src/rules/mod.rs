@@ -76,6 +76,8 @@ impl Rule {
 pub(crate) struct Ctx<'a> {
     pub(crate) source: &'a str,
     pub(crate) tools: &'a [Obj],
+    /// Per tool, the if/else and ternary arms it sits in (`extract::exclusive`).
+    pub(crate) branches: &'a [crate::extract::Branches],
     pub(crate) legacy: &'a [(Span, &'static str)],
 }
 

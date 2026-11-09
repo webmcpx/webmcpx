@@ -770,7 +770,20 @@ impl Scanner {
         let final_url = final_url.as_str().unwrap_or(url.as_str()).to_owned();
         // A refused redirect leaves Chrome on an error page for that URL: say why.
         self.check(&parse_url(&final_url)?).await?;
-        let tools = registered_tools(page, TOOL_WAIT).await.map_err(failed)?;
+        let mut tools = registered_tools(page, TOOL_WAIT).await.map_err(failed)?;
+        // The declarative API: a `<form toolname>` is a tool in a browser with WebMCP, with or without a
+        // script. A form the page itself (document "0") already registered (webmcpx's drop-in does) counts
+        // once; a frame's tool of the same name is another tool.
+        let forms: Vec<Value> = form_tools(page)
+            .await
+            .into_iter()
+            .filter(|form| {
+                !tools
+                    .iter()
+                    .any(|t| t["document"] == "0" && t["name"] == form["name"])
+            })
+            .collect();
+        tools.extend(forms);
         // Only the snapshot's size travels: that is all the token estimate needs. It is read from the
         // page's world (the snapshot script lives there), so it is forced to a number there.
         let snapshot_chars = page
@@ -823,6 +836,48 @@ impl Scanner {
         Ok(report)
     }
 }
+
+/// Every `<form toolname>` on the page as a tool, as browsers register one: a form needs both a `toolname`
+/// and a `tooldescription` (Chrome's declarative API registers no tool otherwise); its named fields (with `toolparamdescription`) as input. Read in an
+/// isolated world and bounded there (50 forms, 100 fields each), like every read from a page; best effort.
+/// Only names and descriptions feed the score and the linter, so the field types are kept simple (the npm
+/// package's `formSchema` builds the full schema an agent calls).
+async fn form_tools(page: &Page) -> Vec<Value> {
+    const FORMS_JS: &str = r#"(() => {
+      if (!isSecureContext) return "[]";
+      const attr = (el, name, max) => (el.getAttribute(name) ?? "").trim().slice(0, max);
+      const skip = new Set(["submit", "button", "reset", "image", "hidden", "file"]);
+      const declared = [...document.querySelectorAll("form[toolname][tooldescription]")].filter(
+        (form) => attr(form, "toolname", 200) && attr(form, "tooldescription", 10000),
+      );
+      const forms = declared.slice(0, 50).map((form) => {
+        const properties = {};
+        for (const el of [...form.elements].slice(0, 100)) {
+          if (!el.name || skip.has(el.type) || el.tagName === "BUTTON" || el.tagName === "FIELDSET") continue;
+          const type = el.type === "number" || el.type === "range" ? "number" : el.type === "checkbox" ? "boolean" : "string";
+          const description = attr(el, "toolparamdescription", 1000);
+          properties[el.name.slice(0, 100)] = description ? { type, description } : { type };
+        }
+        return {
+          name: attr(form, "toolname", 200),
+          description: attr(form, "tooldescription", 10000),
+          inputSchema: { type: "object", properties },
+          document: "0",
+        };
+      });
+      return JSON.stringify(forms);
+    })()"#;
+    let Ok(Ok(found)) = tokio::time::timeout(FORMS_WAIT, page.eval_isolated(FORMS_JS)).await else {
+        return Vec::new();
+    };
+    found
+        .as_str()
+        .and_then(|text| serde_json::from_str::<Vec<Value>>(text).ok())
+        .unwrap_or_default()
+}
+
+/// Reading a page's `<form toolname>`s; past it the scan goes on without them.
+const FORMS_WAIT: Duration = Duration::from_secs(3);
 
 /// The host of a `host:port` endpoint, without the brackets of an IPv6 address (`[::1]:9222` → `::1`).
 fn endpoint_host(endpoint: &str) -> &str {

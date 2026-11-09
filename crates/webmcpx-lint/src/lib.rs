@@ -39,6 +39,7 @@ pub fn lint(path: &Path, source: &str, options: &Options) -> Report {
     let ctx = rules::Ctx {
         source,
         tools: &extracted.tools,
+        branches: &extracted.branches,
         legacy: &extracted.legacy,
     };
     let mut diagnostics = extracted.errors;

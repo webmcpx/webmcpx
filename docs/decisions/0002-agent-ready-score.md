@@ -62,3 +62,6 @@ gets its effective group (its own, else `*`), and the longest rule matching the 
   that WebMCP does not define and browsers ignore (`webmcpx-core`, `Annotation::MCP_ONLY`; the linter warns on
   it), so it told the agent's host nothing. A site whose tools carried only `destructiveHint` loses those 5
   points; the check now uses the same definitions as the linter.
+- **2026-11-09:** a page's `<form toolname>`s count as tools (the declarative API, which browsers with
+  WebMCP expose with or without a script), with their `tooldescription` and named fields. Before, a site
+  that used only forms was scanned as having no tools. Forms the page also registers are counted once.

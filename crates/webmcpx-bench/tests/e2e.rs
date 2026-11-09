@@ -1824,3 +1824,53 @@ async fn the_scan_log_counts_scans_and_survives_a_restart() {
     );
     let _ = std::fs::remove_dir_all(&dir);
 }
+
+/// A site that exposes WebMCP only through the declarative API (`<form toolname>`) has tools: the scan
+/// lists its forms as browsers with WebMCP do, instead of calling it not agent-ready.
+#[tokio::test]
+async fn declarative_forms_are_tools() {
+    if no_chrome() {
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(|| async {
+            axum::response::Html(
+                r#"<title>Shop</title><main><form toolname="search_products" tooldescription="Search the shop's products by name." action="/search">
+                <input name="q" toolparamdescription="Words to look for"><input name="max" type="number"><button>Go</button></form>
+                <form toolname="no_description" action="/x"><input name="a"></form>
+                <iframe src="/frame"></iframe></main>"#,
+            )
+        }),
+    ).route(
+        "/frame",
+        axum::routing::get(|| async {
+            // A same-origin frame's own tool with the form's name: another tool, in another document.
+            axum::response::Html(
+                r#"<script>document.modelContext.registerTool({ name: "search_products", description: "Search inside the frame.", inputSchema: { type: "object", properties: {} }, annotations: { readOnlyHint: true }, execute() { return "ok"; } });</script>"#,
+            )
+        }),
+    ))
+    .await;
+    let scanner = webmcpx_bench::scan::Scanner::new(None, true);
+    let report = scanner.scan(&format!("http://{site}/")).await.unwrap();
+    let tool = report
+        .tools
+        .iter()
+        .find(|t| t.name == "search_products" && t.description.starts_with("Search the shop"))
+        .expect("the form is a tool");
+    // The frame's tool of the same name is kept too: it lives in another document.
+    assert!(
+        report
+            .tools
+            .iter()
+            .any(|t| t.name == "search_products" && t.description == "Search inside the frame."),
+        "{:?}",
+        report.tools
+    );
+    assert_eq!(tool.description, "Search the shop's products by name.");
+    assert_eq!(tool.params, ["max", "q"]);
+    // A form without a tooldescription is no tool, as in browsers.
+    assert!(report.tools.iter().all(|t| t.name != "no_description"));
+    assert_ne!(report.verdict, webmcpx_bench::scan::Verdict::Missing);
+}

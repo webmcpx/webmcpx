@@ -4,7 +4,9 @@ use std::path::Path;
 
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    ArrayExpressionElement, CallExpression, Expression, ObjectPropertyKind, StaticMemberExpression,
+    ArrayExpressionElement, CallExpression, ConditionalExpression, DoWhileStatement, Expression,
+    ForInStatement, ForOfStatement, ForStatement, IfStatement, ObjectPropertyKind,
+    StaticMemberExpression, WhileStatement,
 };
 use oxc_ast_visit::{Visit, walk};
 use oxc_diagnostics::OxcDiagnostic;
@@ -17,6 +19,9 @@ use crate::{Diagnostic, Severity, Span};
 #[derive(Default)]
 pub(crate) struct Extracted {
     pub(crate) tools: Vec<Obj>,
+    /// For each tool, the branches it sits in: (if/else or ternary, which arm). Two tools in different arms
+    /// of the same branch never both run.
+    pub(crate) branches: Vec<Branches>,
     pub(crate) unresolved: usize,
     /// Deprecated API uses: (span, what).
     pub(crate) legacy: Vec<(Span, &'static str)>,
@@ -38,7 +43,13 @@ pub(crate) fn extract(path: &Path, source: &str) -> Extracted {
     let parsed = Parser::new(&allocator, source, source_type).parse();
     out.errors
         .extend(parsed.diagnostics.iter().map(syntax_error));
-    Finder { out: &mut out }.visit_program(&parsed.program);
+    Finder {
+        out: &mut out,
+        path: Vec::new(),
+        next: 0,
+        loops: 0,
+    }
+    .visit_program(&parsed.program);
     out
 }
 
@@ -88,13 +99,40 @@ fn manifest(root: Node, out: &mut Extracted) {
 
 fn push_tool(node: Node, out: &mut Extracted) {
     match node {
-        Node::Obj(obj) => out.tools.push(obj),
+        Node::Obj(obj) => {
+            out.tools.push(obj);
+            out.branches.push(Vec::new());
+        }
         _ => out.unresolved += 1,
     }
 }
 
+/// The branches a registration sits in: (branch id, arm).
+pub(crate) type Branches = Vec<(u32, u8)>;
+
+/// Whether two registrations are in different arms of one if/else or ternary: only one of them runs.
+pub(crate) fn exclusive(a: &[(u32, u8)], b: &[(u32, u8)]) -> bool {
+    a.iter().any(|&(id, arm)| {
+        b.iter()
+            .any(|&(other, other_arm)| other == id && other_arm != arm)
+    })
+}
+
 struct Finder<'o> {
     out: &'o mut Extracted,
+    /// The if/else and ternary arms being visited.
+    path: Branches,
+    next: u32,
+    /// Inside a loop, both arms of an if/else can run (on different turns): none is exclusive there.
+    loops: u32,
+}
+
+impl Finder<'_> {
+    /// A new branch: its id, to tag each arm with.
+    fn branch(&mut self) -> u32 {
+        self.next += 1;
+        self.next
+    }
 }
 
 impl<'a> Visit<'a> for Finder<'_> {
@@ -113,7 +151,10 @@ impl<'a> Visit<'a> for Finder<'_> {
         let first = call.arguments.first().and_then(|a| a.as_expression());
         match method {
             Some("registerTool") => match first.map(convert) {
-                Some(Node::Obj(obj)) => self.out.tools.push(obj),
+                Some(Node::Obj(obj)) => {
+                    self.out.tools.push(obj);
+                    self.out.branches.push(self.path.clone());
+                }
                 _ => self.out.unresolved += 1,
             },
             Some(api @ ("provideContext" | "clearContext")) => {
@@ -130,6 +171,66 @@ impl<'a> Visit<'a> for Finder<'_> {
             _ => {}
         }
         walk::walk_call_expression(self, call);
+    }
+
+    fn visit_for_statement(&mut self, stmt: &ForStatement<'a>) {
+        self.loops += 1;
+        walk::walk_for_statement(self, stmt);
+        self.loops -= 1;
+    }
+
+    fn visit_for_in_statement(&mut self, stmt: &ForInStatement<'a>) {
+        self.loops += 1;
+        walk::walk_for_in_statement(self, stmt);
+        self.loops -= 1;
+    }
+
+    fn visit_for_of_statement(&mut self, stmt: &ForOfStatement<'a>) {
+        self.loops += 1;
+        walk::walk_for_of_statement(self, stmt);
+        self.loops -= 1;
+    }
+
+    fn visit_while_statement(&mut self, stmt: &WhileStatement<'a>) {
+        self.loops += 1;
+        walk::walk_while_statement(self, stmt);
+        self.loops -= 1;
+    }
+
+    fn visit_do_while_statement(&mut self, stmt: &DoWhileStatement<'a>) {
+        self.loops += 1;
+        walk::walk_do_while_statement(self, stmt);
+        self.loops -= 1;
+    }
+
+    fn visit_if_statement(&mut self, stmt: &IfStatement<'a>) {
+        if self.loops > 0 {
+            return walk::walk_if_statement(self, stmt);
+        }
+        let id = self.branch();
+        self.visit_expression(&stmt.test);
+        self.path.push((id, 0));
+        self.visit_statement(&stmt.consequent);
+        self.path.pop();
+        if let Some(alternate) = &stmt.alternate {
+            self.path.push((id, 1));
+            self.visit_statement(alternate);
+            self.path.pop();
+        }
+    }
+
+    fn visit_conditional_expression(&mut self, expr: &ConditionalExpression<'a>) {
+        if self.loops > 0 {
+            return walk::walk_conditional_expression(self, expr);
+        }
+        let id = self.branch();
+        self.visit_expression(&expr.test);
+        self.path.push((id, 0));
+        self.visit_expression(&expr.consequent);
+        self.path.pop();
+        self.path.push((id, 1));
+        self.visit_expression(&expr.alternate);
+        self.path.pop();
     }
 
     fn visit_static_member_expression(&mut self, member: &StaticMemberExpression<'a>) {
