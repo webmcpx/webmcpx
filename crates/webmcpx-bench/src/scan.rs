@@ -369,8 +369,8 @@ impl Scanner {
     /// cards, link previews and badges survive a restart.
     #[must_use]
     pub fn ledger(mut self, ledger: crate::ledger::Ledger) -> Self {
-        for (entry, age) in ledger.recent(VERDICT_FOR) {
-            let Some(found) = entry.found else { continue };
+        ledger.replay(VERDICT_FOR, |entry, age| {
+            let Some(found) = entry.found else { return };
             let kept = Kept {
                 host: found.host,
                 verdict: found.verdict,
@@ -382,7 +382,7 @@ impl Scanner {
                 at: Instant::now().checked_sub(age).unwrap_or_else(Instant::now),
             };
             self.keep(entry.url, &found.hosts, kept);
-        }
+        });
         self.ledger = Some(ledger);
         self
     }
@@ -1288,6 +1288,40 @@ pub fn is_public(ip: std::net::IpAddr) -> bool {
 
 #[cfg(test)]
 mod tests {
+    /// A restart replays the week into the scanner's bounded maps: a log with more addresses than they hold
+    /// never holds more in memory than normal running does.
+    #[test]
+    fn a_restart_stays_within_the_scanners_bounds() {
+        let dir = std::env::temp_dir().join(format!("webmcpx-replay-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let ledger = crate::ledger::Ledger::open(&dir).unwrap();
+        let at = crate::ledger::now();
+        for i in 0..VERDICTS_MAX + 10 {
+            ledger.append(&crate::ledger::Entry {
+                at,
+                url: format!("https://s{i}.example/"),
+                outcome: crate::ledger::Outcome::Fresh,
+                found: Some(crate::ledger::Found {
+                    host: format!("s{i}.example"),
+                    hosts: vec![format!("s{i}.example")],
+                    verdict: Verdict::Missing,
+                    tools: 0,
+                    page_tokens: 1,
+                    score: 0,
+                    lint_errors: false,
+                    scanned_on: "2026-11-09".to_owned(),
+                }),
+            });
+        }
+        let scanner = Scanner::new(None, false).ledger(ledger);
+        assert!(lock(&scanner.summaries).len() <= VERDICTS_MAX);
+        assert!(lock(&scanner.verdicts).len() <= VERDICTS_MAX);
+        // The latest scans are the ones kept.
+        let last = format!("https://s{}.example/", VERDICTS_MAX + 9);
+        assert!(scanner.latest(&last).is_some());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
     use super::*;
 
     fn tool(name: &str, description: &str, annotations: &Value) -> Value {

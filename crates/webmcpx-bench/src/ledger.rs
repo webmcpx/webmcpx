@@ -114,25 +114,17 @@ impl Ledger {
         all
     }
 
-    /// The newest result of each address within `within` of now, with its age, oldest first: what a
-    /// restart brings back, in the order the scans ran (a host's badge ends on its latest verdict). The log
-    /// is streamed: only the week's results are held, however long its history.
-    pub fn recent(&self, within: Duration) -> Vec<(Entry, Duration)> {
+    /// Calls `f` with each fresh result from within `within` of now and its age, in the order the scans
+    /// ran: replayed into the scanner's bounded maps, a later result of an address (or host) replaces an
+    /// earlier one. Streamed: one line in memory at a time, however long the log.
+    pub fn replay(&self, within: Duration, mut f: impl FnMut(Entry, Duration)) {
         let now = now();
-        let mut latest = std::collections::HashMap::new();
-        let mut seq = 0usize;
         each(&self.path, |entry| {
-            seq += 1;
             let age = Duration::from_secs(now.saturating_sub(entry.at));
             if entry.outcome == Outcome::Fresh && entry.found.is_some() && age < within {
-                latest.insert(entry.url.clone(), (seq, entry, age));
+                f(entry, age);
             }
         });
-        let mut kept: Vec<_> = latest.into_values().collect();
-        kept.sort_by_key(|(seq, _, _)| *seq);
-        kept.into_iter()
-            .map(|(_, entry, age)| (entry, age))
-            .collect()
     }
 }
 
@@ -294,9 +286,9 @@ mod tests {
         });
         assert_eq!(ledger.entries().len(), 5);
         assert_eq!(ledger.entries()[4].url, "https://d.example/");
-        let recent = ledger.recent(Duration::from_hours(168));
-        assert_eq!(recent.len(), 1);
-        assert_eq!(recent[0].0.url, "https://a.example/");
+        let mut recent = Vec::new();
+        ledger.replay(Duration::from_hours(168), |e, _| recent.push(e.url));
+        assert_eq!(recent, ["https://a.example/"]);
         let stats = stats(&dir.join("scans.jsonl"), 7);
         assert!(
             stats.starts_with("all time: 5 scans (2 fresh, 1 cached, 2 failed), 2 sites;"),
@@ -321,11 +313,8 @@ mod tests {
                 found: Some(found("a.example")),
             });
         }
-        let urls: Vec<String> = ledger
-            .recent(Duration::from_hours(1))
-            .into_iter()
-            .map(|(e, _)| e.url)
-            .collect();
+        let mut urls = Vec::new();
+        ledger.replay(Duration::from_hours(1), |e, _| urls.push(e.url));
         let expected: Vec<String> = (0..20).map(|i| format!("https://a.example/{i}")).collect();
         assert_eq!(urls, expected);
         // Nothing about who scanned is written.
