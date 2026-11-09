@@ -91,6 +91,7 @@
 								{/snippet}
 							</Rich>
 						</p>
+						<p class="mt-2 text-center font-mono text-xs tracking-wide text-ink-3">{m.trust}</p>
 					{/snippet}
 				</ScanForm>
 			</Reveal>

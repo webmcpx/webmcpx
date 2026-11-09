@@ -54,6 +54,8 @@ const ptBr: Messages = {
 	footer: {
 		tagline: 'Ferramentas WebMCP padrão para todo site, e um linter para as suas.',
 		license: 'Licença MIT · um projeto independente da comunidade.',
+		// The site sets no cookies and loads no analytics or tracking script: keep it literally true.
+		privacy: 'Sem cookies, sem scripts de rastreamento.',
 		badge: 'Este site está pronto para agentes: confira ao vivo',
 		columns: { product: 'Produto', project: 'Projeto', webmcp: 'WebMCP' },
 		links: {
@@ -86,6 +88,8 @@ const ptBr: Messages = {
 		leadPlain:
 			'Agentes de IA já leem suas páginas. Veja o que eles recebem e entregue ferramentas de verdade com uma linha.',
 		try: 'Experimente {sites}',
+		// Under the scan form: why it's safe to try. Short items joined by ' · '.
+		trust: 'Grátis · sem cadastro · sem cookies',
 		entry: { question: 'Não tem site, só usa agentes?', agent: 'Configure seu agente' }
 	},
 
@@ -516,7 +520,7 @@ const ptBr: Messages = {
 				'Os tokens são estimados a partir do texto da página: os caracteres divididos por quatro.',
 				'Para a nota, o mesmo navegador busca o robots.txt, o llms.txt, o sitemap, a versão em Markdown, os headers Link, o índice de Agent Skills e o catálogo de APIs do site (3 s cada, mesma origem, sem cookies) e guarda só se cada um existe.',
 				'A nota, de 0 a 100: WebMCP 50 (ferramentas 25, sem erros de lint 15, toda ferramenta descrita 5, toda ferramenta anotada 5), custo para agentes 15 (cheio com ferramentas; senão, pela contagem de tokens da página), legível 20 e encontrável 15 (5 por verificação).',
-				'Um resultado vale por 10 minutos; cada visitante pode iniciar um scan novo por minuto.'
+				'Um resultado vale por 5 minutos; cada visitante roda um scan por vez.'
 			]
 		},
 		rules: 'Todas as regras do linter, com os motivos',

@@ -80,6 +80,7 @@
 					{m.tagline}
 				</p>
 				<p class="mt-4 text-sm">{m.license}</p>
+				<p class="mt-1 text-sm">{m.privacy}</p>
 			</div>
 			{#each COLUMNS as col (col.title)}
 				<nav aria-label={col.title}>

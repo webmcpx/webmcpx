@@ -81,6 +81,8 @@ const en = {
 		tagline: 'Standard WebMCP tools for any website, and a linter for your own.',
 		license: 'MIT license · an independent community project.',
 		// Tooltip of our own agent-ready badge, which links to a live scan of this site: max 60.
+		// The site sets no cookies and loads no analytics or tracking script: keep it literally true.
+		privacy: 'No cookies, no tracking scripts.',
 		badge: 'This site is agent-ready: check it live',
 		// Column titles: max 12, shown in small capitals.
 		columns: { product: 'Product', project: 'Project', webmcp: 'WebMCP' },
@@ -124,6 +126,8 @@ const en = {
 		// {sites} is a row of three site names (buttons that start a scan).
 		try: 'Try {sites}',
 		// Under the scan, for people who use agents but run no site: a question, then a link.
+		// Under the scan form: why it's safe to try. Short items joined by ' · '.
+		trust: 'Free · no sign-up · no cookies',
 		entry: { question: 'Not running a site, just using agents?', agent: 'Set up your agent' }
 	},
 
@@ -649,7 +653,7 @@ const en = {
 				'Tokens are estimated from the page’s text snapshot: its characters divided by four.',
 				'For the score, the same browser fetches the site’s robots.txt, llms.txt, sitemap, Markdown version, Link headers, Agent Skills index and API catalog (3 s each, same origin, no cookies), and only keeps whether each is there.',
 				'The score, out of 100: WebMCP 50 (tools 25, no lint errors 15, every tool described 5, every tool annotated 5), agent cost 15 (full with tools; else by the page’s token count), readable 20 and discoverable 15 (5 per check).',
-				'A result is reused for 10 minutes; each visitor can start one new scan a minute.'
+				'A result is reused for 5 minutes; each visitor can run one scan at a time.'
 			]
 		},
 		rules: 'Every lint rule, with its reasons',

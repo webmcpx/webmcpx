@@ -54,6 +54,8 @@ const zh: Messages = {
 	footer: {
 		tagline: '为任意网站提供标准 WebMCP 工具，再为你自己的工具配一个 linter。',
 		license: 'MIT 许可证 · 独立社区项目。',
+		// The site sets no cookies and loads no analytics or tracking script: keep it literally true.
+		privacy: '不用 Cookie，没有追踪脚本。',
 		badge: '本站已智能体就绪：点击实时检测',
 		columns: { product: '产品', project: '项目', webmcp: 'WebMCP' },
 		links: {
@@ -86,6 +88,8 @@ const zh: Messages = {
 		// Without a published run (no number to quote).
 		leadPlain: 'AI 智能体已经在读你的网页。先看看它们读到了什么，再用一行代码给它们真正的工具。',
 		try: '试试 {sites}',
+		// Under the scan form: why it's safe to try. Short items joined by ' · '.
+		trust: '免费 · 无需注册 · 不用 Cookie',
 		entry: { question: '没有网站，只用智能体？', agent: '配置你的智能体' }
 	},
 
@@ -487,7 +491,7 @@ const zh: Messages = {
 				'token 数根据页面文本估算：字符数除以 4。',
 				'为了计算评分，同一个浏览器会获取网站的 robots.txt、llms.txt、站点地图、Markdown 版本、Link 响应头、Agent Skills 索引和 API 目录（每项 3 s，同源，不带 Cookie），只记录每一项是否存在。',
 				'评分满分 100：WebMCP 50（工具 25、无 lint 错误 15、每个工具都有描述 5、每个工具都有注解 5），智能体成本 15（有工具即满分，否则按页面 token 数计），可读性 20，可发现性 15（每项检查 5）。',
-				'结果会复用 10 分钟；每位访客每分钟可以发起一次新的扫描。'
+				'结果会复用 5 分钟；每位访客同一时间只能运行一次扫描。'
 			]
 		},
 		rules: '全部 linter 规则及其理由',

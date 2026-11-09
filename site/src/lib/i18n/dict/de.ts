@@ -53,6 +53,8 @@ const de: Messages = {
 	footer: {
 		tagline: 'Standard-WebMCP-Tools für jede Website, ein Linter für Ihre eigenen.',
 		license: 'MIT-Lizenz · ein unabhängiges Community-Projekt.',
+		// The site sets no cookies and loads no analytics or tracking script: keep it literally true.
+		privacy: 'Keine Cookies, keine Tracking-Skripte.',
 		badge: 'Diese Website ist agentenfähig: live prüfen',
 		columns: { product: 'Produkt', project: 'Projekt', webmcp: 'WebMCP' },
 		links: {
@@ -85,6 +87,8 @@ const de: Messages = {
 		leadPlain:
 			'KI-Agenten lesen Ihre Seiten längst. Sehen Sie, was bei ihnen ankommt, und geben Sie ihnen mit einer Zeile echte Tools.',
 		try: 'Testen Sie {sites}',
+		// Under the scan form: why it's safe to try. Short items joined by ' · '.
+		trust: 'Kostenlos · ohne Anmeldung · ohne Cookies',
 		entry: { question: 'Keine Website, nur Agenten?', agent: 'Agent einrichten' }
 	},
 
@@ -518,7 +522,7 @@ const de: Messages = {
 				'Tokens werden aus dem Text-Snapshot der Seite geschätzt: Zeichenzahl geteilt durch vier.',
 				'Für den Score ruft derselbe Browser robots.txt, llms.txt, Sitemap, Markdown-Version, Link-Header, Agent-Skills-Index und API-Katalog der Website ab (je 3 s, gleiche Origin, ohne Cookies) und merkt sich nur, ob es sie gibt.',
 				'Der Score, von 100: WebMCP 50 (Tools 25, keine Lint-Fehler 15, jedes Tool beschrieben 5, jedes Tool annotiert 5), Kosten für Agenten 15 (voll mit Tools, sonst nach der Tokenzahl der Seite), lesbar 20 und auffindbar 15 (5 pro Prüfung).',
-				'Ein Ergebnis gilt 10 Minuten; jeder Besucher kann einen neuen Scan pro Minute starten.'
+				'Ein Ergebnis gilt 5 Minuten; jeder Besucher kann einen Scan gleichzeitig laufen lassen.'
 			]
 		},
 		rules: 'Alle Linter-Regeln mit Begründung',

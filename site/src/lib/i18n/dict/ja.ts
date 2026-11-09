@@ -52,6 +52,8 @@ const ja: Messages = {
 	footer: {
 		tagline: 'あらゆるサイトに標準の WebMCP ツールを。自作ツールにはリンターを。',
 		license: 'MIT ライセンス · 独立したコミュニティプロジェクトです。',
+		// The site sets no cookies and loads no analytics or tracking script: keep it literally true.
+		privacy: 'Cookie もトラッキングスクリプトも使いません。',
 		badge: 'このサイトはエージェント対応済み：ライブで確認',
 		columns: { product: 'プロダクト', project: 'プロジェクト', webmcp: 'WebMCP' },
 		links: {
@@ -84,6 +86,8 @@ const ja: Messages = {
 		leadPlain:
 			'AI エージェントは、すでにあなたのページを読んでいます。何が見えているかを確かめたら、1 行で本物のツールを渡しましょう。',
 		try: 'お試し：{sites}',
+		// Under the scan form: why it's safe to try. Short items joined by ' · '.
+		trust: '無料 · 登録不要 · Cookie なし',
 		entry: { question: 'サイトはなく、エージェントだけ使う？', agent: 'エージェントを設定' }
 	},
 
@@ -501,7 +505,7 @@ const ja: Messages = {
 				'トークン数はページのテキストから見積もります：文字数を 4 で割った値です。',
 				'スコアのために、同じブラウザーがサイトの robots.txt、llms.txt、サイトマップ、Markdown 版、Link ヘッダー、Agent Skills インデックス、API カタログを取得し（各 3 s、同一オリジン、Cookie なし）、それぞれが存在するかどうかだけを記録します。',
 				'スコアは 100 点満点：WebMCP 50（ツール 25、lint エラーなし 15、全ツールに説明 5、全ツールにアノテーション 5）、エージェントのコスト 15（ツールがあれば満点、なければページのトークン数で決定）、読みやすさ 20、見つけやすさ 15（チェックごとに 5）。',
-				'結果は 10 分間再利用され、新しいスキャンは 1 人 1 分に 1 回までです。'
+				'結果は 5 分間再利用され、スキャンは 1 人につき同時に 1 回までです。'
 			]
 		},
 		rules: 'リンターの全ルールと理由',
