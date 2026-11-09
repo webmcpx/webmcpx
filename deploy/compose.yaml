@@ -59,7 +59,8 @@ services:
 
   chrome:
     <<: *hardening
-    image: chromedp/headless-shell:158.0.8127.18
+    # chromedp/headless-shell plus fonts for every site language (see the Dockerfile).
+    build: { context: .., dockerfile: deploy/chrome.Dockerfile }
     # The image starts headless-shell with DevTools on 0.0.0.0:9222 and --no-sandbox (the container and
     # its network are the sandbox); these switches lock it to the egress proxy.
     command:

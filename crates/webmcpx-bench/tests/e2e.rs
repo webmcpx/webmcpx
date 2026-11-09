@@ -967,7 +967,7 @@ async fn shared_scans_have_a_card_a_badge_and_cost_nothing() {
         .unwrap();
     assert!(page.contains("/og/scan.png?url="), "{page}");
     assert!(
-        page.contains("Not agent-ready yet") && page.contains("landing"),
+        page.contains("· Not agent-ready") && page.contains("landing"),
         "{page}"
     );
 

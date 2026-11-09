@@ -425,7 +425,7 @@
 				<Button
 					variant="outline"
 					size="sm"
-					href={`/og/scan.png?url=${encodeURIComponent(r.url)}&size=post`}
+					href={`/og/scan.png?url=${encodeURIComponent(r.url)}&size=post${i18n.code === 'en' ? '' : `&lang=${i18n.code}`}`}
 					download={`webmcpx-scan-${host(r.final_url)}.png`}
 				>
 					<ImageDown aria-hidden="true" />{m.result.savePng}

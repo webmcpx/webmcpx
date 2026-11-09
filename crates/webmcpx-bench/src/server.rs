@@ -108,7 +108,7 @@ async fn page(
             .or_else(|| kept.as_ref().map(crate::scan::Kept::summary));
         return (
             [(axum::http::header::CONTENT_TYPE, "text/html; charset=utf-8")],
-            share_page(&html, &origin, &target, summary),
+            share_page(&html, &origin, &target, summary, language_of(&path)),
         )
             .into_response();
     }
@@ -200,22 +200,28 @@ fn attr(s: &str) -> String {
         .replace('>', "&gt;")
 }
 
-/// The page with its `og:` and `twitter:` tags replaced by ones for the scanned site.
+/// The site language of a page path: its first segment (`/pt-br/` is `pt-br`); English otherwise.
+fn language_of(path: &str) -> &'static crate::card::Text {
+    crate::card::Text::of(path.trim_start_matches('/').split('/').next())
+}
+
+/// The page with its `og:` and `twitter:` tags replaced by ones for the scanned site, in the page's
+/// language `text` (the card image too).
 pub fn share_page(
     html: &str,
     origin: &str,
     target: &str,
     summary: Option<crate::card::Summary<'_>>,
+    text: &crate::card::Text,
 ) -> String {
     let host = crate::card::host_of(target);
     let (title, description) = match summary {
         Some(s) => {
-            let verdict = match s.verdict {
-                crate::scan::Verdict::Ready => "Agent-ready",
-                crate::scan::Verdict::Issues => "Almost agent-ready",
-                crate::scan::Verdict::Missing => "Not agent-ready yet",
-            };
-            (format!("{} · {verdict}", s.host), crate::card::line(s))
+            let verdict = crate::card::verdict_label(s.verdict, text);
+            (
+                format!("{} · {verdict}", s.host),
+                crate::card::line(s, text),
+            )
         }
         None => (
             format!("Is {host} agent-ready?"),
@@ -227,7 +233,12 @@ pub fn share_page(
         .map(|u| u.query().unwrap_or_default().to_owned())
         .unwrap_or_default();
     let image = if summary.is_some() {
-        format!("{origin}/og/scan.png?{encoded}")
+        let lang = if text.code == "en" {
+            String::new()
+        } else {
+            format!("&lang={}", text.code)
+        };
+        format!("{origin}/og/scan.png?{encoded}{lang}")
     } else {
         format!("{origin}/og.png")
     };
@@ -270,6 +281,8 @@ struct CardQuery {
     url: String,
     /// `post`: the 1600×900 image Save PNG downloads; otherwise the 1200×630 link preview.
     size: Option<String>,
+    /// The site language to write the card in (`pt-br`, `ja`, ...); English by default.
+    lang: Option<String>,
 }
 
 /// The share card of a site scanned in the last minutes; the generic card otherwise.
@@ -293,7 +306,11 @@ async fn scan_card(State(state): State<ScanState>, Query(q): Query<CardQuery>) -
     } else {
         crate::card::Format::Link
     };
-    match state.scanner.card_of(summary, format).await {
+    match state
+        .scanner
+        .card_of(summary, format, crate::card::Text::of(q.lang.as_deref()))
+        .await
+    {
         Ok(png) => (
             [
                 (axum::http::header::CONTENT_TYPE, "image/png"),
@@ -520,6 +537,7 @@ mod tests {
             "https://webmcpx.dev",
             r#"https://a.example/?q="x"&y"#,
             None,
+            crate::card::Text::of(None),
         );
         assert!(!out.contains(r#"content="/og.png""#), "{out}");
         assert!(out.contains(r#"<meta name="description" content="keep">"#));
@@ -528,5 +546,45 @@ mod tests {
         assert!(out.contains("summary_large_image"));
         assert!(!out.contains(r#""x""#), "unescaped quotes: {out}");
         assert_eq!(out.matches("og:image\"").count(), 1);
+    }
+
+    /// A scan link shared from `/pt-br/` previews in Portuguese: title, description and card image.
+    #[test]
+    fn share_pages_speak_the_page_language() {
+        let summary = crate::card::Summary {
+            host: "a.example",
+            verdict: crate::scan::Verdict::Missing,
+            tools: 0,
+            page_tokens: 324,
+            score: 25,
+            lint_errors: false,
+            scanned_on: "2026-11-09",
+        };
+        let html = "<html><head></head><body></body></html>";
+        let out = share_page(
+            html,
+            "https://webmcpx.dev",
+            "https://a.example/",
+            Some(summary),
+            language_of("/pt-br/"),
+        );
+        assert!(out.contains("a.example · Não pronto para agentes"), "{out}");
+        assert!(out.contains("Nota 25/100."), "{out}");
+        assert!(
+            out.contains("/og/scan.png?url=https%3A%2F%2Fa.example%2F&amp;lang=pt-br"),
+            "{out}"
+        );
+        let en = share_page(
+            html,
+            "https://webmcpx.dev",
+            "https://a.example/",
+            Some(summary),
+            language_of("/"),
+        );
+        assert!(
+            en.contains("a.example · Not agent-ready") && !en.contains("lang="),
+            "{en}"
+        );
+        assert_eq!(language_of("/brand/").code, "en");
     }
 }

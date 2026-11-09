@@ -6,6 +6,9 @@
 
 use crate::scan::{Report, Verdict};
 
+mod text;
+pub use text::Text;
+
 /// Bricolage Grotesque (SIL OFL 1.1, see assets/fonts), inlined so the card renders without a network.
 const FONT: &[u8] = include_bytes!("../assets/fonts/bricolage-grotesque-latin-wght-normal.woff2");
 /// The webmcpx lockup, outlined (scripts/lockup.py), in ink.
@@ -95,44 +98,34 @@ fn stamp(verdict: Verdict) -> (&'static str, &'static str, &'static str) {
     }
 }
 
-/// `2026-11-09` as `Nov 9, 2026`; anything else as given.
-fn human_date(iso: &str) -> String {
-    const MONTHS: [&str; 12] = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-    ];
-    let mut parts = iso.splitn(3, '-').map(str::parse::<usize>);
-    match (parts.next(), parts.next(), parts.next()) {
-        (Some(Ok(y)), Some(Ok(m @ 1..=12)), Some(Ok(d))) => format!("{} {d}, {y}", MONTHS[m - 1]),
-        _ => iso.to_owned(),
+/// The verdict in `t`'s language: the card's stamp and a shared link's title.
+pub const fn verdict_label(verdict: Verdict, t: &Text) -> &'static str {
+    match verdict {
+        Verdict::Ready => t.ready,
+        Verdict::Issues => t.almost,
+        Verdict::Missing => t.missing,
     }
 }
 
 /// The card's one line under the site name, ending with the score (link previews' description).
-pub fn line(s: Summary<'_>) -> String {
-    format!("{} Score {}/100.", what(s), s.score)
+pub fn line(s: Summary<'_>, t: &Text) -> String {
+    let score = t.score_line.replace("{score}", &s.score.to_string());
+    format!("{} {score}", what(s, t))
 }
 
 /// What the scan found, in one sentence (the card shows the score on its own).
-fn what(s: Summary<'_>) -> String {
-    let tools = if s.tools == 1 { "tool" } else { "tools" };
-    match s.verdict {
-        Verdict::Missing => format!(
-            "No WebMCP tools. Agents read ~{} tokens of this page and guess.",
-            short(s.page_tokens)
-        ),
-        Verdict::Issues if s.lint_errors => {
-            format!(
-                "{} WebMCP {tools}, with lint errors agents will trip on.",
-                s.tools
-            )
-        }
-        Verdict::Issues => format!("{} WebMCP {tools}; a few agent basics missing.", s.tools),
-        Verdict::Ready => format!("{} WebMCP {tools} agents can call directly.", s.tools),
-    }
+fn what(s: Summary<'_>, t: &Text) -> String {
+    let pattern = match s.verdict {
+        Verdict::Missing => return t.no_tools.replace("{n}", &short(s.page_tokens)),
+        Verdict::Issues if s.lint_errors => t.lint,
+        Verdict::Issues => t.basics,
+        Verdict::Ready => t.callable,
+    };
+    pattern.replace("{tools}", &t.tools(s.tools))
 }
 
-/// The card as a standalone HTML page, 1200×630.
-pub fn html(s: Summary<'_>, format: Format) -> String {
+/// The card as a standalone HTML page, in `t`'s language.
+pub fn html(s: Summary<'_>, format: Format, t: &Text) -> String {
     // Long hosts shrink rather than wrap or overflow.
     let size = match s.host.chars().count() {
         0..=18 => 104,
@@ -140,14 +133,16 @@ pub fn html(s: Summary<'_>, format: Format) -> String {
         27..=36 => 60,
         _ => 46,
     };
+    let (_, fill, ink) = stamp(s.verdict);
     render(&Card {
         title: s.host,
         size,
-        line: &what(s),
-        stamp: Some(stamp(s.verdict)),
+        line: &what(s, t),
+        stamp: Some((verdict_label(s.verdict, t), fill, ink)),
         score: Some(s.score),
-        date: Some(human_date(s.scanned_on)),
+        date: Some(t.scanned.replace("{date}", &t.date(s.scanned_on))),
         height: format.size().1,
+        text: t,
     })
 }
 
@@ -160,10 +155,12 @@ struct Card<'a> {
     /// Label, fill and text color of the verdict stamp.
     stamp: Option<(&'a str, &'a str, &'a str)>,
     score: Option<u8>,
-    /// When the scan ran, shown small in the footer.
+    /// When the scan ran ("Scanned Nov 9, 2026"), shown small in the footer.
     date: Option<String>,
     /// Layout height in CSS px (630 for a link preview, 675 for a 16:9 post image).
     height: u32,
+    /// The card's language: its fixed words and `<html lang>`.
+    text: &'a Text,
 }
 
 fn render(c: &Card<'_>) -> String {
@@ -172,6 +169,16 @@ fn render(c: &Card<'_>) -> String {
     let host = escape(c.title);
     let height = c.height;
     let size = c.size;
+    let t = c.text;
+    let lang = t.tag;
+    // A longer verdict (most languages) gets a smaller stamp, so it still fits beside the lockup.
+    let stamp_size = match label.chars().count() {
+        0..=16 => 34,
+        17..=24 => 30,
+        _ => 27,
+    };
+    let score_label = escape(t.score);
+    let cta = escape(t.cta).replace("{site}", "<span>webmcpx.dev</span>");
     // The score, big at the bottom right; highlighted from the agent-ready bar up.
     let score = c.score.map_or_else(String::new, |n| {
         let mark = if n >= crate::scan::READY_SCORE {
@@ -180,22 +187,22 @@ fn render(c: &Card<'_>) -> String {
             ""
         };
         format!(
-            r#"<div class="score"><div class="label">Agent-ready score</div><div class="num{mark}"><b>{n}</b><small>/100</small></div></div>"#
+            r#"<div class="score"><div class="label">{score_label}</div><div class="num{mark}"><b>{n}</b><small>/100</small></div></div>"#
         )
     });
     let date = c.date.as_deref().map_or_else(String::new, |d| {
-        format!(r#"<span class="date">Scanned {}</span>"#, escape(d))
+        format!(r#"<span class="date">{}</span>"#, escape(d))
     });
     format!(
-        r#"<!doctype html><html><head><meta charset="utf-8"><style>
+        r#"<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><style>
 @font-face{{font-family:B;src:url(data:font/woff2;base64,{font}) format("woff2");font-weight:200 800}}
 *{{margin:0;box-sizing:border-box}}
-html,body{{width:1200px;height:{height}px;background:oklch(0.958 0.006 95);font-family:B,sans-serif;color:oklch(0.18 0.004 95)}}
+html,body{{width:1200px;height:{height}px;background:oklch(0.958 0.006 95);font-family:B,"Noto Sans",sans-serif;color:oklch(0.18 0.004 95)}}
 .frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;padding:56px 64px;display:flex;flex-direction:column;overflow:hidden;
 background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.86 0.006 95) 1px,transparent 1px);background-size:64px 64px}}
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .lockup svg{{height:44px;width:auto}}
-.stamp{{display:{stamp_display};border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:10px 28px;font-size:34px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
+.stamp{{display:{stamp_display};border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:10px 28px;font-size:{stamp_size}px;white-space:nowrap;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
 .mark{{position:absolute;right:-110px;top:50%;width:600px;height:600px;transform:translateY(-50%) rotate(-12deg);opacity:.06}}
 .top,.main,.foot{{position:relative}}
 .main{{margin-top:auto}}
@@ -211,11 +218,12 @@ background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1
 .foot{{margin-top:40px;font-size:30px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}}
 .foot span.cta span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
 .date{{font-size:20px;font-weight:600;letter-spacing:.06em;color:oklch(0.38 0.006 95)}}
+:lang(zh) *,:lang(ja) *,:lang(hi) *,:lang(bn) *{{letter-spacing:0!important}}
 </style></head><body><div class="frame">
 <div class="mark">{mark}</div>
 <div class="top"><div class="lockup">{lockup}</div><div class="stamp">{label}</div></div>
 <div class="main"><div class="host">{host}</div><div class="row"><div class="text line">{line}</div>{score}</div></div>
-<div class="foot"><span class="cta">Scan yours at <span>webmcpx.dev</span></span>{date}</div>
+<div class="foot"><span class="cta">{cta}</span>{date}</div>
 </div></body></html>"#,
         font = base64(FONT),
         lockup = LOCKUP,
@@ -234,6 +242,7 @@ pub fn generic_html() -> String {
         score: None,
         date: None,
         height: 630,
+        text: &text::ALL[0],
     })
 }
 
@@ -274,6 +283,7 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
         score: None,
         date: None,
         height: 630,
+        text: &text::ALL[0],
     }))
 }
 
@@ -391,9 +401,14 @@ mod tests {
             lint_errors: false,
             scanned_on: "2026-11-09",
         };
+        let en = Text::of(None);
         assert_eq!(
-            line(s),
+            line(s, en),
             "No WebMCP tools. Agents read ~12k tokens of this page and guess. Score 20/100."
+        );
+        assert_eq!(
+            line(s, Text::of(Some("pt-br"))),
+            "Nenhuma ferramenta WebMCP. Os agentes leem ~12k tokens desta página e adivinham. Nota 20/100."
         );
         let s = Summary {
             verdict: Verdict::Ready,
@@ -402,7 +417,7 @@ mod tests {
             ..s
         };
         assert_eq!(
-            line(s),
+            line(s, en),
             "1 WebMCP tool agents can call directly. Score 90/100."
         );
         let s = Summary {
@@ -412,7 +427,7 @@ mod tests {
             ..s
         };
         assert_eq!(
-            line(s),
+            line(s, en),
             "2 WebMCP tools; a few agent basics missing. Score 65/100."
         );
         assert_eq!(short(2485), "2.5k");
@@ -436,13 +451,14 @@ mod tests {
             lint_errors: false,
             scanned_on: "2026-11-09",
         };
-        let h = html(s, Format::Link);
+        let en = Text::of(None);
+        let h = html(s, Format::Link, en);
         assert!(h.contains("&lt;x&gt;&amp;") && !h.contains("<x>&"));
         assert!(h.contains("AGENT-READY") || h.contains("Agent-ready"));
         assert!(h.contains("Scanned Nov 9, 2026"));
         assert!(h.contains("height:630px"));
         // The post image is 16:9, laid out at 1200×675.
-        assert!(html(s, Format::Post).contains("height:675px"));
+        assert!(html(s, Format::Post, en).contains("height:675px"));
         assert_eq!(Format::Post.size(), (1200, 675, 4.0 / 3.0));
         // A site without tools gets the red "Not agent-ready" stamp.
         let missing = html(
@@ -451,11 +467,39 @@ mod tests {
                 ..s
             },
             Format::Link,
+            en,
         );
         assert!(missing.contains(">Not agent-ready<"));
         assert!(missing.contains("oklch(0.58 0.21 27)"));
-        assert_eq!(super::human_date("2026-01-31"), "Jan 31, 2026");
-        assert_eq!(super::human_date("soon"), "soon");
+        assert!(missing.contains("Scan yours at <span>webmcpx.dev</span>"));
+    }
+
+    /// A card saved or shared from a page in another language is in that language: stamp, line, score
+    /// label, call to action and date.
+    #[test]
+    fn the_card_speaks_the_page_language() {
+        let s = Summary {
+            host: "easi.run",
+            verdict: Verdict::Missing,
+            tools: 0,
+            page_tokens: 324,
+            score: 25,
+            lint_errors: false,
+            scanned_on: "2026-11-09",
+        };
+        let h = html(s, Format::Post, Text::of(Some("pt-br")));
+        assert!(h.contains(r#"<html lang="pt-BR">"#), "{h}");
+        assert!(h.contains(">Não pronto para agentes<"), "{h}");
+        assert!(h.contains("Os agentes leem ~324 tokens"), "{h}");
+        assert!(h.contains(">Nota para agentes<"), "{h}");
+        assert!(
+            h.contains("Escaneie o seu em <span>webmcpx.dev</span>"),
+            "{h}"
+        );
+        assert!(h.contains("Escaneado em 9 de nov. de 2026"), "{h}");
+        assert!(!h.contains("Scan yours"), "{h}");
+        let ja = html(s, Format::Post, Text::of(Some("ja")));
+        assert!(ja.contains(">エージェント未対応<") && ja.contains("2026年11月9日"));
     }
 
     #[test]

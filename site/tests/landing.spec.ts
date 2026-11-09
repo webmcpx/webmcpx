@@ -790,3 +790,15 @@ test('each language shows the benchmark questions and the agent prompts in its o
 	await expect(quoted).toBeVisible();
 	await expect(quoted).not.toContainText(/\b(What|Which|How|When|Add|Put|Is)\b/);
 });
+
+test('Save PNG asks for the share image in the page language', async ({ page }) => {
+	await mockScan(page, { ...REPORT, verdict: 'missing', tools: [] });
+	await page.goto('/pt-br/');
+	await page.getByLabel('Endereço do seu site').first().fill('plain.example.com');
+	await page.keyboard.press('Enter');
+	const png = page.locator('#scan').getByRole('link', { name: 'Salvar PNG' });
+	await expect(png).toHaveAttribute(
+		'href',
+		`/og/scan.png?url=${encodeURIComponent(REPORT.url)}&size=post&lang=pt-br`
+	);
+});

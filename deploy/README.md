@@ -8,7 +8,7 @@ internet:
 | `tunnel` | `cloudflare/cloudflared`, pinned | nonroot | `edge`: dials out to Cloudflare |
 | `nginx` | nginx on Chainguard's distroless image, pinned by digest | nonroot | `edge` |
 | `web` | Rust server and the prerendered landing on `distroless/cc-debian13` (site built with Node 26 LTS) | nonroot | `edge` and `scan` |
-| `chrome` | `chromedp/headless-shell`, pinned | nobody | `scan` only |
+| `chrome` | `chromedp/headless-shell`, pinned, plus Noto fonts (`chrome.Dockerfile`) | nobody | `scan` only |
 
 ## Security model
 

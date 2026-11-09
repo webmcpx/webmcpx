@@ -504,17 +504,23 @@ impl Scanner {
 
     /// The share card (1200×630 PNG) for a report, rendered by the scan browser and kept.
     pub async fn card(&self, report: &Report) -> Result<Arc<Vec<u8>>, ScanError> {
-        self.card_of(crate::card::Summary::of(report), crate::card::Format::Link)
-            .await
+        self.card_of(
+            crate::card::Summary::of(report),
+            crate::card::Format::Link,
+            crate::card::Text::of(None),
+        )
+        .await
     }
 
-    /// The share card for what a scan found (a report's summary, or a site's [`Kept`] one).
+    /// The share card for what a scan found (a report's summary, or a site's [`Kept`] one), in `text`'s
+    /// language.
     pub async fn card_of(
         &self,
         summary: crate::card::Summary<'_>,
         format: crate::card::Format,
+        text: &crate::card::Text,
     ) -> Result<Arc<Vec<u8>>, ScanError> {
-        let key = format!("{format:?} {summary:?}");
+        let key = format!("{format:?} {} {summary:?}", text.code);
         if let Some(png) = lock(&self.cards).get(&key) {
             return Ok(Arc::clone(png));
         }
@@ -529,7 +535,7 @@ impl Scanner {
         if let Some(png) = lock(&self.cards).get(&key) {
             return Ok(Arc::clone(png));
         }
-        self.render(&key, &crate::card::html(summary, format), format)
+        self.render(&key, &crate::card::html(summary, format, text), format)
             .await
     }
 
