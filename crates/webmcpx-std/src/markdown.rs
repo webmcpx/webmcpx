@@ -100,9 +100,14 @@ fn render(stream: &str) -> String {
                 out.push_str(&text);
             }
             Kind::Code => {
-                out.push_str("```\n");
+                // A fence longer than any run of backticks in the code (a tutorial showing a ``` block),
+                // so the code can't close it early (CommonMark).
+                let fence = fence_len(&text);
+                (0..fence).for_each(|_| out.push('`'));
+                out.push('\n');
                 out.push_str(&text);
-                out.push_str("\n```");
+                out.push('\n');
+                (0..fence).for_each(|_| out.push('`'));
             }
             Kind::Quote => {
                 out.push_str("> ");
@@ -112,6 +117,16 @@ fn render(stream: &str) -> String {
         }
     }
     out
+}
+
+/// Backticks for a code fence around `code`: at least three, and more than its longest backtick run.
+fn fence_len(code: &str) -> usize {
+    let (mut longest, mut run) = (0, 0);
+    for c in code.chars() {
+        run = if c == '`' { run + 1 } else { 0 };
+        longest = longest.max(run);
+    }
+    (longest + 1).max(3)
 }
 
 trait LastLine {
@@ -177,6 +192,20 @@ mod tests {
         assert!(calls > 2);
         // Pages put back together are the document, line breaks included (code stays code).
         assert_eq!(joined, full);
+    }
+
+    /// Code that shows a fenced block gets a longer fence, so the page after it stays text.
+    #[test]
+    fn fences_code_that_contains_fences() {
+        let page = "pre\u{1F}```js\nlet a = 1;\n```\u{1E}p\u{1F}After the example.";
+        let md = parse(&markdown(page, "", 0))["data"]["markdown"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        assert_eq!(
+            md,
+            "````\n```js\nlet a = 1;\n```\n````\n\nAfter the example."
+        );
     }
 
     #[test]

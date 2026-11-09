@@ -56,9 +56,18 @@ export function readPage(what, root) {
   // A box of its own on screen (a block, or a flex or grid item, which the browser blockifies): its text
   // stays a separate word from its neighbors'. Inline elements join the text around them.
   const boxed = (el) => el.matches(BLOCKS) || /^(block|flex|grid|list-item|table|flow-root)/.test(css(el).display ?? "");
-  // Visible text; an element with no block inside is one block.
-  const textOf = (el) =>
-    [...el.childNodes].map((n) => (n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? " " : n.nodeType === 1 && !skipped(n) ? (boxed(n) ? ` ${textOf(n)} ` : textOf(n)) : "")).join("");
+  // Visible text; an element with no block inside is one block. In code (<pre>) a <br> or a box is a line
+  // break, so the code keeps its lines; elsewhere it is a space.
+  const textOf = (el, pre = !!el.closest?.("pre")) => {
+    const gap = pre ? "\n" : " ";
+    let out = "";
+    // A box starts on a new line (one break, never a blank line between two boxes) and ends one.
+    const box = (t) => (out && !out.endsWith(gap) ? gap : "") + t + gap;
+    for (const n of el.childNodes) {
+      out += n.nodeType === 3 ? data(n) : n.nodeName == "BR" ? gap : n.nodeType === 1 && !skipped(n) ? (boxed(n) ? box(textOf(n, pre)) : textOf(n, pre)) : "";
+    }
+    return out;
+  };
   const BLOCKS = Object.keys(KINDS) + ",div,section,article,main,ul,ol,dl,table,tr,form,header,figure,details";
   if (what === "context") {
     // Page-set fields are cut to size; URLs never are (a heading with a giant id gets no URL), and a

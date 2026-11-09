@@ -5,8 +5,8 @@ use std::path::Path;
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
     ArrayExpressionElement, CallExpression, ConditionalExpression, DoWhileStatement, Expression,
-    ForInStatement, ForOfStatement, ForStatement, IfStatement, ObjectPropertyKind,
-    StaticMemberExpression, WhileStatement,
+    ForInStatement, ForOfStatement, ForStatement, IfStatement, ObjectPropertyKind, Statement,
+    StaticMemberExpression, SwitchStatement, WhileStatement,
 };
 use oxc_ast_visit::{Visit, walk};
 use oxc_diagnostics::OxcDiagnostic;
@@ -216,6 +216,51 @@ impl<'a> Visit<'a> for Finder<'_> {
             self.path.push((id, 1));
             self.visit_statement(alternate);
             self.path.pop();
+        }
+    }
+
+    /// A function declaration is hoisted to its whole scope (a switch's cases share one), so it can run from
+    /// any arm: the registrations in it belong to no arm of where it is written.
+    fn visit_statement(&mut self, stmt: &Statement<'a>) {
+        if matches!(stmt, Statement::FunctionDeclaration(_)) {
+            let outer = core::mem::take(&mut self.path);
+            walk::walk_statement(self, stmt);
+            self.path = outer;
+        } else {
+            walk::walk_statement(self, stmt);
+        }
+    }
+
+    /// Cases that end in break, return, throw or continue are exclusive arms; a case that falls through
+    /// shares its arm with the next one (both run).
+    fn visit_switch_statement(&mut self, stmt: &SwitchStatement<'a>) {
+        if self.loops > 0 {
+            return walk::walk_switch_statement(self, stmt);
+        }
+        let id = self.branch();
+        self.visit_expression(&stmt.discriminant);
+        let mut arm: u8 = 0;
+        for case in &stmt.cases {
+            if let Some(test) = &case.test {
+                self.visit_expression(test);
+            }
+            self.path.push((id, arm));
+            for statement in &case.consequent {
+                self.visit_statement(statement);
+            }
+            self.path.pop();
+            let ends = case.consequent.last().is_some_and(|last| {
+                matches!(
+                    last,
+                    Statement::BreakStatement(_)
+                        | Statement::ReturnStatement(_)
+                        | Statement::ThrowStatement(_)
+                        | Statement::ContinueStatement(_)
+                )
+            });
+            if ends {
+                arm = arm.saturating_add(1);
+            }
         }
     }
 

@@ -297,3 +297,14 @@ test("flex and grid items stay separate words, as they are on screen", async () 
     delete globalThis.getComputedStyle;
   }
 });
+
+test("code in <pre> keeps its lines, also when they are <br>s or one element per line", async () => {
+  const page = host();
+  document.body.innerHTML =
+    '<main><pre>if ready:<br>    send()<br>finish()</pre><pre><div>a = 1</div><div>b = 2</div></pre><p>One<br>line.</p></main>';
+  await register({ wasm: WASM });
+  const md = (await page.call("fetch_as_markdown", {})).data.markdown;
+  assert.match(md, /```\nif ready:\n {4}send\(\)\nfinish\(\)\n```/);
+  assert.match(md, /```\na = 1\nb = 2\n```/);
+  assert.match(md, /One line\./, "outside code a <br> is a space");
+});

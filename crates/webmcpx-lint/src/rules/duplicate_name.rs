@@ -55,6 +55,32 @@ mod tests {
         ] {
             assert!(check("duplicate-name", source).is_empty(), "{source}");
         }
+        // switch cases that end in break or return: only one runs.
+        assert_eq!(
+            check(
+                "duplicate-name",
+                r#"function setup(provider) { switch (provider) { case "a": mc.registerTool({ name: "s" }); break; case "b": case "c": mc.registerTool({ name: "s" }); return; default: mc.registerTool({ name: "s" }); } }"#
+            ),
+            Vec::<String>::new()
+        );
+        // A function declared in one case is hoisted and can run from another: its registration is in no arm.
+        assert_eq!(
+            check(
+                "duplicate-name",
+                r#"switch (1) { case 0: function register() { mc.registerTool({ name: "s" }); } break; case 1: register(); mc.registerTool({ name: "s" }); break; }"#
+            )
+            .len(),
+            1
+        );
+        // A case that falls through runs the next one too.
+        assert_eq!(
+            check(
+                "duplicate-name",
+                r#"switch (p) { case "a": mc.registerTool({ name: "s" }); case "b": mc.registerTool({ name: "s" }); }"#
+            )
+            .len(),
+            1
+        );
         // The same branch, after the if/else, or inside a loop (each arm runs on some turn): both run.
         assert_eq!(
             check(
