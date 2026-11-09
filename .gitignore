@@ -6,5 +6,11 @@ node_modules/
 /bench/results/*
 !/bench/results/.gitkeep
 
-# Deploy settings (domain); never committed.
+# Secrets and local settings, anywhere in the tree: the tunnel token (deploy/.env), API keys. Never committed;
+# a template to share is named *.env.example.
 deploy/.env
+.env
+.env.*
+*.env
+!*.env.example
+!.env.example
