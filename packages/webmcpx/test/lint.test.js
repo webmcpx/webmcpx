@@ -6,6 +6,7 @@ import { mkdtempSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { lintOperands, listDirs } from "../bin/rust.js";
 import { fileURLToPath } from "node:url";
 
 const BIN = fileURLToPath(new URL("../bin/webmcpx.js", import.meta.url));
@@ -83,4 +84,42 @@ test("POSIX: a backslash is part of a file name, in arguments and in the working
     root: "/",
     pwd: "/home/a\\b"
   });
+});
+
+// Node's WASI can't list directories on Windows (fd_readdir is ENOSYS there), so bin/rust.js lists them
+// for the CLI there. Forced here on every OS, so the path every Windows user takes is tested everywhere.
+test("lint walks directories from the host's listing (the Windows path)", () => {
+  const dir = project();
+  mkdirSync(join(dir, "src", "deep"));
+  writeFileSync(join(dir, "src", "deep", "more.ts"), 'navigator.modelContext.registerTool({ name: "x", description: "", execute() {} });\n');
+  mkdirSync(join(dir, "node_modules"));
+  writeFileSync(join(dir, "node_modules", "dep.js"), 'document.modelContext.registerTool({ name: "bad name" });\n');
+  const forced = (args, cwd) =>
+    spawnSync(process.execPath, [BIN, ...args], { cwd, encoding: "utf8", env: { ...process.env, WEBMCPX_HOST_LISTING: "1" } });
+  for (const args of [["lint", "--format", "concise"], ["lint", "src", "--format", "concise"], ["lint", "src/", "--format", "concise"]]) {
+    const out = forced(args, dir);
+    assert.equal(out.status, 1, `${args.join(" ")}: ${out.stderr}`);
+    assert.match(out.stdout, /src\/tools\.js:1:\d+: error \[invalid-name\]/);
+    assert.match(out.stdout, /src\/deep\/more\.ts:1:/);
+    assert.doesNotMatch(out.stdout, /node_modules/);
+  }
+  // The same output as the CLI's own walk.
+  assert.equal(forced(["lint", "src", "--format", "concise"], dir).stdout, run(["lint", "src", "--format", "concise"], dir).stdout);
+  // An empty directory: nothing to lint, as natively.
+  mkdirSync(join(dir, "empty"));
+  assert.equal(forced(["lint", "empty"], dir).status, run(["lint", "empty"], dir).status);
+});
+
+test("the host listing covers lint's directory operands only", () => {
+  assert.deepEqual(lintOperands(["lint", "src", "--format", "json", "--ignore", "x", "lib", "--fix"]), [1, 6]);
+  assert.deepEqual(lintOperands(["lint", "--format", "concise"]), []);
+  assert.deepEqual(lintOperands(["lint", "--", "--weird"]), [2]);
+  const dir = project();
+  mkdirSync(join(dir, "other"));
+  // A directory operand: that tree only, not the working directory's.
+  assert.deepEqual(Object.keys(listDirs(["lint", "src"], ["lint", "src"], dir)), ["src"]);
+  // A file operand: nothing to list.
+  assert.deepEqual(listDirs(["lint", "src/tools.js"], ["lint", "src/tools.js"], dir), {});
+  // No operand: the working directory, as the CLI's default.
+  assert.deepEqual(Object.keys(listDirs(["lint"], ["lint"], dir)).sort(), [".", "./other", "./src"]);
 });

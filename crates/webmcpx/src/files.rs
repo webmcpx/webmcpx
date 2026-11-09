@@ -78,13 +78,12 @@ pub(crate) fn lint_paths(
 }
 
 fn walk(dir: &Path, files: &mut Vec<PathBuf>) -> std::io::Result<()> {
-    for entry in fs::read_dir(dir)? {
-        let path = entry?.path();
+    for (path, is_dir) in entries(dir)? {
         let name = path
             .file_name()
             .and_then(|n| n.to_str())
             .unwrap_or_default();
-        if path.is_dir() {
+        if is_dir {
             if !name.starts_with('.') && !SKIP_DIRS.contains(&name) {
                 walk(&path, files)?;
             }
@@ -93,6 +92,43 @@ fn walk(dir: &Path, files: &mut Vec<PathBuf>) -> std::io::Result<()> {
         }
     }
     Ok(())
+}
+
+/// A directory's entries and whether each is a directory: from the host's listing when it gave one (see
+/// [`host_listing`]), else read here.
+fn entries(dir: &Path) -> std::io::Result<Vec<(PathBuf, bool)>> {
+    if let Some(listed) = host_listing().and_then(|l| l.get(dir.to_string_lossy().as_ref())) {
+        return Ok(listed
+            .iter()
+            .map(|(name, is_dir)| (dir.join(name), *is_dir))
+            .collect());
+    }
+    fs::read_dir(dir)?
+        .map(|entry| {
+            let path = entry?.path();
+            let is_dir = path.is_dir();
+            Ok((path, is_dir))
+        })
+        .collect()
+}
+
+type Listing = std::collections::HashMap<String, Vec<(String, bool)>>;
+
+/// Node's WASI can't list a directory on Windows (`fd_readdir` is not implemented there), so `npx webmcpx`
+/// (bin/rust.js) lists the directories itself and points `WEBMCPX_TREE` at the listing: a JSON object from
+/// each directory, as this walk names it, to its entries (`[name, is_dir]`). Only the WebAssembly build
+/// reads it; which files are linted is still decided here.
+fn host_listing() -> Option<&'static Listing> {
+    static LISTING: std::sync::OnceLock<Option<Listing>> = std::sync::OnceLock::new();
+    LISTING
+        .get_or_init(|| {
+            if !cfg!(target_os = "wasi") {
+                return None;
+            }
+            let path = std::env::var_os("WEBMCPX_TREE")?;
+            serde_json::from_str(&fs::read_to_string(path).ok()?).ok()
+        })
+        .as_ref()
 }
 
 /// JS/TS sources, plus JSON files that name themselves as WebMCP manifests.

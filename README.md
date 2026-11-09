@@ -93,8 +93,62 @@ codex mcp add webmcpx -- npx -y webmcpx mcp      # Codex
 [<img src="https://cursor.com/deeplink/mcp-install-dark.svg" alt="Install in Cursor" height="32">](https://cursor.com/en/install-mcp?name=webmcpx&config=eyJjb21tYW5kIjoibnB4IC15IHdlYm1jcHggbWNwIn0%3D)
 [<img src="https://img.shields.io/badge/VS_Code-Install_Server-0098FF?style=flat-square" alt="Install in VS Code" height="32">](https://insiders.vscode.dev/redirect?url=vscode%3Amcp%2Finstall%3F%257B%2522name%2522%253A%2522webmcpx%2522%252C%2522command%2522%253A%2522npx%2522%252C%2522args%2522%253A%255B%2522-y%2522%252C%2522webmcpx%2522%252C%2522mcp%2522%255D%257D)
 
-Any other MCP client: command `npx`, args `-y webmcpx mcp`. Then try it on one task; paste this into your
-agent:
+<details>
+<summary><b>OpenClaw</b></summary>
+
+In your OpenClaw config, under `mcp.servers` ([docs](https://docs.openclaw.ai/tools/mcp)):
+
+```json5
+mcp: { servers: { webmcpx: { command: "npx", args: ["-y", "webmcpx", "mcp"] } } }
+```
+
+</details>
+
+<details>
+<summary><b>Hermes Agent</b></summary>
+
+In `~/.hermes/config.yaml` ([docs](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp)):
+
+```yaml
+mcp_servers:
+  webmcpx:
+    command: "npx"
+    args: ["-y", "webmcpx", "mcp"]
+```
+
+</details>
+
+<details>
+<summary><b>OpenCode</b></summary>
+
+```sh
+opencode mcp add webmcpx -- npx -y webmcpx mcp
+```
+
+([docs](https://opencode.ai/docs/mcp-servers/))
+
+</details>
+
+<details>
+<summary><b>Kiro</b></summary>
+
+In `.kiro/settings/mcp.json` (this workspace) or `~/.kiro/settings/mcp.json` (every workspace)
+([docs](https://kiro.dev/docs/mcp/configuration/)):
+
+```json
+{ "mcpServers": { "webmcpx": { "command": "npx", "args": ["-y", "webmcpx", "mcp"] } } }
+```
+
+</details>
+
+<details>
+<summary><b>Any other MCP client</b></summary>
+
+A local (stdio) server: command `npx`, args `-y webmcpx mcp`.
+
+</details>
+
+Then try it on one task; paste this into your agent:
 
 ```text
 Try WebMCP on this task: set up webmcpx (read https://webmcpx.dev/llms.txt), open https://webmcpx.dev, list its WebMCP tools and call one. Use them before reading or clicking the page. If it works, ask me whether to add a rule to AGENTS.md (or CLAUDE.md) to use WebMCP first on every site.
@@ -152,14 +206,15 @@ registers it while the component is mounted. Then see it, no browser flag: `npx 
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/assets/benchmark-dark.svg">
-  <img src="docs/assets/benchmark-light.svg" alt="Tokens saved per question with WebMCP, GPT-6.1 Sol, by site: Cloudflare docs 3.6× to 34×, Notion 4.3× to 18×, Kiln & Co 2.1× to 6.1×, specification.website 2.4× to 5.5×, Orbit docs 1.5× to 2.8×, WooCommerce demo from 2× more to 1.2× fewer.">
+  <img src="docs/assets/benchmark-light.svg" alt="Tokens saved per question with WebMCP, GPT-6 Luna, on the Cloudflare and Notion docs: Notion 1.3× to 62×, Cloudflare docs 3.5× to 28×.">
 </picture>
 
 Same model, prompt and step limit; one arm is a competent DOM browser agent (reads the page in parts, opens
 links and URLs, clicks and fills), the other only calls the WebMCP tools the page registers. 30 questions on 6
 sites, 3 runs each per arm, six models, graded by facts in the answer, never by an LLM. Method, changes and
 audits: [bench/METHODOLOGY.md](bench/METHODOLOGY.md), [bench/CHANGELOG.md](bench/CHANGELOG.md),
-[bench/audits/](bench/audits). Chart: `python3 scripts/bench-chart.py`.
+[bench/audits/](bench/audits). The chart shows the two public docs sites with GPT-6 Luna, the leaderboard's
+best case (`python3 scripts/bench-chart.py`); every site, losses included, is in the table below.
 
 Both arms solve almost every question; the WebMCP arm used **2.7× to 6× fewer tokens** per run across the
 six models (method v2). The best case on the leaderboard is **62×** (GPT-6 Luna, a Notion docs question,
