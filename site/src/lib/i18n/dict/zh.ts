@@ -23,7 +23,7 @@ const zh: Messages = {
 		home: {
 			title: 'webmcpx：让每个网站、每个智能体都用上 WebMCP',
 			description:
-				'扫描任意网站的 WebMCP 工具，一行代码让你的网站智能体就绪，让 Claude Code 或 Codex 在任何网站上都能用 WebMCP。代码开源。'
+				'扫描任意网站的 WebMCP 工具，一行代码为你的网站加上 WebMCP 工具，让 Claude Code 或 Codex 在任何网站上都能用 WebMCP。代码开源。'
 		},
 		brand: {
 			title: '品牌与设计系统 · webmcpx',
@@ -575,7 +575,7 @@ const zh: Messages = {
 		verdicts: { ready: '智能体就绪', issues: '差一点', missing: '智能体未就绪' },
 		failed: '无法扫描这个网站。',
 		result: {
-			missing: '没有 WebMCP 工具。智能体得读完这个页面约 {tokens}，然后靠猜。',
+			missing: '没有 WebMCP 工具。智能体只能读这个页面约 {tokens}。',
 			tokens: { other: '{n} 个 token' },
 			issues: { other: '{tools}，但有 {n} 个 lint 错误会让智能体出错。' },
 			toolCount: { other: '{n} 个工具' },

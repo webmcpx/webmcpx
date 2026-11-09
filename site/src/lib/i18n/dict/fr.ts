@@ -22,7 +22,7 @@ const fr: Messages = {
 		home: {
 			title: 'webmcpx : WebMCP pour tous les sites et tous les agents',
 			description:
-				'Trouvez les outils WebMCP de n’importe quel site, rendez le vôtre prêt pour les agents en une ligne, offrez WebMCP à Claude Code ou Codex partout. Open source.'
+				'Trouvez les outils WebMCP de n’importe quel site, donnez des outils WebMCP au vôtre en une ligne, offrez WebMCP à Claude Code ou Codex partout. Open source.'
 		},
 		brand: {
 			title: 'Marque et design system · webmcpx',
@@ -616,7 +616,7 @@ const fr: Messages = {
 		verdicts: { ready: 'Prêt', issues: 'Presque', missing: 'Pas prêt' },
 		failed: 'Impossible de scanner ce site.',
 		result: {
-			missing: 'Aucun outil WebMCP. Les agents doivent lire environ {tokens} de cette page et deviner.',
+			missing: 'Aucun outil WebMCP. Les agents doivent lire environ {tokens} de cette page à la place.',
 			tokens: { one: '{n} token', other: '{n} tokens' },
 			issues: {
 				one: '{tools}, mais {n} erreur de lint sur laquelle les agents vont buter.',

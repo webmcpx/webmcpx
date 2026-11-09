@@ -1684,3 +1684,79 @@ async fn the_agent_checks_keep_the_page_icon() {
         "the icon the page declares, read before the checks leave the page"
     );
 }
+
+/// Every card, in every language and both sizes, fits its frame: nothing is pushed past the edge where the
+/// frame clips it (the call to action and the date share the footer; long verdicts and lines wrap).
+#[tokio::test]
+async fn share_cards_fit_their_frame_in_every_language() {
+    use webmcpx_bench::card::{Format, LANGUAGES, Summary, html};
+    use webmcpx_bench::scan::Verdict;
+    if no_chrome() {
+        return;
+    }
+    let browser = Browser::launch(None).await.unwrap();
+    let page = browser.page(&[]).await.unwrap();
+    let base = Summary {
+        host: "docs.a-long-company-name.example",
+        verdict: Verdict::Missing,
+        tools: 0,
+        page_tokens: 12_345,
+        score: 30,
+        lint_errors: false,
+        scanned_on: "2026-11-09",
+    };
+    let cases = [
+        base,
+        Summary {
+            page_tokens: 300,
+            ..base
+        },
+        Summary {
+            verdict: Verdict::Issues,
+            tools: 12,
+            score: 64,
+            lint_errors: true,
+            ..base
+        },
+        Summary {
+            verdict: Verdict::Issues,
+            tools: 3,
+            score: 41,
+            ..base
+        },
+        Summary {
+            verdict: Verdict::Ready,
+            tools: 22,
+            score: 100,
+            ..base
+        },
+    ];
+    for text in &LANGUAGES {
+        for s in cases {
+            for format in [Format::Link, Format::Post] {
+                let (width, height, _) = format.size();
+                page.render_png(&html(s, format, text), width, height, 1.0)
+                    .await
+                    .unwrap();
+                let out = page
+                    .eval(
+                        "(() => { const f = document.querySelector('.frame').getBoundingClientRect(); \
+                         const bad = [...document.querySelectorAll('.top *, .main *, .foot *')] \
+                           .filter(e => !e.closest('svg') || e.tagName === 'svg').filter(e => { const r = e.getBoundingClientRect(); \
+                             return r.right > f.right - 4 || r.left < f.left || r.bottom > f.bottom - 4 || r.top < f.top; }) \
+                           .map(e => e.tagName + '.' + e.getAttribute('class') + ' ' + JSON.stringify(e.getBoundingClientRect()) + ' frame ' + JSON.stringify(f)); \
+                         return bad.join(','); })()",
+                    )
+                    .await
+                    .unwrap();
+                assert_eq!(
+                    out.as_str().unwrap(),
+                    "",
+                    "{} {:?} {format:?}: past the frame",
+                    text.code,
+                    s.verdict
+                );
+            }
+        }
+    }
+}

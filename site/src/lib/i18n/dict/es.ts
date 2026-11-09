@@ -20,7 +20,7 @@ const es: Messages = {
 		home: {
 			title: 'webmcpx: WebMCP para cada sitio y cada agente',
 			description:
-				'Busca herramientas WebMCP en cualquier sitio, deja el tuyo listo para agentes en una línea y dale WebMCP a Claude Code o Codex en cualquier web. Open source.'
+				'Busca herramientas WebMCP en cualquier sitio, dale herramientas WebMCP al tuyo en una línea y dale WebMCP a Claude Code o Codex en cualquier web. Open source.'
 		},
 		brand: {
 			title: 'Marca y sistema de diseño · webmcpx',
@@ -611,7 +611,7 @@ const es: Messages = {
 		failed: 'No se pudo escanear.',
 		result: {
 			missing:
-				'Sin herramientas WebMCP. Los agentes tienen que leer unos {tokens} de esta página y adivinar.',
+				'Sin herramientas WebMCP. Los agentes tienen que leer unos {tokens} de esta página en su lugar.',
 			tokens: { one: '{n} token', other: '{n} tokens' },
 			issues: {
 				one: '{tools}, pero con {n} error de lint con el que tropezarán los agentes.',

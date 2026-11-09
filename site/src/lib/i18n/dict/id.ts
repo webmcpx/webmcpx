@@ -22,7 +22,7 @@ const id: Messages = {
 		home: {
 			title: 'webmcpx: WebMCP untuk setiap situs dan setiap agen',
 			description:
-				'Scan situs mana pun untuk tool WebMCP, jadikan situs Anda siap agent dengan satu baris, dan beri Claude Code atau Codex WebMCP di setiap situs. Open source.'
+				'Scan situs mana pun untuk tool WebMCP, beri situs Anda tool WebMCP dengan satu baris, dan beri Claude Code atau Codex WebMCP di setiap situs. Open source.'
 		},
 		brand: {
 			title: 'Merek dan sistem desain · webmcpx',
@@ -605,7 +605,8 @@ const id: Messages = {
 		verdicts: { ready: 'Siap agent', issues: 'Hampir', missing: 'Belum siap agent' },
 		failed: 'Situs itu tidak bisa di-scan.',
 		result: {
-			missing: 'Tidak ada tool WebMCP. Agent harus membaca sekitar {tokens} dari halaman ini lalu menebak.',
+			missing:
+				'Tidak ada tool WebMCP. Sebagai gantinya, agent harus membaca sekitar {tokens} dari halaman ini.',
 			tokens: { other: '{n} token' },
 			issues: {
 				other: '{tools}, tetapi ada {n} error lint yang akan menjegal agent.'

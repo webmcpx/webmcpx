@@ -20,7 +20,7 @@ const hi: Messages = {
 		home: {
 			title: 'webmcpx: हर साइट और हर एजेंट के लिए WebMCP',
 			description:
-				'किसी भी साइट में WebMCP टूल्स स्कैन करें, एक लाइन से अपनी साइट एजेंट-रेडी बनाएँ, और Claude Code या Codex को हर साइट पर WebMCP दें। ओपन सोर्स।'
+				'किसी भी साइट में WebMCP टूल्स स्कैन करें, एक लाइन से अपनी साइट को WebMCP टूल्स दें, और Claude Code या Codex को हर साइट पर WebMCP दें। ओपन सोर्स।'
 		},
 		brand: {
 			title: 'ब्रैंड और डिज़ाइन सिस्टम · webmcpx',
@@ -599,7 +599,7 @@ const hi: Messages = {
 		verdicts: { ready: 'एजेंट-रेडी', issues: 'लगभग', missing: 'एजेंट-रेडी नहीं' },
 		failed: 'इसे स्कैन नहीं कर पाए।',
 		result: {
-			missing: 'कोई WebMCP टूल नहीं। एजेंट को इस पेज के लगभग {tokens} पढ़कर अंदाज़ा लगाना पड़ता है।',
+			missing: 'कोई WebMCP टूल नहीं। एजेंट को इसके बजाय इस पेज के लगभग {tokens} पढ़ने पड़ते हैं।',
 			tokens: { one: '{n} टोकन', other: '{n} टोकन' },
 			issues: {
 				one: '{tools}, लेकिन {n} लिंट एरर, जिस पर एजेंट अटकेंगे।',

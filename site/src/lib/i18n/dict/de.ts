@@ -21,7 +21,7 @@ const de: Messages = {
 		home: {
 			title: 'webmcpx: WebMCP für jede Website und jeden Agenten',
 			description:
-				'Prüfen Sie jede Website auf WebMCP-Tools, machen Sie Ihre mit einer Zeile agentenfähig und geben Sie Claude Code oder Codex überall WebMCP. Open Source.'
+				'Prüfen Sie jede Website auf WebMCP-Tools, geben Sie Ihrer mit einer Zeile WebMCP-Tools und geben Sie Claude Code oder Codex überall WebMCP. Open Source.'
 		},
 		brand: {
 			title: 'Marke und Designsystem · webmcpx',
@@ -611,7 +611,7 @@ const de: Messages = {
 		verdicts: { ready: 'Agentenfähig', issues: 'Fast', missing: 'Nicht agentenfähig' },
 		failed: 'Scan nicht möglich.',
 		result: {
-			missing: 'Keine WebMCP-Tools. Agenten müssen rund {tokens} dieser Seite lesen und raten.',
+			missing: 'Keine WebMCP-Tools. Agenten müssen stattdessen rund {tokens} dieser Seite lesen.',
 			tokens: { one: '{n} Token', other: '{n} Tokens' },
 			issues: {
 				one: '{tools}, aber {n} Lint-Fehler, über den Agenten stolpern.',

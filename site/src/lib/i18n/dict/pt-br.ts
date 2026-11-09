@@ -22,7 +22,7 @@ const ptBr: Messages = {
 		home: {
 			title: 'webmcpx: WebMCP para todo site e todo agente',
 			description:
-				'Escaneie qualquer site atrás de ferramentas WebMCP, deixe o seu pronto para agentes com uma linha e dê WebMCP ao Claude Code ou Codex em todo site. Open source.'
+				'Escaneie qualquer site atrás de ferramentas WebMCP, dê ferramentas WebMCP ao seu com uma linha e dê WebMCP ao Claude Code ou Codex em todo site. Open source.'
 		},
 		brand: {
 			title: 'Marca e design system · webmcpx',
@@ -610,7 +610,7 @@ const ptBr: Messages = {
 		failed: 'Não foi possível escanear.',
 		result: {
 			missing:
-				'Nenhuma ferramenta WebMCP. Os agentes precisam ler cerca de {tokens} desta página e adivinhar.',
+				'Nenhuma ferramenta WebMCP. Em vez disso, os agentes precisam ler cerca de {tokens} desta página.',
 			tokens: { one: '{n} token', other: '{n} tokens' },
 			issues: {
 				one: '{tools}, mas com {n} erro de lint em que os agentes vão tropeçar.',

@@ -7,7 +7,7 @@
 use crate::scan::{Report, Verdict};
 
 mod text;
-pub use text::Text;
+pub use text::{ALL as LANGUAGES, Text};
 
 /// Bricolage Grotesque (SIL OFL 1.1, see assets/fonts), inlined so the card renders without a network.
 const FONT: &[u8] = include_bytes!("../assets/fonts/bricolage-grotesque-latin-wght-normal.woff2");
@@ -107,15 +107,101 @@ pub const fn verdict_label(verdict: Verdict, t: &Text) -> &'static str {
     }
 }
 
+/// From this many page tokens, the card says how much of the page agents read.
+const HEAVY_PAGE: usize = 2000;
+
+/// The second line, bold: why the viewer should care. Without tools, what tools gave agents in the
+/// benchmark (its best case, "up to"); almost there, the points still missing; agent-ready, nothing.
+fn hook(s: Summary<'_>, t: &Text) -> Option<String> {
+    match s.verdict {
+        Verdict::Missing => best_saving().map(|best| t.hook.replace("{best}", &ratio(best))),
+        Verdict::Issues => {
+            let missing = crate::scan::READY_SCORE.checked_sub(s.score)?;
+            (missing > 0).then(|| t.distance(usize::from(missing)))
+        }
+        Verdict::Ready => None,
+    }
+}
+
+/// 62× / 4.4×, as the site shows a saving.
+fn ratio(x: f64) -> String {
+    if x >= 10.0 {
+        format!("{x:.0}\u{d7}")
+    } else {
+        format!("{x:.1}\u{d7}")
+    }
+}
+
+/// Every published run (`site/src/lib/content/bench/`); a test keeps the list in step with the folder.
+const RUNS: [&str; 6] = [
+    include_str!("../../../site/src/lib/content/bench/claude-haiku-5-5.json"),
+    include_str!("../../../site/src/lib/content/bench/claude-opus-5-5.json"),
+    include_str!("../../../site/src/lib/content/bench/gemini-3.8-flash.json"),
+    include_str!("../../../site/src/lib/content/bench/gemini-4-argon.json"),
+    include_str!("../../../site/src/lib/content/bench/gpt-6-luna.json"),
+    include_str!("../../../site/src/lib/content/bench/gpt-6.1-sol.json"),
+];
+
+/// The leaderboard's best case, as the landing quotes it ("up to 62× fewer tokens"): the largest saving on
+/// one question over every published run. None without one.
+pub fn best_saving() -> Option<f64> {
+    static BEST: std::sync::OnceLock<Option<f64>> = std::sync::OnceLock::new();
+    *BEST.get_or_init(|| {
+        RUNS.iter()
+            .filter_map(|run| serde_json::from_str(run).ok())
+            .filter_map(|run: serde_json::Value| best_case(&run).map(|(_, x)| x))
+            .max_by(f64::total_cmp)
+    })
+}
+
+/// A run's best case: the question with the largest token saving among those solved at least as often
+/// with WebMCP (like the page's showcase), and that saving.
+fn best_case(results: &serde_json::Value) -> Option<(&str, f64)> {
+    results["summary"]["tasks"]
+        .as_object()?
+        .iter()
+        .filter_map(|(id, arms)| {
+            let base = arms["baseline"]["tokens"].as_f64()?;
+            let with = arms["webmcp"]["tokens"].as_f64()?;
+            let solved = |arm: &str| arms[arm]["success_rate"].as_f64().unwrap_or(0.0);
+            (with > 0.0 && solved("webmcp") >= solved("baseline"))
+                .then_some((id.as_str(), base / with))
+        })
+        .max_by(|a, b| a.1.total_cmp(&b.1))
+}
+
 /// The card's one line under the site name, ending with the score (link previews' description).
 pub fn line(s: Summary<'_>, t: &Text) -> String {
     let score = t.score_line.replace("{score}", &s.score.to_string());
     format!("{} {score}", what(s, t))
 }
 
+/// A shared scan link's preview text, in `t`'s language: title, description and the image's alt text.
+/// Networks that show text beside the image (Bluesky, `LinkedIn`, Slack, Discord) get what the image only
+/// hints at: the bold line and the way to scan your own site.
+pub fn share_text(s: Summary<'_>, t: &Text) -> (String, String, String) {
+    let verdict = verdict_label(s.verdict, t);
+    let title = format!("{} · {verdict} · {}/100", s.host, s.score);
+    let hook = hook(s, t);
+    let cta = t.cta.replace("{site}", "webmcpx.dev");
+    let description = [Some(line(s, t)), hook.clone(), Some(cta)]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+        .join(" ");
+    let alt = [Some(format!("webmcpx · {title}.")), Some(what(s, t)), hook]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>()
+        .join(" ");
+    (title, description, alt)
+}
+
 /// What the scan found, in one sentence (the card shows the score on its own).
 fn what(s: Summary<'_>, t: &Text) -> String {
     let pattern = match s.verdict {
+        // A light page's token count says little (a few hundred tokens sound cheap): just the finding.
+        Verdict::Missing if s.page_tokens < HEAVY_PAGE => return t.no_tools_light.to_owned(),
         Verdict::Missing => return t.no_tools.replace("{n}", &short(s.page_tokens)),
         Verdict::Issues if s.lint_errors => t.lint,
         Verdict::Issues => t.basics,
@@ -138,6 +224,7 @@ pub fn html(s: Summary<'_>, format: Format, t: &Text) -> String {
         title: s.host,
         size,
         line: &what(s, t),
+        hook: hook(s, t),
         stamp: Some((verdict_label(s.verdict, t), fill, ink)),
         score: Some(s.score),
         date: Some(t.scanned.replace("{date}", &t.date(s.scanned_on))),
@@ -152,6 +239,8 @@ struct Card<'a> {
     /// The title's font size (px).
     size: u32,
     line: &'a str,
+    /// A bold second line (see [`hook`]).
+    hook: Option<String>,
     /// Label, fill and text color of the verdict stamp.
     stamp: Option<(&'a str, &'a str, &'a str)>,
     score: Option<u8>,
@@ -178,6 +267,8 @@ fn render(c: &Card<'_>) -> String {
         _ => 27,
     };
     let score_label = escape(t.score);
+    // The link preview is 45 px shorter than the post image: its text and padding give way first.
+    let (text_size, pad) = if height < 650 { (32, 44) } else { (36, 56) };
     let cta = escape(t.cta).replace("{site}", "<span>webmcpx.dev</span>");
     // The score, big at the bottom right; highlighted from the agent-ready bar up.
     let score = c.score.map_or_else(String::new, |n| {
@@ -190,6 +281,9 @@ fn render(c: &Card<'_>) -> String {
             r#"<div class="score"><div class="label">{score_label}</div><div class="num{mark}"><b>{n}</b><small>/100</small></div></div>"#
         )
     });
+    let hook = c.hook.as_deref().map_or_else(String::new, |h| {
+        format!(r#"<div class="hook">{}</div>"#, escape(h))
+    });
     let date = c.date.as_deref().map_or_else(String::new, |d| {
         format!(r#"<span class="date">{}</span>"#, escape(d))
     });
@@ -198,8 +292,8 @@ fn render(c: &Card<'_>) -> String {
 @font-face{{font-family:B;src:url(data:font/woff2;base64,{font}) format("woff2");font-weight:200 800}}
 *{{margin:0;box-sizing:border-box}}
 html,body{{width:1200px;height:{height}px;background:oklch(0.958 0.006 95);font-family:B,"Noto Sans",sans-serif;color:oklch(0.18 0.004 95)}}
-.frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;padding:56px 64px;display:flex;flex-direction:column;overflow:hidden;
-background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.86 0.006 95) 1px,transparent 1px);background-size:64px 64px}}
+.frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;padding:{pad}px 64px;display:flex;flex-direction:column;overflow:hidden;
+background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.9 0.005 95) 1px,transparent 1px);background-size:64px 64px}}
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .lockup svg{{height:44px;width:auto}}
 .stamp{{display:{stamp_display};border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:10px 28px;font-size:{stamp_size}px;white-space:nowrap;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
@@ -209,21 +303,23 @@ background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1
 .row{{display:flex;align-items:flex-end;gap:48px}}
 .text{{flex:1;min-width:0}}
 .host{{font-size:{size}px;font-weight:800;letter-spacing:-.04em;line-height:1;overflow-wrap:anywhere}}
-.line{{margin-top:22px;font-size:34px;font-weight:500;color:oklch(0.38 0.006 95);max-width:1000px}}
+.line{{margin-top:16px;font-size:{text_size}px;font-weight:500;line-height:1.2;color:oklch(0.38 0.006 95);max-width:1000px}}
+.hook{{margin-top:10px;font-size:{text_size}px;font-weight:700;line-height:1.2;color:oklch(0.18 0.004 95)}}
 .score{{text-align:right;flex:none}}
-.score .label{{font-size:20px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.38 0.006 95);margin-bottom:6px}}
+.score .label{{font-size:24px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:oklch(0.38 0.006 95);margin-bottom:6px}}
 .num b{{font-size:150px;font-weight:800;letter-spacing:-.05em;line-height:.85}}
 .num small{{font-size:46px;font-weight:700;color:oklch(0.38 0.006 95)}}
 .num.marked b{{background:linear-gradient(transparent 45%,oklch(0.89 0.16 95) 45%,oklch(0.89 0.16 95) 80%,transparent 80%)}}
-.foot{{margin-top:40px;font-size:30px;font-weight:700;display:flex;justify-content:space-between;align-items:baseline}}
-.foot span.cta span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
-.date{{font-size:20px;font-weight:600;letter-spacing:.06em;color:oklch(0.38 0.006 95)}}
+.foot{{margin-top:28px;display:flex;justify-content:space-between;align-items:baseline;gap:32px}}
+.cta{{flex:none;font-size:44px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}}
+.cta span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
+.date{{min-width:0;font-size:22px;font-weight:600;letter-spacing:.06em;color:oklch(0.38 0.006 95)}}
 :lang(zh) *,:lang(ja) *,:lang(hi) *,:lang(bn) *{{letter-spacing:0!important}}
 </style></head><body><div class="frame">
 <div class="mark">{mark}</div>
 <div class="top"><div class="lockup">{lockup}</div><div class="stamp">{label}</div></div>
-<div class="main"><div class="host">{host}</div><div class="row"><div class="text line">{line}</div>{score}</div></div>
-<div class="foot"><span class="cta">{cta}</span>{date}</div>
+<div class="main"><div class="host">{host}</div><div class="row"><div class="text"><div class="line">{line}</div>{hook}</div>{score}</div></div>
+<div class="foot">{date}<span class="cta">{cta}</span></div>
 </div></body></html>"#,
         font = base64(FONT),
         lockup = LOCKUP,
@@ -232,12 +328,26 @@ background-image:linear-gradient(to right,oklch(0.86 0.006 95) 1px,transparent 1
     )
 }
 
+/// The generic card's line: what a scan does, and the benchmark's best case as the landing quotes it.
+fn generic_line() -> String {
+    best_saving().map_or_else(
+        || "Scan any site for WebMCP tools.".to_owned(),
+        |best| {
+            format!(
+                "Scan any site for WebMCP tools. With them: up to {} fewer tokens for agents in our benchmark.",
+                ratio(best)
+            )
+        },
+    )
+}
+
 /// The site's own preview image (`/og.png`): what webmcpx is, for links without a scan.
 pub fn generic_html() -> String {
     render(&Card {
         title: "Make your site agent-ready",
         size: 104,
-        line: "Scan any site for WebMCP tools. One line makes it agent\u{2011}ready.",
+        line: &generic_line(),
+        hook: None,
         stamp: None,
         score: None,
         date: None,
@@ -250,28 +360,13 @@ pub fn generic_html() -> String {
 /// largest token saving among those solved at least as often with WebMCP, named as a best case (results
 /// are never averaged). None without such a comparison.
 pub fn bench_html(results: &serde_json::Value) -> Option<String> {
-    let tasks = results["summary"]["tasks"].as_object()?;
-    let (task, ratio) = tasks
-        .iter()
-        .filter_map(|(id, arms)| {
-            let base = arms["baseline"]["tokens"].as_f64()?;
-            let with = arms["webmcp"]["tokens"].as_f64()?;
-            // Like the page's showcase: a best case is solved at least as often with WebMCP.
-            let solved = |arm: &str| arms[arm]["success_rate"].as_f64().unwrap_or(0.0);
-            (with > 0.0 && solved("webmcp") >= solved("baseline")).then_some((id, base / with))
-        })
-        .max_by(|a, b| a.1.total_cmp(&b.1))?;
-    let place = results["tasks"][task.as_str()]["url"].as_str().map_or_else(
+    let (task, saving) = best_case(results)?;
+    let place = results["tasks"][task]["url"].as_str().map_or_else(
         || "a local test site".to_owned(),
         |u| host_of(u).trim_start_matches("www.").to_owned(),
     );
-    let saving = if ratio >= 10.0 {
-        format!("{ratio:.0}")
-    } else {
-        format!("{ratio:.1}")
-    };
     let model = results["model"].as_str().unwrap_or("one model");
-    let title = format!("{saving}\u{d7} fewer tokens");
+    let title = format!("{} fewer tokens", ratio(saving));
     let line = format!(
         "{model}, same question with and without WebMCP: best case, on {place}. Every question is published."
     );
@@ -279,6 +374,7 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
         title: &title,
         size: 104,
         line: &line,
+        hook: None,
         stamp: None,
         score: None,
         date: None,
@@ -404,11 +500,11 @@ mod tests {
         let en = Text::of(None);
         assert_eq!(
             line(s, en),
-            "No WebMCP tools. Agents read ~12k tokens of this page and guess. Score 20/100."
+            "No WebMCP tools: agents read ~12k tokens of this page instead. Score 20/100."
         );
         assert_eq!(
             line(s, Text::of(Some("pt-br"))),
-            "Nenhuma ferramenta WebMCP. Os agentes leem ~12k tokens desta página e adivinham. Nota 20/100."
+            "Nenhuma ferramenta WebMCP: os agentes leem ~12k tokens desta página. Nota 20/100."
         );
         let s = Summary {
             verdict: Verdict::Ready,
@@ -471,7 +567,7 @@ mod tests {
         );
         assert!(missing.contains(">Not agent-ready<"));
         assert!(missing.contains("oklch(0.58 0.21 27)"));
-        assert!(missing.contains("Scan yours at <span>webmcpx.dev</span>"));
+        assert!(missing.contains("Is your site agent-ready? <span>webmcpx.dev</span>"));
     }
 
     /// A card saved or shared from a page in another language is in that language: stamp, line, score
@@ -490,14 +586,19 @@ mod tests {
         let h = html(s, Format::Post, Text::of(Some("pt-br")));
         assert!(h.contains(r#"<html lang="pt-BR">"#), "{h}");
         assert!(h.contains(">Não pronto para agentes<"), "{h}");
-        assert!(h.contains("Os agentes leem ~324 tokens"), "{h}");
-        assert!(h.contains(">Nota para agentes<"), "{h}");
+        // A light page: the finding alone, then what tools gave agents in the benchmark.
         assert!(
-            h.contains("Escaneie o seu em <span>webmcpx.dev</span>"),
+            h.contains(">Nenhuma ferramenta WebMCP para os agentes chamarem.<"),
             "{h}"
         );
+        assert!(
+            h.contains(">Com WebMCP: até 62× menos tokens no nosso benchmark.<"),
+            "{h}"
+        );
+        assert!(h.contains(">Nota para agentes<"), "{h}");
+        assert!(h.contains("E o seu site? <span>webmcpx.dev</span>"), "{h}");
         assert!(h.contains("Escaneado em 9 de nov. de 2026"), "{h}");
-        assert!(!h.contains("Scan yours"), "{h}");
+        assert!(!h.contains("Scan yours") && !h.contains("adivinh"), "{h}");
         let ja = html(s, Format::Post, Text::of(Some("ja")));
         assert!(ja.contains(">エージェント未対応<") && ja.contains("2026年11月9日"));
     }
@@ -527,5 +628,75 @@ mod tests {
             badge_styled(Some(Verdict::Ready), Some("<script>")),
             badge(Some(Verdict::Ready))
         );
+    }
+
+    /// The best case the cards quote is the landing's: every published run, and nothing else.
+    #[test]
+    fn the_quoted_best_case_covers_every_published_run() {
+        let mut files: Vec<String> = std::fs::read_dir(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../site/src/lib/content/bench"
+        ))
+        .unwrap()
+        .map(|e| e.unwrap().file_name().to_string_lossy().into_owned())
+        .filter(|n| {
+            std::path::Path::new(n)
+                .extension()
+                .is_some_and(|e| e == "json")
+        })
+        .collect();
+        files.sort();
+        let src = include_str!("card.rs");
+        for f in &files {
+            assert!(
+                src.contains(&format!("content/bench/{f}\")")),
+                "RUNS misses {f}"
+            );
+        }
+        assert_eq!(files.len(), RUNS.len());
+        assert_eq!(ratio(best_saving().unwrap()), "62\u{d7}");
+    }
+
+    /// Almost: the points still missing; agent-ready: no second line.
+    #[test]
+    fn hooks_by_verdict() {
+        let en = Text::of(None);
+        let s = Summary {
+            host: "a.example",
+            verdict: Verdict::Issues,
+            tools: 2,
+            page_tokens: 5000,
+            score: 64,
+            lint_errors: true,
+            scanned_on: "2026-11-09",
+        };
+        assert_eq!(hook(s, en).as_deref(), Some("6 points to agent-ready."));
+        assert_eq!(hook(Summary { score: 80, ..s }, en), None);
+        assert_eq!(
+            hook(
+                Summary {
+                    verdict: Verdict::Ready,
+                    score: 90,
+                    ..s
+                },
+                en
+            ),
+            None
+        );
+        let heavy = Summary {
+            verdict: Verdict::Missing,
+            tools: 0,
+            page_tokens: 12_345,
+            ..s
+        };
+        assert_eq!(
+            what(heavy, en),
+            "No WebMCP tools: agents read ~12k tokens of this page instead."
+        );
+        assert_eq!(
+            hook(heavy, en).as_deref(),
+            Some("With WebMCP: up to 62\u{d7} fewer tokens in our benchmark.")
+        );
+        assert!(!generic_html().contains("One line makes it"));
     }
 }

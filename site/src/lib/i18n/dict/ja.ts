@@ -20,7 +20,7 @@ const ja: Messages = {
 		home: {
 			title: 'webmcpx：すべてのサイトとエージェントに WebMCP を',
 			description:
-				'あらゆるサイトの WebMCP ツールをスキャン。1 行で自分のサイトをエージェント対応にし、Claude Code や Codex にどのサイトでも WebMCP を。オープンソース。'
+				'あらゆるサイトの WebMCP ツールをスキャン。1 行で自分のサイトに WebMCP ツールを入れ、Claude Code や Codex にどのサイトでも WebMCP を。オープンソース。'
 		},
 		brand: {
 			title: 'ブランドとデザインシステム · webmcpx',
@@ -595,7 +595,7 @@ const ja: Messages = {
 		failed: 'スキャンできませんでした。',
 		result: {
 			missing:
-				'WebMCP ツールがありません。エージェントはこのページの約 {tokens}を読み、推測するしかありません。',
+				'WebMCP ツールがありません。代わりにエージェントはこのページの約 {tokens}を読むしかありません。',
 			tokens: { other: '{n} トークン' },
 			issues: {
 				other: '{tools}が見つかりましたが、エージェントがつまずく lint エラーが {n} 件あります。'

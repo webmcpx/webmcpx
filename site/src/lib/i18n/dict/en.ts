@@ -38,7 +38,7 @@ const en = {
 			title: 'webmcpx: WebMCP for every site and every agent',
 			// max 160: search results cut longer descriptions. No benchmark number here: it needs its attribution.
 			description:
-				'Scan any site for WebMCP tools, make yours agent-ready with one line, and give Claude Code or Codex WebMCP on every site. Open source.'
+				'Scan any site for WebMCP tools, give yours WebMCP tools with one line, and give Claude Code or Codex WebMCP on every site. Open source.'
 		},
 		brand: {
 			// max 60
@@ -752,7 +752,7 @@ const en = {
 		failed: "Couldn't scan that.",
 		result: {
 			// {tokens} is the highlighted token count (the text below). Plural by the count; {n} is shown short (12k).
-			missing: 'No WebMCP tools. Agents have to read about {tokens} of this page and guess.',
+			missing: 'No WebMCP tools. Agents have to read about {tokens} of this page instead.',
 			tokens: p({ one: '{n} token', other: '{n} tokens' }),
 			// {tools} is the tool count (toolCount); plural by {n}, the number of lint errors.
 			issues: p({

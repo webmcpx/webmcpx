@@ -21,7 +21,7 @@ const bn: Messages = {
 		home: {
 			title: 'webmcpx: প্রতিটি সাইট ও প্রতিটি এজেন্টের জন্য WebMCP',
 			description:
-				'যেকোনো সাইটে WebMCP টুল স্ক্যান করুন, এক লাইনে নিজের সাইট এজেন্ট-রেডি করুন, আর Claude Code বা Codex-কে সব সাইটে দিন WebMCP। ওপেন সোর্স।'
+				'যেকোনো সাইটে WebMCP টুল স্ক্যান করুন, এক লাইনে নিজের সাইটে WebMCP টুল দিন, আর Claude Code বা Codex-কে সব সাইটে দিন WebMCP। ওপেন সোর্স।'
 		},
 		brand: {
 			title: 'ব্র্যান্ড ও ডিজাইন সিস্টেম · webmcpx',
@@ -608,7 +608,7 @@ const bn: Messages = {
 		verdicts: { ready: 'এজেন্ট-রেডি', issues: 'প্রায়', missing: 'এজেন্ট-রেডি নয়' },
 		failed: 'এটি স্ক্যান করা গেল না।',
 		result: {
-			missing: 'কোনো WebMCP টুল নেই। এজেন্টকে এই পেজের প্রায় {tokens} পড়ে আন্দাজ করতে হয়।',
+			missing: 'কোনো WebMCP টুল নেই। এজেন্টকে এর বদলে এই পেজের প্রায় {tokens} পড়তে হয়।',
 			tokens: { one: '{n} টোকেন', other: '{n} টোকেন' },
 			issues: {
 				one: '{tools}, কিন্তু {n}টি লিন্ট এরর, যাতে এজেন্ট হোঁচট খাবে।',

@@ -215,18 +215,12 @@ pub fn share_page(
     text: &crate::card::Text,
 ) -> String {
     let host = crate::card::host_of(target);
-    let (title, description) = match summary {
-        Some(s) => {
-            let verdict = crate::card::verdict_label(s.verdict, text);
-            (
-                format!("{} · {verdict}", s.host),
-                crate::card::line(s, text),
-            )
-        }
+    let (title, description, alt) = match summary {
+        Some(s) => crate::card::share_text(s, text),
         None => (
             format!("Is {host} agent-ready?"),
-            "Scan any site for WebMCP tools: what agents get, and the one line that fixes it."
-                .to_owned(),
+            "Scan any site for WebMCP tools: see what agents get from it.".to_owned(),
+            "webmcpx: make your site agent-ready.".to_owned(),
         ),
     };
     let encoded: String = reqwest::Url::parse_with_params("http://x/", [("url", target)])
@@ -250,11 +244,12 @@ pub fn share_page(
     };
     let url = format!("{origin}{page}?scan={}", encoded.trim_start_matches("url="));
     let tags = format!(
-        r#"<meta property="og:type" content="website"><meta property="og:site_name" content="webmcpx"><meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{u}"><meta property="og:image" content="{i}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{d}"><meta name="twitter:image" content="{i}">"#,
+        r#"<meta property="og:type" content="website"><meta property="og:site_name" content="webmcpx"><meta property="og:title" content="{t}"><meta property="og:description" content="{d}"><meta property="og:url" content="{u}"><meta property="og:image" content="{i}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{a}"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{t}"><meta name="twitter:description" content="{d}"><meta name="twitter:image" content="{i}"><meta name="twitter:image:alt" content="{a}">"#,
         t = attr(&title),
         d = attr(&description),
         u = attr(&url),
         i = attr(&image),
+        a = attr(&alt),
     );
     let mut out = strip_social_tags(html);
     if let Some(at) = out.find("</head>") {
@@ -574,8 +569,17 @@ mod tests {
             Some(summary),
             language_of("/pt-br/"),
         );
-        assert!(out.contains("a.example · Não pronto para agentes"), "{out}");
+        assert!(
+            out.contains("a.example · Não pronto para agentes · 25/100"),
+            "{out}"
+        );
         assert!(out.contains("Nota 25/100."), "{out}");
+        // The text beside the image adds the bold line and the way to scan your own; the image gets alt text.
+        assert!(out.contains("E o seu site? webmcpx.dev"), "{out}");
+        assert!(
+            out.contains(r#"twitter:image:alt" content="webmcpx · a.example"#),
+            "{out}"
+        );
         assert!(
             out.contains("/og/scan.png?url=https%3A%2F%2Fa.example%2F&amp;lang=pt-br"),
             "{out}"
