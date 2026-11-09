@@ -1,6 +1,6 @@
 <!--
-	On a first visit in English from a browser set to another site language, a quiet bar offers that
-	language, written in it. Never a redirect: shared links and crawlers get the page they asked for.
+	On a first visit in English from a browser set to another site language, a small card at the bottom of
+	the screen (clear of the logo and menu, in the design system's card style) offers that language, written in it. Never a redirect: shared links and crawlers get the page they asked for.
 	Dismissing it (or switching) is remembered on this device.
 -->
 <script lang="ts">
@@ -46,14 +46,15 @@
 	<aside
 		lang={offer.code === 'pt-br' ? 'pt-BR' : offer.code === 'zh' ? 'zh-Hans' : offer.code}
 		aria-label={offer.text}
-		class="relative z-40 flex items-center justify-center gap-3 border-b-2 border-ink bg-marker px-12 py-2 text-sm"
+		data-language-suggestion
+		class="fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-xl items-center gap-3 rounded-card border-2 border-ink bg-marker py-2.5 pr-2 pl-5 text-sm shadow-hard sm:bottom-5"
 	>
-		<span>{offer.text}</span>
+		<span class="min-w-0 flex-1">{offer.text}</span>
 		<a
 			href={localized(unlocalized(page.url.pathname), offer.code)}
 			onclick={remember}
 			data-sveltekit-reload
-			class="font-bold underline underline-offset-4">{offer.action}</a
+			class="shrink-0 font-bold underline underline-offset-4">{offer.action}</a
 		>
 		<button
 			type="button"
@@ -61,7 +62,7 @@
 				remember();
 				offer = null;
 			}}
-			class="absolute right-3 grid size-8 place-items-center rounded-full hover:bg-ink/10"
+			class="grid size-8 shrink-0 place-items-center rounded-full hover:bg-ink/10"
 		>
 			<X size={16} aria-hidden="true" />
 			<span class="sr-only">{offer.dismiss}</span>

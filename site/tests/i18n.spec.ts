@@ -128,3 +128,25 @@ test.describe('a visitor whose browser is in Portuguese', () => {
 		await expect(page.locator('aside[lang="pt-BR"]')).toHaveCount(0);
 	});
 });
+
+test('the language suggestion is a card clear of the logo and menu', async ({ browser }) => {
+	const context = await browser.newContext({ locale: 'pt-BR' });
+	const page = await context.newPage();
+	await page.goto('/');
+	const card = page.locator('[data-language-suggestion]');
+	await expect(card).toBeVisible();
+	await expect(card).toContainText('Ler em português');
+	const box = (await card.boundingBox())!;
+	const header = (await page.locator('header').first().boundingBox())!;
+	// Below the header, not over it; rounded like the site's cards.
+	expect(box.y).toBeGreaterThan(header.y + header.height);
+	expect(parseFloat(await card.evaluate((el) => getComputedStyle(el).borderTopLeftRadius))).toBeGreaterThan(
+		8
+	);
+	expect(
+		parseFloat(await card.evaluate((el) => getComputedStyle(el).borderBottomRightRadius))
+	).toBeGreaterThan(8);
+	await card.getByRole('button').click();
+	await expect(card).toHaveCount(0);
+	await context.close();
+});
