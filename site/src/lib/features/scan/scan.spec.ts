@@ -108,6 +108,8 @@ describe('helpers', () => {
 	it('counts, names and links', () => {
 		expect(errors(report)).toBe(1);
 		expect(host('https://www.allbirds.com/x')).toBe('allbirds.com');
+		// The port stays, as the scanner keys a site (and its badge) by it.
+		expect(host('https://example.com:8443/')).toBe('example.com:8443');
 		// A plain https address reads as itself; the server sends it on to /?scan=.
 		expect(shareLink('https://webmcp.zone', 'https://a.example/')).toBe('https://webmcp.zone/scan/a.example');
 		expect(shareLink('https://webmcp.zone', 'https://developers.notion.com/docs/x', '/pt-br/')).toBe(

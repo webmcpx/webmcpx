@@ -63,7 +63,8 @@ impl<'a> Summary<'a> {
     }
 }
 
-/// The host of a URL, without `www.`.
+/// The host of a URL, with its port, without `www.`: the key a site's verdict and badge are kept under
+/// (the site's `host()` in scan.ts builds badge URLs the same way).
 pub fn host_of(url: &str) -> &str {
     let rest = url.split_once("://").map_or(url, |(_, r)| r);
     let host = rest.split(['/', '?', '#']).next().unwrap_or(rest);

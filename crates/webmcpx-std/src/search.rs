@@ -33,7 +33,7 @@ struct Passage {
 fn counts(text: &str, terms: &[String]) -> (Vec<u32>, usize) {
     let mut tf = alloc::vec![0u32; terms.len()];
     let mut len = 0;
-    for token in tokenize(text) {
+    for token in tokenize(text, Side::Page) {
         len += 1;
         if let Some(i) = terms.iter().position(|t| *t == token) {
             tf[i] += 1;
@@ -54,7 +54,7 @@ pub fn search(stream: &str, query: &str, limit: usize) -> String {
         return Envelope::new().err(Code::InvalidInput, "query is over 1,000 chars");
     }
     let mut terms: Vec<String> = Vec::new();
-    for word in tokenize(query) {
+    for word in tokenize(query, Side::Query) {
         if terms.len() == MAX_TERMS {
             break;
         }
@@ -190,11 +190,45 @@ fn rank(passages: &[Passage], terms: usize) -> Vec<(usize, f32)> {
     scored
 }
 
-fn tokenize(s: &str) -> Vec<String> {
-    s.split(is_separator)
-        .filter(|w| !w.is_empty())
-        .map(str::to_ascii_lowercase)
-        .collect()
+/// Which text is tokenized: a page indexes every CJK character and pair, a query looks up pairs (or the one
+/// character it has), so "配送" finds "配送は無料です" and "书" finds "买书".
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Side {
+    Page,
+    Query,
+}
+
+/// Words: runs between separators, lowercased. Japanese, Chinese and Korean don't put spaces between
+/// words, so a run of their characters becomes overlapping pairs (bigrams), the usual approach for CJK search.
+fn tokenize(s: &str, side: Side) -> Vec<String> {
+    let mut out = Vec::new();
+    for word in s.split(is_separator).filter(|w| !w.is_empty()) {
+        let mut rest = word;
+        while let Some(c) = rest.chars().next() {
+            let cjk = is_cjk(c);
+            let end = rest
+                .char_indices()
+                .find(|&(_, d)| is_cjk(d) != cjk)
+                .map_or(rest.len(), |(i, _)| i);
+            let (run, tail) = rest.split_at(end);
+            rest = tail;
+            if !cjk {
+                out.push(run.to_ascii_lowercase());
+                continue;
+            }
+            let chars: Vec<char> = run.chars().collect();
+            if side == Side::Page || chars.len() == 1 {
+                out.extend(chars.iter().map(|c| String::from(*c)));
+            }
+            out.extend(chars.windows(2).map(|w| w.iter().collect::<String>()));
+        }
+    }
+    out
+}
+
+/// Han, kana and Hangul, by block (no Unicode tables: they would add kilobytes to the wasm module).
+fn is_cjk(c: char) -> bool {
+    matches!(c as u32, 0x3040..=0x30FF | 0x3400..=0x4DBF | 0x4E00..=0x9FFF | 0xAC00..=0xD7AF | 0xF900..=0xFAFF | 0xFF66..=0xFF9F)
 }
 
 /// Word separators without Unicode tables (they would add kilobytes to the wasm module):
@@ -203,7 +237,7 @@ fn is_separator(c: char) -> bool {
     if c.is_ascii() {
         return !c.is_ascii_alphanumeric();
     }
-    matches!(c as u32, 0x80..=0xBF | 0xD7 | 0xF7 | 0x2000..=0x206F | 0x3000..=0x3002)
+    matches!(c as u32, 0x80..=0xBF | 0xD7 | 0xF7 | 0x2000..=0x206F | 0x3000..=0x3003 | 0x3008..=0x3011 | 0xFF01..=0xFF0F | 0xFF1A..=0xFF20)
 }
 
 /// `text` cut to `max` chars, marked with an ellipsis when cut.
@@ -257,6 +291,34 @@ mod tests {
 
     fn parse(json: &str) -> serde_json::Value {
         serde_json::from_str(json).unwrap()
+    }
+
+    /// Japanese and Chinese have no spaces between words: a word inside a sentence is still found.
+    #[test]
+    fn finds_words_in_unspaced_cjk_text() {
+        let page = "p\u{1F}配送は無料です。\u{1E}p\u{1F}支持免费配送。\u{1E}p\u{1F}营业时间：十点到八点\u{1E}p\u{1F}Free delivery.";
+        // Each query's best passage (results are ranked, as for any multi-word query).
+        for (query, best) in [
+            ("無料", "配送は無料です。"),
+            ("免费配送", "支持免费配送。"),
+            ("营业时间", "营业时间：十点到八点"),
+            ("费", "支持免费配送。"),
+            ("delivery", "Free delivery."),
+        ] {
+            let out = parse(&search(page, query, 5));
+            assert_eq!(out["ok"], true, "{query}: {out}");
+            assert_eq!(out["data"]["results"][0]["snippet"], best, "{query}: {out}");
+        }
+        // A word in both sentences finds both.
+        assert_eq!(
+            parse(&search(page, "配送", 5))["data"]["results"]
+                .as_array()
+                .unwrap()
+                .len(),
+            2
+        );
+        // Unrelated CJK words don't match.
+        assert_eq!(parse(&search(page, "退货", 5))["ok"], false);
     }
 
     #[test]

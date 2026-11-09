@@ -141,9 +141,13 @@ export function normalize(input: string): string | null {
 	}
 }
 
+/**
+ * The site as the scanner keys it (crates/webmcpx-bench/src/card.rs, host_of): the host with its port, without
+ * "www.". The badge URL is looked up by this, so it must match the server's.
+ */
 export const host = (url: string) => {
 	try {
-		return new URL(url).hostname.replace(/^www\./, '');
+		return new URL(url).host.replace(/^www\./, '');
 	} catch {
 		return url;
 	}

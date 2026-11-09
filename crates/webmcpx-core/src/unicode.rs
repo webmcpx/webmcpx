@@ -1,8 +1,8 @@
 //! Characters a human reviewer cannot see but a model reads (webmachinelearning/webmcp#360).
 //!
 //! Covers Unicode `Default_Ignorable_Code_Point`, bidi controls (Trojan Source) and tag
-//! characters. ZWJ and emoji variation selectors are allowed right after a pictograph,
-//! where they are part of a visible emoji.
+//! characters. ZWJ and emoji variation selectors are allowed right after a pictograph, or after
+//! a variation selector that follows one (❤️‍🔥 is ❤, VS16, ZWJ, 🔥), where they are part of a visible emoji.
 
 use alloc::string::String;
 
@@ -40,6 +40,11 @@ pub fn joins_emoji(c: char) -> bool {
     matches!(c, '\u{200D}' | '\u{FE0E}' | '\u{FE0F}')
 }
 
+/// Returns true if `c` is an emoji variation selector (VS15, VS16).
+pub fn is_emoji_style(c: char) -> bool {
+    matches!(c, '\u{FE0E}' | '\u{FE0F}')
+}
+
 /// Byte offsets and chars of every invisible character in `s`.
 ///
 /// ```
@@ -47,10 +52,12 @@ pub fn joins_emoji(c: char) -> bool {
 /// assert_eq!(hits, [(1, '\u{200B}')]);
 /// ```
 pub fn invisible_chars(s: &str) -> impl Iterator<Item = (usize, char)> + '_ {
-    let mut prev = None;
+    let (mut prev, mut before) = (None, None);
     s.char_indices().filter(move |&(_, c)| {
-        let allowed = joins_emoji(c) && prev.is_some_and(is_pictograph);
-        prev = Some(c);
+        let after_emoji = prev.is_some_and(is_pictograph)
+            || prev.is_some_and(is_emoji_style) && before.is_some_and(is_pictograph);
+        let allowed = joins_emoji(c) && after_emoji;
+        (before, prev) = (prev, Some(c));
         is_invisible(c) && !allowed
     })
 }
@@ -85,6 +92,20 @@ mod tests {
         let s = "Olá, señor! ❤\u{FE0F} 👩\u{200D}💻";
         assert_eq!(invisible_chars(s).count(), 0);
         assert_eq!(strip_invisible(s), s);
+    }
+
+    /// A joiner after a styled pictograph is part of the emoji: ❤️‍🔥 (❤, VS16, ZWJ, 🔥), 🏳️‍🌈.
+    #[test]
+    fn keeps_joined_emoji_after_a_variation_selector() {
+        for s in [
+            "\u{2764}\u{FE0F}\u{200D}\u{1F525}",
+            "\u{1F3F3}\u{FE0F}\u{200D}\u{1F308}",
+        ] {
+            assert_eq!(invisible_chars(s).count(), 0, "{s}");
+            assert_eq!(strip_invisible(s), s);
+        }
+        // Not after plain text, styled or not.
+        assert_eq!(invisible_chars("a\u{FE0F}\u{200D}b").count(), 2);
     }
 
     #[test]

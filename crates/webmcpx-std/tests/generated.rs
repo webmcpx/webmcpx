@@ -64,10 +64,11 @@ fn render() -> String {
     };
     let picto = class(unicode::is_pictograph);
     let joiners = class(unicode::joins_emoji);
+    let styles = class(unicode::is_emoji_style);
     let rest = class(|c| unicode::is_invisible(c) && !unicode::joins_emoji(c));
     write!(
         out,
-        "/** Invisible characters (webmcpx-core `unicode`): strip with `s.replace(INVISIBLE, \"\")`. */\nexport const INVISIBLE = new RegExp(\"(?<![{picto}])[{joiners}]|[{rest}]\", \"gu\");\n"
+        "/** Invisible characters (webmcpx-core `unicode`): strip with `s.replace(INVISIBLE, \"\")`. */\nexport const INVISIBLE = new RegExp(\"(?<![{picto}]|[{picto}][{styles}])[{joiners}]|[{rest}]\", \"gu\");\n"
     )
     .expect("writing to a String never fails");
     out

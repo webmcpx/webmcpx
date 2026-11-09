@@ -27,4 +27,4 @@ export const LIMITS = {
 };
 
 /** Invisible characters (webmcpx-core `unicode`): strip with `s.replace(INVISIBLE, "")`. */
-export const INVISIBLE = new RegExp("(?<![\u{2190}-\u{2BFF}\u{1F000}-\u{1FAFF}])[\u{200D}\u{FE0E}-\u{FE0F}]|[\u{AD}\u{34F}\u{61C}\u{115F}-\u{1160}\u{17B4}-\u{17B5}\u{180B}-\u{180F}\u{200B}-\u{200C}\u{200E}-\u{200F}\u{202A}-\u{202E}\u{2060}-\u{206F}\u{3164}\u{FE00}-\u{FE0D}\u{FEFF}\u{FFA0}\u{FFF0}-\u{FFF8}\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0000}-\u{E0FFF}]", "gu");
+export const INVISIBLE = new RegExp("(?<![\u{2190}-\u{2BFF}\u{1F000}-\u{1FAFF}]|[\u{2190}-\u{2BFF}\u{1F000}-\u{1FAFF}][\u{FE0E}-\u{FE0F}])[\u{200D}\u{FE0E}-\u{FE0F}]|[\u{AD}\u{34F}\u{61C}\u{115F}-\u{1160}\u{17B4}-\u{17B5}\u{180B}-\u{180F}\u{200B}-\u{200C}\u{200E}-\u{200F}\u{202A}-\u{202E}\u{2060}-\u{206F}\u{3164}\u{FE00}-\u{FE0D}\u{FEFF}\u{FFA0}\u{FFF0}-\u{FFF8}\u{1BCA0}-\u{1BCA3}\u{1D173}-\u{1D17A}\u{E0000}-\u{E0FFF}]", "gu");
