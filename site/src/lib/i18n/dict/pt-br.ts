@@ -520,7 +520,7 @@ const ptBr: Messages = {
 				'Os tokens são estimados a partir do texto da página: os caracteres divididos por quatro.',
 				'Para a nota, o mesmo navegador busca o robots.txt, o llms.txt, o sitemap, a versão em Markdown, os headers Link, o índice de Agent Skills e o catálogo de APIs do site (3 s cada, mesma origem, sem cookies) e guarda só se cada um existe.',
 				'A nota, de 0 a 100: WebMCP 50 (ferramentas 25, sem erros de lint 15, toda ferramenta descrita 5, toda ferramenta anotada 5), custo para agentes 15 (cheio com ferramentas; senão, pela contagem de tokens da página), legível 20 e encontrável 15 (5 por verificação).',
-				'Um resultado vale por 5 minutos; cada visitante roda um scan por vez.'
+				'Um resultado vale por 5 minutos; cada visitante roda um scan por vez. Registramos o endereço e o resultado de cada scan, nunca quem o fez.'
 			]
 		},
 		rules: 'Todas as regras do linter, com os motivos',

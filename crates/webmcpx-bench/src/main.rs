@@ -91,6 +91,18 @@ enum Command {
         /// Read the visitor's address from X-Forwarded-For, set by our own proxy (production).
         #[arg(long, requires = "one_scan_per_visitor")]
         behind_proxy: bool,
+        /// Keep the scan log here (`scans.jsonl`: what was scanned and found, never who asked): it counts
+        /// scans and brings the week's results back after a restart.
+        #[arg(long)]
+        data_dir: Option<PathBuf>,
+    },
+    /// Count the scans in a scan log: all time and per day.
+    Stats {
+        /// The `--data-dir` the server keeps its log in.
+        data_dir: PathBuf,
+        /// Days to list one by one.
+        #[arg(long, default_value_t = 14)]
+        days: u64,
     },
     /// Render a preview image (1200×630 PNG): the site's generic one (e.g. `site/static/og.png`), or with
     /// `--bench <results.json>` that run's best case (e.g. `site/static/og/benchmark-<model>.png`).
@@ -248,6 +260,14 @@ async fn main() -> Result<()> {
             page.close().await?;
             writeln!(std::io::stdout().lock(), "{result}")?;
         }
+        Command::Stats { data_dir, days } => {
+            let entries = webmcpx_bench::ledger::read(&data_dir.join("scans.jsonl"));
+            write!(
+                std::io::stdout().lock(),
+                "{}",
+                webmcpx_bench::ledger::stats(&entries, days)
+            )?;
+        }
         Command::Serve {
             addr,
             scan_private,
@@ -258,8 +278,12 @@ async fn main() -> Result<()> {
             scan_parallel,
             one_scan_per_visitor,
             behind_proxy,
+            data_dir,
         } => {
             let mut scanner = Scanner::new(chrome, scan_private).parallel(scan_parallel);
+            if let Some(dir) = data_dir {
+                scanner = scanner.ledger(webmcpx_bench::ledger::Ledger::open(&dir)?);
+            }
             if let (Some(chrome), Some(proxy)) = (remote_chrome, proxy_listen) {
                 scanner = scanner.remote(Remote { chrome, proxy });
             }

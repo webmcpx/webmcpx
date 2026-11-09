@@ -42,6 +42,11 @@ docker compose -f deploy/compose.yaml --env-file deploy/.env up -d --build
 
 Update: `git pull` and the same command. Logs: `docker compose -f deploy/compose.yaml logs -f web`.
 
+Scan counts, all time and per day: `docker compose -f deploy/compose.yaml exec web webmcpx stats /data`.
+The scan log (`scans.jsonl` on the `scans` volume) holds what was scanned and what it found, never who
+asked: no address, user agent or language. It also brings the week's results (share cards, link previews,
+badges) back after a deploy.
+
 ### Rootless Docker on a dedicated user (Debian)
 
 ```sh

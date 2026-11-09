@@ -7,6 +7,7 @@ pub mod arm;
 pub mod card;
 pub mod cdp;
 pub mod gemini;
+pub mod ledger;
 pub mod model;
 pub mod proxy;
 pub mod report;

@@ -653,7 +653,7 @@ const en = {
 				'Tokens are estimated from the page’s text snapshot: its characters divided by four.',
 				'For the score, the same browser fetches the site’s robots.txt, llms.txt, sitemap, Markdown version, Link headers, Agent Skills index and API catalog (3 s each, same origin, no cookies), and only keeps whether each is there.',
 				'The score, out of 100: WebMCP 50 (tools 25, no lint errors 15, every tool described 5, every tool annotated 5), agent cost 15 (full with tools; else by the page’s token count), readable 20 and discoverable 15 (5 per check).',
-				'A result is reused for 5 minutes; each visitor can run one scan at a time.'
+				'A result is reused for 5 minutes; each visitor can run one scan at a time. We log each scan’s address and result, never who ran it.'
 			]
 		},
 		rules: 'Every lint rule, with its reasons',

@@ -47,7 +47,10 @@ services:
     <<: *hardening
     build: { context: .., dockerfile: deploy/web.Dockerfile }
     # 12 scans at once; each visitor (IPv4 address or IPv6 /64, from nginx) one at a time.
-    command: [--scan-parallel, "12", --one-scan-per-visitor, --behind-proxy]
+    # The scan log (what was scanned and found, never who asked) lives on the `scans` volume: it counts
+    # scans (see README) and brings the week's results back after a deploy.
+    command: [--scan-parallel, "12", --one-scan-per-visitor, --behind-proxy, --data-dir, /data]
+    volumes: [scans:/data]
     # On a deploy, requests in flight finish, queued scans included: the server stops accepting, then waits
     # up to scan::LONGEST_SCAN (90 s); a test keeps this above it.
     stop_grace_period: 100s
@@ -86,3 +89,6 @@ networks:
   edge: {}
   scan:
     internal: true
+
+volumes:
+  scans:

@@ -1760,3 +1760,39 @@ async fn share_cards_fit_their_frame_in_every_language() {
         }
     }
 }
+
+/// A deploy restarts the server: the scan log brings back the week's results (cards, previews, badges)
+/// and counts every scan, without a word about who ran it.
+#[tokio::test]
+async fn the_scan_log_counts_scans_and_survives_a_restart() {
+    if no_chrome() {
+        return;
+    }
+    let site = serve_html(axum::Router::new().route(
+        "/",
+        axum::routing::get(|| async { axum::response::Html("<title>t</title><p>Hello there</p>") }),
+    ))
+    .await;
+    let url = format!("http://{site}/");
+    let dir = std::env::temp_dir().join(format!("webmcpx-scanlog-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&dir);
+    let open = || webmcpx_bench::ledger::Ledger::open(&dir).unwrap();
+    {
+        let scanner = webmcpx_bench::scan::Scanner::new(None, true).ledger(open());
+        scanner.scan(&url).await.unwrap();
+        // The second ask within minutes is the cached report: counted as such.
+        scanner.scan(&url).await.unwrap();
+    }
+    let restarted = webmcpx_bench::scan::Scanner::new(None, true).ledger(open());
+    let kept = restarted
+        .latest(&url)
+        .expect("the result survives a restart");
+    assert_eq!(kept.verdict, webmcpx_bench::scan::Verdict::Missing);
+    let entries = webmcpx_bench::ledger::read(&dir.join("scans.jsonl"));
+    let stats = webmcpx_bench::ledger::stats(&entries, 1);
+    assert!(
+        stats.starts_with("all time: 2 scans (1 fresh, 1 cached, 0 failed), 1 sites;"),
+        "{stats}"
+    );
+    let _ = std::fs::remove_dir_all(&dir);
+}

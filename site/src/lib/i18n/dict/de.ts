@@ -522,7 +522,7 @@ const de: Messages = {
 				'Tokens werden aus dem Text-Snapshot der Seite geschätzt: Zeichenzahl geteilt durch vier.',
 				'Für den Score ruft derselbe Browser robots.txt, llms.txt, Sitemap, Markdown-Version, Link-Header, Agent-Skills-Index und API-Katalog der Website ab (je 3 s, gleiche Origin, ohne Cookies) und merkt sich nur, ob es sie gibt.',
 				'Der Score, von 100: WebMCP 50 (Tools 25, keine Lint-Fehler 15, jedes Tool beschrieben 5, jedes Tool annotiert 5), Kosten für Agenten 15 (voll mit Tools, sonst nach der Tokenzahl der Seite), lesbar 20 und auffindbar 15 (5 pro Prüfung).',
-				'Ein Ergebnis gilt 5 Minuten; jeder Besucher kann einen Scan gleichzeitig laufen lassen.'
+				'Ein Ergebnis gilt 5 Minuten; jeder Besucher kann einen Scan gleichzeitig laufen lassen. Wir protokollieren Adresse und Ergebnis jedes Scans, nie, wer ihn gestartet hat.'
 			]
 		},
 		rules: 'Alle Linter-Regeln mit Begründung',

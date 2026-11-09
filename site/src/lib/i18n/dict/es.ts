@@ -521,7 +521,7 @@ const es: Messages = {
 				'Los tokens se estiman a partir del texto de la página: sus caracteres divididos entre cuatro.',
 				'Para la puntuación, el mismo navegador pide el robots.txt, el llms.txt, el sitemap, la versión en Markdown, las cabeceras Link, el índice de Agent Skills y el catálogo de APIs del sitio (3 s cada uno, mismo origen, sin cookies) y solo guarda si cada uno existe.',
 				'La puntuación, sobre 100: WebMCP 50 (herramientas 25, sin errores de lint 15, todas las herramientas descritas 5, todas anotadas 5), coste para agentes 15 (completo con herramientas; si no, según los tokens de la página), legible 20 y descubrible 15 (5 por comprobación).',
-				'Un resultado se reutiliza durante 5 minutos; cada visitante puede ejecutar un escaneo a la vez.'
+				'Un resultado se reutiliza durante 5 minutos; cada visitante puede ejecutar un escaneo a la vez. Registramos la dirección y el resultado de cada escaneo, nunca quién lo hizo.'
 			]
 		},
 		rules: 'Todas las reglas del linter, con sus motivos',

@@ -516,7 +516,7 @@ const id: Messages = {
 				'Token diperkirakan dari teks halaman: jumlah karakternya dibagi empat.',
 				'Untuk skor, browser yang sama mengambil robots.txt, llms.txt, sitemap, versi Markdown, header Link, indeks Agent Skills, dan katalog API situs (masing-masing 3 s, origin yang sama, tanpa cookie), dan hanya mencatat ada atau tidaknya masing-masing.',
 				'Skor, dari 100: WebMCP 50 (tool 25, tanpa error lint 15, semua tool berdeskripsi 5, semua tool beranotasi 5), biaya agent 15 (penuh jika ada tool; jika tidak, menurut jumlah token halaman), mudah dibaca 20, dan mudah ditemukan 15 (5 per pemeriksaan).',
-				'Hasil dipakai ulang selama 5 menit; setiap pengunjung bisa menjalankan satu pemindaian dalam satu waktu.'
+				'Hasil dipakai ulang selama 5 menit; setiap pengunjung bisa menjalankan satu pemindaian dalam satu waktu. Kami mencatat alamat dan hasil setiap pemindaian, tidak pernah siapa yang menjalankannya.'
 			]
 		},
 		rules: 'Semua aturan linter, beserta alasannya',

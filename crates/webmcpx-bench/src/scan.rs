@@ -94,7 +94,7 @@ pub struct Cached {
     pub expires_in_s: u64,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Verdict {
     /// Registers tools, the linter finds no errors and the score is at least [`READY_SCORE`].
@@ -238,10 +238,12 @@ type Inflight = std::sync::Mutex<HashMap<String, (SharedScan, usize)>>;
 
 /// Today's date in UTC, `YYYY-MM-DD` (days to civil date, as in Howard Hinnant's `civil_from_days`).
 fn today() -> String {
-    let secs = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map_or(0, |d| d.as_secs());
-    let z = i64::try_from(secs / 86_400).unwrap_or(0) + 719_468;
+    civil(crate::ledger::now() / 86_400)
+}
+
+/// Day `days` since the Unix epoch as `YYYY-MM-DD` (UTC).
+pub fn civil(days: u64) -> String {
+    let z = i64::try_from(days).unwrap_or(0) + 719_468;
     let era = z.div_euclid(146_097);
     let doe = z.rem_euclid(146_097);
     let yoe = (doe - doe / 1460 + doe / 36_524 - doe / 146_096) / 365;
@@ -251,6 +253,16 @@ fn today() -> String {
     let month = if mp < 10 { mp + 3 } else { mp - 9 };
     let year = yoe + era * 400 + i64::from(month <= 2);
     format!("{year:04}-{month:02}-{day:02}")
+}
+
+/// The hosts a report answers for: the address scanned and where it ended up (lowercase, no `www.`).
+fn hosts_of(report: &Report) -> Vec<String> {
+    let mut hosts: Vec<String> = [report.url.as_str(), report.final_url.as_str()]
+        .iter()
+        .map(|url| crate::card::host_of(url).to_ascii_lowercase())
+        .collect();
+    hosts.dedup();
+    hosts
 }
 
 /// A site's latest scan in a few numbers, kept a week (a few dozen bytes per site): its badge, and its share
@@ -308,6 +320,8 @@ pub struct Scanner {
     /// Cards render one at a time; a few more requests may wait (the rest get the generic image).
     card_turn: Mutex<()>,
     card_waiting: Semaphore,
+    /// The scan log (public server): counts scans and brings the week's results back after a restart.
+    ledger: Option<crate::ledger::Ledger>,
 }
 
 /// A browser and the proxy it is locked to; both stop when the last scan using them ends (a remote
@@ -347,7 +361,53 @@ impl Scanner {
             cards: std::sync::Mutex::default(),
             card_turn: Mutex::new(()),
             card_waiting: Semaphore::new(CARD_WAITERS),
+            ledger: None,
         }
+    }
+
+    /// Logs every scan to `ledger`, and brings back the results it holds from the last week, so share
+    /// cards, link previews and badges survive a restart.
+    #[must_use]
+    pub fn ledger(mut self, ledger: crate::ledger::Ledger) -> Self {
+        for (entry, age) in ledger.recent(VERDICT_FOR) {
+            let Some(found) = entry.found else { continue };
+            let kept = Kept {
+                host: found.host,
+                verdict: found.verdict,
+                tools: found.tools,
+                page_tokens: found.page_tokens,
+                score: found.score,
+                lint_errors: found.lint_errors,
+                scanned_on: found.scanned_on,
+                at: Instant::now().checked_sub(age).unwrap_or_else(Instant::now),
+            };
+            self.keep(entry.url, &found.hosts, kept);
+        }
+        self.ledger = Some(ledger);
+        self
+    }
+
+    fn log(&self, url: &str, outcome: crate::ledger::Outcome, report: Option<&Report>) {
+        let Some(ledger) = &self.ledger else { return };
+        let found = report.map(|report| {
+            let s = crate::card::Summary::of(report);
+            crate::ledger::Found {
+                host: s.host.to_owned(),
+                hosts: hosts_of(report),
+                verdict: s.verdict,
+                tools: s.tools,
+                page_tokens: s.page_tokens,
+                score: s.score,
+                lint_errors: s.lint_errors,
+                scanned_on: s.scanned_on.to_owned(),
+            }
+        });
+        ledger.append(&crate::ledger::Entry {
+            at: crate::ledger::now(),
+            url: url.to_owned(),
+            outcome,
+            found,
+        });
     }
 
     /// Runs up to `n` scans at once (default 2).
@@ -385,6 +445,7 @@ impl Scanner {
         self.check(&url).await?;
         let key = url.as_str().to_owned();
         if let Some(report) = self.cached(&key) {
+            self.log(&key, crate::ledger::Outcome::Cached, Some(&report));
             return Ok(report);
         }
         let caller = Caller::join(&self.inflight, key.clone());
@@ -392,8 +453,12 @@ impl Scanner {
             .cell
             .get_or_init(|| async {
                 let result = self.scan_now(url).await;
-                if let Ok(report) = &result {
-                    self.remember(key, report.clone());
+                match &result {
+                    Ok(report) => {
+                        self.log(&key, crate::ledger::Outcome::Fresh, Some(report));
+                        self.remember(key, report.clone());
+                    }
+                    Err(_) => self.log(&key, crate::ledger::Outcome::Failed, None),
                 }
                 result
             })
@@ -441,6 +506,23 @@ impl Scanner {
     }
 
     fn remember(&self, key: String, report: Report) {
+        let s = crate::card::Summary::of(&report);
+        let kept = Kept {
+            host: s.host.to_owned(),
+            verdict: s.verdict,
+            tools: s.tools,
+            page_tokens: s.page_tokens,
+            score: s.score,
+            lint_errors: s.lint_errors,
+            scanned_on: s.scanned_on.to_owned(),
+            at: Instant::now(),
+        };
+        self.keep(key.clone(), &hosts_of(&report), kept);
+        lock(&self.cache).put(key, report, CACHE_BYTES);
+    }
+
+    /// Keeps a week: `kept` as the verdict of each of `hosts` (badges) and the summary of `key` (cards).
+    fn keep(&self, key: String, hosts: &[String], kept: Kept) {
         {
             let mut verdicts = lock(&self.verdicts);
             if verdicts.len() >= VERDICTS_MAX {
@@ -449,20 +531,8 @@ impl Scanner {
                     verdicts.clear();
                 }
             }
-            let s = crate::card::Summary::of(&report);
-            let kept = Kept {
-                host: s.host.to_owned(),
-                verdict: s.verdict,
-                tools: s.tools,
-                page_tokens: s.page_tokens,
-                score: s.score,
-                lint_errors: s.lint_errors,
-                scanned_on: s.scanned_on.to_owned(),
-                at: Instant::now(),
-            };
-            for url in [report.url.as_str(), report.final_url.as_str()] {
-                let host = crate::card::host_of(url).to_ascii_lowercase();
-                verdicts.insert(host, kept.clone());
+            for host in hosts {
+                verdicts.insert(host.clone(), kept.clone());
             }
             let mut summaries = lock(&self.summaries);
             if summaries.len() >= VERDICTS_MAX {
@@ -471,9 +541,8 @@ impl Scanner {
                     summaries.clear();
                 }
             }
-            summaries.insert(key.clone(), kept);
+            summaries.insert(key, kept);
         }
-        lock(&self.cache).put(key, report, CACHE_BYTES);
     }
 
     /// A browser and a new tab in it, within the deadline: a Chrome that accepts connections but never
