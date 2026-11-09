@@ -106,6 +106,11 @@ comparative reliability claims between models.
   `<form toolname>` path, and are labeled "local" on the site.
 - **Provider differences:** reasoning effort `medium` and token accounting differ by provider.
 - **Caching:** repeated tasks share prompt-cache benefits differently per arm and provider (see `cached` usage).
+- **Provenance:** the published runs (method v2) were made from a working tree with uncommitted changes; each
+  results file records it (`config.uncommitted_changes: true`), and the exact code is not recoverable from the
+  repository. The next published run comes from a clean commit.
+- **Tokens, not time:** the benchmark measures the tokens an agent reads and writes; fewer tokens is not
+  claimed to mean faster answers.
 
 ## Reproduce
 
