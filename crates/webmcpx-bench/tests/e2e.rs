@@ -1839,6 +1839,8 @@ async fn declarative_forms_are_tools() {
                 r#"<title>Shop</title><main><form toolname="search_products" tooldescription="Search the shop's products by name." action="/search">
                 <input name="q" toolparamdescription="Words to look for"><input name="max" type="number"><button>Go</button></form>
                 <form toolname="no_description" action="/x"><input name="a"></form>
+                <form toolname="Search flights" tooldescription="Search available flights."><input name="to"></form>
+                <script>document.modelContext.registerTool({ name: "Search_flights", description: "Search available flights.", inputSchema: { type: "object", properties: { to: { type: "string" } } }, annotations: { readOnlyHint: true }, execute() { return "ok"; } });</script>
                 <iframe src="/frame"></iframe></main>"#,
             )
         }),
@@ -1870,6 +1872,21 @@ async fn declarative_forms_are_tools() {
     );
     assert_eq!(tool.description, "Search the shop's products by name.");
     assert_eq!(tool.params, ["max", "q"]);
+    // A form webmcpx's drop-in registered under its normalized name ("Search flights" → Search_flights)
+    // is that one tool, not a second one with an invalid name.
+    assert!(
+        report.tools.iter().all(|t| t.name != "Search flights"),
+        "{:?}",
+        report.tools
+    );
+    assert_eq!(
+        report
+            .tools
+            .iter()
+            .filter(|t| t.name == "Search_flights")
+            .count(),
+        1
+    );
     // A form without a tooldescription is no tool, as in browsers.
     assert!(report.tools.iter().all(|t| t.name != "no_description"));
     assert_ne!(report.verdict, webmcpx_bench::scan::Verdict::Missing);

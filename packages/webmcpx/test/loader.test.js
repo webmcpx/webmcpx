@@ -308,3 +308,13 @@ test("code in <pre> keeps its lines, also when they are <br>s or one element per
   assert.match(md, /```\na = 1\nb = 2\n```/);
   assert.match(md, /One line\./, "outside code a <br> is a space");
 });
+
+test("the main content wins over an article that comes before it (a sidebar teaser)", async () => {
+  const page = host();
+  document.body.innerHTML =
+    '<div class="sidebar"><article><p>Read our latest story.</p></article></div><main><p>Shipping takes 3 days.</p></main>';
+  await register({ wasm: WASM });
+  const md = (await page.call("fetch_as_markdown", {})).data.markdown;
+  assert.match(md, /Shipping takes 3 days/);
+  assert.equal((await page.call("search_page", { query: "shipping" })).ok, true);
+});

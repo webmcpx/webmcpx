@@ -774,13 +774,20 @@ impl Scanner {
         // The declarative API: a `<form toolname>` is a tool in a browser with WebMCP, with or without a
         // script. A form the page itself (document "0") already registered (webmcpx's drop-in does) counts
         // once; a frame's tool of the same name is another tool.
+        // A form is matched by its own name and by the one webmcpx's drop-in registers it under (`key`).
         let forms: Vec<Value> = form_tools(page)
             .await
             .into_iter()
             .filter(|form| {
-                !tools
-                    .iter()
-                    .any(|t| t["document"] == "0" && t["name"] == form["name"])
+                !tools.iter().any(|t| {
+                    t["document"] == "0" && (t["name"] == form["name"] || t["name"] == form["key"])
+                })
+            })
+            .map(|mut form| {
+                if let Some(form) = form.as_object_mut() {
+                    form.remove("key");
+                }
+                form
             })
             .collect();
         tools.extend(forms);
@@ -858,8 +865,11 @@ async fn form_tools(page: &Page) -> Vec<Value> {
           const description = attr(el, "toolparamdescription", 1000);
           properties[el.name.slice(0, 100)] = description ? { type, description } : { type };
         }
+        const name = attr(form, "toolname", 200);
         return {
-          name: attr(form, "toolname", 200),
+          name,
+          // The name webmcpx's drop-in registers a form under (packages/webmcpx/src/tool.js, forms()).
+          key: name.replace(/[^A-Za-z0-9_.-]+/g, "_"),
           description: attr(form, "tooldescription", 10000),
           inputSchema: { type: "object", properties },
           document: "0",

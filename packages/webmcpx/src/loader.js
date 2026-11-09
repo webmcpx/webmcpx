@@ -103,7 +103,10 @@ export function readPage(what, root) {
       else visit(child);
     }
   };
-  for (const el of root ? [root] : [...document.querySelectorAll("main, [role=main], article"), document.body]) {
+  // The page's main content first, then an article (a page without <main>), then the whole body: an
+  // article earlier in the document (a sidebar teaser) never wins over <main>.
+  const roots = [...document.querySelectorAll("main, [role=main]"), ...document.querySelectorAll("article"), document.body];
+  for (const el of root ? [root] : roots) {
     anchor = "";
     if (shown(el) && (visit(el), out)) break;
   }
