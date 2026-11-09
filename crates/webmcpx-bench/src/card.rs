@@ -226,6 +226,7 @@ pub fn html(s: Summary<'_>, format: Format, t: &Text) -> String {
         line: &what(s, t),
         hook: hook(s, t),
         stamp: Some((verdict_label(s.verdict, t), fill, ink)),
+        verdict: Some(s.verdict),
         score: Some(s.score),
         date: Some(t.scanned.replace("{date}", &t.date(s.scanned_on))),
         height: format.size().1,
@@ -241,6 +242,8 @@ struct Card<'a> {
     line: &'a str,
     /// A bold second line (see [`hook`]).
     hook: Option<String>,
+    /// The verdict the stamp shows, for its icon.
+    verdict: Option<Verdict>,
     /// Label, fill and text color of the verdict stamp.
     stamp: Option<(&'a str, &'a str, &'a str)>,
     score: Option<u8>,
@@ -254,6 +257,12 @@ struct Card<'a> {
 
 fn render(c: &Card<'_>) -> String {
     let (label, fill, stamp_ink) = c.stamp.unwrap_or(("", "transparent", "inherit"));
+    // A check for agent-ready, a cross for not agent-ready: the verdict reads before its words do.
+    let icon = c.verdict.map_or("", |v| match v {
+        Verdict::Ready => r#"<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.5l5 5L19.5 7"/></svg>"#,
+        Verdict::Missing => r#"<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>"#,
+        Verdict::Issues => "",
+    });
     let stamp_display = if c.stamp.is_some() { "block" } else { "none" };
     let host = escape(c.title);
     let height = c.height;
@@ -296,6 +305,7 @@ html,body{{width:1200px;height:{height}px;background:oklch(0.958 0.006 95);font-
 background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.9 0.005 95) 1px,transparent 1px);background-size:64px 64px}}
 .top{{display:flex;justify-content:space-between;align-items:center}}
 .lockup svg{{height:44px;width:auto}}
+.stamp .icon{{width:1.05em;height:1.05em;margin-right:.35em;vertical-align:-.15em;fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}}
 .stamp{{display:{stamp_display};border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:10px 28px;font-size:{stamp_size}px;white-space:nowrap;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
 .mark{{position:absolute;right:-110px;top:50%;width:600px;height:600px;transform:translateY(-50%) rotate(-12deg);opacity:.06}}
 .top,.main,.foot{{position:relative}}
@@ -317,7 +327,7 @@ background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1p
 :lang(zh) *,:lang(ja) *,:lang(hi) *,:lang(bn) *{{letter-spacing:0!important}}
 </style></head><body><div class="frame">
 <div class="mark">{mark}</div>
-<div class="top"><div class="lockup">{lockup}</div><div class="stamp">{label}</div></div>
+<div class="top"><div class="lockup">{lockup}</div><div class="stamp">{icon}{label}</div></div>
 <div class="main"><div class="host">{host}</div><div class="row"><div class="text"><div class="line">{line}</div>{hook}</div>{score}</div></div>
 <div class="foot">{date}<span class="cta">{cta}</span></div>
 </div></body></html>"#,
@@ -349,6 +359,7 @@ pub fn generic_html() -> String {
         line: &generic_line(),
         hook: None,
         stamp: None,
+        verdict: None,
         score: None,
         date: None,
         height: 630,
@@ -376,6 +387,7 @@ pub fn bench_html(results: &serde_json::Value) -> Option<String> {
         line: &line,
         hook: None,
         stamp: None,
+        verdict: None,
         score: None,
         date: None,
         height: 630,
@@ -567,6 +579,20 @@ mod tests {
         );
         assert!(missing.contains(">Not agent-ready<"));
         assert!(missing.contains("oklch(0.58 0.21 27)"));
+        // A cross on the red stamp, a check on the green one, neither on "almost".
+        let cross = r#"<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>"#;
+        let check = r#"<path d="M4.5 12.5l5 5L19.5 7"/>"#;
+        assert!(missing.contains(cross) && !missing.contains(check));
+        assert!(h.contains(check) && !h.contains(cross));
+        let almost = html(
+            Summary {
+                verdict: Verdict::Issues,
+                ..s
+            },
+            Format::Link,
+            en,
+        );
+        assert!(!almost.contains(check) && !almost.contains(cross));
         assert!(missing.contains("Is your site agent-ready? <span>webmcpx.dev</span>"));
     }
 
