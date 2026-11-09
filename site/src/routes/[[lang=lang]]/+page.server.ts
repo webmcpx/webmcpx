@@ -5,7 +5,8 @@ import { modelLook } from '#lib/content/models.ts';
 import { tokenSaving } from '#lib/features/benchmark/bench.ts';
 import { bestGain } from '#lib/features/benchmark/sites.ts';
 import { loadRuns } from '#lib/server/bench.ts';
-import { highlightAll } from '#lib/server/highlight.ts';
+import { reproduceFor } from '#lib/content/snippets.ts';
+import { highlight, highlightAll } from '#lib/server/highlight.ts';
 import { localizedSnippets, localizeRuns } from '#lib/server/localize.ts';
 import type { PageServerLoad } from './$types';
 
@@ -29,6 +30,12 @@ export const load: PageServerLoad = async ({ params }) => {
 	);
 	return {
 		code: await highlightAll(snippets),
+		// Each model's own rerun command: the switcher shows the selected one's (its key and id).
+		reproduce: Object.fromEntries(
+			await Promise.all(
+				runs.map(async (r) => [r.results.model, await highlight(reproduceFor(r.results.model))] as const)
+			)
+		),
 		own: await highlightAll(own),
 		runs,
 		// For "For agents": each model's whole-run token saving, lowest to highest (null: nothing published).

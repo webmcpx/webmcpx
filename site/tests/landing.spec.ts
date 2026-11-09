@@ -388,7 +388,15 @@ test('the model switcher shows each model on its own run', async ({ page }) => {
 		await proof.getByRole('tab', { name: 'Method' }).click();
 		await expect(
 			proof.getByText(new RegExp(`^${id.replaceAll('.', '\\.')}, reasoning medium`)).filter({ visible: true })
-		).toHaveCount(1);
+		).toHaveCount(1); // The rerun command is this model's: its id, and its provider's key.
+		const command = proof.getByRole('region', { name: /reproduce/i }).filter({ visible: true });
+		await expect(command).toContainText(`--model ${id}`);
+		const key = id.startsWith('claude-')
+			? 'ANTHROPIC_API_KEY'
+			: id.startsWith('gemini-')
+				? 'GEMINI_API_KEY'
+				: 'OPENAI_API_KEY';
+		await expect(command).toContainText(key);
 	}
 	expect(new Set(ids).size).toBe(ids.length);
 });

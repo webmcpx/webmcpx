@@ -41,7 +41,7 @@
 <Divider />
 <What snippet={page.code.registerTool} best={page.best} />
 <Divider />
-<Proof runs={page.runs} reproduce={page.code.reproduce} compact />
+<Proof runs={page.runs} reproduce={page.reproduce} compact />
 <Divider />
 <Agents code={page.code} saving={page.saving} best={page.best} />
 <Divider />

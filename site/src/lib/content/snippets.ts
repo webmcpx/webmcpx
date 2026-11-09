@@ -53,8 +53,7 @@ register(); // the standard tools; tool() adds your own`
     catch { return JSON.stringify({ error: "Catalog unavailable, try again shortly." }); }
   }
 });`
-	},
-	reproduce: reproduceFor('gpt-6-luna')
+	}
 } satisfies Record<string, CodeSample>;
 
 /** How to rerun one model's benchmark: its provider's key, its id, effort medium (bench/AGENTS.md). */

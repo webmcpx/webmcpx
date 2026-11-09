@@ -38,7 +38,8 @@
 		runs: ModelRun[];
 		/** Every published model, linked to its own page for readers without JavaScript (default: `runs`). */
 		models?: string[];
-		reproduce: Highlighted;
+		/** The command that reruns each model's benchmark (its provider's key, its id), by model id. */
+		reproduce: Record<string, Highlighted>;
 		/**
 		 * Render only the open site and detail tab (the home: thousands fewer elements, a faster first paint).
 		 * Without JavaScript the home shows the first site; each model's own page renders every site and tab.
@@ -342,7 +343,7 @@
 										<li>{m.method.measures}</li>
 										<li>{m.method.failures}</li>
 									</ul>
-									<CodeBlock snippet={reproduce} title={m.method.reproduce} />
+									<CodeBlock snippet={reproduce[modelId]} title={m.method.reproduce} />
 								</div>
 							{/if}
 						</div>

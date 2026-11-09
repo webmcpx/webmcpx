@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		run,
 		models: runs.map((r) => r.results.model),
-		reproduce: await highlight(reproduceFor(params.model)),
+		reproduce: { [params.model]: await highlight(reproduceFor(params.model)) },
 		og: existsSync(`static${og}`) ? og : undefined,
 		// Its Markdown twin, for agents (`benchmark/[model]/index.md`).
 		markdown: `/benchmark/${params.model}/index.md`
