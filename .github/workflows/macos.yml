@@ -1,0 +1,41 @@
+name: macOS
+
+# Advisory, off the push path: `just check` already runs on macOS before every push, and hosted macOS
+# runners were not acquired for this repo from 2026-11-09 on, which turned every push red. Run it by hand
+# (Actions → macOS → Run workflow) or let the weekly run catch drift.
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: stable
+          targets: wasm32-wasip1
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: taiki-e/install-action@c509219cf42fba86913069efd0ade2458c59337b # v2.90.1
+        with:
+          tool: just,cargo-nextest
+      - run: just test
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+      - name: npx webmcpx lint (WASI)
+        shell: bash
+        run: |
+          cargo build --target wasm32-wasip1 --profile release-wasm -p webmcpx
+          mkdir -p packages/webmcpx/wasm
+          cp target/wasm32-wasip1/release-wasm/webmcpx.wasm packages/webmcpx/wasm/webmcpx_cli.wasm
+          cd packages/webmcpx && npm ci && node --test test/lint.test.js
