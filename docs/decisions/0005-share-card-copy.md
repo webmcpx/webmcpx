@@ -37,3 +37,12 @@ measures.
 - Red vs a softer stamp, and "Not agent-ready" vs "No WebMCP tools": a guess either way until there is data.
   Count card renders and Save PNG downloads by verdict and language first.
 - A percentile ("better than N% of scanned sites") needs a published method and a denominator; none exists.
+
+## Changes
+
+- **2026-11-10, layout.** Long hosts broke the card: the host's size came from its character count, so a
+  25-character host filled the width while a 45-character one wrapped mid-label. The host now shrinks to fit
+  one line once the card's font has loaded (120 px down to 44 px); only a longer host wraps, onto two lines
+  at most, after a dot or a hyphen (`share_cards_fit_any_host`). The score became a gauge in the verdict's
+  color, so the distance to 100 reads at a glance; the call to action moved into a dark band across the
+  bottom, the card's highest-contrast element, with `webmcpx.dev` in the brand yellow. Words are unchanged.

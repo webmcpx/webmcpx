@@ -219,13 +219,8 @@ fn what(s: Summary<'_>, t: &Text) -> String {
 
 /// The card as a standalone HTML page, in `t`'s language.
 pub fn html(s: Summary<'_>, format: Format, t: &Text) -> String {
-    // Long hosts shrink rather than wrap or overflow.
-    let size = match s.host.chars().count() {
-        0..=18 => 104,
-        19..=26 => 80,
-        27..=36 => 54,
-        _ => 44,
-    };
+    // The host's largest size: the card shrinks it to fit its line (see FIT).
+    let size = 120;
     let (_, fill, ink) = stamp(s.verdict);
     render(&Card {
         title: s.host,
@@ -280,16 +275,19 @@ fn render(c: &Card<'_>) -> String {
         ""
     };
     let stamp_display = if c.stamp.is_some() { "block" } else { "none" };
+    // A scanned host is one word: it shrinks to fit one line (see FIT), and only a host too long for
+    // that breaks, at its dots and hyphens, never inside a label.
+    let fit = c.verdict.is_some();
     let host = escape(c.title);
+    let host_class = if fit { "host fit" } else { "host" };
     let height = c.height;
-    let size = c.size;
     let t = c.text;
     let lang = t.tag;
     // A longer verdict (most languages) gets a smaller stamp, so it still fits beside the lockup.
     let stamp_size = match label.chars().count() {
-        0..=16 => 34,
-        17..=24 => 30,
-        _ => 27,
+        0..=16 => 30,
+        17..=24 => 27,
+        _ => 24,
     };
     let score_label = escape(t.score);
     let top_right = if badge.is_empty() {
@@ -297,24 +295,27 @@ fn render(c: &Card<'_>) -> String {
     } else {
         format!(r#"<div class="seal">{badge}</div>"#)
     };
-    // The link preview is 45 px shorter than the post image: its text and padding give way first.
-    let (text_size, pad, foot_gap) = if height < 650 {
-        (30, 40, 20)
+    // The link preview is 45 px shorter than the post image: its type, gauge and padding give way first.
+    let (size, text_size, pad, gap, ring) = if height < 650 {
+        (c.size.min(104), 28, 34, 14, 150)
     } else {
-        (34, 52, 26)
+        (c.size, 31, 42, 20, 172)
     };
     // The fix line, about 70% of the hook: there to read, never competing with it.
     let fix_size = text_size * 7 / 10;
     let cta = escape(t.cta).replace("{site}", "<span>webmcpx.dev</span>");
-    // The score, big at the bottom right; highlighted from the agent-ready bar up.
+    // The score as a gauge in the verdict's color: how far the site is from 100 reads at a glance.
     let score = c.score.map_or_else(String::new, |n| {
-        let mark = if n >= crate::scan::READY_SCORE {
-            " marked"
-        } else {
-            ""
+        let tone = match c.verdict {
+            Some(Verdict::Ready) => "oklch(0.66 0.17 150)",
+            Some(Verdict::Missing) => "oklch(0.58 0.21 27)",
+            _ => "oklch(0.8 0.17 85)",
         };
+        let r = 42.0;
+        let length = 2.0 * std::f64::consts::PI * r;
+        let filled = length * f64::from(n.min(100)) / 100.0;
         format!(
-            r#"<div class="score"><div class="label">{score_label}</div><div class="num{mark}"><b>{n}</b><small>/100</small></div></div>"#
+            r#"<div class="score"><div class="label">{score_label}</div><div class="gauge"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="{r}" class="track"/><circle cx="50" cy="50" r="{r}" class="arc" stroke="{tone}" stroke-dasharray="{filled:.2} {length:.2}"/></svg><div class="num"><b>{n}</b><small>/100</small></div></div></div>"#
         )
     });
     let hook = c.hook.as_deref().map_or_else(String::new, |h| {
@@ -326,49 +327,76 @@ fn render(c: &Card<'_>) -> String {
     let date = c.date.as_deref().map_or_else(String::new, |d| {
         format!(r#"<span class="date">{}</span>"#, escape(d))
     });
+    let script = if fit { FIT } else { "" };
     format!(
         r#"<!doctype html><html lang="{lang}"><head><meta charset="utf-8"><style>
 @font-face{{font-family:B;src:url(data:font/woff2;base64,{font}) format("woff2");font-weight:200 800}}
 *{{margin:0;box-sizing:border-box}}
 html,body{{width:1200px;height:{height}px;background:oklch(0.958 0.006 95);font-family:B,"Noto Sans",sans-serif;color:oklch(0.18 0.004 95)}}
-.frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;padding:{pad}px 64px;display:flex;flex-direction:column;overflow:hidden;
-background-image:linear-gradient(to right,oklch(0.9 0.005 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.9 0.005 95) 1px,transparent 1px);background-size:64px 64px}}
-.top{{display:flex;justify-content:space-between;align-items:center}}
-.lockup svg{{height:44px;width:auto}}
+.frame{{position:absolute;inset:28px;border:4px solid currentColor;border-radius:36px;display:flex;flex-direction:column;overflow:hidden;
+background-color:oklch(0.975 0.004 95);background-image:linear-gradient(to right,oklch(0.92 0.005 95) 1px,transparent 1px),linear-gradient(to bottom,oklch(0.92 0.005 95) 1px,transparent 1px);background-size:64px 64px}}
+.top{{display:flex;justify-content:space-between;align-items:center;gap:32px;padding:{pad}px 56px 0}}
+.lockup svg{{display:block;height:40px;width:auto}}
 .stamp .icon{{width:1.05em;height:1.05em;margin-right:.35em;vertical-align:-.15em;fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}}
-.seal svg{{display:block;height:88px;width:auto}}
-.stamp{{display:{stamp_display};border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:10px 28px;font-size:{stamp_size}px;white-space:nowrap;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
-.mark{{position:absolute;right:-110px;top:50%;width:600px;height:600px;transform:translateY(-50%) rotate(-12deg);opacity:.06}}
+.seal svg{{display:block;height:80px;width:auto}}
+.stamp{{display:{stamp_display};flex:none;border:4px solid oklch(0.18 0.004 95);border-radius:999px;padding:9px 26px;font-size:{stamp_size}px;white-space:nowrap;font-weight:800;letter-spacing:.04em;text-transform:uppercase;background:{fill};color:{stamp_ink};box-shadow:5px 5px 0 oklch(0.18 0.004 95)}}
+.mark{{position:absolute;right:-120px;top:42%;width:560px;height:560px;transform:translateY(-50%) rotate(-12deg);opacity:.05}}
 .top,.main,.foot{{position:relative}}
-.main{{margin-top:auto}}
-.row{{display:flex;align-items:flex-end;gap:48px}}
+.main{{flex:1;display:flex;flex-direction:column;justify-content:center;gap:{gap}px;padding:0 56px;min-height:0}}
+.host{{font-size:{size}px;font-weight:800;letter-spacing:-.045em;line-height:1.02;overflow-wrap:anywhere}}
+.host.fit{{white-space:nowrap;overflow-wrap:normal}}
+.row{{display:flex;align-items:center;gap:44px}}
 .text{{flex:1;min-width:0}}
-.host{{font-size:{size}px;font-weight:800;letter-spacing:-.04em;line-height:1;overflow-wrap:anywhere}}
-.line{{margin-top:16px;font-size:{text_size}px;font-weight:500;line-height:1.2;color:oklch(0.38 0.006 95);max-width:1000px}}
-.fix{{margin-top:8px;font-family:ui-monospace,"SFMono-Regular",Menlo,"DejaVu Sans Mono",monospace;font-size:{fix_size}px;font-weight:600;color:oklch(0.38 0.006 95)}}
-.hook{{margin-top:10px;font-size:{text_size}px;font-weight:700;line-height:1.2;color:oklch(0.18 0.004 95)}}
-.score{{text-align:right;flex:none;max-width:300px}}
-.score .label{{font-size:22px;line-height:1.25;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.38 0.006 95);margin-bottom:6px}}
-.num b{{font-size:150px;font-weight:800;letter-spacing:-.05em;line-height:.85}}
-.num small{{font-size:46px;font-weight:700;color:oklch(0.38 0.006 95)}}
-.num.marked b{{background:linear-gradient(transparent 45%,oklch(0.89 0.16 95) 45%,oklch(0.89 0.16 95) 80%,transparent 80%)}}
-.foot{{margin-top:{foot_gap}px;display:flex;justify-content:space-between;align-items:baseline;gap:32px}}
-.cta{{flex:none;font-size:44px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}}
-.cta span{{background:linear-gradient(transparent 55%,oklch(0.89 0.16 95) 55%,oklch(0.89 0.16 95) 92%,transparent 92%)}}
-.date{{min-width:0;font-size:22px;font-weight:600;letter-spacing:.06em;color:oklch(0.38 0.006 95)}}
+.line{{font-size:{text_size}px;font-weight:500;line-height:1.22;color:oklch(0.36 0.006 95)}}
+.hook{{margin-top:10px;font-size:{text_size}px;font-weight:800;line-height:1.2;color:oklch(0.18 0.004 95)}}
+.fix{{margin-top:12px;display:inline-block;padding:4px 12px;border-radius:8px;background:oklch(0.18 0.004 95);color:oklch(0.958 0.006 95);font-family:ui-monospace,"SFMono-Regular",Menlo,"DejaVu Sans Mono",monospace;font-size:{fix_size}px;font-weight:600}}
+.score{{flex:none;display:flex;flex-direction:column;align-items:center;gap:6px}}
+.score .label{{max-width:260px;text-align:center;font-size:17px;line-height:1.2;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:oklch(0.36 0.006 95)}}
+.gauge{{position:relative;width:{ring}px;height:{ring}px}}
+.gauge svg{{position:absolute;inset:0;transform:rotate(-90deg)}}
+.gauge circle{{fill:none;stroke-width:13}}
+.gauge .track{{stroke:oklch(0.9 0.005 95)}}
+.gauge .arc{{stroke-linecap:round}}
+.num{{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}}
+.num b{{font-size:{num_size}px;font-weight:800;letter-spacing:-.05em;line-height:.9}}
+.num small{{font-size:{small_size}px;font-weight:800;color:oklch(0.36 0.006 95)}}
+.foot{{display:flex;justify-content:space-between;align-items:center;gap:32px;padding:18px 56px 20px;background:oklch(0.18 0.004 95);color:oklch(0.958 0.006 95)}}
+.cta{{flex:none;font-size:38px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}}
+.cta span{{color:oklch(0.89 0.16 95)}}
+.cta .go{{display:inline-block;margin-left:.3em;color:oklch(0.89 0.16 95)}}
+.date{{min-width:0;font-size:19px;font-weight:600;letter-spacing:.06em;color:oklch(0.78 0.006 95)}}
 :lang(zh) *,:lang(ja) *,:lang(hi) *,:lang(bn) *{{letter-spacing:0!important}}
 </style></head><body><div class="frame">
 <div class="mark">{mark}</div>
 <div class="top"><div class="lockup">{lockup}</div>{top_right}</div>
-<div class="main"><div class="host">{host}</div><div class="row"><div class="text"><div class="line">{line}</div>{hook}{fix}</div>{score}</div></div>
-<div class="foot">{date}<span class="cta">{cta}</span></div>
-</div></body></html>"#,
+<div class="main"><div class="{host_class}">{host}</div><div class="row"><div class="text"><div class="line">{line}</div>{hook}{fix}</div>{score}</div></div>
+<div class="foot">{date}<span class="cta">{cta}<span class="go">→</span></span></div>
+</div>{script}</body></html>"#,
         font = base64(FONT),
         lockup = LOCKUP,
         mark = MARK,
         line = escape(c.line),
+        // A perfect 100 is three digits wide: smaller, so it stays inside the ring.
+        num_size = if c.score >= Some(100) { ring * 3 / 10 } else { ring * 2 / 5 },
+        small_size = ring / 8,
     )
 }
+
+/// Shrinks a scanned host until it fits its line (from its starting size down to 44 px); a host still
+/// too long wraps at its dots and hyphens and keeps shrinking until it fits two lines. It measures once
+/// the inlined font has loaded (not the fallback's widths), and the renderer waits for `cardReady`.
+const FIT: &str = r"<script>window.cardReady = document.fonts.load('800 100px B').then(() => {
+const h = document.querySelector('.host.fit'); if (!h) return;
+let s = parseFloat(getComputedStyle(h).fontSize);
+const set = (n) => { s = n; h.style.fontSize = n + 'px'; };
+while (h.scrollWidth > h.clientWidth + 1 && s > 44) set(s - 2);
+if (h.scrollWidth > h.clientWidth + 1) {
+  // Chrome breaks at <wbr> even under nowrap, so the break points only go in now.
+  h.innerHTML = h.innerHTML.replace(/[.-]/g, '$&<wbr>');
+  h.style.whiteSpace = 'normal';
+  while (h.getBoundingClientRect().height > s * 2.2 && s > 32) set(s - 2);
+}
+});</script>";
 
 /// The generic card's line: what a scan does, and the benchmark's best case as the landing quotes it.
 fn generic_line() -> String {

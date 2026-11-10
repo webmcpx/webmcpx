@@ -1771,6 +1771,57 @@ async fn share_cards_fit_their_frame_in_every_language() {
     }
 }
 
+/// A host is the card's headline: a short one is big, a long one shrinks to fit one line, and only one too
+/// long for that wraps, onto two lines at most and only after a dot or a hyphen, never inside a label.
+#[tokio::test]
+async fn share_cards_fit_any_host() {
+    use webmcpx_bench::card::{Format, Summary, Text, html};
+    use webmcpx_bench::scan::Verdict;
+    if no_chrome() {
+        return;
+    }
+    let browser = Browser::launch(None).await.unwrap();
+    let page = browser.page(&[]).await.unwrap();
+    let measure = "(() => { const h = document.querySelector('.host'); const r = document.createRange(); \
+        r.selectNodeContents(h); const lines = new Set([...r.getClientRects()].map(x => Math.round(x.top))).size; \
+        const breaks = h.innerText.split('\\n').slice(0, -1).every(l => /[.-]$/.test(l)); \
+        return [parseFloat(getComputedStyle(h).fontSize), lines, h.scrollWidth <= h.clientWidth + 1, breaks].join(' '); })()";
+    for (host, min_size, max_lines) in [
+        ("easi.run", 100.0, 1),
+        ("developers.cloudflare.com", 70.0, 1),
+        ("my-super-long-online-store-name.myshopify.com", 44.0, 1),
+        (
+            "the-quite-unreasonably-long-subdomain-name.staging.example-company.co.uk:8443",
+            32.0,
+            2,
+        ),
+    ] {
+        let s = Summary {
+            host,
+            verdict: Verdict::Missing,
+            tools: 0,
+            page_tokens: 12_345,
+            score: 25,
+            lint_errors: false,
+            scanned_on: "2026-11-09",
+        };
+        for format in [Format::Link, Format::Post] {
+            let (width, height, _) = format.size();
+            page.render_png(&html(s, format, Text::of(Some("de"))), width, height, 1.0)
+                .await
+                .unwrap();
+            let out = page.eval(measure).await.unwrap();
+            let out = out.as_str().unwrap().to_owned();
+            let mut it = out.split(' ');
+            let size: f64 = it.next().unwrap().parse().unwrap();
+            let lines: usize = it.next().unwrap().parse().unwrap();
+            assert!(size >= min_size, "{host} {format:?}: {out}");
+            assert!(lines <= max_lines, "{host} {format:?}: {out}");
+            assert_eq!(it.collect::<Vec<_>>(), ["true", "true"], "{host} {format:?}: {out}");
+        }
+    }
+}
+
 /// A deploy restarts the server: the scan log brings back the week's results (cards, previews, badges)
 /// and counts every scan, without a word about who ran it.
 #[tokio::test]

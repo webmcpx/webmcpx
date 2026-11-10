@@ -459,8 +459,10 @@ impl Page {
             json!({ "frameId": frame, "html": html }),
         )
         .await?;
-        // Fonts are inlined; wait until they are ready so the PNG never shows a fallback face.
-        self.eval("document.fonts.ready.then(() => true)").await?;
+        // Fonts are inlined; wait until they are ready so the PNG never shows a fallback face, and until
+        // a page that lays itself out (the share card fitting its host) says it is done.
+        self.eval("Promise.resolve(window.cardReady).then(() => document.fonts.ready).then(() => true)")
+            .await?;
         let shot = self
             .send(
                 "Page.captureScreenshot",
