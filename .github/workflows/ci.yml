@@ -42,9 +42,12 @@ jobs:
   test-os:
     strategy:
       matrix:
-        # Pinned: since 2026-11-09 ~14:00 UTC no macos-latest job was acquired by a hosted runner.
-        os: [macos-15, windows-latest]
+        os: [macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
+    # macOS is advisory: `just check` already runs on macOS before every push, and since 2026-11-09
+    # GitHub stopped acquiring hosted macOS runners for this repo (macos-latest and macos-15 alike).
+    # A macOS failure still shows on the job; it no longer fails the run.
+    continue-on-error: ${{ startsWith(matrix.os, 'macos') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
