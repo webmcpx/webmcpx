@@ -1792,7 +1792,12 @@ async fn share_cards_fit_any_host() {
     for (host, min_size, max_lines, clean_breaks) in [
         ("easi.run", 100.0, 1, true),
         ("developers.cloudflare.com", 70.0, 1, true),
-        ("my-super-long-online-store-name.myshopify.com", 44.0, 1, true),
+        (
+            "my-super-long-online-store-name.myshopify.com",
+            44.0,
+            1,
+            true,
+        ),
         (
             "the-quite-unreasonably-long-subdomain-name.staging.example-company.co.uk:8443",
             32.0,
@@ -1822,9 +1827,17 @@ async fn share_cards_fit_any_host() {
             let lines: usize = it.next().unwrap().parse().unwrap();
             assert!(size >= min_size, "{host} {format:?}: {out}");
             assert!(lines <= max_lines, "{host} {format:?}: {out}");
-            assert_eq!(it.next(), Some("true"), "{host} {format:?} past its line: {out}");
+            assert_eq!(
+                it.next(),
+                Some("true"),
+                "{host} {format:?} past its line: {out}"
+            );
             if clean_breaks {
-                assert_eq!(it.next(), Some("true"), "{host} {format:?} broke a label: {out}");
+                assert_eq!(
+                    it.next(),
+                    Some("true"),
+                    "{host} {format:?} broke a label: {out}"
+                );
             }
         }
     }

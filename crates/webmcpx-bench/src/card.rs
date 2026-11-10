@@ -377,7 +377,11 @@ background-color:oklch(0.975 0.004 95);background-image:linear-gradient(to right
         mark = MARK,
         line = escape(c.line),
         // A perfect 100 is three digits wide: smaller, so it stays inside the ring.
-        num_size = if c.score >= Some(100) { ring * 3 / 10 } else { ring * 2 / 5 },
+        num_size = if c.score >= Some(100) {
+            ring * 3 / 10
+        } else {
+            ring * 2 / 5
+        },
         small_size = ring / 8,
     )
 }
