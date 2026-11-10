@@ -383,7 +383,8 @@ background-color:oklch(0.975 0.004 95);background-image:linear-gradient(to right
 }
 
 /// Shrinks a scanned host until it fits its line (from its starting size down to 44 px); a host still
-/// too long wraps at its dots and hyphens and keeps shrinking until it fits two lines. It measures once
+/// too long wraps at its dots and hyphens and keeps shrinking until it fits two lines and its width; a
+/// single label wider than a line at 32 px breaks anywhere. It measures once
 /// the inlined font has loaded (not the fallback's widths), and the renderer waits for `cardReady`.
 const FIT: &str = r"<script>window.cardReady = document.fonts.load('800 100px B').then(() => {
 const h = document.querySelector('.host.fit'); if (!h) return;
@@ -394,7 +395,10 @@ if (h.scrollWidth > h.clientWidth + 1) {
   // Chrome breaks at <wbr> even under nowrap, so the break points only go in now.
   h.innerHTML = h.innerHTML.replace(/[.-]/g, '$&<wbr>');
   h.style.whiteSpace = 'normal';
-  while (h.getBoundingClientRect().height > s * 2.2 && s > 32) set(s - 2);
+  const over = () => h.scrollWidth > h.clientWidth + 1 || h.getBoundingClientRect().height > s * 2.2;
+  while (over() && s > 32) set(s - 2);
+  // A single label too long for any line (up to 63 characters) breaks anywhere, inside the frame.
+  if (h.scrollWidth > h.clientWidth + 1) h.style.overflowWrap = 'anywhere';
 }
 });</script>";
 

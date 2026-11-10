@@ -1772,7 +1772,8 @@ async fn share_cards_fit_their_frame_in_every_language() {
 }
 
 /// A host is the card's headline: a short one is big, a long one shrinks to fit one line, and only one too
-/// long for that wraps, onto two lines at most and only after a dot or a hyphen, never inside a label.
+/// long for that wraps, onto two lines at most and only after a dot or a hyphen, never inside a label (but
+/// a single label too long for any line, which breaks anywhere rather than leave the frame).
 #[tokio::test]
 async fn share_cards_fit_any_host() {
     use webmcpx_bench::card::{Format, Summary, Text, html};
@@ -1786,15 +1787,19 @@ async fn share_cards_fit_any_host() {
         r.selectNodeContents(h); const lines = new Set([...r.getClientRects()].map(x => Math.round(x.top))).size; \
         const breaks = h.innerText.split('\\n').slice(0, -1).every(l => /[.-]$/.test(l)); \
         return [parseFloat(getComputedStyle(h).fontSize), lines, h.scrollWidth <= h.clientWidth + 1, breaks].join(' '); })()";
-    for (host, min_size, max_lines) in [
-        ("easi.run", 100.0, 1),
-        ("developers.cloudflare.com", 70.0, 1),
-        ("my-super-long-online-store-name.myshopify.com", 44.0, 1),
+    // A label can be 63 characters (RFC 1035): one that fits no line breaks anywhere, still in the frame.
+    let longest_label = format!("{}.com", "w".repeat(63));
+    for (host, min_size, max_lines, clean_breaks) in [
+        ("easi.run", 100.0, 1, true),
+        ("developers.cloudflare.com", 70.0, 1, true),
+        ("my-super-long-online-store-name.myshopify.com", 44.0, 1, true),
         (
             "the-quite-unreasonably-long-subdomain-name.staging.example-company.co.uk:8443",
             32.0,
             2,
+            true,
         ),
+        (longest_label.as_str(), 32.0, 3, false),
     ] {
         let s = Summary {
             host,
@@ -1817,7 +1822,10 @@ async fn share_cards_fit_any_host() {
             let lines: usize = it.next().unwrap().parse().unwrap();
             assert!(size >= min_size, "{host} {format:?}: {out}");
             assert!(lines <= max_lines, "{host} {format:?}: {out}");
-            assert_eq!(it.collect::<Vec<_>>(), ["true", "true"], "{host} {format:?}: {out}");
+            assert_eq!(it.next(), Some("true"), "{host} {format:?} past its line: {out}");
+            if clean_breaks {
+                assert_eq!(it.next(), Some("true"), "{host} {format:?} broke a label: {out}");
+            }
         }
     }
 }
